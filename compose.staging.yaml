@@ -1,0 +1,27 @@
+services:
+  pdw-frontend:
+    image: registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}
+    container_name: pdw-frontend
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/staging.conf:/etc/nginx/conf.d/default.conf
+      - /home/dev/certs/bundle.crt:/etc/nginx/certs/bundle.crt:ro
+      - /home/dev/certs/csr_key.key:/etc/nginx/certs/csr_key.key:ro
+    networks:
+      - pdw-backend-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+
+networks:
+  pdw-backend-network:
+    name: pdw-backend-network
+    external: true

@@ -1,0 +1,30 @@
+.AccessIndicator {
+    display: inline-block;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+
+    &.small {
+        width: 6px;
+        height: 6px;
+    }
+
+    &.medium {
+        width: 8px;
+        height: 8px;
+    }
+
+    &.private {
+        background-color: #ef4444;
+        box-shadow: 0 0 4px rgb(239, 68, 68, 0.5);
+    }
+
+    &.read {
+        background-color: #3b82f6;
+        box-shadow: 0 0 4px rgb(59, 130, 246, 0.5);
+    }
+
+    &:hover {
+        transform: scale(1.2);
+    }
+}

@@ -1,0 +1,1084 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "PDW AI Wiki",
+      "description": "AI Wiki assistant service powered by SGR Agent Core",
+      "version": "0.1.0"
+    },
+    "paths": {
+      "/agent/": {
+        "post": {
+          "tags": [
+            "Agent"
+          ],
+          "summary": "Ask Agent",
+          "operationId": "ask_agent_agent__post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AgentResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "APIKeyHeader": []
+            },
+            {
+              "APIKeyCookie": []
+            }
+          ]
+        }
+      },
+      "/agent/stream": {
+        "post": {
+          "tags": [
+            "Agent"
+          ],
+          "summary": "Ask Agent Stream",
+          "operationId": "ask_agent_stream_agent_stream_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "APIKeyHeader": []
+            },
+            {
+              "APIKeyCookie": []
+            }
+          ]
+        }
+      },
+      "/chats": {
+        "post": {
+          "tags": [
+            "Chats"
+          ],
+          "summary": "Create Chat Endpoint",
+          "operationId": "create_chat_endpoint_chats_post",
+          "security": [
+            {
+              "APIKeyHeader": []
+            },
+            {
+              "APIKeyCookie": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCreateRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ChatSchema"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "Chats"
+          ],
+          "summary": "List Chats Endpoint",
+          "operationId": "list_chats_endpoint_chats_get",
+          "security": [
+            {
+              "APIKeyHeader": []
+            },
+            {
+              "APIKeyCookie": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "context_type",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Context Type"
+              }
+            },
+            {
+              "name": "context_uuid",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Context Uuid"
+              }
+            },
+            {
+              "name": "search",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Search"
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 1,
+                "title": "Page"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "maximum": 100,
+                "minimum": 1,
+                "default": 20,
+                "title": "Limit"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ChatListResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/chats/{chat_id}": {
+        "get": {
+          "tags": [
+            "Chats"
+          ],
+          "summary": "Get Chat Endpoint",
+          "operationId": "get_chat_endpoint_chats__chat_id__get",
+          "security": [
+            {
+              "APIKeyHeader": []
+            },
+            {
+              "APIKeyCookie": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "chat_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid",
+                "title": "Chat Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ChatDetailSchema"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Chats"
+          ],
+          "summary": "Update Chat Endpoint",
+          "operationId": "update_chat_endpoint_chats__chat_id__put",
+          "security": [
+            {
+              "APIKeyHeader": []
+            },
+            {
+              "APIKeyCookie": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "chat_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid",
+                "title": "Chat Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatUpdateRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ChatSchema"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Chats"
+          ],
+          "summary": "Delete Chat Endpoint",
+          "operationId": "delete_chat_endpoint_chats__chat_id__delete",
+          "security": [
+            {
+              "APIKeyHeader": []
+            },
+            {
+              "APIKeyCookie": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "chat_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid",
+                "title": "Chat Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/chats/{chat_id}/messages/stream": {
+        "post": {
+          "tags": [
+            "Chats"
+          ],
+          "summary": "Stream Chat Message Endpoint",
+          "operationId": "stream_chat_message_endpoint_chats__chat_id__messages_stream_post",
+          "security": [
+            {
+              "APIKeyHeader": []
+            },
+            {
+              "APIKeyCookie": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "chat_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid",
+                "title": "Chat Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMessageRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/healthz": {
+        "get": {
+          "tags": [
+            "Health"
+          ],
+          "summary": "Healthz",
+          "operationId": "healthz_healthz_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "text/plain": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "AgentRequest": {
+          "properties": {
+            "query": {
+              "type": "string",
+              "maxLength": 4000,
+              "minLength": 1,
+              "title": "Query"
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DocumentContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object",
+          "required": [
+            "query"
+          ],
+          "title": "AgentRequest"
+        },
+        "AgentResponse": {
+          "properties": {
+            "answer": {
+              "type": "string",
+              "title": "Answer"
+            },
+            "sources": {
+              "items": {
+                "$ref": "#/components/schemas/SourceItem"
+              },
+              "type": "array",
+              "title": "Sources"
+            },
+            "used_tool": {
+              "type": "string",
+              "title": "Used Tool",
+              "default": "pioneer_ai"
+            },
+            "referenced_documents": {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array",
+              "title": "Referenced Documents"
+            }
+          },
+          "type": "object",
+          "required": [
+            "answer"
+          ],
+          "title": "AgentResponse"
+        },
+        "ChatCreateRequest": {
+          "properties": {
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 255
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Name"
+            },
+            "context_type": {
+              "type": "string",
+              "pattern": "^(global|document|collection)$",
+              "title": "Context Type",
+              "default": "global"
+            },
+            "context_uuid": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Context Uuid"
+            }
+          },
+          "type": "object",
+          "title": "ChatCreateRequest"
+        },
+        "ChatDetailSchema": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Name"
+            },
+            "context_type": {
+              "type": "string",
+              "title": "Context Type"
+            },
+            "context_uuid": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Context Uuid"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "message_count": {
+              "type": "integer",
+              "title": "Message Count",
+              "default": 0
+            },
+            "messages": {
+              "items": {
+                "$ref": "#/components/schemas/MessageSchema"
+              },
+              "type": "array",
+              "title": "Messages"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "context_type",
+            "context_uuid",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "ChatDetailSchema"
+        },
+        "ChatListItemSchema": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Name"
+            },
+            "context_type": {
+              "type": "string",
+              "title": "Context Type"
+            },
+            "context_uuid": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Context Uuid"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "message_count": {
+              "type": "integer",
+              "title": "Message Count",
+              "default": 0
+            },
+            "last_message_preview": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last Message Preview"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "context_type",
+            "context_uuid",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "ChatListItemSchema"
+        },
+        "ChatListResponse": {
+          "properties": {
+            "objects": {
+              "items": {
+                "$ref": "#/components/schemas/ChatListItemSchema"
+              },
+              "type": "array",
+              "title": "Objects"
+            },
+            "total": {
+              "type": "integer",
+              "title": "Total"
+            }
+          },
+          "type": "object",
+          "required": [
+            "objects",
+            "total"
+          ],
+          "title": "ChatListResponse"
+        },
+        "ChatMessageRequest": {
+          "properties": {
+            "query": {
+              "type": "string",
+              "maxLength": 4000,
+              "minLength": 1,
+              "title": "Query"
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DocumentContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object",
+          "required": [
+            "query"
+          ],
+          "title": "ChatMessageRequest"
+        },
+        "ChatSchema": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Name"
+            },
+            "context_type": {
+              "type": "string",
+              "title": "Context Type"
+            },
+            "context_uuid": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Context Uuid"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "message_count": {
+              "type": "integer",
+              "title": "Message Count",
+              "default": 0
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "context_type",
+            "context_uuid",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "ChatSchema"
+        },
+        "ChatUpdateRequest": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1,
+              "title": "Name"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "title": "ChatUpdateRequest"
+        },
+        "DocumentContext": {
+          "properties": {
+            "active_document_uuid": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Active Document Uuid"
+            },
+            "selection_text": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 8000
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Selection Text"
+            },
+            "referenced_document_uuids": {
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "type": "array",
+              "title": "Referenced Document Uuids"
+            },
+            "collection_uuid": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Collection Uuid"
+            }
+          },
+          "type": "object",
+          "title": "DocumentContext"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "MessageSchema": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            },
+            "role": {
+              "type": "string",
+              "title": "Role"
+            },
+            "content": {
+              "type": "string",
+              "title": "Content"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Context"
+            },
+            "sources": {
+              "items": {
+                "$ref": "#/components/schemas/SourceItem"
+              },
+              "type": "array",
+              "title": "Sources"
+            },
+            "used_tool": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Used Tool"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "role",
+            "content",
+            "created_at"
+          ],
+          "title": "MessageSchema"
+        },
+        "SourceItem": {
+          "properties": {
+            "type": {
+              "type": "string",
+              "title": "Type"
+            },
+            "uuid": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Uuid"
+            },
+            "title": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Title"
+            },
+            "url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Url"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "title": "SourceItem"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            },
+            "input": {
+              "title": "Input"
+            },
+            "ctx": {
+              "type": "object",
+              "title": "Context"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        }
+      },
+      "securitySchemes": {
+        "APIKeyHeader": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "access-token"
+        },
+        "APIKeyCookie": {
+          "type": "apiKey",
+          "in": "cookie",
+          "name": "access-token"
+        }
+      }
+    }
+  }

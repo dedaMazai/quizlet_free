@@ -1,0 +1,7 @@
+.ThemeSwitcher {
+    color: var(--text);
+
+    &:hover {
+        color: var(--text) !important;
+    }
+}

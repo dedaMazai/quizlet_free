@@ -1,0 +1,12 @@
+export const RouteNames = {
+  MAIN: 'MAIN',
+  PROFILE: 'PROFILE',
+  CHANGE_PASSWORD: 'CHANGE_PASSWORD',
+  USER: 'USER',
+  LOGIN: 'LOGIN',
+  SETTINGS: 'SETTINGS',
+  PRIVACY: 'PRIVACY',
+  FORBIDDEN: 'FORBIDDEN',
+  // last
+  NOT_FOUND: 'NOT_FOUND',
+} as const;

@@ -1,0 +1,126 @@
+.FloatingFormItem {
+    :global {
+        .ant-form-item-row {
+            background: var(--field-bg);
+            border-radius: var(--field-border-radius);
+            padding: 6px 16px;
+            flex-direction: column;
+        }
+
+        .ant-form-item-label {
+            padding: 0 0 4px;
+            text-align: left;
+
+            > label {
+                color: var(--field-label-color);
+                font-size: 12px;
+                line-height: 20px;
+                height: auto;
+
+                &::after {
+                    display: none;
+                }
+            }
+        }
+
+        .ant-form-item-control {
+            .ant-input,
+            .ant-select,
+            .ant-input-affix-wrapper,
+            .ant-select-selector,
+            .ant-picker {
+                background: transparent;
+                border: none;
+                padding: 0;
+                box-shadow: none;
+                color: var(--text);
+                font-size: 16px;
+                line-height: 24px;
+
+                &:focus,
+                &:hover,
+                &.ant-input-focused {
+                    border: none;
+                    box-shadow: none;
+                }
+            }
+
+            .ant-input-textarea {
+                textarea.ant-input {
+                    background: transparent;
+                    border: none;
+                    padding: 0;
+                    box-shadow: none;
+                    resize: none;
+                }
+            }
+
+            .ant-select {
+                // Span the full field background, then pad back to 16px so the
+                // value/placeholder align with the label and the arrow sits
+                // 16px from the right edge instead of hugging it.
+                width: calc(100% + 32px) !important;
+                margin-inline: -16px;
+                padding-inline: 16px !important;
+
+                // Multi-select tags
+                .ant-select-selection-item {
+                    background: var(--help-button-bg);
+                    border: none;
+                    border-radius: 6px;
+                    color: var(--text);
+                    margin: 0;
+                    padding: 2px 8px !important;
+                    padding-inline-end: 4px !important;
+                    line-height: 20px;
+
+                    .ant-select-selection-item-content {
+                        color: var(--text);
+                        margin-inline-end: 4px;
+                    }
+
+                    .ant-select-selection-item-remove {
+                        color: var(--text);
+                        font-size: 10px;
+
+                        &:hover {
+                            color: var(--color-error, #eb5151);
+                        }
+
+                        .anticon {
+                            color: inherit;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Inline variant (label and control on same row)
+.inline {
+    :global {
+        .ant-form-item-row {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 16px;
+        }
+
+        .ant-form-item-label {
+            padding: 0;
+            flex: 1;
+
+            > label {
+                font-size: 16px;
+                line-height: 24px;
+                color: var(--text);
+            }
+        }
+
+        .ant-form-item-control {
+            flex: none;
+            width: auto;
+        }
+    }
+}

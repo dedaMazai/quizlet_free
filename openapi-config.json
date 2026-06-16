@@ -1,0 +1,8 @@
+{
+  "schemaFile": "http://localhost:8000/api/openapi.json",
+  "apiFile": "./src/shared/api/rtkApi.ts",
+  "apiImport": "rtkApi",
+  "outputFile": "./src/shared/api/generatedApi.ts",
+  "exportName": "generatedApi",
+  "hooks": true
+}

@@ -1,0 +1,59 @@
+.Navbar {
+    width: 100%;
+    flex-shrink: 0;
+    height: var(--navbar-height);
+    display: flex;
+    align-items: center;
+    padding: 8px 24px 0;
+    justify-content: space-between;
+    background: var(--bg-color);
+
+    @media (width <= 768px) {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgb(0, 0, 0, 0.06);
+    }
+
+    .dropDown {
+        cursor: pointer;
+    }
+}
+
+.menu {
+    * {
+        transition: none !important;
+    }
+
+    :global(.ant-menu-item:active) {
+        color: var(--text) !important;
+    }
+}
+
+.dropDownItem {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.rootClassName {
+    padding-top: 4px;
+}
+
+.tabs {
+    :global(.ant-tabs-tab) {
+        padding: 0 12px 8px;
+    }
+
+    :global(.ant-tabs-tab:nth-child(n + 2)) {
+        margin: 0 !important;
+    }
+}
+
+.FAQButton {
+    color: var(--text);
+
+    &:hover {
+        color: var(--text) !important;
+    }
+}

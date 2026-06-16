@@ -1,0 +1,88 @@
+:root {
+    --scroll-bard-border: #666;
+    --scroll-bard: rgb(255, 255, 255, 0.15);
+    --text: #fff;
+    --text-secondary: #A0A0A0;
+    --bg-color: #141414;
+    --bg-color-secondary: #1A1A1A;
+    --inverted-bg-color: #fff;
+    --help-button-bg: #333;
+    --field-border: rgb(255, 255, 255, 0.16);
+    --card-bg: rgb(255, 255, 255, 0.03);
+    --card-bg-secondary: #222;
+
+    // Borders
+    --border-subtle: rgb(255, 255, 255, 0.1);
+    --border-light: rgb(255, 255, 255, 0.15);
+    --border-medium: rgb(255, 255, 255, 0.2);
+    --border-accent: rgb(255, 255, 255, 0.3);
+    --color-border: rgb(255, 255, 255, 0.1);
+
+    // Primary color (for rgba usage)
+    --color-primary-rgb: 14, 14, 14;
+    --color-primary-bg-hover: rgb(255, 255, 255, 0.08);
+
+    // Interactive states
+    --hover-bg: rgb(255, 255, 255, 0.08);
+    --active-bg: rgb(255, 255, 255, 0.12);
+    --hover-bg-light: rgb(255, 255, 255, 0.05);
+
+    // Form fields (floating label style)
+    --field-bg: #252525;
+    --field-border-radius: 8px;
+    --field-label-color: #A0A0A0;
+
+    // Sizes
+    --navbar-height: 50px;
+    --sidebar-width: 300px;
+    --sidebar-width-collapsed: 80px;
+
+    // z-indexes
+    --modal-z-index: 1000;
+    --overlay-z-index: 100;
+    --overlay-color: rgb(0 0 0 / 0.6);
+
+    // Semantic colors
+    --color-accent-blue: #1890ff;
+    --color-pending-revision: #4096ff;
+    --color-star: #fadb14;
+    --color-logo: #EFEDE7;
+    --code-bg: #1a1b26;
+    --inline-code-bg: rgb(255, 255, 255, 0.1);
+    --inline-code-border: rgb(255, 255, 255, 0.15);
+    --inline-code-color: #e06c75;
+    --code-line-number: #636d83;
+    --code-border: rgb(255, 255, 255, 0.08);
+
+    // Syntax token colors (defaults for dark theme)
+    --code-keyword: #bb9af7;
+    --code-string: #9ece6a;
+    --code-comment: #565f89;
+    --code-function: #7aa2f7;
+    --code-number: #ff9e64;
+    --code-operator: #89ddff;
+    --code-punctuation: #a9b1d6;
+    --code-boolean: #ff9e64;
+    --code-class-name: #2ac3de;
+    --code-builtin: #7dcfff;
+    --code-property: #73daca;
+    --code-tag: #f7768e;
+    --code-attr-name: #bb9af7;
+    --code-attr-value: #9ece6a;
+    --code-regex: #b4f9f8;
+    --code-important: #f7768e;
+    --code-variable: #c0caf5;
+    --selection-bg: rgb(255, 255, 255, 0.2);
+    --selection-color: #fff;
+    --color-icon-secondary: #A0A0A0;
+    --color-elevated-bg: #222;
+    --color-spotlight-bg: #333;
+
+    // Editor highlights
+    --highlight-yellow: #fef08a;
+    --highlight-green: #bbf7d0;
+    --highlight-blue: #bfdbfe;
+    --highlight-pink: #fbcfe8;
+    --highlight-orange: #fed7aa;
+    --highlight-purple: #ddd6fe;
+}

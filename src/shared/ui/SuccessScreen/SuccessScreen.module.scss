@@ -1,0 +1,324 @@
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgb(82, 196, 26, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 20px rgb(82, 196, 26, 0);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes confetti {
+    0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-100px) rotate(720deg);
+    }
+}
+
+.wrapper {
+    min-height: 350px;
+    padding-top: 50px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+        180deg,
+        rgb(82, 196, 26, 0.03) 0%,
+        rgb(255, 255, 255, 0) 50%
+    );
+}
+
+.content {
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.iconContainer {
+    position: relative;
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.iconRing {
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 2px solid rgb(82, 196, 26, 0.2);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.iconRingOuter {
+    position: absolute;
+    inset: -24px;
+    border-radius: 50%;
+    border: 1px solid rgb(82, 196, 26, 0.1);
+    animation: pulse 2s ease-in-out 0.5s infinite;
+}
+
+.iconCircle {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        0 8px 32px rgb(82, 196, 26, 0.35),
+        0 2px 8px rgb(0, 0, 0, 0.1),
+        inset 0 2px 4px rgb(255, 255, 255, 0.2);
+    animation: float 3s ease-in-out infinite;
+    
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 2px;
+        border-radius: 50%;
+        background: linear-gradient(
+            135deg,
+            rgb(255, 255, 255, 0.2) 0%,
+            transparent 50%
+        );
+    }
+}
+
+.checkIcon {
+    color: var(--color-text-light-solid, #fff);
+    font-size: 48px;
+    filter: drop-shadow(0 2px 4px rgb(0, 0, 0, 0.15));
+    animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+}
+
+.textContainer {
+    animation: fadeInUp 0.6s ease-out 0.4s both;
+    text-align: center;
+}
+
+.title {
+    font-size: 24px !important;
+    font-weight: 600 !important;
+    color: var(--text) !important;
+    margin-bottom: 8px !important;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.buttonContainer {
+    animation: fadeInUp 0.6s ease-out 0.6s both;
+    width: 100%;
+}
+
+.closeButton {
+    height: 44px !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    background: linear-gradient(135deg, var(--inverted-bg-color) 0%, var(--bg-color) 100%) !important;
+    border: none !important;
+    box-shadow: 
+        0 4px 12px rgb(0, 0, 0, 0.25),
+        0 2px 4px rgb(0, 0, 0, 0.1) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgb(255, 255, 255, 0.1) 50%,
+            transparent 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 2.5s ease-in-out infinite;
+    }
+
+    &:hover {
+        transform: translateY(-2px) !important;
+        background: linear-gradient(135deg, var(--help-button-bg) 0%, var(--inverted-bg-color) 100%) !important;
+        box-shadow: 
+            0 6px 20px rgb(0, 0, 0, 0.3),
+            0 4px 8px rgb(0, 0, 0, 0.15) !important;
+    }
+
+    &:active {
+        transform: translateY(0) !important;
+    }
+}
+
+// Confetti particles
+.confettiContainer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    animation: confetti 1.5s ease-out forwards;
+    
+    &:nth-child(1) {
+        left: 20%;
+        top: 30%;
+        background: #52c41a;
+        animation-delay: 0.1s;
+        border-radius: 2px;
+    }
+    
+    &:nth-child(2) {
+        left: 40%;
+        top: 25%;
+        background: #1677ff;
+        animation-delay: 0.2s;
+        border-radius: 50%;
+    }
+    
+    &:nth-child(3) {
+        left: 60%;
+        top: 35%;
+        background: #faad14;
+        animation-delay: 0.15s;
+        width: 8px;
+        height: 8px;
+    }
+    
+    &:nth-child(4) {
+        left: 80%;
+        top: 28%;
+        background: #eb2f96;
+        animation-delay: 0.25s;
+        border-radius: 2px;
+    }
+    
+    &:nth-child(5) {
+        left: 30%;
+        top: 40%;
+        background: #722ed1;
+        animation-delay: 0.3s;
+        border-radius: 50%;
+        width: 6px;
+        height: 6px;
+    }
+    
+    &:nth-child(6) {
+        left: 70%;
+        top: 32%;
+        background: #13c2c2;
+        animation-delay: 0.18s;
+    }
+}
+
+// Decorative circles
+@keyframes floatUp {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes floatDown {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(15px);
+    }
+}
+
+.decorCircle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.06;
+    background: #52c41a;
+    
+    &:nth-child(1) {
+        width: 200px;
+        height: 200px;
+        top: -100px;
+        right: -60px;
+        animation: floatDown 6s ease-in-out infinite;
+    }
+    
+    &:nth-child(2) {
+        width: 120px;
+        height: 120px;
+        bottom: 20%;
+        left: -40px;
+        animation: floatUp 5s ease-in-out infinite 1s;
+    }
+    
+    &:nth-child(3) {
+        width: 80px;
+        height: 80px;
+        top: 40%;
+        right: -20px;
+        animation: floatDown 4s ease-in-out infinite 0.5s;
+    }
+}
+

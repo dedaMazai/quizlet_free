@@ -1,0 +1,135 @@
+.EmptyState {
+    width: 100%;
+    padding: 24px;
+    text-align: center;
+
+    &.small {
+        padding: 16px;
+
+        .iconWrapper {
+            .iconBg {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+
+        .title {
+            font-size: 13px;
+        }
+
+        .description {
+            font-size: 11px;
+        }
+
+        .actionButton {
+            height: 28px;
+            font-size: 12px;
+        }
+    }
+
+    &.medium {
+        padding: 24px;
+
+        .iconWrapper {
+            .iconBg {
+                width: 56px;
+                height: 56px;
+                font-size: 24px;
+            }
+        }
+
+        .title {
+            font-size: 14px;
+        }
+
+        .description {
+            font-size: 12px;
+        }
+    }
+
+    &.large {
+        padding: 48px;
+
+        .iconWrapper {
+            .iconBg {
+                width: 80px;
+                height: 80px;
+                font-size: 36px;
+            }
+        }
+
+        .title {
+            font-size: 18px;
+        }
+
+        .description {
+            font-size: 14px;
+            max-width: 300px;
+        }
+    }
+}
+
+.iconWrapper {
+    position: relative;
+
+    // Decorative glow effect
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle,
+            rgb(114, 46, 209, 0.1) 0%,
+            transparent 70%
+        );
+        filter: blur(20px);
+        pointer-events: none;
+    }
+}
+
+.iconBg {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(
+        135deg,
+        var(--hover-bg) 0%,
+        var(--hover-bg-light) 100%
+    );
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+
+    .EmptyState:hover & {
+        background: linear-gradient(
+            135deg,
+            var(--active-bg) 0%,
+            var(--hover-bg) 100%
+        );
+        border-color: var(--border-light);
+        color: var(--text);
+        transform: scale(1.05);
+    }
+}
+
+.title {
+    color: var(--text);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.description {
+    line-height: 1.5;
+    margin: 0;
+}
+
+.actionButton {
+    margin-top: 8px;
+}

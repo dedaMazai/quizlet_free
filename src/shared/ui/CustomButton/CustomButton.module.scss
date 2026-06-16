@@ -1,0 +1,64 @@
+.CustomButton {
+    border: none !important;
+    box-shadow: none !important;
+
+    &:hover,
+    &:focus,
+    &:active {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+
+.default {
+    background: var(--bg-color-secondary) !important;
+    color: var(--text) !important;
+
+    &:hover,
+    &:focus,
+    &:active {
+        background: var(--bg-color) !important;
+        color: var(--text) !important;
+    }
+}
+
+.delegate {
+    background: var(--help-button-bg) !important;
+    color: var(--text) !important;
+
+    &:hover,
+    &:active {
+        background: var(--active-bg) !important;
+        color: var(--text) !important;
+    }
+}
+
+.reject {
+    background: rgb(235, 81, 81, 0.15) !important;
+    color: var(--color-error) !important;
+
+    &:hover,
+    &:active {
+        background: rgb(235, 81, 81, 0.25) !important;
+        color: var(--color-error) !important;
+    }
+
+    :global(.anticon) {
+        color: var(--color-error);
+    }
+}
+
+.accept {
+    background: rgb(105, 187, 128, 0.15) !important;
+    color: var(--color-success) !important;
+
+    &:hover,
+    &:active {
+        background: rgb(105, 187, 128, 0.25) !important;
+        color: var(--color-success) !important;
+    }
+
+    :global(.anticon) {
+        color: var(--color-success);
+    }
+}

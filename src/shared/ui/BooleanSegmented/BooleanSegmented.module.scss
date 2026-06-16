@@ -1,0 +1,70 @@
+.BooleanSegmented {
+    background: var(--card-bg-secondary);
+    padding: 4px;
+    border-radius: 10px;
+
+    :global {
+        .ant-segmented-group {
+            gap: 4px;
+        }
+
+        .ant-segmented-item {
+            background: transparent;
+            border-radius: 8px;
+            min-width: 50px;
+
+            &::after {
+                display: none;
+            }
+
+            .ant-segmented-item-label {
+                color: var(--text-secondary);
+                padding: 5px 10px;
+                min-height: unset;
+                font-size: 16px;
+                line-height: 24px;
+                transition: color 0.2s ease;
+            }
+
+            &:hover:not(.ant-segmented-item-selected) {
+                .ant-segmented-item-label {
+                    color: var(--text);
+                }
+            }
+        }
+
+        .ant-segmented-item-selected {
+            .ant-segmented-item-label {
+                color: var(--text);
+            }
+        }
+
+        .ant-segmented-thumb {
+            border-radius: 8px;
+            box-shadow: none;
+            background: var(--hover-bg);
+        }
+    }
+}
+
+// Positive state (Yes selected) - green
+.positive {
+    :global(.ant-segmented-item-selected) {
+        background: rgb(105, 187, 128, 0.15) !important;
+
+        :global(.ant-segmented-item-label) {
+            color: var(--color-success) !important;
+        }
+    }
+}
+
+// Negative state (No selected) - red
+.negative {
+    :global(.ant-segmented-item-selected) {
+        background: rgb(235, 81, 81, 0.15) !important;
+
+        :global(.ant-segmented-item-label) {
+            color: var(--color-error) !important;
+        }
+    }
+}

@@ -1,0 +1,1 @@
+export { ChangePasswordAsync as ChangePasswordPage } from './ui/ChangePasswordPage.async';

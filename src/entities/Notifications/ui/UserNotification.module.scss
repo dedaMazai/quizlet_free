@@ -1,0 +1,72 @@
+.CardNotification {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+
+    .checker {
+        width: 12px;
+        height: 12px;
+        flex-shrink: 0;
+        border-radius: 6px;
+        background: var(--color-warning);
+        margin: 6px;
+    }
+
+    .closeBtn {
+        flex-shrink: 0;
+        display: none;
+    }
+
+    &:hover {
+        background: var(--hover-bg);
+
+        .checker {
+            display: none;
+        }
+
+        .closeBtn {
+            display: block;
+        }
+    }
+}
+
+.list {
+    overflow-y: auto;
+
+    @media (width <= 1199px) {
+        padding-top: 0;
+    }
+}
+
+.badge {
+    cursor: pointer;
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    height: 16px;
+    background: var(--color-warning);
+    border-radius: 4px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+}
+
+.triggerBtn {
+    color: var(--text);
+
+    &:hover {
+        color: var(--text) !important;
+    }
+}
+
+.textBtn {
+    color: var(--text);
+
+    &:hover {
+        color: var(--text) !important;
+    }
+}
+
+.header {
+    padding: 8px 24px;
+    background: var(--bg-color);
+}

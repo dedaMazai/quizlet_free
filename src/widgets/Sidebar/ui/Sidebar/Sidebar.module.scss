@@ -1,0 +1,251 @@
+.Sidebar {
+    position: relative;
+    width: 70px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-shrink: 0;
+    transition: width 0.3s;
+    border-radius: 0 0 8px;
+
+    .headerSidebar {
+        min-width: max-content;
+        height: 50px;
+        flex-shrink: 0;
+        border-radius: 0 0 6px;
+        background-blend-mode: exclusion, normal;
+    }
+
+    .collapseBtn {
+        color: var(--text) !important;
+        height: 100%;
+    }
+
+    &.open {
+        width: 300px;
+
+        @media (width <= 1199px) {
+            width: 200px;
+        }
+    }
+}
+
+/* Accordion modules container */
+.modulesContainer {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 8px 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Module header (accordion toggle) */
+.moduleHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+    margin-bottom: 2px;
+
+    &:hover {
+        background-color: var(--color-fill-tertiary, rgb(255, 255, 255, 0.04));
+    }
+}
+
+.moduleHeaderActive {
+    background-color: var(--color-fill-secondary, rgb(255, 255, 255, 0.06));
+}
+
+.moduleIcon {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: var(--text);
+}
+
+.moduleLabel {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.expandIcon {
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+
+    &.expanded {
+        transform: rotate(90deg);
+    }
+}
+
+/* Module content area */
+.moduleContent {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+/* Module content that should fill remaining space (PioneerAI with chats, Wiki) */
+.moduleContentFlex {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0;
+    gap: 2px;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.moduleContentWiki {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px 0 0;
+}
+
+/* Classifier tree section within Cases module */
+.classifierSection {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border-secondary, rgb(255, 255, 255, 0.08));
+}
+
+.classifierTitle {
+    padding: 0 12px 4px 20px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* Individual module items (links) */
+.moduleItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+        background-color: var(--color-fill-tertiary, rgb(255, 255, 255, 0.04));
+    }
+}
+
+.moduleItemActive {
+    background-color: var(--color-fill-secondary, rgb(255, 255, 255, 0.06));
+}
+
+.itemIcon {
+    font-size: 14px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.itemLabel {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+    font-size: 14px;
+}
+
+/* Add case button */
+.addCaseButton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 0;
+}
+
+/* Chats content within PioneerAI module */
+.chatsContent {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Bottom section */
+.bottomSection {
+    padding: 8px 8px 24px;
+    width: 100%;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.bottomItem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: var(--text);
+    width: 100%;
+
+    &:hover {
+        background-color: var(--color-fill-tertiary, rgb(255, 255, 255, 0.04));
+    }
+}
+
+/* Resize handle */
+.resizeHandle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 1;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 2px;
+        height: 100%;
+        border-radius: 1px;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+    }
+
+    &:hover::after {
+        background-color: var(--border-light, rgb(255, 255, 255, 0.15));
+    }
+}
+
+.resizeHandleDragging {
+    &::after {
+        background-color: var(--color-accent-blue, #1890ff) !important;
+    }
+}
+
+.dragging {
+    transition: none !important;
+}

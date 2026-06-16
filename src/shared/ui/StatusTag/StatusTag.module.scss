@@ -1,0 +1,30 @@
+.StatusTag {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+
+    &.success {
+        background: rgb(105, 187, 128, 0.15);
+        color: var(--color-success);
+    }
+
+    &.warning {
+        background: rgb(245, 120, 52, 0.15);
+        color: var(--color-warning);
+    }
+
+    &.purple {
+        background: rgb(114, 46, 209, 0.15);
+        color: var(--color-link);
+    }
+
+    &.default {
+        background: rgb(255, 255, 255, 0.08);
+        color: var(--text-secondary);
+    }
+}

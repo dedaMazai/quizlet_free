@@ -1,0 +1,43 @@
+.InputFile {
+    position: relative;
+    display: inline-block;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    .input {
+        position: absolute;
+        z-index: -1;
+        opacity: 0;
+        display: block;
+        width: 0;
+        height: 0;
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    &::file-selector-button {
+        display: none;
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        appearance: none;
+        margin: 0;
+    }
+
+    &.dragging {
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+
+    &:hover {
+        opacity: 0.9;
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
+}
