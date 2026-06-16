@@ -1,0 +1,31 @@
+.stage {
+  width: 100%;
+  max-width: 520px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.writeRow {
+  max-width: 480px;
+}
+
+.feedbackIcon {
+  font-size: 48px;
+
+  &.correct {
+    color: var(--color-success);
+  }
+
+  &.wrong {
+    color: var(--color-error);
+  }
+}

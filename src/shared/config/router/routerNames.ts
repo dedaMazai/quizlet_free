@@ -7,6 +7,11 @@ export const RouteNames = {
   SETTINGS: 'SETTINGS',
   PRIVACY: 'PRIVACY',
   FORBIDDEN: 'FORBIDDEN',
+  DECKS: 'DECKS',
+  DECK: 'DECK',
+  ALL_WORDS: 'ALL_WORDS',
+  FLASHCARDS: 'FLASHCARDS',
+  LEARN: 'LEARN',
   // last
   NOT_FOUND: 'NOT_FOUND',
 } as const;

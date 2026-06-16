@@ -11,6 +11,11 @@ import { ChangePasswordPage } from '@/pages/ChangePasswordPage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { MainPage } from '@/pages/MainPage';
+import { DecksPage } from '@/pages/DecksPage';
+import { DeckPage } from '@/pages/DeckPage';
+import { AllWordsPage } from '@/pages/AllWordsPage';
+import { FlashcardsPage } from '@/pages/FlashcardsPage';
+import { LearnPage } from '@/pages/LearnPage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -72,6 +77,64 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.SETTINGS(),
                     label: i18n.t('Настройки'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.DECKS(),
+        element: <DecksPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.DECKS(),
+                    label: i18n.t('Колоды'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.DECK(':deckId'),
+        element: <DeckPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.DECKS(),
+                    label: i18n.t('Колоды'),
+                },
+                {
+                    path: () => RoutePath.DECK(`${params.deckId}`),
+                    label: i18n.t('Колода'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.FLASHCARDS(':deckId'),
+        element: <FlashcardsPage />,
+        authOnly: true,
+        withSidebar: true,
+    },
+    {
+        path: RoutePath.LEARN(':deckId'),
+        element: <LearnPage />,
+        authOnly: true,
+        withSidebar: true,
+    },
+    {
+        path: RoutePath.ALL_WORDS(),
+        element: <AllWordsPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.ALL_WORDS(),
+                    label: i18n.t('Все слова'),
                 },
             ]),
         },

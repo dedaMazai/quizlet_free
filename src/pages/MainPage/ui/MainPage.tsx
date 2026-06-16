@@ -1,12 +1,16 @@
 import { FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Typography } from 'antd';
-import { VStack } from '@/shared/ui/Stack';
+import { Button, Typography } from 'antd';
+import { AppstoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { HStack, VStack } from '@/shared/ui/Stack';
 import { useUserInfo } from '@/entities/User';
 import { buildName } from '@/shared/lib/helpers/buildName';
+import { RoutePath } from '@/shared/config/router/routePath';
 
 const MainPage: FC = () => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const userInfo = useUserInfo();
 
     const name = userInfo
@@ -24,8 +28,23 @@ const MainPage: FC = () => {
                 {name ? t('Добро пожаловать, {{name}}', { name }) : t('Добро пожаловать')}
             </Typography.Title>
             <Typography.Paragraph type="secondary">
-                {t('Это стартовая страница приложения.')}
+                {t('Создавайте колоды слов и заучивайте их в режимах «Карточки» и «Заучивание».')}
             </Typography.Paragraph>
+            <HStack gap="12" wrap>
+                <Button
+                    type="primary"
+                    icon={<AppstoreOutlined />}
+                    onClick={() => navigate(RoutePath.DECKS())}
+                >
+                    {t('Мои колоды')}
+                </Button>
+                <Button
+                    icon={<UnorderedListOutlined />}
+                    onClick={() => navigate(RoutePath.ALL_WORDS())}
+                >
+                    {t('Все слова')}
+                </Button>
+            </HStack>
         </VStack>
     );
 };

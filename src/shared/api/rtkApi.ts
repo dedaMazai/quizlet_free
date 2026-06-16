@@ -56,6 +56,11 @@ export enum ApiTag {
     Statistics = 'Statistics',
     News = 'News',
     NewsList = 'NewsList',
+    Deck = 'Deck',
+    Decks = 'Decks',
+    Card = 'Card',
+    Cards = 'Cards',
+    LearnProgress = 'LearnProgress',
 }
 
 const mutex = new Mutex();

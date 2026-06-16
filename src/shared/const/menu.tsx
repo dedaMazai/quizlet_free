@@ -1,6 +1,6 @@
 import { MenuProps } from "antd";
 import type { TFunction } from 'i18next';
-import Icon, { HomeOutlined } from '@ant-design/icons';
+import Icon, { HomeOutlined, AppstoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { filterValuesForAccess } from "@/entities/User";
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from "../types/accesses";
@@ -24,6 +24,18 @@ export const getMenuItems = ({
                     key: RoutePath.MAIN(),
                     label: t('Главная'),
                     icon: <Icon component={HomeOutlined} />,
+                    className,
+                },
+                {
+                    key: RoutePath.DECKS(),
+                    label: t('Колоды'),
+                    icon: <Icon component={AppstoreOutlined} />,
+                    className,
+                },
+                {
+                    key: RoutePath.ALL_WORDS(),
+                    label: t('Все слова'),
+                    icon: <Icon component={UnorderedListOutlined} />,
                     className,
                 },
             ],

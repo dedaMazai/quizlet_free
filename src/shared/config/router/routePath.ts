@@ -9,6 +9,11 @@ export const RoutePath = {
   [RouteNames.USER]: (id: string | number) => `/users/${id}`,
   [RouteNames.PRIVACY]: () => '/privacy',
   [RouteNames.FORBIDDEN]: () => '/forbidden',
+  [RouteNames.DECKS]: () => '/decks',
+  [RouteNames.DECK]: (id: string) => `/decks/${id}`,
+  [RouteNames.ALL_WORDS]: () => '/words',
+  [RouteNames.FLASHCARDS]: (id: string) => `/decks/${id}/flashcards`,
+  [RouteNames.LEARN]: (id: string) => `/decks/${id}/learn`,
   // last
   [RouteNames.NOT_FOUND]: () => '/*',
 };
