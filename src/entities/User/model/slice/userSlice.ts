@@ -8,10 +8,13 @@ import {
   UserSchema,
 } from '../types/user';
 import { IS_OLD_SAFARI } from '@/shared/const/const';
+import { MOCK_USER } from '../const/mockUser';
 
+// Авторизация замокана: приложение стартует уже залогиненным обычным пользователем.
 const initialState: UserSchema = {
-  _inited: false,
+  _inited: true,
   _loggedOut: false,
+  userInfo: MOCK_USER,
 };
 
 export const userSlice = buildSlice({

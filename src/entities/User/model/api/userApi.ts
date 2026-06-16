@@ -6,6 +6,7 @@ import {
 import { callAuthFailureHandler } from '@/shared/api/authenticatedFetch';
 import { userActions } from '../slice/userSlice';
 import { TLanguageUser, UserInfo, UserInfoCreate, RoleName } from '../types/user';
+import { MOCK_USER } from '../const/mockUser';
 import { OrderingType, PaginationResult } from '@/shared/types/types';
 import { GenderUser, IS_OLD_SAFARI } from '@/shared/const/const';
 
@@ -180,17 +181,12 @@ const userApi = rtkApi.injectEndpoints({
       })
     }),
     userInfo: build.query<UserInfo, void>({
-      query: () => {
-        return ({
-          url: '/users/me',
-          method: 'GET',
-        });
-      },
+      // Авторизация замокана: возвращаем мок-пользователя без запроса к бэкенду.
+      queryFn: () => ({ data: MOCK_USER }),
       providesTags: (user) => user ? [{
         type: ApiTag.User,
         id: user.uuid,
       }] : [],
-      // forceRefetch: () => true,
       async onQueryStarted(_arg, {
         dispatch,
         queryFulfilled,
