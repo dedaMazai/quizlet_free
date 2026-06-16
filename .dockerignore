@@ -1,0 +1,13 @@
+build
+node_modules
+.vscode
+docker-compose-*.yaml
+.env
+.env.*
+.env.sentry-build-plugin
+cache
+reports
+.git
+.gitlab-ci.yml
+.idea
+*.log

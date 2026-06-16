@@ -1,0 +1,96 @@
+stages:
+  - build
+  - staging
+  - production
+
+build:
+  stage: build
+  variables:
+    DOCKER_IMAGE_NAME: $CI_REGISTRY/pioneer-digital-platform/pd-ai-front
+    # Proxy for npm inside container during build
+    BUILD_PROXY: "http://editsquidams.pioneer.ru:31280"
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - export TAG=${CI_COMMIT_TAG:-$CI_COMMIT_REF_SLUG}
+  script:
+    # NOTE: Docker daemon must have proxy configured on the server for pulling base images.
+    # See: /etc/systemd/system/docker.service.d/http-proxy.conf
+    # DOCKER_BUILDKIT=0 disables BuildKit which may not respect daemon proxy settings
+    - echo "Building image $DOCKER_IMAGE_NAME:$TAG"
+    - DOCKER_BUILDKIT=0 docker build -f Dockerfile --pull
+        --build-arg APP_VERSION="${TAG} (${CI_COMMIT_SHORT_SHA})"
+        --build-arg HTTP_PROXY=$BUILD_PROXY
+        --build-arg HTTPS_PROXY=$BUILD_PROXY
+        -t "$DOCKER_IMAGE_NAME:$TAG" .
+    - echo "Pushing image $DOCKER_IMAGE_NAME:$TAG"
+    - docker push "$DOCKER_IMAGE_NAME:$TAG"
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+  tags:
+    - wiki_staging
+
+staging:
+  stage: staging
+  environment: staging
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - export TAG=${CI_COMMIT_TAG:-$CI_COMMIT_REF_SLUG}
+  script:
+    - echo "Deploying tag $TAG to staging"
+    - echo "Stopping frontend"
+    - TAG=$TAG docker compose -f "compose.staging.yaml" stop pdw-frontend
+    - echo "Removing old container"
+    - TAG=$TAG docker compose -f "compose.staging.yaml" rm -f pdw-frontend
+    - echo "Pulling latest image registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}"
+    - docker pull "registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}"
+    - echo "Starting frontend with image tag $TAG"
+    - TAG=$TAG docker compose -f "compose.staging.yaml" up -d --force-recreate --pull always
+  after_script:
+    - docker system prune --volumes -f
+    - docker logs pdw-frontend || echo "Frontend container not found or not running"
+  allow_failure: false
+  needs:
+    - job: build
+      optional: false
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+  tags:
+    - wiki_staging
+
+production:
+  stage: production
+  environment: production
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - export TAG=${CI_COMMIT_TAG:-$CI_COMMIT_REF_SLUG}
+  script:
+    - echo "Deploying tag $TAG"
+    - echo "Stopping frontend"
+    - TAG=$TAG docker compose -f "compose.prod.yaml" stop pdw-frontend
+    - echo "Removing old container"
+    - TAG=$TAG docker compose -f "compose.prod.yaml" rm -f pdw-frontend
+    - echo "Pulling latest image registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}"
+    - docker pull "registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}"
+    - echo "Starting frontend with image tag $TAG"
+    - TAG=$TAG docker compose -f "compose.prod.yaml" up -d --force-recreate --pull always
+  after_script:
+    - docker system prune --volumes -f
+    - docker logs pdw-frontend || echo "Frontend container not found or not running"
+  allow_failure: false
+  needs:
+    - job: build
+      optional: false
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+  tags:
+    - wiki_production

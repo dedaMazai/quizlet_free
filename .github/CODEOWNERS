@@ -1,0 +1,31 @@
+# Владельцы кода - ООО "Пионер Диджитал"
+# 
+# Данный файл определяет владельцев кода для автоматического 
+# назначения ревьюеров при создании Pull Request
+#
+# Все изменения требуют одобрения владельцев кода
+
+# Глобальные владельцы (весь код)
+* @pioneer-digital/tech-leads
+
+# Критические файлы и конфигурация
+/src/app/                    @pioneer-digital/tech-leads @pioneer-digital/architects
+/src/shared/api/             @pioneer-digital/tech-leads @pioneer-digital/backend-team
+/webpack.config.ts           @pioneer-digital/tech-leads
+/package.json                @pioneer-digital/tech-leads
+/tsconfig.json               @pioneer-digital/tech-leads
+
+# Entities - бизнес-логика
+/src/entities/               @pioneer-digital/backend-team @pioneer-digital/frontend-team
+
+# Конфигурация и deployment
+/nginx/                      @pioneer-digital/devops
+/docker-compose*.yaml        @pioneer-digital/devops
+/Dockerfile                  @pioneer-digital/devops
+/.github/                    @pioneer-digital/tech-leads
+
+# Документация
+/README.md                   @pioneer-digital/tech-leads
+/LICENSE                     @pioneer-digital/legal
+/LICENSE.md                  @pioneer-digital/legal
+

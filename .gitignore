@@ -1,0 +1,25 @@
+/cache
+/node_modules
+/.idea
+/.vscode
+/build
+/reports
+*.log
+*.tar
+.env
+memory-bank
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Sentry Config File
+.env.sentry-build-plugin
+
+# Auto-generated CSS Modules type declarations (see npm run gen:scss-types)
+*.module.scss.d.ts
