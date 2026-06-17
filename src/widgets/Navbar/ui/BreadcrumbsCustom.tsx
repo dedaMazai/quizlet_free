@@ -8,18 +8,19 @@ import {
 } from 'react-router';
 import Icon from '@ant-design/icons';
 import { useGetUserQuery, useUserInfo } from '@/entities/User';
+import { useGetDeckQuery } from '@/entities/Deck';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { ReactComponent as Home } from '@/shared/assets/icons/Home.svg';
 import { HStack } from '@/shared/ui/Stack';
 import { buildName } from '@/shared/lib/helpers/buildName';
 
-type CrumbType = 'user';
+type CrumbType = 'user' | 'deck';
 
 export type Crumb = {
     path: (value?: string) => string;
     label: string;
-    type: CrumbType;
+    type?: CrumbType;
 };
 
 export const BreadcrumbsCustom = ({ breadcrumbs }: { breadcrumbs: Crumb[] }) => {
@@ -27,13 +28,18 @@ export const BreadcrumbsCustom = ({ breadcrumbs }: { breadcrumbs: Crumb[] }) => 
     const userInfo = useUserInfo();
     const {
         id_user: userUuid,
+        deckId,
     } = useParams();
 
     const { data: user } = useGetUserQuery(userUuid!, {
         skip: !userUuid,
     });
 
-    const createLabel = (label: string, type: CrumbType) => {
+    const { data: deck } = useGetDeckQuery(deckId!, {
+        skip: !deckId,
+    });
+
+    const createLabel = (label: string, type?: CrumbType) => {
         if (type === 'user') {
             return (
                 (user?.name && user.surname)
@@ -45,6 +51,10 @@ export const BreadcrumbsCustom = ({ breadcrumbs }: { breadcrumbs: Crumb[] }) => 
                     })
                     : user?.email || label
             )
+        }
+
+        if (type === 'deck') {
+            return deck?.name || label
         }
 
         return label

@@ -109,6 +109,7 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.DECK(`${params.deckId}`),
                     label: i18n.t('Колода'),
+                    type: 'deck',
                 },
             ]),
         },
@@ -127,6 +128,7 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.DECK(`${params.deckId}`),
                     label: i18n.t('Колода'),
+                    type: 'deck',
                 },
                 {
                     path: () => RoutePath.FLASHCARDS(`${params.deckId}`),
@@ -149,6 +151,7 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.DECK(`${params.deckId}`),
                     label: i18n.t('Колода'),
+                    type: 'deck',
                 },
                 {
                     path: () => RoutePath.LEARN(`${params.deckId}`),
