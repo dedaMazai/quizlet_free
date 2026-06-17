@@ -1,14 +1,14 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 20px;
   width: 100%;
 }
 
 .card {
-  height: 100%;
   border-radius: 16px;
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
@@ -17,17 +17,14 @@
   }
 }
 
-.cardInner {
-  height: 100%;
-}
-
-.countBadge {
-  align-self: flex-start;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  line-height: 20px;
-  font-weight: 600;
+.iconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 22px;
   color: var(--color-accent);
   background: var(--color-accent-soft);
 }

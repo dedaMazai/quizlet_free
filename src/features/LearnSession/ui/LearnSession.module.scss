@@ -1,6 +1,6 @@
 .stage {
   width: 100%;
-  max-width: 520px;
+  max-width: 560px;
   min-height: 280px;
   display: flex;
   align-items: center;
@@ -10,8 +10,24 @@
 .choices {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
+}
+
+.choiceBtn {
+  height: 64px;
+  border-radius: 14px;
+  font-size: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: var(--color-accent) !important;
+    color: var(--color-accent) !important;
+    background: var(--color-accent-soft) !important;
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .writeRow {
@@ -19,13 +35,21 @@
 }
 
 .feedbackIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
   font-size: 48px;
 
   &.correct {
     color: var(--color-success);
+    background: var(--color-success-soft);
   }
 
   &.wrong {
     color: var(--color-error);
+    background: var(--color-error-soft);
   }
 }

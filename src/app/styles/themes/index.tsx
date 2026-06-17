@@ -19,13 +19,23 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--scroll-bard': 'rgba(255, 255, 255, 0.15)',
     '--text': '#ffffff',
     '--text-secondary': '#A0A0A0',
-    '--bg-color': '#141414',
-    '--bg-color-secondary': '#1A1A1A',
+    '--bg-color': '#141419',
+    '--bg-color-secondary': '#1C1C22',
     '--inverted-bg-color': '#fff',
     '--help-button-bg': '#333333',
     '--field-border': 'rgba(255, 255, 255, 0.16)',
     '--card-bg': 'rgba(255, 255, 255, 0.03)',
-    '--card-bg-secondary': '#222222',
+    '--card-bg-secondary': '#26262E',
+
+    // Brand accent (indigo) + elevation
+    '--color-accent': '#5B6BFF',
+    '--color-accent-hover': '#6E7CFF',
+    '--color-accent-soft': 'rgba(91, 107, 255, 0.18)',
+    '--color-success-soft': 'rgba(105, 187, 128, 0.18)',
+    '--color-error-soft': 'rgba(235, 81, 81, 0.18)',
+    '--shadow-sm': '0 1px 2px rgba(0, 0, 0, 0.4)',
+    '--shadow-md': '0 6px 20px rgba(0, 0, 0, 0.45)',
+    '--shadow-card-hover': '0 10px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(91, 107, 255, 0.4)',
 
     // Borders
     '--border-subtle': 'rgba(255, 255, 255, 0.1)',
@@ -51,7 +61,7 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--overlay-color': 'rgba(0, 0, 0, 0.6)',
 
     // Semantic colors
-    '--color-accent-blue': '#1890ff',
+    '--color-accent-blue': '#5B6BFF',
     '--color-star': '#fadb14',
     '--color-logo': '#EFEDE7',
     '--code-bg': '#1a1b26',
@@ -102,13 +112,23 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--scroll-bard': 'rgba(0, 0, 0, 0.15)',
     '--text': '#1A1A1A',
     '--text-secondary': '#666666',
-    '--bg-color': '#F5F5F5',
+    '--bg-color': '#F4F5FB',
     '--bg-color-secondary': '#FFFFFF',
     '--inverted-bg-color': '#0E0E0E',
     '--help-button-bg': '#E8E8E8',
     '--field-border': 'rgba(0, 0, 0, 0.15)',
     '--card-bg': 'rgba(0, 0, 0, 0.02)',
     '--card-bg-secondary': '#FAFAFA',
+
+    // Brand accent (indigo) + elevation
+    '--color-accent': '#4255FF',
+    '--color-accent-hover': '#3646E6',
+    '--color-accent-soft': '#EEF0FF',
+    '--color-success-soft': 'rgba(105, 187, 128, 0.14)',
+    '--color-error-soft': 'rgba(235, 81, 81, 0.12)',
+    '--shadow-sm': '0 1px 2px rgba(16, 24, 40, 0.06)',
+    '--shadow-md': '0 4px 16px rgba(16, 24, 40, 0.08)',
+    '--shadow-card-hover': '0 10px 28px rgba(66, 85, 255, 0.18)',
 
     // Borders
     '--border-subtle': 'rgba(0, 0, 0, 0.06)',
@@ -134,7 +154,7 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--overlay-color': 'rgba(0, 0, 0, 0.45)',
 
     // Semantic colors
-    '--color-accent-blue': '#1677ff',
+    '--color-accent-blue': '#4255FF',
     '--color-star': '#faad14',
     '--color-logo': '#1A1A1A',
     '--code-bg': '#f5f5f5',
@@ -560,12 +580,18 @@ function getDarkComponentOverrides(): ThemeConfig['components'] {
       "algorithm": true
     },
     "Card": {
-      "colorBgContainer": "rgb(34,34,34)",
-      "colorBorderSecondary": "rgba(255,255,255,0.1)",
+      "colorBgContainer": "rgb(38,38,46)",
+      "colorBorderSecondary": "rgba(255,255,255,0.08)",
       "colorText": "rgb(255,255,255)",
       "colorTextHeading": "rgb(255,255,255)",
       "colorTextDescription": "rgb(160,160,160)",
-      "headerBg": "rgb(34,34,34)",
+      "headerBg": "rgb(38,38,46)",
+      "borderRadiusLG": 16,
+      "algorithm": true
+    },
+    "Progress": {
+      "defaultColor": "#5B6BFF",
+      "remainingColor": "rgba(255,255,255,0.12)",
       "algorithm": true
     },
     "Descriptions": {
@@ -894,6 +920,12 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "colorTextHeading": "rgb(26,26,26)",
       "colorTextDescription": "rgb(102,102,102)",
       "headerBg": "#FFFFFF",
+      "borderRadiusLG": 16,
+      "algorithm": true
+    },
+    "Progress": {
+      "defaultColor": "#4255FF",
+      "remainingColor": "rgba(0,0,0,0.06)",
       "algorithm": true
     },
     "Descriptions": {

@@ -1,0 +1,12 @@
+.panel {
+  width: 100%;
+  padding: 8px 16px;
+  border-radius: 16px;
+  background: var(--bg-color-secondary);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.term {
+  font-weight: 600;
+}

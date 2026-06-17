@@ -9,20 +9,22 @@ export const LightTheme: ThemeConfig['token'] = {
     "colorError": "#eb5151",
     "colorWarning": "#f57834",
     "colorSuccess": "#69bb80",
-    "colorLink": "#722ed1",
+    "colorLink": "#4255FF",
     "wireframe": false,
     "borderRadius": 8,
 
-    // Primary colors (black primary -- brand identity)
-    "colorPrimary": "#0E0E0E",
-    "colorPrimaryBg": "#FFFFFF",
-    "colorPrimaryBgHover": "rgba(0, 0, 0, 0.04)",
-    "colorInfo": "#000000",
+    // Primary colors (indigo brand accent)
+    "colorPrimary": "#4255FF",
+    "colorPrimaryHover": "#3646E6",
+    "colorPrimaryActive": "#2D3BC4",
+    "colorPrimaryBg": "#EEF0FF",
+    "colorPrimaryBgHover": "#E2E5FF",
+    "colorInfo": "#4255FF",
 
     // Background tokens
     "colorBgElevated": "#FFFFFF",
     "colorBgContainer": "#FFFFFF",
-    "colorBgLayout": "#F5F5F5",
+    "colorBgLayout": "#F4F5FB",
     "colorBgSpotlight": "#FFFFFF",
     "colorBgMask": "rgba(0, 0, 0, 0.45)",
 

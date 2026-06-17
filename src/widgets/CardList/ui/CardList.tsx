@@ -14,6 +14,7 @@ import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack } from '@/shared/ui/Stack';
 import { Loader } from '@/shared/ui/Loader';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import cls from './CardList.module.scss';
 
 interface CardListProps {
   /** Если задан — показываются слова только этой колоды, иначе все слова. */
@@ -59,7 +60,7 @@ export const CardList: FC<CardListProps> = (props) => {
       key: 'term',
       render: (term: string) => (
         <HStack gap="8" align="center">
-          <span>{term}</span>
+          <span className={cls.term}>{term}</span>
           <SpeakButton text={term} />
         </HStack>
       ),
@@ -113,13 +114,15 @@ export const CardList: FC<CardListProps> = (props) => {
 
   return (
     <>
-      <Table
-        rowKey="uuid"
-        dataSource={cards}
-        columns={columns}
-        pagination={cards.length > 20 ? { pageSize: 20 } : false}
-        size="middle"
-      />
+      <div className={cls.panel}>
+        <Table
+          rowKey="uuid"
+          dataSource={cards}
+          columns={columns}
+          pagination={cards.length > 20 ? { pageSize: 20 } : false}
+          size="middle"
+        />
+      </div>
       <CardForm
         open={Boolean(editingCard)}
         deckUuid={editingCard?.deck_uuid ?? ''}

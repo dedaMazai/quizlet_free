@@ -107,9 +107,9 @@ export const DeckList: FC = () => {
                 {deck.description && (
                   <MyTypography.Base type="secondary">{deck.description}</MyTypography.Base>
                 )}
-                <MyTypography.Small type="secondary">
+                <span className={cls.countBadge}>
                   {t('{{count}} слов', { count: countByDeck[deck.uuid] ?? 0 })}
-                </MyTypography.Small>
+                </span>
               </VStack>
 
               <HStack max gap="8" wrap>

@@ -26,6 +26,7 @@ export const ChoiceQuestion: FC<ChoiceQuestionProps> = (props) => {
             key={choice}
             size="large"
             block
+            className={cls.choiceBtn}
             onClick={() => onAnswer(choice)}
           >
             {choice}
