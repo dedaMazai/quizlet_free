@@ -1,0 +1,63 @@
+.card {
+  width: 100%;
+  max-width: 560px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  padding-bottom: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+}
+
+.rowMain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.iconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 18px;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  flex-shrink: 0;
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowLabel {
+  white-space: nowrap;
+}
+
+.control {
+  flex-shrink: 0;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-subtle);
+}

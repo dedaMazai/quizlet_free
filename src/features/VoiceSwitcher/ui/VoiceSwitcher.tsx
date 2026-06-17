@@ -32,7 +32,7 @@ export const VoiceSwitcher: FC = () => {
     const enVoices = voices.filter((v) => v.lang.toLowerCase().startsWith('en'));
     return [
       { value: '', label: t('Авто (женский)') },
-      ...enVoices.map((v) => ({ value: v.voiceURI, label: `${v.name} (${v.lang})` })),
+      ...enVoices.map((v) => ({ value: v.voiceURI, label: v.name })),
     ];
   }, [voices, t]);
 
