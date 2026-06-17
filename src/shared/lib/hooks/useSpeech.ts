@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { LOCAL_STORAGE_VOICE_KEY } from '@/shared/const/localstorage';
 
 type SpeechLang = 'en-US' | 'ru-RU';
 
@@ -26,10 +27,34 @@ if (isSupported) {
   window.speechSynthesis.addEventListener('voiceschanged', refresh);
 }
 
-/** Подбирает женский голос под язык, иначе — первый подходящий по языку. */
-const pickFemaleVoice = (lang: SpeechLang): SpeechSynthesisVoice | undefined => {
+/** Голос, выбранный пользователем в настройках (localStorage), либо '' — авто. */
+const getSavedVoiceUri = (): string => {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_VOICE_KEY);
+    return raw ? (JSON.parse(raw) as string) : '';
+  } catch {
+    return '';
+  }
+};
+
+/**
+ * Подбирает голос под язык:
+ * 1) выбранный пользователем (если есть и подходит по языку),
+ * 2) иначе женский по имени,
+ * 3) иначе первый подходящий по языку.
+ */
+const pickVoice = (lang: SpeechLang): SpeechSynthesisVoice | undefined => {
   const voices = cachedVoices.length ? cachedVoices : window.speechSynthesis.getVoices();
   const langPrefix = lang.split('-')[0];
+
+  const savedUri = getSavedVoiceUri();
+  if (savedUri) {
+    const chosen = voices.find((v) => v.voiceURI === savedUri);
+    if (chosen && chosen.lang.toLowerCase().startsWith(langPrefix)) {
+      return chosen;
+    }
+  }
+
   const matching = voices.filter((v) => v.lang.toLowerCase().startsWith(langPrefix));
 
   const female = matching.find((v) =>
@@ -41,7 +66,7 @@ const pickFemaleVoice = (lang: SpeechLang): SpeechSynthesisVoice | undefined => 
 /**
  * Обёртка над Web Speech API (window.speechSynthesis) для произношения слов.
  * Бэкенд и аудиофайлы не нужны. Если API не поддерживается — `supported = false`.
- * Предпочитает женский голос (если он есть на устройстве).
+ * Учитывает выбранный в настройках голос, иначе предпочитает женский.
  */
 export const useSpeech = () => {
   const speak = useCallback((text: string, lang: SpeechLang = 'en-US') => {
@@ -54,7 +79,7 @@ export const useSpeech = () => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
 
-    const voice = pickFemaleVoice(lang);
+    const voice = pickVoice(lang);
     if (voice) {
       utterance.voice = voice;
     }

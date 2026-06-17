@@ -4,6 +4,7 @@ import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { ThemeSwitcher } from '@/features/ThemeSwitcher';
 import { LangSwitcher } from '@/features/LangSwitcher';
+import { VoiceSwitcher } from '@/features/VoiceSwitcher';
 
 const SettingPage = () => {
     const { t } = useTranslation();
@@ -20,6 +21,10 @@ const SettingPage = () => {
                     <HStack max justify="between" align="center">
                         <MyTypography.Base>{t('Язык')}</MyTypography.Base>
                         <LangSwitcher />
+                    </HStack>
+                    <HStack max justify="between" align="center">
+                        <MyTypography.Base>{t('Голос озвучивания')}</MyTypography.Base>
+                        <VoiceSwitcher />
                     </HStack>
                 </VStack>
             </Card>
