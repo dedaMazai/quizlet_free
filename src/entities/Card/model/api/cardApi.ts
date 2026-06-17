@@ -46,6 +46,25 @@ const cardApi = rtkApi.injectEndpoints({
       },
       invalidatesTags: [ApiTag.Cards],
     }),
+    createCards: build.mutation<Card[], CardCreateDto[]>({
+      queryFn: (dtos) => {
+        const now = new Date().toISOString();
+        const created = dtos.map((dto) => {
+          const card: Card = {
+            uuid: crypto.randomUUID(),
+            deck_uuid: dto.deck_uuid,
+            term: dto.term,
+            translation: dto.translation,
+            example: dto.example,
+            created_at: now,
+            updated_at: now,
+          };
+          return cardRepo.insert(card);
+        });
+        return { data: created };
+      },
+      invalidatesTags: [ApiTag.Cards],
+    }),
     deleteCard: build.mutation<void, string>({
       queryFn: (uuid) => {
         cardRepo.remove(uuid);
@@ -82,6 +101,7 @@ const cardApi = rtkApi.injectEndpoints({
 export const {
   useGetCardsQuery,
   useCreateCardMutation,
+  useCreateCardsMutation,
   useUpdateCardMutation,
   useDeleteCardMutation,
   useDeleteCardsByDeckMutation,

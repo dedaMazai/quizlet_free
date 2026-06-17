@@ -7,7 +7,7 @@ import {
 } from '@ant-design/icons';
 import { useGetDeckQuery } from '@/entities/Deck';
 import { CardList } from '@/widgets/CardList';
-import { CardForm } from '@/features/CardForm';
+import { CardEditor } from '@/features/CardEditor';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
@@ -54,13 +54,13 @@ const DeckPage = () => {
       <HStack max justify="between" align="center">
         <MyTypography.Base strong>{t('Слова')}</MyTypography.Base>
         <Button icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-          {t('Добавить слово')}
+          {t('Добавить слова')}
         </Button>
       </HStack>
 
       <CardList deckUuid={deckId} />
 
-      <CardForm open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
+      <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
     </VStack>
   );
 };

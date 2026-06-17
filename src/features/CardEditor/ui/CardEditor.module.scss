@@ -1,0 +1,15 @@
+.row {
+  width: 100%;
+}
+
+.index {
+  flex: 0 0 auto;
+  width: 20px;
+  color: var(--color-text-secondary);
+  text-align: right;
+}
+
+.grow {
+  flex: 1 1 0;
+  min-width: 0;
+}

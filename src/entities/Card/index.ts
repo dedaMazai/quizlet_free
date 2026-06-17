@@ -3,6 +3,7 @@ export type { CardLevel, LearnProgress } from './model/types/learnProgress';
 export {
   useGetCardsQuery,
   useCreateCardMutation,
+  useCreateCardsMutation,
   useUpdateCardMutation,
   useDeleteCardMutation,
   useDeleteCardsByDeckMutation,
