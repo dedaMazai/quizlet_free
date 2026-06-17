@@ -118,12 +118,44 @@ export const routeConfig: AppRoutesProps[] = [
         element: <FlashcardsPage />,
         authOnly: true,
         withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.DECKS(),
+                    label: i18n.t('Колоды'),
+                },
+                {
+                    path: () => RoutePath.DECK(`${params.deckId}`),
+                    label: i18n.t('Колода'),
+                },
+                {
+                    path: () => RoutePath.FLASHCARDS(`${params.deckId}`),
+                    label: i18n.t('Карточки'),
+                },
+            ]),
+        },
     },
     {
         path: RoutePath.LEARN(':deckId'),
         element: <LearnPage />,
         authOnly: true,
         withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.DECKS(),
+                    label: i18n.t('Колоды'),
+                },
+                {
+                    path: () => RoutePath.DECK(`${params.deckId}`),
+                    label: i18n.t('Колода'),
+                },
+                {
+                    path: () => RoutePath.LEARN(`${params.deckId}`),
+                    label: i18n.t('Заучивание'),
+                },
+            ]),
+        },
     },
     {
         path: RoutePath.ALL_WORDS(),
