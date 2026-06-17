@@ -1,0 +1,7 @@
+<svg viewBox="0 0 176 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="11" width="20" height="23" rx="2.5" stroke="#EFEDE7" stroke-width="2.2"/>
+    <line x1="6" y1="18" x2="18" y2="18" stroke="#EFEDE7" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="6" y1="23" x2="18" y2="23" stroke="#EFEDE7" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="6" y1="28" x2="14" y2="28" stroke="#EFEDE7" stroke-width="2.2" stroke-linecap="round"/>
+    <text x="32" y="31" font-family="'Open Sans', Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="-0.5" fill="#EFEDE7" textLength="140" lengthAdjust="spacingAndGlyphs">Flashcards</text>
+</svg>

@@ -12,8 +12,8 @@ import { HStack, VStack } from '@/shared/ui/Stack';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
 import { useResizable } from '@/shared/lib/hooks/useResizable';
 import { ReactComponent as LeftArrow } from '@/shared/assets/icons/Sidebar/LeftArrow.svg';
-import { ReactComponent as LogoPioneer } from '@/shared/assets/icons/LogoPioneer.svg';
-import { ReactComponent as LogoPioneerBig } from '@/shared/assets/icons/LogoBigPioneer.svg';
+import { ReactComponent as LogoFlashcards } from '@/shared/assets/icons/LogoFlashcards.svg';
+import { ReactComponent as LogoFlashcardsBig } from '@/shared/assets/icons/LogoBigFlashcards.svg';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { RoutePath } from '@/shared/config/router/routePath';
 import cls from './Sidebar.module.scss';
@@ -66,8 +66,8 @@ export const Sidebar = memo(() => {
                             style={{ cursor: 'pointer' }}
                         >
                             {collapsed
-                                ? <LogoPioneer width={40} height={26} style={{ color: 'var(--color-logo)' }} />
-                                : <LogoPioneerBig width={104} height={28} />
+                                ? <LogoFlashcards width={40} height={26} style={{ color: 'var(--color-logo)' }} />
+                                : <LogoFlashcardsBig width={104} height={28} />
                             }
                         </div>
                         <Button

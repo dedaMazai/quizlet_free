@@ -15,7 +15,7 @@ import {
 import { Loader } from '@/shared/ui/Loader';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
 import { useNotificationFn } from '@/shared/lib/context/NotificationContext';
-import { ReactComponent as LogoPioneer } from '@/shared/assets/icons/LogoPioneer.svg';
+import { ReactComponent as LogoFlashcards } from '@/shared/assets/icons/LogoFlashcards.svg';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import cls from './LoginPage.module.scss';
 
@@ -197,7 +197,7 @@ const LoginPage = () => {
                             userSelect: 'none',
                         }}
                     >
-                        <LogoPioneer width={104} height={40} style={{ color: 'var(--color-logo)' }} />
+                        <LogoFlashcards width={104} height={40} style={{ color: 'var(--color-logo)' }} />
                     </div>
                 </HStack>
                 <Typography.Title level={3} style={{ textAlign: 'center', marginBottom: '24px' }}>

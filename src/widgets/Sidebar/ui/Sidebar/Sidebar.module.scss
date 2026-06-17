@@ -99,7 +99,7 @@
     flex-shrink: 0;
 }
 
-/* Module content that should fill remaining space (PioneerAI with chats, Wiki) */
+/* Module content that should fill remaining space (FlashcardsAI with chats, Wiki) */
 .moduleContentFlex {
     display: flex;
     flex-direction: column;
@@ -179,7 +179,7 @@
     margin: 4px 0;
 }
 
-/* Chats content within PioneerAI module */
+/* Chats content within FlashcardsAI module */
 .chatsContent {
     flex: 1 1 0;
     min-height: 0;
