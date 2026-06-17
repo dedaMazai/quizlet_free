@@ -1,9 +1,9 @@
 import {
-  FC, useEffect, useRef,
+  FC, useEffect, useMemo, useRef,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Empty, Progress, Result,
+  Button, Empty, Result,
 } from 'antd';
 import {
   Card,
@@ -48,9 +48,17 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
     });
   }, [session.levels, deckUuid, saveProgress]);
 
-  const percent = session.total
-    ? Math.round((session.mastered / session.total) * 100)
-    : 0;
+  // Распределение слов по стадиям освоения: 0 — новые, 1 — изучаю, 2 — усвоено.
+  const counts = useMemo(() => {
+    const acc = { fresh: 0, learning: 0, mastered: 0 };
+    cards.forEach((card) => {
+      const level = session.levels[card.uuid] ?? 0;
+      if (level === 2) acc.mastered += 1;
+      else if (level === 1) acc.learning += 1;
+      else acc.fresh += 1;
+    });
+    return acc;
+  }, [cards, session.levels]);
 
   if (session.phase === 'finished') {
     return (
@@ -69,7 +77,7 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
 
   return (
     <VStack max gap="24" align="center">
-      <VStack max gap="8">
+      <VStack max gap="10">
         <HStack max justify="between" align="center">
           <MyTypography.Small type="secondary">
             {t('Раунд {{n}}', { n: session.round })}
@@ -78,7 +86,33 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
             {t('Усвоено')}: {session.mastered} / {session.total}
           </MyTypography.Small>
         </HStack>
-        <Progress percent={percent} showInfo={false} />
+
+        <div className={cls.segbar}>
+          {counts.fresh > 0 && (
+            <div className={cls.segFresh} style={{ flexGrow: counts.fresh }} />
+          )}
+          {counts.learning > 0 && (
+            <div className={cls.segLearning} style={{ flexGrow: counts.learning }} />
+          )}
+          {counts.mastered > 0 && (
+            <div className={cls.segMastered} style={{ flexGrow: counts.mastered }} />
+          )}
+        </div>
+
+        <HStack max gap="16" wrap justify="center">
+          <span className={cls.legendItem}>
+            <i className={`${cls.dot} ${cls.dotFresh}`} />
+            {t('Новые')}: {counts.fresh}
+          </span>
+          <span className={cls.legendItem}>
+            <i className={`${cls.dot} ${cls.dotLearning}`} />
+            {t('Изучаю')}: {counts.learning}
+          </span>
+          <span className={cls.legendItem}>
+            <i className={`${cls.dot} ${cls.dotMastered}`} />
+            {t('Усвоено')}: {counts.mastered}
+          </span>
+        </HStack>
       </VStack>
 
       <div className={cls.stage}>

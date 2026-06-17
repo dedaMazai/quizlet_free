@@ -14,7 +14,7 @@ const LearnPage = () => {
   if (!deckId) return null;
 
   return (
-    <VStack max fullHeight gap="24">
+    <VStack max fullHeight gap="24" align="center">
       <MyTypography.Large strong>
         {t('Заучивание')}{deck ? `: ${deck.name}` : ''}
       </MyTypography.Large>
