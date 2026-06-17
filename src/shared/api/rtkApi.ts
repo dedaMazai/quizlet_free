@@ -15,47 +15,9 @@ import i18n from 'i18next';
 export enum ApiTag {
     Notification = 'Notification',
     Notifications = 'Notifications',
-    File = 'File',
     User = 'User',
     Users = 'Users',
-    UserRole = 'UserRole',
-    UserRoles = 'UserRoles',
     UserSettings = 'UserSettings',
-    Team = 'Team',
-    Teams = 'Teams',
-    Collection = 'Collection',
-    Collections = 'Collections',
-    Document = 'Document',
-    Documents = 'Documents',
-    Group = 'Group',
-    Groups = 'Groups',
-    Revision = 'Revision',
-    Revisions = 'Revisions',
-    Comment = 'Comment',
-    Comments = 'Comments',
-    Star = 'Star',
-    Stars = 'Stars',
-    ChatThread = 'ChatThread',
-    ChatThreads = 'ChatThreads',
-    ChatFeedback = 'ChatFeedback',
-    ChatGallery = 'ChatGallery',
-    ChatModes = 'ChatModes',
-    Case = 'Case',
-    Cases = 'Cases',
-    CaseStats = 'CaseStats',
-    CaseRole = 'CaseRole',
-    CaseTags = 'CaseTags',
-    CaseClassifier = 'CaseClassifier',
-    CaseClassifierVersions = 'CaseClassifierVersions',
-    Resource = 'Resource',
-    Resources = 'Resources',
-    WikiChat = 'WikiChat',
-    WikiChats = 'WikiChats',
-    Suggestion = 'Suggestion',
-    Suggestions = 'Suggestions',
-    Statistics = 'Statistics',
-    News = 'News',
-    NewsList = 'NewsList',
     Deck = 'Deck',
     Decks = 'Decks',
     Card = 'Card',
@@ -135,9 +97,9 @@ const baseQueryWithReAuth: BaseQueryFn<
             message = i18n.t('Сервис временно недоступен. Попробуйте позже.');
         }
 
-        notificationApi.error({
-            message,
-        });
+        // notificationApi.error({
+        //     message,
+        // });
     }
     return result;
 };
