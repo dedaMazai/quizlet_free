@@ -8,4 +8,8 @@ export {
   useDeleteCardsByDeckMutation,
   useGetLearnProgressQuery,
   useSaveLearnProgressMutation,
+  useGetFavoritesQuery,
+  useToggleFavoriteMutation,
 } from './model/api/cardApi';
+export { FAVORITES_PROGRESS_KEY } from './model/const/favorites';
+export { FavoriteToggle } from './ui/FavoriteToggle/FavoriteToggle';

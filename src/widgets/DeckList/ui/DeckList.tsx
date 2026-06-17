@@ -10,13 +10,18 @@ import {
   MoreOutlined,
   ReadOutlined,
   BulbOutlined,
+  StarFilled,
 } from '@ant-design/icons';
 import {
   Deck,
   useGetDecksQuery,
   useDeleteDeckMutation,
 } from '@/entities/Deck';
-import { useGetCardsQuery, useDeleteCardsByDeckMutation } from '@/entities/Card';
+import {
+  useGetCardsQuery,
+  useDeleteCardsByDeckMutation,
+  useGetFavoritesQuery,
+} from '@/entities/Card';
 import { DeckForm } from '@/features/DeckForm';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
@@ -32,7 +37,10 @@ export const DeckList: FC = () => {
 
   const { data: decks, isLoading } = useGetDecksQuery();
   const { data: allCards } = useGetCardsQuery();
+  const { data: favorites } = useGetFavoritesQuery();
   const [deleteDeck] = useDeleteDeckMutation();
+
+  const favCount = favorites?.length ?? 0;
   const [deleteCardsByDeck] = useDeleteCardsByDeckMutation();
 
   const [editingDeck, setEditingDeck] = useState<Deck | undefined>(undefined);
@@ -72,6 +80,41 @@ export const DeckList: FC = () => {
   return (
     <>
       <div className={cls.grid}>
+        <Card variant="borderless" className={`${cls.card} ${cls.favoriteCard}`}>
+          <VStack max gap="12" justify="between" className={cls.cardInner}>
+            <VStack max gap="4">
+              <HStack gap="8" align="center">
+                <StarFilled className={cls.favStar} />
+                <MyTypography.Large strong>{t('Избранное')}</MyTypography.Large>
+              </HStack>
+              <span className={cls.countBadge}>
+                {t('{{count}} слов', { count: favCount })}
+              </span>
+            </VStack>
+
+            <HStack max gap="8" wrap>
+              <Button onClick={() => navigate(RoutePath.FAVORITES())}>
+                {t('Открыть')}
+              </Button>
+              <Button
+                icon={<ReadOutlined />}
+                disabled={favCount === 0}
+                onClick={() => navigate(RoutePath.FAVORITES_FLASHCARDS())}
+              >
+                {t('Карточки')}
+              </Button>
+              <Button
+                type="primary"
+                icon={<BulbOutlined />}
+                disabled={favCount === 0}
+                onClick={() => navigate(RoutePath.FAVORITES_LEARN())}
+              >
+                {t('Заучивание')}
+              </Button>
+            </HStack>
+          </VStack>
+        </Card>
+
         {decks.map((deck) => (
           <Card key={deck.uuid} variant="borderless" className={cls.card}>
             <VStack max gap="12" justify="between" className={cls.cardInner}>

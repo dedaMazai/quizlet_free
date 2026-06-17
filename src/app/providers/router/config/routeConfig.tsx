@@ -16,6 +16,9 @@ import { DeckPage } from '@/pages/DeckPage';
 import { AllWordsPage } from '@/pages/AllWordsPage';
 import { FlashcardsPage } from '@/pages/FlashcardsPage';
 import { LearnPage } from '@/pages/LearnPage';
+import { FavoritesPage } from '@/pages/FavoritesPage';
+import { FavoriteFlashcardsPage } from '@/pages/FavoriteFlashcardsPage';
+import { FavoriteLearnPage } from '@/pages/FavoriteLearnPage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -170,6 +173,56 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.ALL_WORDS(),
                     label: i18n.t('Все слова'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.FAVORITES(),
+        element: <FavoritesPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.FAVORITES(),
+                    label: i18n.t('Избранное'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.FAVORITES_FLASHCARDS(),
+        element: <FavoriteFlashcardsPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.FAVORITES(),
+                    label: i18n.t('Избранное'),
+                },
+                {
+                    path: () => RoutePath.FAVORITES_FLASHCARDS(),
+                    label: i18n.t('Карточки'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.FAVORITES_LEARN(),
+        element: <FavoriteLearnPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.FAVORITES(),
+                    label: i18n.t('Избранное'),
+                },
+                {
+                    path: () => RoutePath.FAVORITES_LEARN(),
+                    label: i18n.t('Заучивание'),
                 },
             ]),
         },

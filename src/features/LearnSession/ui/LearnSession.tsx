@@ -7,7 +7,6 @@ import {
 } from 'antd';
 import {
   Card,
-  useGetCardsQuery,
   useGetLearnProgressQuery,
   useSaveLearnProgressMutation,
 } from '@/entities/Card';
@@ -22,13 +21,13 @@ import { AnswerFeedback } from './AnswerFeedback';
 import cls from './LearnSession.module.scss';
 
 interface LearnSessionInnerProps {
-  deckUuid: string;
+  progressKey: string;
   cards: Card[];
   savedLevels?: Levels;
 }
 
 const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
-  const { deckUuid, cards, savedLevels } = props;
+  const { progressKey, cards, savedLevels } = props;
   const { t } = useTranslation();
   const [saveProgress] = useSaveLearnProgressMutation();
 
@@ -42,11 +41,11 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
       return;
     }
     saveProgress({
-      deck_uuid: deckUuid,
+      deck_uuid: progressKey,
       levels: session.levels,
       updated_at: new Date().toISOString(),
     });
-  }, [session.levels, deckUuid, saveProgress]);
+  }, [session.levels, progressKey, saveProgress]);
 
   // Распределение слов по стадиям освоения: 0 — новые, 1 — изучаю, 2 — усвоено.
   const counts = useMemo(() => {
@@ -142,27 +141,28 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
 };
 
 interface LearnSessionProps {
-  deckUuid: string;
+  cards: Card[];
+  /** Ключ, под которым хранится прогресс заучивания (deck_uuid или ключ избранного). */
+  progressKey: string;
 }
 
 export const LearnSession: FC<LearnSessionProps> = (props) => {
-  const { deckUuid } = props;
+  const { cards, progressKey } = props;
   const { t } = useTranslation();
 
-  const { data: cards, isLoading: isCardsLoading } = useGetCardsQuery(deckUuid);
-  const { data: progress, isLoading: isProgressLoading } = useGetLearnProgressQuery(deckUuid);
+  const { data: progress, isLoading } = useGetLearnProgressQuery(progressKey);
 
-  if (isCardsLoading || isProgressLoading) {
+  if (isLoading) {
     return <Loader />;
   }
 
-  if (!cards?.length) {
-    return <Empty description={t('Добавьте слова в колоду, чтобы начать заучивание')} />;
+  if (!cards.length) {
+    return <Empty description={t('Нет слов для заучивания')} />;
   }
 
   return (
     <LearnSessionInner
-      deckUuid={deckUuid}
+      progressKey={progressKey}
       cards={cards}
       savedLevels={progress?.levels}
     />

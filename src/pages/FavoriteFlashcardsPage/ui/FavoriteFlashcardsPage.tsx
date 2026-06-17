@@ -1,24 +1,27 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { useGetDeckQuery } from '@/entities/Deck';
-import { useGetCardsQuery } from '@/entities/Card';
-import { LearnSession } from '@/features/LearnSession';
+import { useGetCardsQuery, useGetFavoritesQuery } from '@/entities/Card';
+import { FlashcardsGame } from '@/features/FlashcardsGame';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 
-const LearnPage = () => {
+const FavoriteFlashcardsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { deckId } = useParams();
 
-  const { data: deck } = useGetDeckQuery(deckId!, { skip: !deckId });
-  const { data: cards, isLoading } = useGetCardsQuery(deckId ?? undefined, { skip: !deckId });
+  const { data: cards, isLoading } = useGetCardsQuery();
+  const { data: favorites } = useGetFavoritesQuery();
 
-  if (!deckId) return null;
+  const favCards = useMemo(
+    () => (cards ?? []).filter((card) => favorites?.includes(card.uuid)),
+    [cards, favorites],
+  );
+
   if (isLoading) return <Loader />;
 
   return (
@@ -27,15 +30,15 @@ const LearnPage = () => {
         <Button
           type="text"
           icon={<ArrowLeftOutlined />}
-          onClick={() => navigate(RoutePath.DECK(deckId))}
+          onClick={() => navigate(RoutePath.FAVORITES())}
         />
         <MyTypography.Large strong>
-          {t('Заучивание')}{deck ? `: ${deck.name}` : ''}
+          {t('Карточки')}: {t('Избранное')}
         </MyTypography.Large>
       </HStack>
-      <LearnSession cards={cards ?? []} progressKey={deckId} />
+      <FlashcardsGame cards={favCards} />
     </VStack>
   );
 };
 
-export default LearnPage;
+export default FavoriteFlashcardsPage;

@@ -2,6 +2,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Input, InputRef } from 'antd';
 import { LearnQuestion } from '../model/lib/learnEngine';
+import { FavoriteToggle } from '@/entities/Card';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import cls from './LearnSession.module.scss';
@@ -31,7 +32,10 @@ export const WriteQuestion: FC<WriteQuestionProps> = (props) => {
   return (
     <VStack max gap="16" align="center">
       <MyTypography.Small type="secondary">{t('Напишите слово по-английски')}</MyTypography.Small>
-      <MyTypography.ExtraLarge strong>{question.card.translation}</MyTypography.ExtraLarge>
+      <HStack gap="8" align="center">
+        <MyTypography.ExtraLarge strong>{question.card.translation}</MyTypography.ExtraLarge>
+        <FavoriteToggle cardUuid={question.card.uuid} />
+      </HStack>
 
       <HStack max gap="8" className={cls.writeRow}>
         <Input

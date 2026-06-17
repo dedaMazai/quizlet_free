@@ -6,7 +6,7 @@ import { Button, Empty } from 'antd';
 import {
   LeftOutlined, RightOutlined, RetweetOutlined,
 } from '@ant-design/icons';
-import { Card } from '@/entities/Card';
+import { Card, FavoriteToggle } from '@/entities/Card';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
@@ -79,6 +79,9 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
         className={classNames(cls.card, { [cls.flipped]: flipped })}
         onClick={() => setFlipped((f) => !f)}
       >
+        <div className={cls.favorite}>
+          <FavoriteToggle cardUuid={current.uuid} />
+        </div>
         <div className={cls.inner}>
           <div className={cls.front}>
             <MyTypography.ExtraLarge strong>{current.term}</MyTypography.ExtraLarge>

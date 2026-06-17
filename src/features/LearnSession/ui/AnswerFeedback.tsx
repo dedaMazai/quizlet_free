@@ -2,7 +2,7 @@ import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
-import { Card } from '@/entities/Card';
+import { Card, FavoriteToggle } from '@/entities/Card';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
@@ -49,6 +49,7 @@ export const AnswerFeedback: FC<AnswerFeedbackProps> = (props) => {
         <MyTypography.Base type="secondary">{t('Правильный ответ')}:</MyTypography.Base>
         <MyTypography.Base strong>{card.term}</MyTypography.Base>
         <SpeakButton text={card.term} />
+        <FavoriteToggle cardUuid={card.uuid} />
       </HStack>
 
       <Button type="primary" size="large" onClick={onNext} autoFocus>

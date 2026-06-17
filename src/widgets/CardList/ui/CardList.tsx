@@ -7,6 +7,8 @@ import {
   Card,
   useGetCardsQuery,
   useDeleteCardMutation,
+  useGetFavoritesQuery,
+  FavoriteToggle,
 } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { CardForm } from '@/features/CardForm';
@@ -19,16 +21,26 @@ import cls from './CardList.module.scss';
 interface CardListProps {
   /** Если задан — показываются слова только этой колоды, иначе все слова. */
   deckUuid?: string;
+  /** Если true — показываются только избранные слова (из всех колод). */
+  favoritesOnly?: boolean;
 }
 
 export const CardList: FC<CardListProps> = (props) => {
-  const { deckUuid } = props;
+  const { deckUuid, favoritesOnly } = props;
   const { t } = useTranslation();
   const { modal, message } = useAntdApp();
 
-  const { data: cards, isLoading } = useGetCardsQuery(deckUuid ?? undefined);
+  const { data: allCards, isLoading } = useGetCardsQuery(deckUuid ?? undefined);
+  const { data: favorites } = useGetFavoritesQuery(undefined, { skip: !favoritesOnly });
   const { data: decks } = useGetDecksQuery(undefined, { skip: Boolean(deckUuid) });
   const [deleteCard] = useDeleteCardMutation();
+
+  const cards = useMemo(
+    () => (favoritesOnly
+      ? (allCards ?? []).filter((card) => favorites?.includes(card.uuid))
+      : allCards),
+    [allCards, favorites, favoritesOnly],
+  );
 
   const [editingCard, setEditingCard] = useState<Card | undefined>(undefined);
 
@@ -70,6 +82,12 @@ export const CardList: FC<CardListProps> = (props) => {
       dataIndex: 'translation',
       key: 'translation',
     },
+    {
+      title: '',
+      key: 'favorite',
+      width: 56,
+      render: (_, card) => <FavoriteToggle cardUuid={card.uuid} />,
+    },
     ...(deckUuid
       ? []
       : [
@@ -109,7 +127,11 @@ export const CardList: FC<CardListProps> = (props) => {
   }
 
   if (!cards?.length) {
-    return <Empty description={t('Пока нет слов')} />;
+    return (
+      <Empty
+        description={favoritesOnly ? t('В избранном пока нет слов') : t('Пока нет слов')}
+      />
+    );
   }
 
   return (

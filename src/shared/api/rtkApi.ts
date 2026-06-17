@@ -23,6 +23,7 @@ export enum ApiTag {
     Card = 'Card',
     Cards = 'Cards',
     LearnProgress = 'LearnProgress',
+    Favorites = 'Favorites',
 }
 
 const mutex = new Mutex();

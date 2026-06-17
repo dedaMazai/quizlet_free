@@ -3,7 +3,7 @@ import {
     useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { HomeOutlined } from '@ant-design/icons';
+import { HomeOutlined, StarFilled } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useLocation, useNavigate } from 'react-router';
 import { BrowserView } from 'react-device-detect';
@@ -102,6 +102,23 @@ export const Sidebar = memo(() => {
                                 {!collapsed && (
                                     <MyTypography.Base className={cls.moduleLabel}>
                                         {t('Главная')}
+                                    </MyTypography.Base>
+                                )}
+                            </HStack>
+                        </div>
+                        <div
+                            className={classNames(cls.moduleHeader, {
+                                [cls.moduleHeaderActive]: location.pathname.startsWith(RoutePath.FAVORITES()),
+                            })}
+                            onClick={() => handleNavigate(RoutePath.FAVORITES())}
+                        >
+                            <HStack align="center" gap="8" max>
+                                <span className={cls.moduleIcon}>
+                                    <StarFilled style={{ color: 'var(--color-star)' }} />
+                                </span>
+                                {!collapsed && (
+                                    <MyTypography.Base className={cls.moduleLabel}>
+                                        {t('Избранное')}
                                     </MyTypography.Base>
                                 )}
                             </HStack>

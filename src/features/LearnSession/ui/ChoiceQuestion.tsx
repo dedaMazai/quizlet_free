@@ -2,8 +2,9 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { LearnQuestion } from '../model/lib/learnEngine';
+import { FavoriteToggle } from '@/entities/Card';
 import { MyTypography } from '@/shared/ui/MyTypography';
-import { VStack } from '@/shared/ui/Stack';
+import { HStack, VStack } from '@/shared/ui/Stack';
 import cls from './LearnSession.module.scss';
 
 interface ChoiceQuestionProps {
@@ -18,7 +19,10 @@ export const ChoiceQuestion: FC<ChoiceQuestionProps> = (props) => {
   return (
     <VStack max gap="16" align="center">
       <MyTypography.Small type="secondary">{t('Выберите перевод')}</MyTypography.Small>
-      <MyTypography.ExtraLarge strong>{question.card.translation}</MyTypography.ExtraLarge>
+      <HStack gap="8" align="center">
+        <MyTypography.ExtraLarge strong>{question.card.translation}</MyTypography.ExtraLarge>
+        <FavoriteToggle cardUuid={question.card.uuid} />
+      </HStack>
 
       <div className={cls.choices}>
         {question.choices.map((choice) => (

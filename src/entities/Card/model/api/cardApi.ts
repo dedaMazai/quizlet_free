@@ -3,6 +3,7 @@ import { Card, CardCreateDto, CardUpdateDto } from '../types/card';
 import { LearnProgress } from '../types/learnProgress';
 import { cardRepo } from '../lib/cardRepo';
 import { learnProgressRepo } from '../lib/learnProgressRepo';
+import { favoritesRepo } from '../lib/favoritesRepo';
 
 const cardApi = rtkApi.injectEndpoints({
   endpoints: (build) => ({
@@ -67,6 +68,14 @@ const cardApi = rtkApi.injectEndpoints({
       queryFn: (progress) => ({ data: learnProgressRepo.save(progress) }),
       invalidatesTags: [ApiTag.LearnProgress],
     }),
+    getFavorites: build.query<string[], void>({
+      queryFn: () => ({ data: favoritesRepo.getAll() }),
+      providesTags: [ApiTag.Favorites],
+    }),
+    toggleFavorite: build.mutation<string[], string>({
+      queryFn: (uuid) => ({ data: favoritesRepo.toggle(uuid) }),
+      invalidatesTags: [ApiTag.Favorites],
+    }),
   }),
 });
 
@@ -78,4 +87,6 @@ export const {
   useDeleteCardsByDeckMutation,
   useGetLearnProgressQuery,
   useSaveLearnProgressMutation,
+  useGetFavoritesQuery,
+  useToggleFavoriteMutation,
 } = cardApi;
