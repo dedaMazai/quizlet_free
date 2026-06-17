@@ -1,6 +1,6 @@
 services:
   pdw-frontend:
-    image: registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}
+    image: registry.flashcards.ru/flashcards-digital-platform/pd-ai-front:${TAG}
     container_name: pdw-frontend
     ports:
       - 80:80

@@ -6,9 +6,9 @@ stages:
 build:
   stage: build
   variables:
-    DOCKER_IMAGE_NAME: $CI_REGISTRY/pioneer-digital-platform/pd-ai-front
+    DOCKER_IMAGE_NAME: $CI_REGISTRY/flashcards-digital-platform/pd-ai-front
     # Proxy for npm inside container during build
-    BUILD_PROXY: "http://editsquidams.pioneer.ru:31280"
+    BUILD_PROXY: "http://editsquidams.flashcards.ru:31280"
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - export TAG=${CI_COMMIT_TAG:-$CI_COMMIT_REF_SLUG}
@@ -45,8 +45,8 @@ staging:
     - TAG=$TAG docker compose -f "compose.staging.yaml" stop pdw-frontend
     - echo "Removing old container"
     - TAG=$TAG docker compose -f "compose.staging.yaml" rm -f pdw-frontend
-    - echo "Pulling latest image registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}"
-    - docker pull "registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}"
+    - echo "Pulling latest image registry.flashcards.ru/flashcards-digital-platform/pd-ai-front:${TAG}"
+    - docker pull "registry.flashcards.ru/flashcards-digital-platform/pd-ai-front:${TAG}"
     - echo "Starting frontend with image tag $TAG"
     - TAG=$TAG docker compose -f "compose.staging.yaml" up -d --force-recreate --pull always
   after_script:
@@ -76,8 +76,8 @@ production:
     - TAG=$TAG docker compose -f "compose.prod.yaml" stop pdw-frontend
     - echo "Removing old container"
     - TAG=$TAG docker compose -f "compose.prod.yaml" rm -f pdw-frontend
-    - echo "Pulling latest image registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}"
-    - docker pull "registry.pioneer.ru/pioneer-digital-platform/pd-ai-front:${TAG}"
+    - echo "Pulling latest image registry.flashcards.ru/flashcards-digital-platform/pd-ai-front:${TAG}"
+    - docker pull "registry.flashcards.ru/flashcards-digital-platform/pd-ai-front:${TAG}"
     - echo "Starting frontend with image tag $TAG"
     - TAG=$TAG docker compose -f "compose.prod.yaml" up -d --force-recreate --pull always
   after_script:
