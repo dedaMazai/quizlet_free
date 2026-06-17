@@ -4,7 +4,7 @@ import { Button } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useGetDeckQuery } from '@/entities/Deck';
 import { LearnSession } from '@/features/LearnSession';
-import { VStack } from '@/shared/ui/Stack';
+import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { RoutePath } from '@/shared/config/router/routePath';
 
@@ -18,20 +18,18 @@ const LearnPage = () => {
   if (!deckId) return null;
 
   return (
-    <VStack max fullHeight gap="16">
-      <Button
-        type="text"
-        icon={<ArrowLeftOutlined />}
-        onClick={() => navigate(RoutePath.DECK(deckId))}
-      >
-        {t('Назад')}
-      </Button>
-      <VStack max gap="24" align="center">
+    <VStack max fullHeight gap="24">
+      <HStack gap="8" align="center">
+        <Button
+          type="text"
+          icon={<ArrowLeftOutlined />}
+          onClick={() => navigate(RoutePath.DECK(deckId))}
+        />
         <MyTypography.Large strong>
           {t('Заучивание')}{deck ? `: ${deck.name}` : ''}
         </MyTypography.Large>
-        <LearnSession deckUuid={deckId} />
-      </VStack>
+      </HStack>
+      <LearnSession deckUuid={deckId} />
     </VStack>
   );
 };
