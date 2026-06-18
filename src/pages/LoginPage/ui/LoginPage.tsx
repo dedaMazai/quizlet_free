@@ -9,6 +9,7 @@ import {
     useCheckOidcMutation,
     useLoginImpersonateMutation,
     useLoginMutation,
+    useRegisterMutation,
     useUserInfoQuery,
     useUserLoggedOut,
 } from '@/entities/User';
@@ -22,6 +23,7 @@ import cls from './LoginPage.module.scss';
 interface LoginForm {
     email: string;
     password: string;
+    name?: string;
     remember: boolean;
     impersonate_email?: string;
 }
@@ -63,10 +65,12 @@ const WrapperCard = memo(({ children, isImpersonateMode, style }: WrapperCardPro
 const LoginPage = () => {
     const { t } = useTranslation();
     const [login, { isLoading: isAdminLoading }] = useLoginMutation();
+    const [register, { isLoading: isRegisterLoading }] = useRegisterMutation();
     const [loginImpersonate, { isLoading: isImpersonateLoading }] = useLoginImpersonateMutation();
     const notification = useNotificationFn();
     const [form] = Form.useForm<LoginForm>();
     const [isImpersonateMode, setIsImpersonateMode] = useState(false);
+    const [isRegisterMode, setIsRegisterMode] = useState(false);
     const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
     const [
         storageFields,
@@ -93,7 +97,22 @@ const LoginPage = () => {
     };
 
     const onFinish = async (values: LoginForm) => {
-        if (!isImpersonateMode) {
+        if (isRegisterMode && !isImpersonateMode) {
+            const result = await register({
+                email: values.email,
+                password: values.password,
+                name: values.name,
+            });
+            if ('error' in result) {
+                notification?.error({
+                    message: t('Не удалось зарегистрироваться'),
+                });
+            } else if (result.data === null) {
+                notification?.info({
+                    message: t('Подтвердите регистрацию по ссылке в письме'),
+                });
+            }
+        } else if (!isImpersonateMode) {
             const result = await login(values);
             if ('error' in result) {
                 notification?.error({
@@ -130,7 +149,7 @@ const LoginPage = () => {
         };
     }, []);
 
-    const isLoading = isAdminLoading || isImpersonateLoading;
+    const isLoading = isAdminLoading || isImpersonateLoading || isRegisterLoading;
 
     const { isLoading: userInfoIsLoading, isFetching: userInfoIsFetching, error: userInfoError } = useUserInfoQuery();
     const [, { isLoading: oidcIsLoading, isSuccess: oidcIsSuccess, isError: oidcIsError }] = useCheckOidcMutation({
@@ -201,7 +220,7 @@ const LoginPage = () => {
                     </div>
                 </HStack>
                 <Typography.Title level={3} style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    {t('Вход в личный кабинет')}
+                    {isRegisterMode && !isImpersonateMode ? t('Регистрация') : t('Вход в личный кабинет')}
                 </Typography.Title>
                 <Form
                     form={form}
@@ -214,6 +233,15 @@ const LoginPage = () => {
                     }}
                     onFinish={onFinish}
                 >
+                    {isRegisterMode && !isImpersonateMode && (
+                        <Form.Item name="name">
+                            <Input
+                                prefix={<UserOutlined style={{ color: 'var(--color-logo)' }} />}
+                                placeholder={t('Имя (необязательно)')}
+                                size="large"
+                            />
+                        </Form.Item>
+                    )}
                     <Form.Item
                         name="email"
                         validateDebounce={700}
@@ -286,10 +314,24 @@ const LoginPage = () => {
                             block
                             htmlType="submit"
                         >
-                            {isLoading ? <Loader className={cls.loader} /> : t('Войти')}
+                            {isLoading
+                                ? <Loader className={cls.loader} />
+                                : (isRegisterMode && !isImpersonateMode ? t('Зарегистрироваться') : t('Войти'))}
                         </Button>
                     </Form.Item>
                 </Form>
+                {!isImpersonateMode && (
+                    <HStack max justify="center" style={{ marginBottom: 12 }}>
+                        <Button
+                            type="link"
+                            onClick={() => setIsRegisterMode((prev) => !prev)}
+                        >
+                            {isRegisterMode
+                                ? t('Уже есть аккаунт? Войти')
+                                : t('Нет аккаунта? Зарегистрироваться')}
+                        </Button>
+                    </HStack>
+                )}
                 <HStack max justify="center">
                     <MyTypography.Small style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
                         {t('Нажимая «Войти», вы принимаете')}{' '}

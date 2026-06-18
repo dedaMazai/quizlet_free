@@ -10,7 +10,7 @@ import CompressionPlugin from 'compression-webpack-plugin';
 import { BuildOptions } from './types/config';
 
 export function buildPlugins({
-    paths, isDev, apiUrl, apiChatsUrl, apiAiWikiUrl, project, appVersion,
+    paths, isDev, apiUrl, apiChatsUrl, apiAiWikiUrl, supabaseUrl, supabaseAnonKey, project, appVersion,
 }: BuildOptions): webpack.WebpackPluginInstance[] {
     const isProd = !isDev;
 
@@ -38,6 +38,8 @@ export function buildPlugins({
             __API__: JSON.stringify(apiUrl),
             __API_CHATS__: JSON.stringify(apiChatsUrl),
             __API_AI_WIKI__: JSON.stringify(apiAiWikiUrl),
+            __SUPABASE_URL__: JSON.stringify(supabaseUrl),
+            __SUPABASE_ANON_KEY__: JSON.stringify(supabaseAnonKey),
             __PROJECT__: JSON.stringify(project),
             __APP_VERSION__: JSON.stringify(appVersion),
             __SENTRY_DSN__: JSON.stringify(process.env.SENTRY_DSN ?? ''),

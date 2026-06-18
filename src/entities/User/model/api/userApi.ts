@@ -3,16 +3,22 @@ import {
   ApiTag,
   rtkApi,
 } from '@/shared/api/rtkApi';
-import { callAuthFailureHandler } from '@/shared/api/authenticatedFetch';
+import { supabase, supabaseError } from '@/shared/api/supabaseClient';
 import { userActions } from '../slice/userSlice';
 import { TLanguageUser, UserInfo, UserInfoCreate, RoleName } from '../types/user';
-import { MOCK_USER } from '../const/mockUser';
+import { mapSupabaseUser } from '../lib/mapSupabaseUser';
 import { OrderingType, PaginationResult } from '@/shared/types/types';
 import { GenderUser, IS_OLD_SAFARI } from '@/shared/const/const';
 
 interface RequestLogin {
   password: string
   email: string
+}
+
+interface RequestRegister {
+  email: string
+  password: string
+  name?: string
 }
 
 interface RequestLoginOidc {
@@ -89,29 +95,38 @@ const userApi = rtkApi.injectEndpoints({
         }
       },
     }),
-    login: build.mutation<ResAuth, RequestLogin>({
-      query: (body) => ({
-        url: '/auth/login/email-password',
-        method: 'POST',
-        body,
-      }),
-      async onQueryStarted(_arg, {
-        dispatch,
-        queryFulfilled,
-      }) {
+    login: build.mutation<UserInfo, RequestLogin>({
+      queryFn: async ({ email, password }) => {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) return supabaseError(error.message);
+        return { data: mapSupabaseUser(data.user) };
+      },
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          const {
-            access_token,
-            refresh_token,
-            ...userData
-          } = data;
-          if (__IS_DEV__ || IS_OLD_SAFARI) {
-            setCookie('dev_access_token', access_token);
-          }
-          dispatch(userActions.setUserData(userData));
+          dispatch(userActions.setUserData(data));
         } catch (err) {
           console.error('Login error:', err);
+        }
+      },
+    }),
+    register: build.mutation<UserInfo | null, RequestRegister>({
+      queryFn: async ({ email, password, name }) => {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: name ? { data: { name } } : undefined,
+        });
+        if (error) return supabaseError(error.message);
+        // Если в проекте включено подтверждение email — сессии ещё нет (data.session === null).
+        return { data: data.session && data.user ? mapSupabaseUser(data.user) : null };
+      },
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data) dispatch(userActions.setUserData(data));
+        } catch (err) {
+          console.error('Register error:', err);
         }
       },
     }),
@@ -145,18 +160,21 @@ const userApi = rtkApi.injectEndpoints({
         }
       },
     }),
-    logout: build.mutation<string, void>({
-      query: () => ({
-        url: '/auth/logout',
-        method: 'POST',
-      }),
+    logout: build.mutation<void, void>({
+      queryFn: async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          dispatch(userActions.setExplicitLogout());
-          callAuthFailureHandler();
         } catch (err) {
           console.error('Logout error:', err);
+        } finally {
+          dispatch(userActions.setExplicitLogout());
+          dispatch(userActions.logout());
+          dispatch(rtkApi.util.resetApiState());
         }
       },
     }),
@@ -181,8 +199,13 @@ const userApi = rtkApi.injectEndpoints({
       })
     }),
     userInfo: build.query<UserInfo, void>({
-      // Авторизация замокана: возвращаем мок-пользователя без запроса к бэкенду.
-      queryFn: () => ({ data: MOCK_USER }),
+      // Восстанавливаем пользователя из сессии Supabase (хранится в localStorage).
+      queryFn: async () => {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) return supabaseError(error.message);
+        if (!data.session) return { error: { status: 401, data: 'No session' } };
+        return { data: mapSupabaseUser(data.session.user) };
+      },
       providesTags: (user) => user ? [{
         type: ApiTag.User,
         id: user.uuid,
@@ -194,8 +217,8 @@ const userApi = rtkApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           dispatch(userActions.setUserData(data));
-        } catch (err) {
-          console.error('User info error:', err);
+        } catch {
+          // Нет активной сессии — пользователь остаётся неавторизованным.
         } finally {
           dispatch(userActions.initUserData());
         }
@@ -354,6 +377,7 @@ export const {
   useGetUserQuery,
   useCreateUserMutation,
   useLoginMutation,
+  useRegisterMutation,
   useLoginOidcMutation,
   useLoginImpersonateMutation,
   useLogoutMutation,

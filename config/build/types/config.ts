@@ -19,6 +19,8 @@ export interface BuildOptions {
     apiChatsUrl: string;
     apiAiWikiUrl: string;
     targetUrl: string;
+    supabaseUrl: string;
+    supabaseAnonKey: string;
     project: 'frontend';
     appVersion: string;
 }

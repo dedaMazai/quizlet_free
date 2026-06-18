@@ -27,6 +27,8 @@ export default () => {
     const apiAiWikiUrl = process.env.API_AI_WIKI || '/api/ai-wiki';
     const appVersion = process.env.APP_VERSION || 'dev';
     const targetUrl = process.env.TARGET_URL || 'https://localhost:8080';
+    const supabaseUrl = process.env.SUPABASE_URL || '';
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 
     const isDev = mode === 'development';
 
@@ -49,6 +51,8 @@ export default () => {
         apiChatsUrl,
         apiAiWikiUrl,
         targetUrl,
+        supabaseUrl,
+        supabaseAnonKey,
         project: 'frontend',
         appVersion,
     });

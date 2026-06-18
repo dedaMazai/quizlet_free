@@ -8,13 +8,12 @@ import {
   UserSchema,
 } from '../types/user';
 import { IS_OLD_SAFARI } from '@/shared/const/const';
-import { MOCK_USER } from '../const/mockUser';
 
-// Авторизация замокана: приложение стартует уже залогиненным обычным пользователем.
+// Старт неинициализированным: реальная сессия проверяется через userInfo (Supabase).
 const initialState: UserSchema = {
-  _inited: true,
+  _inited: false,
   _loggedOut: false,
-  userInfo: MOCK_USER,
+  userInfo: undefined,
 };
 
 export const userSlice = buildSlice({
