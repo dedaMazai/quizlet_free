@@ -188,7 +188,11 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
                 <Tooltip title={t('Есть другие варианты перевода')}>
                   <UnorderedListOutlined
                     className={cls.variantsHint}
-                    onClick={() => setOpenVariantsId((prev) => (prev === row.id ? null : row.id))}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenVariantsId((prev) => (prev === row.id ? null : row.id));
+                    }}
                   />
                 </Tooltip>
               );
