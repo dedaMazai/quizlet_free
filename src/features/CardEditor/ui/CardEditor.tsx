@@ -3,11 +3,12 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Input, Modal, Spin,
+  AutoComplete, Button, Input, Modal, Spin,
 } from 'antd';
 import type { InputRef } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { CardCreateDto, useCreateCardsMutation } from '@/entities/Card';
+import { TranslationResult } from '@/shared/lib/translate';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
@@ -22,6 +23,8 @@ interface CardRow {
   example: string;
   /** true, когда пользователь сам отредактировал перевод — тогда автоперевод его больше не перезаписывает. */
   translationEdited: boolean;
+  /** Альтернативные варианты перевода от автопереводчика (для выпадающего списка). */
+  alternatives: string[];
 }
 
 interface CardEditorProps {
@@ -36,6 +39,7 @@ const makeEmptyRow = (): CardRow => ({
   translation: '',
   example: '',
   translationEdited: false,
+  alternatives: [],
 });
 
 const makeInitialRows = (): CardRow[] => [makeEmptyRow(), makeEmptyRow(), makeEmptyRow()];
@@ -67,12 +71,13 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
     }
   }, [rows]);
 
-  // Подставляем автоперевод, пока пользователь сам не отредактировал перевод и
-  // пока термин не успел измениться (отбрасываем устаревший ответ).
-  const handleTranslationResult = useCallback((id: string, translation: string, term: string) => {
+  // Подставляем лучший автоперевод и сохраняем альтернативы для выпадающего
+  // списка — пока пользователь сам не отредактировал перевод и пока термин не
+  // успел измениться (отбрасываем устаревший ответ).
+  const handleTranslationResult = useCallback((id: string, result: TranslationResult, term: string) => {
     setRows((prev) => prev.map((row) => (
       row.id === id && !row.translationEdited && row.term.trim() === term
-        ? { ...row, translation }
+        ? { ...row, translation: result.best, alternatives: result.alternatives }
         : row
     )));
   }, []);
@@ -84,9 +89,12 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   }, []);
 
   const handleTermChange = useCallback((id: string, value: string) => {
-    updateRow(id, 'term', value);
+    // Сбрасываем устаревшие варианты прошлого термина.
+    setRows((prev) => prev.map((row) => (
+      row.id === id ? { ...row, term: value, alternatives: [] } : row
+    )));
     requestTranslation(id, value);
-  }, [updateRow, requestTranslation]);
+  }, [requestTranslation]);
 
   const handleTranslationChange = useCallback((id: string, value: string) => {
     setRows((prev) => prev.map((row) => (
@@ -163,14 +171,19 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
             />
           );
           const translationInput = (
-            <Input
+            <AutoComplete
               className={cls.grow}
               value={row.translation}
-              placeholder={t('Перевод')}
-              onChange={(e) => handleTranslationChange(row.id, e.target.value)}
-              onPressEnter={addRow}
-              suffix={translatingIds.has(row.id) ? <Spin size="small" /> : <span />}
-            />
+              options={row.alternatives.map((variant) => ({ value: variant }))}
+              filterOption={false}
+              onChange={(value) => handleTranslationChange(row.id, value)}
+            >
+              <Input
+                placeholder={t('Перевод')}
+                onPressEnter={addRow}
+                suffix={translatingIds.has(row.id) ? <Spin size="small" /> : <span />}
+              />
+            </AutoComplete>
           );
           const exampleInput = (
             <Input

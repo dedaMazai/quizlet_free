@@ -21,6 +21,7 @@ export interface BuildOptions {
     targetUrl: string;
     supabaseUrl: string;
     supabaseAnonKey: string;
+    myMemoryEmail: string;
     project: 'frontend';
     appVersion: string;
 }

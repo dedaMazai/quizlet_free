@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { translateWord } from '@/shared/lib/translate';
+import { translateWord, TranslationResult } from '@/shared/lib/translate';
 import { useDebounce } from '@/shared/lib/hooks/useDebounce';
 
 interface UseAutoTranslateResult {
@@ -7,7 +7,7 @@ interface UseAutoTranslateResult {
   translatingIds: Set<string>;
   /**
    * Запросить перевод термина для строки (с дебаунсом). Результат отдаётся в
-   * `onResult` только если перевод непустой; вместе с переводом передаётся
+   * `onResult` только если перевод непустой; вместе с результатом передаётся
    * исходный термин — вызывающий может отбросить устаревший ответ.
    */
   requestTranslation: (id: string, term: string) => void;
@@ -18,7 +18,7 @@ interface UseAutoTranslateResult {
  * термин через ~500мс после ввода и отдаёт результат для конкретной строки.
  */
 export const useAutoTranslate = (
-  onResult: (id: string, translation: string, term: string) => void,
+  onResult: (id: string, result: TranslationResult, term: string) => void,
 ): UseAutoTranslateResult => {
   const [translatingIds, setTranslatingIds] = useState<Set<string>>(new Set());
 
@@ -46,6 +46,7 @@ export const useAutoTranslate = (
       if (result) {
         onResult(id, result, query);
       }
+      // null — ошибка/лимит/пусто: оставляем поле пустым для ручного ввода.
     },
     [onResult, setTranslating],
   );

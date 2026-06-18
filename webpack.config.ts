@@ -29,6 +29,7 @@ export default () => {
     const targetUrl = process.env.TARGET_URL || 'https://localhost:8080';
     const supabaseUrl = process.env.SUPABASE_URL || '';
     const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+    const myMemoryEmail = process.env.MYMEMORY_EMAIL || '';
 
     const isDev = mode === 'development';
 
@@ -53,6 +54,7 @@ export default () => {
         targetUrl,
         supabaseUrl,
         supabaseAnonKey,
+        myMemoryEmail,
         project: 'frontend',
         appVersion,
     });
