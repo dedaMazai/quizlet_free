@@ -21,7 +21,7 @@ export const ChoiceQuestion: FC<ChoiceQuestionProps> = (props) => {
       <MyTypography.Small type="secondary">{t('Выберите перевод')}</MyTypography.Small>
       <HStack gap="8" align="center">
         <MyTypography.ExtraLarge strong>{question.card.translation}</MyTypography.ExtraLarge>
-        <FavoriteToggle cardUuid={question.card.uuid} />
+        <FavoriteToggle cardUuid={question.card.uuid} className={cls.favoriteLarge} />
       </HStack>
 
       <div className={cls.choices}>

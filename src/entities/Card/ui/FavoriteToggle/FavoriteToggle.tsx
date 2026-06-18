@@ -27,15 +27,15 @@ export const FavoriteToggle: FC<FavoriteToggleProps> = (props) => {
     toggleFavorite(cardUuid);
   };
 
+  const actionLabel = isFavorite ? t('Убрать из избранного') : t('Добавить в избранное');
+
   return (
-    <Tooltip
-      title={isFavorite ? t('Убрать из избранного') : t('Добавить в избранное')}
-    >
+    <Tooltip title={actionLabel}>
       <Button
         className={className}
         type="text"
         shape="circle"
-        aria-label={isFavorite ? t('Убрать из избранного') : t('Добавить в избранное')}
+        aria-label={actionLabel}
         icon={isFavorite
           ? <StarFilled className={cls.starActive} />
           : <StarOutlined className={cls.star} />}

@@ -34,7 +34,7 @@ export const WriteQuestion: FC<WriteQuestionProps> = (props) => {
       <MyTypography.Small type="secondary">{t('Напишите слово по-английски')}</MyTypography.Small>
       <HStack gap="8" align="center">
         <MyTypography.ExtraLarge strong>{question.card.translation}</MyTypography.ExtraLarge>
-        <FavoriteToggle cardUuid={question.card.uuid} />
+        <FavoriteToggle cardUuid={question.card.uuid} className={cls.favoriteLarge} />
       </HStack>
 
       <HStack max gap="8" className={cls.writeRow}>

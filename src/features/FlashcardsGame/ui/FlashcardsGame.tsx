@@ -79,9 +79,6 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
         className={classNames(cls.card, { [cls.flipped]: flipped })}
         onClick={() => setFlipped((f) => !f)}
       >
-        <div className={cls.favorite}>
-          <FavoriteToggle cardUuid={current.uuid} />
-        </div>
         <div className={cls.inner}>
           <div className={cls.front}>
             <MyTypography.ExtraLarge strong>{current.term}</MyTypography.ExtraLarge>
@@ -102,7 +99,8 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
         {t('Нажмите на карточку, чтобы перевернуть')}
       </MyTypography.Small>
 
-      <HStack gap="12" justify="center">
+      <HStack gap="12" justify="center" wrap>
+        <FavoriteToggle cardUuid={current.uuid} />
         <Button icon={<LeftOutlined />} onClick={goPrev}>
           {t('Назад')}
         </Button>

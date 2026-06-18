@@ -141,7 +141,8 @@ export const DeckList: FC = () => {
                           key: 'edit',
                           icon: <EditOutlined />,
                           label: t('Редактировать'),
-                          onClick: () => {
+                          onClick: ({ domEvent }) => {
+                            domEvent.stopPropagation();
                             setEditingDeck(deck);
                             setFormOpen(true);
                           },
@@ -151,7 +152,10 @@ export const DeckList: FC = () => {
                           icon: <DeleteOutlined />,
                           label: t('Удалить'),
                           danger: true,
-                          onClick: () => handleDelete(deck),
+                          onClick: ({ domEvent }) => {
+                            domEvent.stopPropagation();
+                            handleDelete(deck);
+                          },
                         },
                       ],
                     }}
