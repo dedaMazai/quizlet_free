@@ -11,6 +11,7 @@ import { CardCreateDto, useCreateCardsMutation } from '@/entities/Card';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { useAutoTranslate } from '../model/useAutoTranslate';
 import cls from './CardEditor.module.scss';
 
@@ -43,6 +44,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   const { open, onClose, deckUuid } = props;
   const { t } = useTranslation();
   const { message } = useAntdApp();
+  const { isMobile } = useMatchMedia();
 
   const [rows, setRows] = useState<CardRow[]>(makeInitialRows);
   const [createCards, { isLoading }] = useCreateCardsMutation();
@@ -133,7 +135,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   return (
     <Modal
       open={open}
-      width={760}
+      width={isMobile ? 'calc(100vw - 24px)' : 760}
       title={t('Добавить слова')}
       okText={t('Сохранить все')}
       cancelText={t('Отмена')}
@@ -141,10 +143,9 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
       onOk={handleSubmit}
       onCancel={onClose}
     >
-      <VStack max gap="8">
-        {rows.map((row, index) => (
-          <HStack key={row.id} max gap="8" align="center" className={cls.row}>
-            <span className={cls.index}>{index + 1}</span>
+      <VStack max gap={isMobile ? '12' : '8'}>
+        {rows.map((row, index) => {
+          const termInput = (
             <Input
               ref={(el) => {
                 if (el) {
@@ -160,6 +161,8 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
               onPressEnter={addRow}
               suffix={row.term.trim() ? <SpeakButton text={row.term} /> : <span />}
             />
+          );
+          const translationInput = (
             <Input
               className={cls.grow}
               value={row.translation}
@@ -168,6 +171,8 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
               onPressEnter={addRow}
               suffix={translatingIds.has(row.id) ? <Spin size="small" /> : <span />}
             />
+          );
+          const exampleInput = (
             <Input
               className={cls.grow}
               value={row.example}
@@ -175,14 +180,41 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
               onChange={(e) => updateRow(row.id, 'example', e.target.value)}
               onPressEnter={addRow}
             />
+          );
+          const deleteButton = (
             <Button
               type="text"
               danger
+              aria-label={t('Удалить строку')}
               icon={<DeleteOutlined />}
               onClick={() => removeRow(row.id)}
             />
-          </HStack>
-        ))}
+          );
+
+          if (isMobile) {
+            return (
+              <VStack key={row.id} max gap="8" align="start" className={cls.cardRow}>
+                <HStack max justify="between" align="center">
+                  <span className={cls.indexBadge}>{index + 1}</span>
+                  {deleteButton}
+                </HStack>
+                {termInput}
+                {translationInput}
+                {exampleInput}
+              </VStack>
+            );
+          }
+
+          return (
+            <HStack key={row.id} max gap="8" align="center" className={cls.row}>
+              <span className={cls.index}>{index + 1}</span>
+              {termInput}
+              {translationInput}
+              {exampleInput}
+              {deleteButton}
+            </HStack>
+          );
+        })}
 
         <Button type="dashed" icon={<PlusOutlined />} onClick={addRow} block>
           {t('Добавить строку')}

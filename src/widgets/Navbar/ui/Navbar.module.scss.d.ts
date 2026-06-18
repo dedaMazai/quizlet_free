@@ -3,7 +3,9 @@ export type Styles = {
   dropDownItem: string;
   FAQButton: string;
   menu: string;
+  menuWrap: string;
   Navbar: string;
+  profileCard: string;
   rootClassName: string;
   tabs: string;
 };

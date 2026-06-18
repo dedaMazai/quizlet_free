@@ -56,6 +56,10 @@
     width: 100%;
     padding-right: 24px;
     height: calc(100vh - (1.5 * var(--navbar-height)));
+
+    @media (width <= 1199px) {
+        padding: 8px 12px 16px;
+    }
 }
 
 

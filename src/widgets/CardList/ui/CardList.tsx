@@ -1,6 +1,8 @@
 import { FC, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Table, Empty } from 'antd';
+import {
+  Button, Table, Empty, Tag,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import {
@@ -17,6 +19,7 @@ import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './CardList.module.scss';
 
 interface CardListProps {
@@ -36,6 +39,7 @@ export const CardList: FC<CardListProps> = (props) => {
   } = props;
   const { t } = useTranslation();
   const { modal, message } = useAntdApp();
+  const { isMobile } = useMatchMedia();
 
   const { data: allCards, isLoading } = useGetCardsQuery(deckUuid ?? undefined, {
     skip: Boolean(cardsProp),
@@ -149,6 +153,66 @@ export const CardList: FC<CardListProps> = (props) => {
     return <Empty description={description} />;
   }
 
+  const editor = (
+    <CardForm
+      open={Boolean(editingCard)}
+      deckUuid={editingCard?.deck_uuid ?? ''}
+      card={editingCard}
+      onClose={() => setEditingCard(undefined)}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <VStack max gap="8">
+          {cards.map((card) => (
+            <div key={card.uuid} className={cls.cardItem}>
+              <HStack max justify="between" align="start" gap="8">
+                <VStack gap="2" align="start" className={cls.cardMain}>
+                  <HStack gap="4" align="center">
+                    <span className={cls.term}>{card.term}</span>
+                    <SpeakButton text={card.term} />
+                  </HStack>
+                  <MyTypography.Base>{card.translation}</MyTypography.Base>
+                  {card.example && (
+                    <MyTypography.Small type="secondary" className={cls.example}>
+                      {card.example}
+                    </MyTypography.Small>
+                  )}
+                  {!deckUuid && (
+                    <Tag className={cls.deckTag} bordered={false}>
+                      {deckNameByUuid[card.deck_uuid] ?? '—'}
+                    </Tag>
+                  )}
+                </VStack>
+                <HStack gap="2" align="center">
+                  <FavoriteToggle cardUuid={card.uuid} />
+                  <Button
+                    type="text"
+                    size="small"
+                    aria-label={t('Редактировать')}
+                    icon={<EditOutlined />}
+                    onClick={() => setEditingCard(card)}
+                  />
+                  <Button
+                    type="text"
+                    size="small"
+                    danger
+                    aria-label={t('Удалить')}
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDelete(card)}
+                  />
+                </HStack>
+              </HStack>
+            </div>
+          ))}
+        </VStack>
+        {editor}
+      </>
+    );
+  }
+
   return (
     <>
       <div className={cls.panel}>
@@ -160,12 +224,7 @@ export const CardList: FC<CardListProps> = (props) => {
           size="middle"
         />
       </div>
-      <CardForm
-        open={Boolean(editingCard)}
-        deckUuid={editingCard?.deck_uuid ?? ''}
-        card={editingCard}
-        onClose={() => setEditingCard(undefined)}
-      />
+      {editor}
     </>
   );
 };

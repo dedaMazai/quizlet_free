@@ -49,7 +49,7 @@ export const VoiceSwitcher: FC = () => {
   };
 
   return (
-    <HStack gap="8" align="center">
+    <HStack gap="8" align="center" max>
       <Select
         className={cls.select}
         value={selectValue}

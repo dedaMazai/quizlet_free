@@ -72,17 +72,13 @@ export const NavbarMenu = memo(() => {
                 <VStack
                     max
                     gap="12"
+                    className={cls.menuWrap}
                 >
-                    <HStack max gap="12" align="start">
+                    <HStack max gap="12" align="center">
                         <HStack
                             max
                             gap="10"
-                            style={{
-                                padding: '8px',
-                                borderRadius: '8px',
-                                border: '1px solid #F5F5F5',
-                                background: 'white'
-                            }}
+                            className={cls.profileCard}
                         >
                             {userPhoto ? (
                                 <img
@@ -137,8 +133,9 @@ export const NavbarMenu = memo(() => {
                         style={{
                             borderRadius: 8,
                             width: '100%',
+                            flex: 1,
+                            minHeight: 0,
                             overflowY: 'auto',
-                            height: 'calc(100vh - 260px)',
                         }}
                     />
                     <LogoutButton variant="navbar" />

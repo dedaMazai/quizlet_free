@@ -1,6 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Typography } from 'antd';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import {
     BgColorsOutlined,
     GlobalOutlined,
@@ -18,15 +19,17 @@ interface SettingRowProps {
     label: string;
     description: string;
     control: ReactNode;
+    /** На узких экранах переносит контрол под текст (для широких контролов, например селекта). */
+    stackOnMobile?: boolean;
 }
 
 const SettingRow: FC<SettingRowProps> = (props) => {
     const {
-        icon, label, description, control,
+        icon, label, description, control, stackOnMobile,
     } = props;
 
     return (
-        <div className={cls.row}>
+        <div className={classNames(cls.row, { [cls.rowStack]: stackOnMobile })}>
             <div className={cls.rowMain}>
                 <div className={cls.iconBox}>{icon}</div>
                 <div className={cls.rowText}>
@@ -78,6 +81,7 @@ const SettingPage = () => {
                         label={t('Голос')}
                         description={t('Голос для произношения слов')}
                         control={<VoiceSwitcher />}
+                        stackOnMobile
                     />
                 </VStack>
             </Card>

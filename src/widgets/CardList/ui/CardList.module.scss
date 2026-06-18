@@ -14,3 +14,20 @@
 .example {
   white-space: normal;
 }
+
+.cardItem {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--bg-color-secondary);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.cardMain {
+  min-width: 0;
+}
+
+.deckTag {
+  margin-top: 2px;
+}
