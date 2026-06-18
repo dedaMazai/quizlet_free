@@ -80,7 +80,11 @@ export const DeckList: FC = () => {
   return (
     <>
       <div className={cls.grid}>
-        <Card variant="borderless" className={`${cls.card} ${cls.favoriteCard}`}>
+        <Card
+          variant="borderless"
+          className={`${cls.card} ${cls.favoriteCard}`}
+          onClick={() => navigate(RoutePath.FAVORITES())}
+        >
           <VStack max gap="12" justify="between" className={cls.cardInner}>
             <VStack max gap="4">
               <HStack gap="8" align="center">
@@ -93,13 +97,13 @@ export const DeckList: FC = () => {
             </VStack>
 
             <HStack max gap="8" wrap>
-              <Button onClick={() => navigate(RoutePath.FAVORITES())}>
-                {t('Открыть')}
-              </Button>
               <Button
                 icon={<ReadOutlined />}
                 disabled={favCount === 0}
-                onClick={() => navigate(RoutePath.FAVORITES_FLASHCARDS())}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(RoutePath.FAVORITES_FLASHCARDS());
+                }}
               >
                 {t('Карточки')}
               </Button>
@@ -107,7 +111,10 @@ export const DeckList: FC = () => {
                 type="primary"
                 icon={<BulbOutlined />}
                 disabled={favCount === 0}
-                onClick={() => navigate(RoutePath.FAVORITES_LEARN())}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(RoutePath.FAVORITES_LEARN());
+                }}
               >
                 {t('Заучивание')}
               </Button>
@@ -116,7 +123,12 @@ export const DeckList: FC = () => {
         </Card>
 
         {decks.map((deck) => (
-          <Card key={deck.uuid} variant="borderless" className={cls.card}>
+          <Card
+            key={deck.uuid}
+            variant="borderless"
+            className={cls.card}
+            onClick={() => navigate(RoutePath.DECK(deck.uuid))}
+          >
             <VStack max gap="12" justify="between" className={cls.cardInner}>
               <VStack max gap="4">
                 <HStack max justify="between" align="start" gap="8">
@@ -144,7 +156,12 @@ export const DeckList: FC = () => {
                       ],
                     }}
                   >
-                    <Button type="text" size="small" icon={<MoreOutlined />} />
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<MoreOutlined />}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   </Dropdown>
                 </HStack>
                 {deck.description && (
@@ -156,19 +173,22 @@ export const DeckList: FC = () => {
               </VStack>
 
               <HStack max gap="8" wrap>
-                <Button onClick={() => navigate(RoutePath.DECK(deck.uuid))}>
-                  {t('Открыть')}
-                </Button>
                 <Button
                   icon={<ReadOutlined />}
-                  onClick={() => navigate(RoutePath.FLASHCARDS(deck.uuid))}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(RoutePath.FLASHCARDS(deck.uuid));
+                  }}
                 >
                   {t('Карточки')}
                 </Button>
                 <Button
                   type="primary"
                   icon={<BulbOutlined />}
-                  onClick={() => navigate(RoutePath.LEARN(deck.uuid))}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(RoutePath.LEARN(deck.uuid));
+                  }}
                 >
                   {t('Заучивание')}
                 </Button>
