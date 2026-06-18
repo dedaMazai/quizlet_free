@@ -3,12 +3,13 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AutoComplete, Button, Input, Modal, Spin,
+  AutoComplete, Button, Input, Modal, Spin, Tooltip,
 } from 'antd';
 import type { InputRef } from 'antd';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { CardCreateDto, useCreateCardsMutation } from '@/entities/Card';
 import { TranslationResult } from '@/shared/lib/translate';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
@@ -51,6 +52,8 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   const { isMobile } = useMatchMedia();
 
   const [rows, setRows] = useState<CardRow[]>(makeInitialRows);
+  // Строка, у которой сейчас открыт список вариантов перевода.
+  const [openVariantsId, setOpenVariantsId] = useState<string | null>(null);
   const [createCards, { isLoading }] = useCreateCardsMutation();
 
   const termRefs = useRef<Map<string, InputRef>>(new Map());
@@ -80,6 +83,10 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
         ? { ...row, translation: result.best, alternatives: result.alternatives }
         : row
     )));
+    // Сразу показываем выпадашку, если есть из чего выбрать.
+    if (result.alternatives.length) {
+      setOpenVariantsId(id);
+    }
   }, []);
 
   const { translatingIds, requestTranslation } = useAutoTranslate(handleTranslationResult);
@@ -89,10 +96,11 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   }, []);
 
   const handleTermChange = useCallback((id: string, value: string) => {
-    // Сбрасываем устаревшие варианты прошлого термина.
+    // Сбрасываем устаревшие варианты прошлого термина и закрываем выпадашку.
     setRows((prev) => prev.map((row) => (
       row.id === id ? { ...row, term: value, alternatives: [] } : row
     )));
+    setOpenVariantsId((prev) => (prev === id ? null : prev));
     requestTranslation(id, value);
   }, [requestTranslation]);
 
@@ -170,18 +178,39 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
               suffix={row.term.trim() ? <SpeakButton text={row.term} /> : <span />}
             />
           );
+          const hasVariants = row.alternatives.length > 0;
+          const translationSuffix = (() => {
+            if (translatingIds.has(row.id)) {
+              return <Spin size="small" />;
+            }
+            if (hasVariants) {
+              return (
+                <Tooltip title={t('Есть другие варианты перевода')}>
+                  <UnorderedListOutlined
+                    className={cls.variantsHint}
+                    onClick={() => setOpenVariantsId((prev) => (prev === row.id ? null : row.id))}
+                  />
+                </Tooltip>
+              );
+            }
+            return <span />;
+          })();
           const translationInput = (
             <AutoComplete
-              className={cls.grow}
+              className={classNames(cls.grow, { [cls.hasVariants]: hasVariants })}
               value={row.translation}
               options={row.alternatives.map((variant) => ({ value: variant }))}
               filterOption={false}
+              open={openVariantsId === row.id && hasVariants}
+              onDropdownVisibleChange={(visible) => {
+                setOpenVariantsId(visible && hasVariants ? row.id : null);
+              }}
               onChange={(value) => handleTranslationChange(row.id, value)}
             >
               <Input
                 placeholder={t('Перевод')}
                 onPressEnter={addRow}
-                suffix={translatingIds.has(row.id) ? <Spin size="small" /> : <span />}
+                suffix={translationSuffix}
               />
             </AutoComplete>
           );

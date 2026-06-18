@@ -15,6 +15,25 @@
   width: 100%;
 }
 
+// Иконка-подсказка в поле перевода: показывает, что есть другие варианты.
+.variantsHint {
+  color: var(--color-link);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+// Подсветка поля перевода, когда автопереводчик предложил несколько вариантов.
+.hasVariants {
+  :global(.ant-input-affix-wrapper),
+  :global(.ant-select-selector) {
+    border-color: var(--color-link);
+  }
+}
+
 .cardRow {
   padding: 12px;
   border-radius: 14px;
