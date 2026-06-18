@@ -2,16 +2,14 @@ import { useTranslation } from 'react-i18next';
 import { Button, Card, Form, Input, Typography, Badge } from 'antd';
 import { UserOutlined, LockOutlined, CloseOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { NavLink } from 'react-router';
-import { CSSProperties, memo, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, memo, ReactNode, useEffect, useRef, useState } from 'react';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { RoutePath } from '@/shared/config/router/routePath';
 import {
-    useCheckOidcMutation,
     useLoginImpersonateMutation,
     useLoginMutation,
     useRegisterMutation,
     useUserInfoQuery,
-    useUserLoggedOut,
 } from '@/entities/User';
 import { Loader } from '@/shared/ui/Loader';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
@@ -151,29 +149,11 @@ const LoginPage = () => {
 
     const isLoading = isAdminLoading || isImpersonateLoading || isRegisterLoading;
 
-    const { isLoading: userInfoIsLoading, isFetching: userInfoIsFetching, error: userInfoError } = useUserInfoQuery();
-    const [, { isLoading: oidcIsLoading, isSuccess: oidcIsSuccess, isError: oidcIsError }] = useCheckOidcMutation({
-        fixedCacheKey: 'init-oidc-check',
-    });
-    const loggedOut = useUserLoggedOut();
+    const { isLoading: userInfoIsLoading, isFetching: userInfoIsFetching } = useUserInfoQuery();
 
-    const oidcErrorInUrl = useMemo(
-        () => new URLSearchParams(window.location.search).has('oidc_error'),
-        [],
-    );
-
-    const userInfoIs401 = !!userInfoError && 'status' in userInfoError && userInfoError.status === 401;
-
-    const isAuthProbing = !__IS_DEV__
-        && !loggedOut
-        && !oidcErrorInUrl
-        && (
-            userInfoIsLoading
-            || userInfoIsFetching
-            || oidcIsLoading
-            || oidcIsSuccess
-            || (userInfoIs401 && !oidcIsError)
-        );
+    // Показываем лоадер только пока идёт проверка сессии Supabase. Как только она
+    // завершилась (в т.ч. с 401 = нет сессии) — показываем форму входа.
+    const isAuthProbing = !__IS_DEV__ && (userInfoIsLoading || userInfoIsFetching);
 
     if (isAuthProbing) {
         return (
