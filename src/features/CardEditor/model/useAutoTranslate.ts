@@ -7,8 +7,8 @@ interface UseAutoTranslateResult {
   translatingIds: Set<string>;
   /**
    * Запросить перевод термина для строки (с дебаунсом). Результат отдаётся в
-   * `onResult` только если перевод непустой — вызывающий сам решает, подставлять
-   * ли его (например, лишь когда поле перевода пустое).
+   * `onResult` только если перевод непустой; вместе с переводом передаётся
+   * исходный термин — вызывающий может отбросить устаревший ответ.
    */
   requestTranslation: (id: string, term: string) => void;
 }
@@ -18,7 +18,7 @@ interface UseAutoTranslateResult {
  * термин через ~500мс после ввода и отдаёт результат для конкретной строки.
  */
 export const useAutoTranslate = (
-  onResult: (id: string, translation: string) => void,
+  onResult: (id: string, translation: string, term: string) => void,
 ): UseAutoTranslateResult => {
   const [translatingIds, setTranslatingIds] = useState<Set<string>>(new Set());
 
@@ -44,7 +44,7 @@ export const useAutoTranslate = (
       const result = await translateWord(query);
       setTranslating(id, false);
       if (result) {
-        onResult(id, result);
+        onResult(id, result, query);
       }
     },
     [onResult, setTranslating],

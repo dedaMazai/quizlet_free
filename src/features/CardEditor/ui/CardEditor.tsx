@@ -19,6 +19,8 @@ interface CardRow {
   term: string;
   translation: string;
   example: string;
+  /** true, когда пользователь сам отредактировал перевод — тогда автоперевод его больше не перезаписывает. */
+  translationEdited: boolean;
 }
 
 interface CardEditorProps {
@@ -32,6 +34,7 @@ const makeEmptyRow = (): CardRow => ({
   term: '',
   translation: '',
   example: '',
+  translationEdited: false,
 });
 
 const makeInitialRows = (): CardRow[] => [makeEmptyRow(), makeEmptyRow(), makeEmptyRow()];
@@ -62,10 +65,13 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
     }
   }, [rows]);
 
-  // Подставляем автоперевод только если поле перевода ещё пустое.
-  const handleTranslationResult = useCallback((id: string, translation: string) => {
+  // Подставляем автоперевод, пока пользователь сам не отредактировал перевод и
+  // пока термин не успел измениться (отбрасываем устаревший ответ).
+  const handleTranslationResult = useCallback((id: string, translation: string, term: string) => {
     setRows((prev) => prev.map((row) => (
-      row.id === id && !row.translation.trim() ? { ...row, translation } : row
+      row.id === id && !row.translationEdited && row.term.trim() === term
+        ? { ...row, translation }
+        : row
     )));
   }, []);
 
@@ -79,6 +85,12 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
     updateRow(id, 'term', value);
     requestTranslation(id, value);
   }, [updateRow, requestTranslation]);
+
+  const handleTranslationChange = useCallback((id: string, value: string) => {
+    setRows((prev) => prev.map((row) => (
+      row.id === id ? { ...row, translation: value, translationEdited: true } : row
+    )));
+  }, []);
 
   const addRow = useCallback(() => {
     const row = makeEmptyRow();
@@ -152,7 +164,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
               className={cls.grow}
               value={row.translation}
               placeholder={t('Перевод')}
-              onChange={(e) => updateRow(row.id, 'translation', e.target.value)}
+              onChange={(e) => handleTranslationChange(row.id, e.target.value)}
               onPressEnter={addRow}
               suffix={translatingIds.has(row.id) ? <Spin size="small" /> : <span />}
             />
