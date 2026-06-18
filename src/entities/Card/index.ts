@@ -13,4 +13,5 @@ export {
   useToggleFavoriteMutation,
 } from './model/api/cardApi';
 export { FAVORITES_PROGRESS_KEY } from './model/const/favorites';
+export { ALL_WORDS_PROGRESS_KEY } from './model/const/allWords';
 export { FavoriteToggle } from './ui/FavoriteToggle/FavoriteToggle';

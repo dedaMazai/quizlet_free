@@ -52,6 +52,12 @@ export const AnswerFeedback: FC<AnswerFeedbackProps> = (props) => {
         <FavoriteToggle cardUuid={card.uuid} />
       </HStack>
 
+      {card.example && (
+        <MyTypography.Base type="secondary" className={cls.example}>
+          {card.example}
+        </MyTypography.Base>
+      )}
+
       <Button type="primary" size="large" onClick={onNext} autoFocus>
         {t('Продолжить')}
       </Button>

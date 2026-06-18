@@ -14,6 +14,8 @@ import { MainPage } from '@/pages/MainPage';
 import { DecksPage } from '@/pages/DecksPage';
 import { DeckPage } from '@/pages/DeckPage';
 import { AllWordsPage } from '@/pages/AllWordsPage';
+import { AllWordsFlashcardsPage } from '@/pages/AllWordsFlashcardsPage';
+import { AllWordsLearnPage } from '@/pages/AllWordsLearnPage';
 import { FlashcardsPage } from '@/pages/FlashcardsPage';
 import { LearnPage } from '@/pages/LearnPage';
 import { FavoritesPage } from '@/pages/FavoritesPage';
@@ -173,6 +175,42 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.ALL_WORDS(),
                     label: i18n.t('Все слова'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.ALL_WORDS_FLASHCARDS(),
+        element: <AllWordsFlashcardsPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.ALL_WORDS(),
+                    label: i18n.t('Все слова'),
+                },
+                {
+                    path: () => RoutePath.ALL_WORDS_FLASHCARDS(),
+                    label: i18n.t('Карточки'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.ALL_WORDS_LEARN(),
+        element: <AllWordsLearnPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.ALL_WORDS(),
+                    label: i18n.t('Все слова'),
+                },
+                {
+                    path: () => RoutePath.ALL_WORDS_LEARN(),
+                    label: i18n.t('Заучивание'),
                 },
             ]),
         },

@@ -13,7 +13,8 @@ import {
 import { useGetDecksQuery } from '@/entities/Deck';
 import { CardForm } from '@/features/CardForm';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
-import { HStack } from '@/shared/ui/Stack';
+import { HStack, VStack } from '@/shared/ui/Stack';
+import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import cls from './CardList.module.scss';
@@ -23,24 +24,34 @@ interface CardListProps {
   deckUuid?: string;
   /** Если true — показываются только избранные слова (из всех колод). */
   favoritesOnly?: boolean;
+  /** Явный список слов (переопределяет загрузку — для фильтрации на стороне страницы). */
+  cards?: Card[];
+  /** Текст пустого состояния (например, «Ничего не найдено» при поиске). */
+  emptyText?: string;
 }
 
 export const CardList: FC<CardListProps> = (props) => {
-  const { deckUuid, favoritesOnly } = props;
+  const {
+    deckUuid, favoritesOnly, cards: cardsProp, emptyText,
+  } = props;
   const { t } = useTranslation();
   const { modal, message } = useAntdApp();
 
-  const { data: allCards, isLoading } = useGetCardsQuery(deckUuid ?? undefined);
+  const { data: allCards, isLoading } = useGetCardsQuery(deckUuid ?? undefined, {
+    skip: Boolean(cardsProp),
+  });
   const { data: favorites } = useGetFavoritesQuery(undefined, { skip: !favoritesOnly });
   const { data: decks } = useGetDecksQuery(undefined, { skip: Boolean(deckUuid) });
   const [deleteCard] = useDeleteCardMutation();
 
-  const cards = useMemo(
-    () => (favoritesOnly
+  const cards = useMemo(() => {
+    if (cardsProp) {
+      return cardsProp;
+    }
+    return favoritesOnly
       ? (allCards ?? []).filter((card) => favorites?.includes(card.uuid))
-      : allCards),
-    [allCards, favorites, favoritesOnly],
-  );
+      : allCards;
+  }, [cardsProp, allCards, favorites, favoritesOnly]);
 
   const [editingCard, setEditingCard] = useState<Card | undefined>(undefined);
 
@@ -68,13 +79,19 @@ export const CardList: FC<CardListProps> = (props) => {
   const columns: ColumnsType<Card> = [
     {
       title: t('Слово'),
-      dataIndex: 'term',
       key: 'term',
-      render: (term: string) => (
-        <HStack gap="8" align="center">
-          <span className={cls.term}>{term}</span>
-          <SpeakButton text={term} />
-        </HStack>
+      render: (_, card) => (
+        <VStack gap="2">
+          <HStack gap="8" align="center">
+            <span className={cls.term}>{card.term}</span>
+            <SpeakButton text={card.term} />
+          </HStack>
+          {card.example && (
+            <MyTypography.Small type="secondary" className={cls.example}>
+              {card.example}
+            </MyTypography.Small>
+          )}
+        </VStack>
       ),
     },
     {
@@ -127,11 +144,9 @@ export const CardList: FC<CardListProps> = (props) => {
   }
 
   if (!cards?.length) {
-    return (
-      <Empty
-        description={favoritesOnly ? t('В избранном пока нет слов') : t('Пока нет слов')}
-      />
-    );
+    const description = emptyText
+      ?? (favoritesOnly ? t('В избранном пока нет слов') : t('Пока нет слов'));
+    return <Empty description={description} />;
   }
 
   return (
