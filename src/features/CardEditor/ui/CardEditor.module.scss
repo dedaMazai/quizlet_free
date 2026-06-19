@@ -6,6 +6,10 @@
 
 .importFull {
   width: 100%;
+
+  :global(.ant-upload) {
+    display: block;
+  }
 }
 
 .row {

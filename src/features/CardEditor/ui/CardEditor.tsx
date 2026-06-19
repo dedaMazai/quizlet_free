@@ -3,9 +3,9 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AutoComplete, Button, Input, Modal, Spin, Tooltip,
+  AutoComplete, Button, Input, Modal, Spin, Tooltip, Upload,
 } from 'antd';
-import type { InputRef } from 'antd';
+import type { InputRef, UploadProps } from 'antd';
 import {
   DeleteOutlined, DownloadOutlined, PlusOutlined, UnorderedListOutlined, UploadOutlined,
 } from '@ant-design/icons';
@@ -14,7 +14,6 @@ import { TranslationResult } from '@/shared/lib/translate';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
-import { InputFile } from '@/shared/ui/InputFile';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { useAutoTranslate } from '../model/useAutoTranslate';
@@ -183,10 +182,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
     }
   }, [createCards, message, onClose, t]);
 
-  const handleImport = useCallback(async (files: FileList | null) => {
-    const file = files?.[0];
-    if (!file) return;
-
+  const handleImport = useCallback(async (file: File) => {
     setIsImporting(true);
     try {
       const { rows: parsed, skipped } = await parseCardsFromExcel(file);
@@ -222,6 +218,12 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
     }
   }, [deckUuid, message, modal, saveImported, t]);
 
+  // beforeUpload возвращает false — отменяем штатную загрузку antd и парсим файл сами.
+  const handleBeforeUpload = useCallback<NonNullable<UploadProps['beforeUpload']>>((file) => {
+    handleImport(file);
+    return false;
+  }, [handleImport]);
+
   return (
     <Modal
       open={open}
@@ -242,9 +244,10 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
           >
             {t('Скачать шаблон')}
           </Button>
-          <InputFile
+          <Upload
             accept={EXCEL_ACCEPT}
-            onChange={handleImport}
+            showUploadList={false}
+            beforeUpload={handleBeforeUpload}
             className={isMobile ? cls.importFull : undefined}
           >
             <Button
@@ -254,7 +257,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
             >
               {t('Импорт из Excel')}
             </Button>
-          </InputFile>
+          </Upload>
         </HStack>
 
         {rows.map((row, index) => {

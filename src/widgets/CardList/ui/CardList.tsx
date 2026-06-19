@@ -230,7 +230,15 @@ export const CardList: FC<CardListProps> = (props) => {
           rowKey="uuid"
           dataSource={cards}
           columns={columns}
-          pagination={cards.length > 20 ? { pageSize: 20 } : false}
+          pagination={
+            cards.length > 20
+              ? {
+                  defaultPageSize: 20,
+                  showSizeChanger: true,
+                  pageSizeOptions: [10, 20, 50, 100],
+                }
+              : false
+          }
           size="middle"
         />
       </div>
