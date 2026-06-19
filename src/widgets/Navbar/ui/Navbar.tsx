@@ -79,6 +79,10 @@ export const NavbarMenu = memo(() => {
                             max
                             gap="10"
                             className={cls.profileCard}
+                            onClick={() => {
+                                navigate(RoutePath.PROFILE());
+                                setOpenMenu(false);
+                            }}
                         >
                             {userPhoto ? (
                                 <img
@@ -173,6 +177,12 @@ export const Navbar = memo(({ className }: NavbarProps) => {
             label: userInfo?.email,
             disabled: true,
         },
+        { type: 'divider' as const },
+        {
+            key: 'profile',
+            label: t('Личный кабинет'),
+            icon: <Icon component={UserOutlined} />,
+        },
         {
             key: 'settings',
             label: t('Настройки'),
@@ -190,6 +200,9 @@ export const Navbar = memo(({ className }: NavbarProps) => {
     const handleUserMenuClick = useCallback(({ key }: { key: string }) => {
         if (key === 'logout') {
             logout();
+        }
+        if (key === 'profile') {
+            navigate(RoutePath.PROFILE());
         }
         if (key === 'settings') {
             navigate(RoutePath.SETTINGS());
