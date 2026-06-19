@@ -1,5 +1,6 @@
 import { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Card } from 'antd';
 import {
   ALL_WORDS_PROGRESS_KEY,
   FAVORITES_PROGRESS_KEY,
@@ -8,8 +9,8 @@ import { useGetDecksQuery } from '@/entities/Deck';
 import { useGetDeckProgressQuery, useGetMasteryQuery } from '@/entities/Statistics';
 import { HorizontalBarChart } from '@/shared/ui/HorizontalBarChart';
 import { VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import cls from './DeckProgressList.module.scss';
 
 interface DeckProgressListProps {
   className?: string;
@@ -63,16 +64,18 @@ export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) =
   if (!rows.length) return null;
 
   return (
-    <VStack max gap="8" className={classNames('', [className])}>
-      <MyTypography.Small type="secondary">{t('Прогресс по колодам')}</MyTypography.Small>
-      <HorizontalBarChart
-        labels={rows.map((r) => r.name)}
-        datasets={[
-          { label: 'Усвоено', data: rows.map((r) => r.mastered), color: COLOR_MASTERED },
-          { label: 'Всего слов', data: rows.map((r) => r.total), color: COLOR_TOTAL },
-        ]}
-        height={Math.max(MIN_HEIGHT, rows.length * ROW_HEIGHT)}
-      />
-    </VStack>
+    <Card className={classNames(cls.card, [className])} variant="borderless">
+      <VStack max gap="12">
+        <div className={cls.cardTitle}>{t('Прогресс по колодам')}</div>
+        <HorizontalBarChart
+          labels={rows.map((r) => r.name)}
+          datasets={[
+            { label: 'Усвоено', data: rows.map((r) => r.mastered), color: COLOR_MASTERED },
+            { label: 'Всего слов', data: rows.map((r) => r.total), color: COLOR_TOTAL },
+          ]}
+          height={Math.max(MIN_HEIGHT, rows.length * ROW_HEIGHT)}
+        />
+      </VStack>
+    </Card>
   );
 };

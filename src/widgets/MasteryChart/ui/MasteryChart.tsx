@@ -1,10 +1,11 @@
 import { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Card } from 'antd';
 import { useGetMasteryQuery } from '@/entities/Statistics';
 import { DoughnutChart, DoughnutChartDataItem } from '@/shared/ui/DoughnutChart';
 import { VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import cls from './MasteryChart.module.scss';
 
 interface MasteryChartProps {
   className?: string;
@@ -29,15 +30,16 @@ export const MasteryChart: FC<MasteryChartProps> = ({ className }) => {
   }, [data]);
 
   return (
-    <VStack gap="8" className={classNames('', [className])}>
-      <MyTypography.Small type="secondary">{t('Освоение слов')}</MyTypography.Small>
-      <DoughnutChart
-        data={items}
-        centerLabel="Усвоено"
-        labelPosition="none"
-        height={300}
-        maxWidth={360}
-      />
-    </VStack>
+    <Card className={classNames(cls.card, [className])} variant="borderless">
+      <VStack max gap="12">
+        <div className={cls.cardTitle}>{t('Освоение слов')}</div>
+        <DoughnutChart
+          data={items}
+          centerLabel="Усвоено"
+          labelPosition="none"
+          height={300}
+        />
+      </VStack>
+    </Card>
   );
 };
