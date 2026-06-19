@@ -40,7 +40,7 @@ const FavoriteLearnPage = () => {
           {t('Заучивание')}: {t('Избранное')}
         </MyTypography.Large>
       </HStack>
-      <LearnSession cards={favCards} progressKey={FAVORITES_PROGRESS_KEY} />
+      <LearnSession cards={favCards} progressKey={FAVORITES_PROGRESS_KEY} deckName={FAVORITES_PROGRESS_KEY} />
     </VStack>
   );
 };

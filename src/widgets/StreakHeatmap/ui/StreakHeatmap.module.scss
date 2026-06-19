@@ -1,0 +1,40 @@
+.grid {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  grid-auto-flow: column;
+  grid-auto-columns: 12px;
+  gap: 3px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--border-subtle);
+}
+
+.level0 {
+  background: var(--border-subtle);
+}
+
+.level1 {
+  background: var(--color-success);
+  opacity: 0.3;
+}
+
+.level2 {
+  background: var(--color-success);
+  opacity: 0.5;
+}
+
+.level3 {
+  background: var(--color-success);
+  opacity: 0.75;
+}
+
+.level4 {
+  background: var(--color-success);
+  opacity: 1;
+}

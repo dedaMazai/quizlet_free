@@ -29,7 +29,7 @@ const AllWordsLearnPage = () => {
           {t('Заучивание')}: {t('Все слова')}
         </MyTypography.Large>
       </HStack>
-      <LearnSession cards={cards ?? []} progressKey={ALL_WORDS_PROGRESS_KEY} />
+      <LearnSession cards={cards ?? []} progressKey={ALL_WORDS_PROGRESS_KEY} deckName={ALL_WORDS_PROGRESS_KEY} />
     </VStack>
   );
 };

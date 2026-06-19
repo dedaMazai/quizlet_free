@@ -10,6 +10,7 @@ export {
 } from './camelCaseIntoToken';
 export { buildTimeName } from './buildTimeName';
 export { buildName } from './buildName';
+export { formatDuration } from './formatDuration';
 export { serializeFormData } from './serializeFormData';
 export { getContrastTextColor } from './getContrastTextColor';
 export {

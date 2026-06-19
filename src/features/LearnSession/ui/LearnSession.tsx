@@ -22,16 +22,19 @@ import cls from './LearnSession.module.scss';
 
 interface LearnSessionInnerProps {
   progressKey: string;
+  deckName: string;
   cards: Card[];
   savedLevels?: Levels;
 }
 
 const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
-  const { progressKey, cards, savedLevels } = props;
+  const {
+    progressKey, deckName, cards, savedLevels,
+  } = props;
   const { t } = useTranslation();
   const [saveProgress] = useSaveLearnProgressMutation();
 
-  const session = useLearnSession(cards, savedLevels);
+  const session = useLearnSession(cards, savedLevels, { deckKey: progressKey, deckName });
 
   // Сохраняем прогресс при каждом изменении уровней (пропускаем первый рендер)
   const isFirst = useRef(true);
@@ -144,10 +147,12 @@ interface LearnSessionProps {
   cards: Card[];
   /** Ключ, под которым хранится прогресс заучивания (deck_uuid или ключ избранного). */
   progressKey: string;
+  /** Имя колоды для снапшота в статистике (для синтетических колод — сам ключ). */
+  deckName: string;
 }
 
 export const LearnSession: FC<LearnSessionProps> = (props) => {
-  const { cards, progressKey } = props;
+  const { cards, progressKey, deckName } = props;
   const { t } = useTranslation();
 
   const { data: progress, isLoading } = useGetLearnProgressQuery(progressKey);
@@ -163,6 +168,7 @@ export const LearnSession: FC<LearnSessionProps> = (props) => {
   return (
     <LearnSessionInner
       progressKey={progressKey}
+      deckName={deckName}
       cards={cards}
       savedLevels={progress?.levels}
     />
