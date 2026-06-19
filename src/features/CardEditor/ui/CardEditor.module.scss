@@ -1,3 +1,13 @@
+.toolbar {
+  flex-wrap: wrap;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.importFull {
+  width: 100%;
+}
+
 .row {
   width: 100%;
 }

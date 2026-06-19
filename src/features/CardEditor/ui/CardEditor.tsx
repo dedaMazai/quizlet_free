@@ -6,16 +6,33 @@ import {
   AutoComplete, Button, Input, Modal, Spin, Tooltip,
 } from 'antd';
 import type { InputRef } from 'antd';
-import { DeleteOutlined, PlusOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined, DownloadOutlined, PlusOutlined, UnorderedListOutlined, UploadOutlined,
+} from '@ant-design/icons';
 import { CardCreateDto, useCreateCardsMutation } from '@/entities/Card';
 import { TranslationResult } from '@/shared/lib/translate';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
+import { InputFile } from '@/shared/ui/InputFile';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { useAutoTranslate } from '../model/useAutoTranslate';
+import { downloadCardsTemplate, parseCardsFromExcel } from '../model/cardsExcel';
 import cls from './CardEditor.module.scss';
+
+/** Карточки сохраняются партиями — Supabase надёжно принимает такой размер insert. */
+const IMPORT_CHUNK_SIZE = 500;
+
+const chunk = <T, >(items: T[], size: number): T[][] => {
+  const result: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    result.push(items.slice(i, i + size));
+  }
+  return result;
+};
+
+const EXCEL_ACCEPT = '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 interface CardRow {
   id: string;
@@ -48,12 +65,13 @@ const makeInitialRows = (): CardRow[] => [makeEmptyRow(), makeEmptyRow(), makeEm
 export const CardEditor: FC<CardEditorProps> = (props) => {
   const { open, onClose, deckUuid } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const { message, modal } = useAntdApp();
   const { isMobile } = useMatchMedia();
 
   const [rows, setRows] = useState<CardRow[]>(makeInitialRows);
   // Строка, у которой сейчас открыт список вариантов перевода.
   const [openVariantsId, setOpenVariantsId] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
   const [createCards, { isLoading }] = useCreateCardsMutation();
 
   const termRefs = useRef<Map<string, InputRef>>(new Map());
@@ -148,6 +166,62 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
     }
   };
 
+  const handleDownloadTemplate = useCallback(() => {
+    downloadCardsTemplate();
+  }, []);
+
+  const saveImported = useCallback(async (dtos: CardCreateDto[]) => {
+    try {
+      // Сохраняем партиями последовательно, чтобы не превысить лимиты insert.
+      for (const part of chunk(dtos, IMPORT_CHUNK_SIZE)) {
+        await createCards(part).unwrap();
+      }
+      message.success(t('Добавлено слов: {{count}}', { count: dtos.length }));
+      onClose();
+    } catch {
+      message.error(t('Не удалось сохранить слова'));
+    }
+  }, [createCards, message, onClose, t]);
+
+  const handleImport = useCallback(async (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const { rows: parsed, skipped } = await parseCardsFromExcel(file);
+
+      if (!parsed.length) {
+        message.warning(t('В файле нет подходящих слов'));
+        return;
+      }
+
+      const dtos: CardCreateDto[] = parsed.map((row) => ({
+        deck_uuid: deckUuid,
+        term: row.term,
+        translation: row.translation,
+        example: row.example,
+      }));
+
+      modal.confirm({
+        title: t('Импортировать {{count}} слов?', { count: dtos.length }),
+        content: (
+          <VStack gap="4">
+            <span>{t('Найдено слов: {{count}}', { count: dtos.length })}</span>
+            {skipped > 0 && <span>{t('Пропущено строк: {{count}}', { count: skipped })}</span>}
+          </VStack>
+        ),
+        okText: t('Сохранить все'),
+        cancelText: t('Отмена'),
+        onOk: () => saveImported(dtos),
+      });
+    } catch {
+      message.error(t('Не удалось прочитать файл'));
+    } finally {
+      setIsImporting(false);
+    }
+  }, [deckUuid, message, modal, saveImported, t]);
+
   return (
     <Modal
       open={open}
@@ -160,6 +234,29 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
       onCancel={onClose}
     >
       <VStack max gap={isMobile ? '12' : '8'}>
+        <HStack max gap="8" className={cls.toolbar}>
+          <Button
+            icon={<DownloadOutlined />}
+            onClick={handleDownloadTemplate}
+            block={isMobile}
+          >
+            {t('Скачать шаблон')}
+          </Button>
+          <InputFile
+            accept={EXCEL_ACCEPT}
+            onChange={handleImport}
+            className={isMobile ? cls.importFull : undefined}
+          >
+            <Button
+              icon={<UploadOutlined />}
+              loading={isImporting}
+              block={isMobile}
+            >
+              {t('Импорт из Excel')}
+            </Button>
+          </InputFile>
+        </HStack>
+
         {rows.map((row, index) => {
           const termInput = (
             <Input
