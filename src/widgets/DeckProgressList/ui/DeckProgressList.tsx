@@ -7,8 +7,8 @@ import {
 } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { useGetDeckProgressQuery, useGetMasteryQuery } from '@/entities/Statistics';
-import { HorizontalBarChart } from '@/shared/ui/HorizontalBarChart';
-import { VStack } from '@/shared/ui/Stack';
+import { HStack, VStack } from '@/shared/ui/Stack';
+import { MyTypography } from '@/shared/ui/MyTypography';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import cls from './DeckProgressList.module.scss';
 
@@ -16,11 +16,6 @@ interface DeckProgressListProps {
   className?: string;
   tz: string;
 }
-
-const COLOR_MASTERED = '#69bb80';
-const COLOR_TOTAL = '#bfbfbf';
-const ROW_HEIGHT = 56;
-const MIN_HEIGHT = 200;
 
 interface DeckRow {
   name: string;
@@ -65,16 +60,26 @@ export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) =
 
   return (
     <Card className={classNames(cls.card, [className])} variant="borderless">
-      <VStack max gap="12">
+      <VStack max gap="16">
         <div className={cls.cardTitle}>{t('Прогресс по колодам')}</div>
-        <HorizontalBarChart
-          labels={rows.map((r) => r.name)}
-          datasets={[
-            { label: 'Усвоено', data: rows.map((r) => r.mastered), color: COLOR_MASTERED },
-            { label: 'Всего слов', data: rows.map((r) => r.total), color: COLOR_TOTAL },
-          ]}
-          height={Math.max(MIN_HEIGHT, rows.length * ROW_HEIGHT)}
-        />
+        <VStack max gap="16">
+          {rows.map((r) => {
+            const percent = r.total > 0 ? Math.round((r.mastered / r.total) * 100) : 0;
+            return (
+              <VStack max gap="6" key={r.name}>
+                <HStack max justify="between" align="center" gap="12">
+                  <MyTypography.Base className={cls.name}>{r.name}</MyTypography.Base>
+                  <MyTypography.Small type="secondary">
+                    {`${r.mastered}/${r.total} · ${percent}%`}
+                  </MyTypography.Small>
+                </HStack>
+                <div className={cls.track}>
+                  <div className={cls.fill} style={{ width: `${percent}%` }} />
+                </div>
+              </VStack>
+            );
+          })}
+        </VStack>
       </VStack>
     </Card>
   );
