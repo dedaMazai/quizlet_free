@@ -20,6 +20,7 @@ export enum ApiTag {
     UserSettings = 'UserSettings',
     Deck = 'Deck',
     Decks = 'Decks',
+    DeckShares = 'DeckShares',
     Card = 'Card',
     Cards = 'Cards',
     LearnProgress = 'LearnProgress',

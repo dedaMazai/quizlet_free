@@ -1,35 +1,81 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty } from 'antd';
+import { Button, Empty, Tag } from 'antd';
 import {
-  PlusOutlined, ReadOutlined, BulbOutlined,
+  PlusOutlined,
+  ReadOutlined,
+  BulbOutlined,
+  ShareAltOutlined,
+  CopyOutlined,
+  UserDeleteOutlined,
 } from '@ant-design/icons';
-import { useGetDeckQuery } from '@/entities/Deck';
+import {
+  useGetDeckQuery,
+  useDuplicateDeckMutation,
+  useRemoveDeckShareMutation,
+} from '@/entities/Deck';
+import { useUserInfo } from '@/entities/User';
 import { CardList } from '@/widgets/CardList';
 import { CardEditor } from '@/features/CardEditor';
+import { ShareDeckModal } from '@/features/ShareDeck';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 
 const DeckPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { message } = useAntdApp();
   const { deckId } = useParams();
+  const userInfo = useUserInfo();
   const [formOpen, setFormOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const { data: deck, isLoading } = useGetDeckQuery(deckId!, { skip: !deckId });
+  const [duplicateDeck, { isLoading: isDuplicating }] = useDuplicateDeckMutation();
+  const [removeShare, { isLoading: isLeaving }] = useRemoveDeckShareMutation();
 
   if (!deckId) return null;
   if (isLoading) return <Loader />;
   if (!deck) return <Empty description={t('Колода не найдена')} />;
 
+  const isOwner = deck.is_owner;
+  const authorLabel = deck.owner_name ?? deck.owner_email;
+
+  const handleDuplicate = async () => {
+    try {
+      const copy = await duplicateDeck(deck).unwrap();
+      message.success(t('Колода скопирована'));
+      navigate(RoutePath.DECK(copy.uuid));
+    } catch {
+      message.error(t('Не удалось скопировать колоду'));
+    }
+  };
+
+  const handleLeave = async () => {
+    if (!userInfo) return;
+    try {
+      await removeShare({ deckUuid: deck.uuid, userId: userInfo.uuid }).unwrap();
+      message.success(t('Вы больше не видите эту колоду'));
+      navigate(RoutePath.DECKS());
+    } catch {
+      message.error(t('Не удалось убрать колоду'));
+    }
+  };
+
   return (
     <VStack max fullHeight gap="16">
       <HStack max justify="between" align="start" gap="16" wrap>
         <VStack gap="4">
-          <MyTypography.Large strong>{deck.name}</MyTypography.Large>
+          <HStack gap="8" align="center" wrap>
+            <MyTypography.Large strong>{deck.name}</MyTypography.Large>
+            {!isOwner && authorLabel && (
+              <Tag bordered={false}>{t('Автор')}: {authorLabel}</Tag>
+            )}
+          </HStack>
           {deck.description && (
             <MyTypography.Base type="secondary">{deck.description}</MyTypography.Base>
           )}
@@ -48,19 +94,48 @@ const DeckPage = () => {
           >
             {t('Заучивание')}
           </Button>
+          {isOwner ? (
+            <Button icon={<ShareAltOutlined />} onClick={() => setShareOpen(true)}>
+              {t('Поделиться')}
+            </Button>
+          ) : (
+            <>
+              <Button
+                icon={<CopyOutlined />}
+                loading={isDuplicating}
+                onClick={handleDuplicate}
+              >
+                {t('Дублировать')}
+              </Button>
+              <Button
+                icon={<UserDeleteOutlined />}
+                loading={isLeaving}
+                onClick={handleLeave}
+              >
+                {t('Убрать из своих')}
+              </Button>
+            </>
+          )}
         </HStack>
       </HStack>
 
       <HStack max justify="between" align="center">
         <MyTypography.Base strong>{t('Слова')}</MyTypography.Base>
-        <Button icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-          {t('Добавить слова')}
-        </Button>
+        {isOwner && (
+          <Button icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
+            {t('Добавить слова')}
+          </Button>
+        )}
       </HStack>
 
-      <CardList deckUuid={deckId} />
+      <CardList deckUuid={deckId} readOnly={!isOwner} />
 
-      <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
+      {isOwner && (
+        <>
+          <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
+          <ShareDeckModal open={shareOpen} deckUuid={deckId} onClose={() => setShareOpen(false)} />
+        </>
+      )}
     </VStack>
   );
 };

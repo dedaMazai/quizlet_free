@@ -2,8 +2,9 @@ import { FC, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Card, Dropdown, Empty,
+  Button, Card, Dropdown, Empty, Tag,
 } from 'antd';
+import type { MenuProps } from 'antd';
 import {
   EditOutlined,
   DeleteOutlined,
@@ -11,18 +12,25 @@ import {
   ReadOutlined,
   BulbOutlined,
   StarFilled,
+  ShareAltOutlined,
+  CopyOutlined,
+  UserDeleteOutlined,
 } from '@ant-design/icons';
 import {
   Deck,
   useGetDecksQuery,
   useDeleteDeckMutation,
+  useDuplicateDeckMutation,
+  useRemoveDeckShareMutation,
 } from '@/entities/Deck';
 import {
   useGetCardsQuery,
   useDeleteCardsByDeckMutation,
   useGetFavoritesQuery,
 } from '@/entities/Card';
+import { useUserInfo } from '@/entities/User';
 import { DeckForm } from '@/features/DeckForm';
+import { ShareDeckModal } from '@/features/ShareDeck';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
@@ -34,17 +42,21 @@ export const DeckList: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { modal, message } = useAntdApp();
+  const userInfo = useUserInfo();
 
   const { data: decks, isLoading } = useGetDecksQuery();
   const { data: allCards } = useGetCardsQuery();
   const { data: favorites } = useGetFavoritesQuery();
   const [deleteDeck] = useDeleteDeckMutation();
+  const [duplicateDeck] = useDuplicateDeckMutation();
+  const [removeShare] = useRemoveDeckShareMutation();
 
   const favCount = favorites?.length ?? 0;
   const [deleteCardsByDeck] = useDeleteCardsByDeckMutation();
 
   const [editingDeck, setEditingDeck] = useState<Deck | undefined>(undefined);
   const [formOpen, setFormOpen] = useState(false);
+  const [sharingDeckUuid, setSharingDeckUuid] = useState<string | undefined>(undefined);
 
   const countByDeck = useMemo(() => {
     const map: Record<string, number> = {};
@@ -68,6 +80,85 @@ export const DeckList: FC = () => {
       },
     });
   };
+
+  const handleDuplicate = async (deck: Deck) => {
+    try {
+      await duplicateDeck(deck).unwrap();
+      message.success(t('Колода скопирована'));
+    } catch {
+      message.error(t('Не удалось скопировать колоду'));
+    }
+  };
+
+  const handleLeave = (deck: Deck) => {
+    if (!userInfo) return;
+    modal.confirm({
+      title: t('Убрать колоду «{{name}}» из своих?', { name: deck.name }),
+      content: t('Вы больше не будете её видеть. Автор сможет открыть доступ снова.'),
+      okText: t('Убрать из своих'),
+      okButtonProps: { danger: true },
+      cancelText: t('Отмена'),
+      onOk: async () => {
+        await removeShare({ deckUuid: deck.uuid, userId: userInfo.uuid }).unwrap();
+        message.success(t('Вы больше не видите эту колоду'));
+      },
+    });
+  };
+
+  const deckMenuItems = (deck: Deck): MenuProps['items'] =>
+    (deck.is_owner
+      ? [
+          {
+            key: 'edit',
+            icon: <EditOutlined />,
+            label: t('Редактировать'),
+            onClick: ({ domEvent }) => {
+              domEvent.stopPropagation();
+              setEditingDeck(deck);
+              setFormOpen(true);
+            },
+          },
+          {
+            key: 'share',
+            icon: <ShareAltOutlined />,
+            label: t('Поделиться'),
+            onClick: ({ domEvent }) => {
+              domEvent.stopPropagation();
+              setSharingDeckUuid(deck.uuid);
+            },
+          },
+          {
+            key: 'delete',
+            icon: <DeleteOutlined />,
+            label: t('Удалить'),
+            danger: true,
+            onClick: ({ domEvent }) => {
+              domEvent.stopPropagation();
+              handleDelete(deck);
+            },
+          },
+        ]
+      : [
+          {
+            key: 'duplicate',
+            icon: <CopyOutlined />,
+            label: t('Дублировать'),
+            onClick: ({ domEvent }) => {
+              domEvent.stopPropagation();
+              handleDuplicate(deck);
+            },
+          },
+          {
+            key: 'leave',
+            icon: <UserDeleteOutlined />,
+            label: t('Убрать из своих'),
+            danger: true,
+            onClick: ({ domEvent }) => {
+              domEvent.stopPropagation();
+              handleLeave(deck);
+            },
+          },
+        ]);
 
   if (isLoading) {
     return <Loader />;
@@ -135,30 +226,7 @@ export const DeckList: FC = () => {
                   <MyTypography.Large strong>{deck.name}</MyTypography.Large>
                   <Dropdown
                     trigger={['click']}
-                    menu={{
-                      items: [
-                        {
-                          key: 'edit',
-                          icon: <EditOutlined />,
-                          label: t('Редактировать'),
-                          onClick: ({ domEvent }) => {
-                            domEvent.stopPropagation();
-                            setEditingDeck(deck);
-                            setFormOpen(true);
-                          },
-                        },
-                        {
-                          key: 'delete',
-                          icon: <DeleteOutlined />,
-                          label: t('Удалить'),
-                          danger: true,
-                          onClick: ({ domEvent }) => {
-                            domEvent.stopPropagation();
-                            handleDelete(deck);
-                          },
-                        },
-                      ],
-                    }}
+                    menu={{ items: deckMenuItems(deck) }}
                   >
                     <Button
                       type="text"
@@ -168,6 +236,11 @@ export const DeckList: FC = () => {
                     />
                   </Dropdown>
                 </HStack>
+                {!deck.is_owner && (deck.owner_name ?? deck.owner_email) && (
+                  <Tag bordered={false} className={cls.authorTag}>
+                    {t('Автор')}: {deck.owner_name ?? deck.owner_email}
+                  </Tag>
+                )}
                 {deck.description && (
                   <MyTypography.Base type="secondary">{deck.description}</MyTypography.Base>
                 )}
@@ -210,6 +283,14 @@ export const DeckList: FC = () => {
           setEditingDeck(undefined);
         }}
       />
+
+      {sharingDeckUuid && (
+        <ShareDeckModal
+          open={Boolean(sharingDeckUuid)}
+          deckUuid={sharingDeckUuid}
+          onClose={() => setSharingDeckUuid(undefined)}
+        />
+      )}
     </>
   );
 };

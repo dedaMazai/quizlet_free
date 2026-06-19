@@ -31,11 +31,13 @@ interface CardListProps {
   cards?: Card[];
   /** Текст пустого состояния (например, «Ничего не найдено» при поиске). */
   emptyText?: string;
+  /** Если true — скрыть кнопки редактирования/удаления (чужая, расшаренная колода). */
+  readOnly?: boolean;
 }
 
 export const CardList: FC<CardListProps> = (props) => {
   const {
-    deckUuid, favoritesOnly, cards: cardsProp, emptyText,
+    deckUuid, favoritesOnly, cards: cardsProp, emptyText, readOnly,
   } = props;
   const { t } = useTranslation();
   const { modal, message } = useAntdApp();
@@ -119,28 +121,32 @@ export const CardList: FC<CardListProps> = (props) => {
             render: (uuid: string) => deckNameByUuid[uuid] ?? '—',
           } as ColumnsType<Card>[number],
         ]),
-    {
-      title: '',
-      key: 'actions',
-      width: 96,
-      render: (_, card) => (
-        <HStack gap="4" justify="end">
-          <Button
-            type="text"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => setEditingCard(card)}
-          />
-          <Button
-            type="text"
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(card)}
-          />
-        </HStack>
-      ),
-    },
+    ...(readOnly
+      ? []
+      : [
+          {
+            title: '',
+            key: 'actions',
+            width: 96,
+            render: (_, card) => (
+              <HStack gap="4" justify="end">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={() => setEditingCard(card)}
+                />
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => handleDelete(card)}
+                />
+              </HStack>
+            ),
+          } as ColumnsType<Card>[number],
+        ]),
   ];
 
   if (isLoading) {
@@ -153,7 +159,7 @@ export const CardList: FC<CardListProps> = (props) => {
     return <Empty description={description} />;
   }
 
-  const editor = (
+  const editor = readOnly ? null : (
     <CardForm
       open={Boolean(editingCard)}
       deckUuid={editingCard?.deck_uuid ?? ''}
@@ -188,21 +194,25 @@ export const CardList: FC<CardListProps> = (props) => {
                 </VStack>
                 <HStack gap="2" align="center">
                   <FavoriteToggle cardUuid={card.uuid} />
-                  <Button
-                    type="text"
-                    size="small"
-                    aria-label={t('Редактировать')}
-                    icon={<EditOutlined />}
-                    onClick={() => setEditingCard(card)}
-                  />
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    aria-label={t('Удалить')}
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDelete(card)}
-                  />
+                  {!readOnly && (
+                    <>
+                      <Button
+                        type="text"
+                        size="small"
+                        aria-label={t('Редактировать')}
+                        icon={<EditOutlined />}
+                        onClick={() => setEditingCard(card)}
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        aria-label={t('Удалить')}
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDelete(card)}
+                      />
+                    </>
+                  )}
                 </HStack>
               </HStack>
             </div>
