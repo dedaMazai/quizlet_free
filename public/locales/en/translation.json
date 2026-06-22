@@ -1438,5 +1438,17 @@
   "Markdown": "Markdown",
   "Колода выгружена": "Deck exported",
   "Не удалось выгрузить колоду": "Failed to export deck",
-  "В колоде нет слов для экспорта": "No words to export"
+  "В колоде нет слов для экспорта": "No words to export",
+  "Проверить через ИИ": "Check with AI",
+  "Проверка переводов ИИ": "AI translation check",
+  "Текущий перевод": "Current translation",
+  "Предложение ИИ": "AI suggestion",
+  "Корректно": "Correct",
+  "Применить выбранные": "Apply selected",
+  "Осталось запросов: {{count}}": "Requests left: {{count}}",
+  "Переводы проверены": "Translations checked",
+  "Лимит запросов к ИИ исчерпан": "AI request limit reached",
+  "Не удалось проверить переводы": "Failed to check translations",
+  "Изменения применены": "Changes applied",
+  "Не удалось применить изменения": "Failed to apply changes"
 }

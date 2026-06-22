@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Dropdown, Empty, MenuProps, Tag } from 'antd';
+import { Button, Dropdown, Empty, Input, MenuProps, Tag } from 'antd';
 import {
   PlusOutlined,
   ReadOutlined,
@@ -12,6 +12,8 @@ import {
   DiffOutlined,
   ExportOutlined,
   MoreOutlined,
+  RobotOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import {
   useGetDeckQuery,
@@ -24,12 +26,15 @@ import { CardList } from '@/widgets/CardList';
 import { CardEditor } from '@/features/CardEditor';
 import { ShareDeckModal } from '@/features/ShareDeck';
 import { DuplicateCardsModal } from '@/features/DuplicateCardsModal';
+import { CheckTranslationsModal } from '@/features/CheckTranslationsAI';
 import { useDeckExport, ExportFormat } from '@/features/ExportDeck';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
+import cls from './DeckPage.module.scss';
 
 const DeckPage = () => {
   const { t } = useTranslation();
@@ -40,12 +45,23 @@ const DeckPage = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [dupOpen, setDupOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
 
   const { data: deck, isLoading } = useGetDeckQuery(deckId!, { skip: !deckId });
   const [duplicateDeck, { isLoading: isDuplicating }] = useDuplicateDeckMutation();
   const [removeShare, { isLoading: isLeaving }] = useRemoveDeckShareMutation();
   const { data: cards } = useGetCardsQuery(deckId!, { skip: !deckId });
   const dupCount = useMemo(() => findDuplicateGroups(cards ?? []).length, [cards]);
+
+  const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
+  const filtered = useMemo(() => {
+    const query = debouncedSearch.trim().toLowerCase();
+    if (!query) return cards ?? [];
+    return (cards ?? []).filter((card) => card.term.toLowerCase().includes(query)
+      || card.translation.toLowerCase().includes(query)
+      || (card.example?.toLowerCase().includes(query) ?? false));
+  }, [cards, debouncedSearch]);
+  const hasSearch = Boolean(debouncedSearch.trim());
   const { exportDeck, exporting, disabled: exportDisabled } = useDeckExport(
     deckId ?? '',
     deck?.name ?? '',
@@ -93,6 +109,9 @@ const DeckPage = () => {
       ],
     },
     isOwner
+      ? { key: 'ai-check', icon: <RobotOutlined />, label: t('Проверить через ИИ') }
+      : null,
+    isOwner
       ? { key: 'share', icon: <ShareAltOutlined />, label: t('Поделиться') }
       : null,
     isOwner && dupCount > 0
@@ -111,6 +130,7 @@ const DeckPage = () => {
       exportDeck(key.split(':')[1] as ExportFormat);
       return;
     }
+    if (key === 'ai-check') setAiOpen(true);
     if (key === 'share') setShareOpen(true);
     if (key === 'dedup') setDupOpen(true);
     if (key === 'duplicate') handleDuplicate();
@@ -157,22 +177,45 @@ const DeckPage = () => {
         </HStack>
       </HStack>
 
-      <HStack max justify="between" align="center">
-        <MyTypography.Base strong>{t('Слова')}</MyTypography.Base>
+      <HStack max align="center" gap="16" wrap>
+        <HStack gap="8" align="center">
+          <MyTypography.Base strong>{t('Слова')}</MyTypography.Base>
+          <MyTypography.Small type="secondary">
+            {t('{{count}} слов', { count: cards?.length ?? 0 })}
+          </MyTypography.Small>
+        </HStack>
+        <Input
+          className={cls.search}
+          prefix={<SearchOutlined />}
+          allowClear
+          value={search}
+          placeholder={t('Поиск слов')}
+          onChange={(e) => setSearchDebounced(e.target.value)}
+        />
         {isOwner && (
-          <Button icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
+          <Button
+            className={cls.addButton}
+            icon={<PlusOutlined />}
+            onClick={() => setFormOpen(true)}
+          >
             {t('Добавить слова')}
           </Button>
         )}
       </HStack>
 
-      <CardList deckUuid={deckId} readOnly={!isOwner} />
+      <CardList
+        deckUuid={deckId}
+        readOnly={!isOwner}
+        cards={filtered}
+        emptyText={hasSearch ? t('Ничего не найдено') : undefined}
+      />
 
       {isOwner && (
         <>
           <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
           <ShareDeckModal open={shareOpen} deckUuid={deckId} onClose={() => setShareOpen(false)} />
           <DuplicateCardsModal open={dupOpen} deckUuid={deckId} onClose={() => setDupOpen(false)} />
+          <CheckTranslationsModal open={aiOpen} deckUuid={deckId} onClose={() => setAiOpen(false)} />
         </>
       )}
     </VStack>
