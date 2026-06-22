@@ -1,0 +1,26 @@
+.group {
+  width: 100%;
+}
+
+.divider {
+  margin: 8px 0;
+}
+
+.row {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--bg-color-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.main {
+  min-width: 0;
+}
+
+.term {
+  font-weight: 600;
+}
+
+.example {
+  white-space: normal;
+}

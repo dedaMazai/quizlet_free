@@ -40,6 +40,10 @@
   "Слова": "Words",
   "Добавить слово": "Add word",
   "Добавить слова": "Add words",
+  "Дубли ({{count}})": "Duplicates ({{count}})",
+  "Дубли слов": "Duplicate words",
+  "Дубли не найдены": "No duplicates found",
+  "{{count}} совпадения": "{{count}} matches",
   "Добавить строку": "Add row",
   "Сохранить все": "Save all",
   "Добавлено слов: {{count}}": "Words added: {{count}}",
@@ -1427,5 +1431,12 @@
   "Не удалось убрать колоду": "Failed to remove deck",
   "Только автор может поделиться колодой": "Only the author can share the deck",
   "Убрать колоду «{{name}}» из своих?": "Remove deck «{{name}}» from yours?",
-  "Вы больше не будете её видеть. Автор сможет открыть доступ снова.": "You will no longer see it. The author can grant access again."
+  "Вы больше не будете её видеть. Автор сможет открыть доступ снова.": "You will no longer see it. The author can grant access again.",
+  "Экспорт": "Export",
+  "Excel": "Excel",
+  "JSON": "JSON",
+  "Markdown": "Markdown",
+  "Колода выгружена": "Deck exported",
+  "Не удалось выгрузить колоду": "Failed to export deck",
+  "В колоде нет слов для экспорта": "No words to export"
 }

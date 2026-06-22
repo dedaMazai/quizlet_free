@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Empty, Tag } from 'antd';
@@ -9,6 +9,7 @@ import {
   ShareAltOutlined,
   CopyOutlined,
   UserDeleteOutlined,
+  DiffOutlined,
 } from '@ant-design/icons';
 import {
   useGetDeckQuery,
@@ -16,9 +17,12 @@ import {
   useRemoveDeckShareMutation,
 } from '@/entities/Deck';
 import { useUserInfo } from '@/entities/User';
+import { useGetCardsQuery, findDuplicateGroups } from '@/entities/Card';
 import { CardList } from '@/widgets/CardList';
 import { CardEditor } from '@/features/CardEditor';
 import { ShareDeckModal } from '@/features/ShareDeck';
+import { DuplicateCardsModal } from '@/features/DuplicateCardsModal';
+import { ExportDeckButton } from '@/features/ExportDeck';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
@@ -33,10 +37,13 @@ const DeckPage = () => {
   const userInfo = useUserInfo();
   const [formOpen, setFormOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [dupOpen, setDupOpen] = useState(false);
 
   const { data: deck, isLoading } = useGetDeckQuery(deckId!, { skip: !deckId });
   const [duplicateDeck, { isLoading: isDuplicating }] = useDuplicateDeckMutation();
   const [removeShare, { isLoading: isLeaving }] = useRemoveDeckShareMutation();
+  const { data: cards } = useGetCardsQuery(deckId!, { skip: !deckId });
+  const dupCount = useMemo(() => findDuplicateGroups(cards ?? []).length, [cards]);
 
   if (!deckId) return null;
   if (isLoading) return <Loader />;
@@ -94,6 +101,7 @@ const DeckPage = () => {
           >
             {t('Заучивание')}
           </Button>
+          <ExportDeckButton deckUuid={deckId} deckName={deck.name} />
           {isOwner ? (
             <Button icon={<ShareAltOutlined />} onClick={() => setShareOpen(true)}>
               {t('Поделиться')}
@@ -122,9 +130,16 @@ const DeckPage = () => {
       <HStack max justify="between" align="center">
         <MyTypography.Base strong>{t('Слова')}</MyTypography.Base>
         {isOwner && (
-          <Button icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-            {t('Добавить слова')}
-          </Button>
+          <HStack gap="8" wrap>
+            {dupCount > 0 && (
+              <Button icon={<DiffOutlined />} onClick={() => setDupOpen(true)}>
+                {t('Дубли ({{count}})', { count: dupCount })}
+              </Button>
+            )}
+            <Button icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
+              {t('Добавить слова')}
+            </Button>
+          </HStack>
         )}
       </HStack>
 
@@ -134,6 +149,7 @@ const DeckPage = () => {
         <>
           <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
           <ShareDeckModal open={shareOpen} deckUuid={deckId} onClose={() => setShareOpen(false)} />
+          <DuplicateCardsModal open={dupOpen} deckUuid={deckId} onClose={() => setDupOpen(false)} />
         </>
       )}
     </VStack>
