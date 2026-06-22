@@ -1,14 +1,14 @@
 import {
-  FC, useMemo, useState, useEffect,
+  FC, useMemo, useState, useEffect, useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Modal, Table, Tag,
+  Button, Modal, Table, Tag, Input,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { Key } from 'react';
 import { RobotOutlined } from '@ant-design/icons';
-import { useGetCardsQuery, useUpdateCardMutation } from '@/entities/Card';
+import { useGetCardsQuery, useUpdateCardsBulkMutation } from '@/entities/Card';
 import { VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
@@ -21,10 +21,16 @@ interface CheckTranslationsModalProps {
   onClose: () => void;
 }
 
-// Строка таблицы результатов: ответ ИИ, дополненный текущими данными карточки.
+// Строка таблицы: ответ ИИ, дополненный текущими данными карточки.
 interface ResultRow extends AiCheckResult {
   term: string;
   current: string;
+}
+
+// Редактируемые пользователем значения по uuid карточки.
+interface EditValue {
+  translation: string;
+  example: string;
 }
 
 export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) => {
@@ -33,18 +39,19 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
   const { message } = useAntdApp();
 
   const [results, setResults] = useState<AiCheckResult[] | null>(null);
+  const [edits, setEdits] = useState<Record<string, EditValue>>({});
   const [selectedKeys, setSelectedKeys] = useState<Key[]>([]);
-  const [applying, setApplying] = useState(false);
 
   const { data: cards } = useGetCardsQuery(deckUuid, { skip: !open });
   const { data: remaining } = useGetAiUsageQuery(undefined, { skip: !open });
   const [checkTranslations, { isLoading: isChecking }] = useCheckTranslationsMutation();
-  const [updateCard] = useUpdateCardMutation();
+  const [updateCardsBulk, { isLoading: isApplying }] = useUpdateCardsBulkMutation();
 
-  // Сбрасываем результаты при каждом открытии модалки.
+  // Сбрасываем состояние при каждом открытии модалки.
   useEffect(() => {
     if (open) {
       setResults(null);
+      setEdits({});
       setSelectedKeys([]);
     }
   }, [open]);
@@ -69,12 +76,28 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
   const noCredits = remaining !== undefined && remaining <= 0;
   const hasCards = (cards?.length ?? 0) > 0;
 
+  const setEditField = useCallback((uuid: string, field: keyof EditValue, value: string) => {
+    setEdits((prev) => ({ ...prev, [uuid]: { ...prev[uuid], [field]: value } }));
+  }, []);
+
   const handleCheck = async () => {
     if (!cards?.length) return;
     try {
       const input = cards.map((c) => ({ uuid: c.uuid, term: c.term, translation: c.translation }));
       const data = await checkTranslations(input).unwrap();
       setResults(data);
+      // Предзаполняем правки: перевод — предложение ИИ (или текущий, если ИИ счёл его корректным).
+      const initialEdits: Record<string, EditValue> = {};
+      data.forEach((r) => {
+        const card = cardsByUuid.get(r.uuid);
+        initialEdits[r.uuid] = {
+          translation: !r.translation_ok && r.suggested_translation
+            ? r.suggested_translation
+            : (card?.translation ?? ''),
+          example: r.example ?? '',
+        };
+      });
+      setEdits(initialEdits);
       // По умолчанию выбираем все строки — ИИ заполняет примеры для каждого слова.
       setSelectedKeys(data.map((r) => r.uuid));
       message.success(t('Переводы проверены'));
@@ -90,27 +113,20 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
 
   const handleApply = async () => {
     const selected = new Set(selectedKeys.map(String));
-    const toApply = rows.filter((r) => selected.has(r.uuid));
-    if (toApply.length === 0) return;
-    setApplying(true);
+    const payload = rows
+      .filter((r) => selected.has(r.uuid))
+      .map((r) => ({
+        uuid: r.uuid,
+        translation: edits[r.uuid]?.translation ?? r.current,
+        example: edits[r.uuid]?.example ? edits[r.uuid].example : null,
+      }));
+    if (payload.length === 0) return;
     try {
-      await Promise.all(
-        toApply.map((r) =>
-          updateCard({
-            uuid: r.uuid,
-            term: r.term,
-            translation: !r.translation_ok && r.suggested_translation
-              ? r.suggested_translation
-              : r.current,
-            example: r.example,
-          }).unwrap()),
-      );
+      await updateCardsBulk(payload).unwrap();
       message.success(t('Изменения применены'));
       onClose();
     } catch {
       message.error(t('Не удалось применить изменения'));
-    } finally {
-      setApplying(false);
     }
   };
 
@@ -119,23 +135,42 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
       title: t('Слово'),
       dataIndex: 'term',
       key: 'term',
+      width: 160,
     },
     {
       title: t('Текущий перевод'),
-      dataIndex: 'current',
       key: 'current',
+      width: 180,
+      render: (_, row) => (row.translation_ok
+        ? <MyTypography.Base type="secondary">{row.current}</MyTypography.Base>
+        : (
+          <VStack gap="2">
+            <MyTypography.Base type="secondary">{row.current}</MyTypography.Base>
+            <Tag color="warning">{t('Требует правки')}</Tag>
+          </VStack>
+        )),
     },
     {
-      title: t('Предложение ИИ'),
-      key: 'suggestion',
-      render: (_, row) => (row.translation_ok
-        ? <Tag color="success">{t('Корректно')}</Tag>
-        : <MyTypography.Base>{row.suggested_translation ?? '—'}</MyTypography.Base>),
+      title: t('Новый перевод'),
+      key: 'translation',
+      width: 220,
+      render: (_, row) => (
+        <Input
+          value={edits[row.uuid]?.translation ?? ''}
+          onChange={(e) => setEditField(row.uuid, 'translation', e.target.value)}
+        />
+      ),
     },
     {
       title: t('Пример'),
-      dataIndex: 'example',
       key: 'example',
+      render: (_, row) => (
+        <Input.TextArea
+          autoSize={{ minRows: 1, maxRows: 4 }}
+          value={edits[row.uuid]?.example ?? ''}
+          onChange={(e) => setEditField(row.uuid, 'example', e.target.value)}
+        />
+      ),
     },
   ];
 
@@ -145,7 +180,7 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
       title={t('Проверка переводов ИИ')}
       footer={null}
       onCancel={onClose}
-      width={results ? 900 : 520}
+      width={results ? 1000 : 520}
       destroyOnClose
     >
       <VStack max gap="16">
@@ -172,16 +207,17 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
               rowKey="uuid"
               columns={columns}
               dataSource={rows}
-              pagination={false}
-              scroll={{ y: 420 }}
+              scroll={{ y: 440 }}
+              pagination={{ pageSize: 50, showSizeChanger: true, pageSizeOptions: [20, 50, 100] }}
               rowSelection={{
                 selectedRowKeys: selectedKeys,
                 onChange: setSelectedKeys,
+                preserveSelectedRowKeys: true,
               }}
             />
             <Button
               type="primary"
-              loading={applying}
+              loading={isApplying}
               disabled={selectedKeys.length === 0}
               onClick={handleApply}
             >

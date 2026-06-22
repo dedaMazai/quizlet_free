@@ -97,6 +97,15 @@ const cardApi = rtkApi.injectEndpoints({
       },
       invalidatesTags: [ApiTag.Cards],
     }),
+    updateCardsBulk: build.mutation<void, { uuid: string; translation: string; example: string | null }[]>({
+      queryFn: async (cards) => {
+        const p_cards = cards.map((c) => ({ id: c.uuid, translation: c.translation, example: c.example }));
+        const { error } = await supabase.rpc('update_cards_bulk', { p_cards });
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
+      invalidatesTags: [ApiTag.Cards],
+    }),
     deleteCard: build.mutation<void, string>({
       queryFn: async (uuid) => {
         const { error } = await supabase.from('cards').delete().eq('id', uuid);
@@ -190,6 +199,7 @@ export const {
   useCreateCardMutation,
   useCreateCardsMutation,
   useUpdateCardMutation,
+  useUpdateCardsBulkMutation,
   useDeleteCardMutation,
   useDeleteCardsByDeckMutation,
   useGetLearnProgressQuery,

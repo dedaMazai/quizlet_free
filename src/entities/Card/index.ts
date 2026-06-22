@@ -5,6 +5,7 @@ export {
   useCreateCardMutation,
   useCreateCardsMutation,
   useUpdateCardMutation,
+  useUpdateCardsBulkMutation,
   useDeleteCardMutation,
   useDeleteCardsByDeckMutation,
   useGetLearnProgressQuery,
