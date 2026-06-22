@@ -1,21 +1,14 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Dropdown, MenuProps } from 'antd';
-import { ExportOutlined } from '@ant-design/icons';
 import { Card, useGetCardsQuery } from '@/entities/Card';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import {
   exportCardsToExcel,
   exportCardsToJson,
   exportCardsToMarkdown,
-} from '../model/cardsExport';
+} from './cardsExport';
 
-interface ExportDeckButtonProps {
-  deckUuid: string;
-  deckName: string;
-}
-
-type ExportFormat = 'excel' | 'json' | 'markdown';
+export type ExportFormat = 'excel' | 'json' | 'markdown';
 
 const EXPORTERS: Record<ExportFormat, (cards: Card[], deckName: string) => Promise<void>> = {
   excel: exportCardsToExcel,
@@ -23,14 +16,21 @@ const EXPORTERS: Record<ExportFormat, (cards: Card[], deckName: string) => Promi
   markdown: exportCardsToMarkdown,
 };
 
-export const ExportDeckButton: FC<ExportDeckButtonProps> = (props) => {
-  const { deckUuid, deckName } = props;
+interface UseDeckExport {
+  exportDeck: (format: ExportFormat) => Promise<void>;
+  exporting: boolean;
+  /** true, пока карточки грузятся или колода пуста — экспортировать нечего. */
+  disabled: boolean;
+}
+
+/** Загружает карточки колоды и выгружает их в выбранный формат с нотификациями. */
+export const useDeckExport = (deckUuid: string, deckName: string): UseDeckExport => {
   const { t } = useTranslation();
   const { message } = useAntdApp();
   const { data: cards, isLoading } = useGetCardsQuery(deckUuid);
   const [exporting, setExporting] = useState(false);
 
-  const handleExport = async (format: ExportFormat) => {
+  const exportDeck = async (format: ExportFormat) => {
     if (!cards?.length) {
       message.warning(t('В колоде нет слов для экспорта'));
       return;
@@ -46,21 +46,5 @@ export const ExportDeckButton: FC<ExportDeckButtonProps> = (props) => {
     }
   };
 
-  const items: MenuProps['items'] = [
-    { key: 'excel', label: t('Excel') },
-    { key: 'json', label: t('JSON') },
-    { key: 'markdown', label: t('Markdown') },
-  ];
-
-  return (
-    <Dropdown
-      trigger={['click']}
-      menu={{ items, onClick: ({ key }) => handleExport(key as ExportFormat) }}
-      disabled={isLoading || !cards?.length}
-    >
-      <Button icon={<ExportOutlined />} loading={exporting}>
-        {t('Экспорт')}
-      </Button>
-    </Dropdown>
-  );
+  return { exportDeck, exporting, disabled: isLoading || !cards?.length };
 };

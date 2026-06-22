@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty, Tag } from 'antd';
+import { Button, Dropdown, Empty, MenuProps, Tag } from 'antd';
 import {
   PlusOutlined,
   ReadOutlined,
@@ -10,6 +10,8 @@ import {
   CopyOutlined,
   UserDeleteOutlined,
   DiffOutlined,
+  ExportOutlined,
+  MoreOutlined,
 } from '@ant-design/icons';
 import {
   useGetDeckQuery,
@@ -22,7 +24,7 @@ import { CardList } from '@/widgets/CardList';
 import { CardEditor } from '@/features/CardEditor';
 import { ShareDeckModal } from '@/features/ShareDeck';
 import { DuplicateCardsModal } from '@/features/DuplicateCardsModal';
-import { ExportDeckButton } from '@/features/ExportDeck';
+import { useDeckExport, ExportFormat } from '@/features/ExportDeck';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
@@ -44,6 +46,10 @@ const DeckPage = () => {
   const [removeShare, { isLoading: isLeaving }] = useRemoveDeckShareMutation();
   const { data: cards } = useGetCardsQuery(deckId!, { skip: !deckId });
   const dupCount = useMemo(() => findDuplicateGroups(cards ?? []).length, [cards]);
+  const { exportDeck, exporting, disabled: exportDisabled } = useDeckExport(
+    deckId ?? '',
+    deck?.name ?? '',
+  );
 
   if (!deckId) return null;
   if (isLoading) return <Loader />;
@@ -71,6 +77,44 @@ const DeckPage = () => {
     } catch {
       message.error(t('Не удалось убрать колоду'));
     }
+  };
+
+  // Второстепенные действия колоды собраны в одно меню «...».
+  const moreItems: MenuProps['items'] = [
+    {
+      key: 'export',
+      icon: <ExportOutlined />,
+      label: t('Экспорт'),
+      disabled: exportDisabled,
+      children: [
+        { key: 'export:excel', label: t('Excel') },
+        { key: 'export:json', label: t('JSON') },
+        { key: 'export:markdown', label: t('Markdown') },
+      ],
+    },
+    isOwner
+      ? { key: 'share', icon: <ShareAltOutlined />, label: t('Поделиться') }
+      : null,
+    isOwner && dupCount > 0
+      ? { key: 'dedup', icon: <DiffOutlined />, label: t('Дубли ({{count}})', { count: dupCount }) }
+      : null,
+    !isOwner
+      ? { key: 'duplicate', icon: <CopyOutlined />, label: t('Дублировать') }
+      : null,
+    !isOwner
+      ? { key: 'leave', icon: <UserDeleteOutlined />, label: t('Убрать из своих') }
+      : null,
+  ].filter(Boolean);
+
+  const handleMoreClick: MenuProps['onClick'] = ({ key }) => {
+    if (key.startsWith('export:')) {
+      exportDeck(key.split(':')[1] as ExportFormat);
+      return;
+    }
+    if (key === 'share') setShareOpen(true);
+    if (key === 'dedup') setDupOpen(true);
+    if (key === 'duplicate') handleDuplicate();
+    if (key === 'leave') handleLeave();
   };
 
   return (
@@ -101,45 +145,24 @@ const DeckPage = () => {
           >
             {t('Заучивание')}
           </Button>
-          <ExportDeckButton deckUuid={deckId} deckName={deck.name} />
-          {isOwner ? (
-            <Button icon={<ShareAltOutlined />} onClick={() => setShareOpen(true)}>
-              {t('Поделиться')}
-            </Button>
-          ) : (
-            <>
-              <Button
-                icon={<CopyOutlined />}
-                loading={isDuplicating}
-                onClick={handleDuplicate}
-              >
-                {t('Дублировать')}
-              </Button>
-              <Button
-                icon={<UserDeleteOutlined />}
-                loading={isLeaving}
-                onClick={handleLeave}
-              >
-                {t('Убрать из своих')}
-              </Button>
-            </>
-          )}
+          <Dropdown
+            trigger={['click']}
+            menu={{ items: moreItems, onClick: handleMoreClick }}
+          >
+            <Button
+              icon={<MoreOutlined />}
+              loading={exporting || isDuplicating || isLeaving}
+            />
+          </Dropdown>
         </HStack>
       </HStack>
 
       <HStack max justify="between" align="center">
         <MyTypography.Base strong>{t('Слова')}</MyTypography.Base>
         {isOwner && (
-          <HStack gap="8" wrap>
-            {dupCount > 0 && (
-              <Button icon={<DiffOutlined />} onClick={() => setDupOpen(true)}>
-                {t('Дубли ({{count}})', { count: dupCount })}
-              </Button>
-            )}
-            <Button icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-              {t('Добавить слова')}
-            </Button>
-          </HStack>
+          <Button icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
+            {t('Добавить слова')}
+          </Button>
         )}
       </HStack>
 

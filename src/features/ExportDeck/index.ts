@@ -1,1 +1,2 @@
-export { ExportDeckButton } from './ui/ExportDeckButton';
+export { useDeckExport } from './model/useDeckExport';
+export type { ExportFormat } from './model/useDeckExport';
