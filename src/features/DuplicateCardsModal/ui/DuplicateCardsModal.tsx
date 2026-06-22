@@ -9,6 +9,7 @@ import {
   useGetCardsQuery,
   useDeleteCardMutation,
   findDuplicateGroups,
+  FavoriteToggle,
 } from '@/entities/Card';
 import { CardForm } from '@/features/CardForm';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
@@ -82,6 +83,7 @@ export const DuplicateCardsModal: FC<DuplicateCardsModalProps> = (props) => {
                     )}
                   </VStack>
                   <HStack gap="2" align="center">
+                    <FavoriteToggle cardUuid={card.uuid} />
                     <Button
                       type="text"
                       size="small"
