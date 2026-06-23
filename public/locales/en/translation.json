@@ -1450,5 +1450,6 @@
   "Лимит запросов к ИИ исчерпан": "AI request limit reached",
   "Не удалось проверить переводы": "Failed to check translations",
   "Изменения применены": "Changes applied",
-  "Не удалось применить изменения": "Failed to apply changes"
+  "Не удалось применить изменения": "Failed to apply changes",
+  "Исправлено ИИ": "AI-corrected"
 }

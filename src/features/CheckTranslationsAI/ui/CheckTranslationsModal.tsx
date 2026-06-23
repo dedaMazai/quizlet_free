@@ -8,12 +8,16 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import type { Key } from 'react';
 import { RobotOutlined } from '@ant-design/icons';
-import { useGetCardsQuery, useUpdateCardsBulkMutation } from '@/entities/Card';
+import {
+  useGetCardsQuery,
+  useUpdateCardsBulkMutation,
+  useCheckTranslationsMutation,
+  useGetAiUsageQuery,
+  AiCheckResult,
+} from '@/entities/Card';
 import { VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
-import { useCheckTranslationsMutation, useGetAiUsageQuery } from '../model/api/aiCheckApi';
-import { AiCheckResult } from '../model/types/aiCheck';
 
 interface CheckTranslationsModalProps {
   open: boolean;

@@ -7,9 +7,15 @@ import {
 } from 'antd';
 import type { InputRef, UploadProps } from 'antd';
 import {
-  DeleteOutlined, DownloadOutlined, PlusOutlined, UnorderedListOutlined, UploadOutlined,
+  DeleteOutlined, DownloadOutlined, PlusOutlined, RobotOutlined, UnorderedListOutlined, UploadOutlined,
 } from '@ant-design/icons';
-import { CardCreateDto, useCreateCardsMutation } from '@/entities/Card';
+import {
+  AiCheckInput,
+  CardCreateDto,
+  useCheckTranslationsMutation,
+  useCreateCardsMutation,
+  useGetAiUsageQuery,
+} from '@/entities/Card';
 import { TranslationResult } from '@/shared/lib/translate';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
@@ -42,6 +48,8 @@ interface CardRow {
   translationEdited: boolean;
   /** Альтернативные варианты перевода от автопереводчика (для выпадающего списка). */
   alternatives: string[];
+  /** true, когда перевод/пример строки подставил ИИ при проверке. */
+  aiCorrected: boolean;
 }
 
 interface CardEditorProps {
@@ -57,6 +65,7 @@ const makeEmptyRow = (): CardRow => ({
   example: '',
   translationEdited: false,
   alternatives: [],
+  aiCorrected: false,
 });
 
 const makeInitialRows = (): CardRow[] => [makeEmptyRow(), makeEmptyRow(), makeEmptyRow()];
@@ -72,6 +81,8 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   const [openVariantsId, setOpenVariantsId] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [createCards, { isLoading }] = useCreateCardsMutation();
+  const [checkTranslations, { isLoading: isChecking }] = useCheckTranslationsMutation();
+  const { data: remaining } = useGetAiUsageQuery(undefined, { skip: !open });
 
   const termRefs = useRef<Map<string, InputRef>>(new Map());
   const focusIdRef = useRef<string | null>(null);
@@ -109,13 +120,17 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   const { translatingIds, requestTranslation } = useAutoTranslate(handleTranslationResult);
 
   const updateRow = useCallback((id: string, field: keyof CardRow, value: string) => {
-    setRows((prev) => prev.map((row) => (row.id === id ? { ...row, [field]: value } : row)));
+    setRows((prev) => prev.map((row) => (
+      row.id === id ? { ...row, [field]: value, aiCorrected: false } : row
+    )));
   }, []);
 
   const handleTermChange = useCallback((id: string, value: string) => {
     // Сбрасываем устаревшие варианты прошлого термина и закрываем выпадашку.
     setRows((prev) => prev.map((row) => (
-      row.id === id ? { ...row, term: value, alternatives: [] } : row
+      row.id === id ? {
+        ...row, term: value, alternatives: [], aiCorrected: false,
+      } : row
     )));
     setOpenVariantsId((prev) => (prev === id ? null : prev));
     requestTranslation(id, value);
@@ -123,7 +138,9 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
 
   const handleTranslationChange = useCallback((id: string, value: string) => {
     setRows((prev) => prev.map((row) => (
-      row.id === id ? { ...row, translation: value, translationEdited: true } : row
+      row.id === id ? {
+        ...row, translation: value, translationEdited: true, aiCorrected: false,
+      } : row
     )));
   }, []);
 
@@ -162,6 +179,47 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
       onClose();
     } catch {
       message.error(t('Не удалось сохранить слова'));
+    }
+  };
+
+  const handleAiCheck = async () => {
+    const input: AiCheckInput[] = rows
+      .filter((row) => row.term.trim())
+      .map((row) => ({
+        uuid: row.id,
+        term: row.term.trim(),
+        translation: row.translation.trim(),
+      }));
+
+    if (!input.length) return;
+
+    try {
+      const data = await checkTranslations(input).unwrap();
+      const byId = new Map(data.map((r) => [r.uuid, r]));
+      setRows((prev) => prev.map((row) => {
+        const result = byId.get(row.id);
+        if (!result) return row;
+        const translation = !result.translation_ok && result.suggested_translation
+          ? result.suggested_translation
+          : row.translation;
+        return {
+          ...row,
+          translation,
+          example: result.example,
+          translationEdited: true,
+          aiCorrected: true,
+        };
+      }));
+      // Закрываем выпадашку вариантов — перевод подставлен ИИ.
+      setOpenVariantsId(null);
+      message.success(t('Переводы проверены'));
+    } catch (err) {
+      const code = (err as { error?: string })?.error;
+      if (code === 'AI_LIMIT_EXCEEDED') {
+        message.error(t('Лимит запросов к ИИ исчерпан'));
+      } else {
+        message.error(t('Не удалось проверить переводы'));
+      }
     }
   };
 
@@ -224,6 +282,11 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
     return false;
   }, [handleImport]);
 
+  const filledCount = rows.filter((row) => row.term.trim()).length;
+  // ИИ-проверка доступна, когда добавлено больше 3 слов.
+  const canAiCheck = filledCount > 3;
+  const noCredits = remaining !== undefined && remaining <= 0;
+
   return (
     <Modal
       open={open}
@@ -258,6 +321,20 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
               {t('Импорт из Excel')}
             </Button>
           </Upload>
+          {canAiCheck && (
+            <Tooltip title={t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}>
+              <Button
+                type="primary"
+                icon={<RobotOutlined />}
+                loading={isChecking}
+                disabled={noCredits}
+                onClick={handleAiCheck}
+                block={isMobile}
+              >
+                {t('Проверить через ИИ')}
+              </Button>
+            </Tooltip>
+          )}
         </HStack>
 
         {rows.map((row, index) => {
@@ -294,6 +371,13 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
                       setOpenVariantsId((prev) => (prev === row.id ? null : row.id));
                     }}
                   />
+                </Tooltip>
+              );
+            }
+            if (row.aiCorrected) {
+              return (
+                <Tooltip title={t('Исправлено ИИ')}>
+                  <RobotOutlined className={cls.aiHint} />
                 </Tooltip>
               );
             }

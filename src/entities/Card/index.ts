@@ -1,5 +1,6 @@
 export type { Card, CardCreateDto, CardUpdateDto } from './model/types/card';
 export type { CardLevel, LearnProgress } from './model/types/learnProgress';
+export type { AiCheckInput, AiCheckResult } from './model/types/aiCheck';
 export {
   useGetCardsQuery,
   useCreateCardMutation,
@@ -12,6 +13,8 @@ export {
   useSaveLearnProgressMutation,
   useGetFavoritesQuery,
   useToggleFavoriteMutation,
+  useCheckTranslationsMutation,
+  useGetAiUsageQuery,
 } from './model/api/cardApi';
 export { findDuplicateGroups } from './model/lib/findDuplicateGroups';
 export { FAVORITES_PROGRESS_KEY } from './model/const/favorites';
