@@ -11,7 +11,6 @@ import { useUserInfo } from '@/entities/User';
 import { DeckList } from '@/widgets/DeckList';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
-import { buildName } from '@/shared/lib/helpers/buildName';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
 import { StatsStrip } from './StatsStrip';
@@ -21,6 +20,13 @@ import { GlobalSearchResults } from './GlobalSearchResults';
 import cls from './MainPage.module.scss';
 
 type DeckFilter = 'all' | 'own' | 'shared';
+
+const getGreetingKey = (hour: number): string => {
+    if (hour >= 5 && hour < 12) return 'Доброе утро';
+    if (hour >= 12 && hour < 18) return 'Добрый день';
+    if (hour >= 18 && hour < 23) return 'Добрый вечер';
+    return 'Доброй ночи';
+};
 
 const MainPage: FC = () => {
     const { t } = useTranslation();
@@ -34,14 +40,8 @@ const MainPage: FC = () => {
     const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
     const [filter, setFilter] = useState<DeckFilter>('all');
 
-    const name = userInfo
-        ? buildName({
-            surname: userInfo.surname,
-            name: userInfo.name,
-            middle_name: userInfo.middle_name,
-            language: userInfo.language,
-        })
-        : '';
+    const name = userInfo?.name ?? '';
+    const greeting = t(getGreetingKey(new Date().getHours()));
 
     const deckList = useMemo(() => decks ?? [], [decks]);
     const cardList = useMemo(() => allCards ?? [], [allCards]);
@@ -66,7 +66,9 @@ const MainPage: FC = () => {
             <VStack max gap="16">
                 <VStack max gap="4">
                     <Typography.Title level={2} className={cls.greeting}>
-                        {name ? t('Добро пожаловать, {{name}}', { name }) : t('Добро пожаловать')}
+                        {name
+                            ? t('{{greeting}}, {{name}}! 👋', { greeting, name })
+                            : t('{{greeting}}! 👋', { greeting })}
                     </Typography.Title>
                     <Typography.Paragraph type="secondary" className={cls.subtitle}>
                         {t('Создавайте колоды слов и заучивайте их в режимах «Карточки» и «Заучивание».')}
