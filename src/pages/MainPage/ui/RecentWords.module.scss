@@ -1,0 +1,32 @@
+.container {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.row {
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--color-fill-tertiary);
+  }
+}
+
+.word {
+  min-width: 0;
+  flex: 1;
+}
+
+.arrow {
+  color: var(--color-text-quaternary);
+}
+
+.deckTag {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

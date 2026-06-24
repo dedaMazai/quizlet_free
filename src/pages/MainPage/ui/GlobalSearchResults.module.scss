@@ -1,0 +1,44 @@
+.container {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.row {
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--color-fill-tertiary);
+  }
+}
+
+.word {
+  min-width: 0;
+  flex: 1;
+}
+
+.arrow {
+  color: var(--color-text-quaternary);
+}
+
+.iconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 16px;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.deckTag {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

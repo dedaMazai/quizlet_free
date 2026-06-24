@@ -1,3 +1,32 @@
 .select {
   flex: 1;
 }
+
+.option {
+  padding: 4px 0;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sectionTitle {
+  padding-top: 4px;
+}
+
+.avatar {
+  flex-shrink: 0;
+  color: #fff;
+  font-weight: 600;
+}
+
+.c0 { background: #1677ff; }
+.c1 { background: #722ed1; }
+.c2 { background: #eb2f96; }
+.c3 { background: #f57834; }
+.c4 { background: #13a8a8; }
+.c5 { background: #52c41a; }
+.c6 { background: #2f54eb; }
+.c7 { background: #fa8c16; }

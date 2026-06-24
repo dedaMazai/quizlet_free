@@ -55,4 +55,6 @@ export {
   useGetUsersQuery,
   useDeleteUserMutation,
   useGetUsersSearchQuery,
+  useSetUserBlockedMutation,
+  useSetUserAiLimitMutation,
 } from './model/api/userApi';

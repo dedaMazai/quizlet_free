@@ -102,7 +102,13 @@ const userApi = rtkApi.injectEndpoints({
       queryFn: async ({ email, password }) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) return supabaseError(error.message);
-        return { data: await fetchUserInfo(data.user) };
+        const userInfo = await fetchUserInfo(data.user);
+        // Страховка на случай, если нативный бан ещё не применился: блокируем вход на клиенте.
+        if (userInfo.blocked) {
+          await supabase.auth.signOut();
+          return supabaseError('USER_BLOCKED');
+        }
+        return { data: userInfo };
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
@@ -207,7 +213,13 @@ const userApi = rtkApi.injectEndpoints({
         const { data, error } = await supabase.auth.getSession();
         if (error) return supabaseError(error.message);
         if (!data.session) return { error: { status: 401, data: 'No session' } };
-        return { data: await fetchUserInfo(data.session.user) };
+        const userInfo = await fetchUserInfo(data.session.user);
+        // Пользователя заблокировали при активной сессии — разлогиниваем.
+        if (userInfo.blocked) {
+          await supabase.auth.signOut();
+          return { error: { status: 401, data: 'User blocked' } };
+        }
+        return { data: userInfo };
       },
       providesTags: (user) => user ? [{
         type: ApiTag.User,
@@ -389,6 +401,46 @@ const userApi = rtkApi.injectEndpoints({
         ApiTag.Users,
       ],
     }),
+    setUserBlocked: build.mutation<void, {
+      user_uuid: string
+      blocked: boolean
+    }>({
+      queryFn: async ({ user_uuid, blocked }) => {
+        const { error } = await supabase.rpc('set_user_blocked', {
+          p_user_id: user_uuid,
+          p_blocked: blocked,
+        });
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
+      invalidatesTags: (_res, _error, { user_uuid }) => [
+        {
+          type: ApiTag.User,
+          id: user_uuid,
+        },
+        ApiTag.Users,
+      ],
+    }),
+    setUserAiLimit: build.mutation<void, {
+      user_uuid: string
+      ai_limit: number
+    }>({
+      queryFn: async ({ user_uuid, ai_limit }) => {
+        const { error } = await supabase.rpc('set_user_ai_limit', {
+          p_user_id: user_uuid,
+          p_limit: ai_limit,
+        });
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
+      invalidatesTags: (_res, _error, { user_uuid }) => [
+        {
+          type: ApiTag.User,
+          id: user_uuid,
+        },
+        ApiTag.Users,
+      ],
+    }),
     deleteUser: build.mutation<void, string>({
       queryFn: async (uuid) => {
         const { error } = await supabase.rpc('delete_user', { p_user_id: uuid });
@@ -418,4 +470,6 @@ export const {
   useGetUsersQuery,
   useDeleteUserMutation,
   useGetUsersSearchQuery,
+  useSetUserBlockedMutation,
+  useSetUserAiLimitMutation,
 } = userApi;

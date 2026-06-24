@@ -38,7 +38,20 @@ import { RoutePath } from '@/shared/config/router/routePath';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import cls from './DeckList.module.scss';
 
-export const DeckList: FC = () => {
+interface DeckListProps {
+  limit?: number;
+  sort?: 'default' | 'recent' | 'name';
+  filter?: 'all' | 'own' | 'shared';
+  showFavorites?: boolean;
+}
+
+export const DeckList: FC<DeckListProps> = (props) => {
+  const {
+    limit,
+    sort = 'default',
+    filter = 'all',
+    showFavorites = true,
+  } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { modal, message } = useAntdApp();
@@ -65,6 +78,22 @@ export const DeckList: FC = () => {
     });
     return map;
   }, [allCards]);
+
+  const visibleDecks = useMemo(() => {
+    let list = decks ?? [];
+    if (filter === 'own') list = list.filter((deck) => deck.is_owner);
+    if (filter === 'shared') list = list.filter((deck) => !deck.is_owner);
+
+    if (sort === 'recent') {
+      list = [...list].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+    } else if (sort === 'name') {
+      list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return typeof limit === 'number' ? list.slice(0, limit) : list;
+  }, [decks, filter, sort, limit]);
+
+  const showFavoritesCard = showFavorites && filter !== 'shared';
 
   const handleDelete = (deck: Deck) => {
     modal.confirm({
@@ -164,13 +193,14 @@ export const DeckList: FC = () => {
     return <Loader />;
   }
 
-  if (!decks?.length) {
+  if (!visibleDecks.length && !showFavoritesCard) {
     return <Empty description={t('Пока нет ни одной колоды')} />;
   }
 
   return (
     <>
       <div className={cls.grid}>
+        {showFavoritesCard && (
         <Card
           variant="borderless"
           className={`${cls.card} ${cls.favoriteCard}`}
@@ -212,8 +242,9 @@ export const DeckList: FC = () => {
             </HStack>
           </VStack>
         </Card>
+        )}
 
-        {decks.map((deck) => (
+        {visibleDecks.map((deck) => (
           <Card
             key={deck.uuid}
             variant="borderless"

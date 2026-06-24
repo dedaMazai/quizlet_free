@@ -61,6 +61,12 @@ export interface UserInfo {
   language?: TLanguageUser
   timezone?: string
 
+  /** Пользователь заблокирован администратором — не может авторизоваться. */
+  blocked?: boolean
+
+  /** Персональный лимит запросов к ИИ (0–25, по умолчанию 5). */
+  ai_limit?: number
+
   suspended_by_user_uuid?: string
   invited_by_user_uuid?: string
 

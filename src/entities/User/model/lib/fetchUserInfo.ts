@@ -29,6 +29,7 @@ export const fetchUserInfo = async (user: User): Promise<UserInfo> => {
     tel: data.tel ?? undefined,
     description: data.description ?? undefined,
     avatar: data.avatar ?? undefined,
+    blocked: data.blocked ?? false,
     role: {
       uuid: `role-${role}`,
       name: role,

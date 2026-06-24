@@ -12,6 +12,8 @@ export interface ProfileRow {
   description: string | null;
   avatar: string | null;
   role: string | null;
+  blocked: boolean | null;
+  ai_limit: number | null;
 }
 
 // Нормализует значение роли из БД в RoleName (фолбэк — 'user').
@@ -31,6 +33,8 @@ export const mapProfile = (row: ProfileRow): UserInfo => {
     tel: row.tel ?? undefined,
     description: row.description ?? undefined,
     avatar: row.avatar ?? undefined,
+    blocked: row.blocked ?? false,
+    ai_limit: row.ai_limit ?? 5,
     language: 'ru',
     role: {
       uuid: `role-${role}`,
