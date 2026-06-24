@@ -136,6 +136,7 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
             {t('Есть доступ')}
           </MyTypography.Small>
           <List
+            className={cls.list}
             loading={isLoading}
             dataSource={shares ?? []}
             locale={{ emptyText: t('Пока ни с кем не поделились') }}

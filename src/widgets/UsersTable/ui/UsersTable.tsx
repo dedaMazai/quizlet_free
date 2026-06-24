@@ -289,14 +289,14 @@ export const UsersTable = () => {
 
     return (
         <VStack max gap="16">
-            <HStack gap="8" wrap>
+            <HStack max gap="8" wrap align="start">
                 <Input
                     placeholder={t('Поиск по ФИО или e-mail')}
                     prefix={<SearchOutlined />}
                     value={search}
                     onChange={handleSearchChange}
                     allowClear
-                    style={{ maxWidth: 280 }}
+                    style={{ width: 280 }}
                 />
                 <RoleSelect
                     placeholder={t('Все роли')}
