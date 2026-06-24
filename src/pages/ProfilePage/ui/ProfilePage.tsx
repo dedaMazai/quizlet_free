@@ -1,13 +1,19 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Card, Tag, Typography } from 'antd';
+import {
+    EditOutlined, MailOutlined, PhoneOutlined, UserOutlined,
+} from '@ant-design/icons';
+import {
+    Avatar, Button, Card, Tag, Typography,
+} from 'antd';
 import { HStack, VStack } from '@/shared/ui/Stack';
-import { useUserInfo } from '@/entities/User';
+import { useUserInfo, ROLE_NAMES } from '@/entities/User';
 import { useGetStudyOverviewQuery } from '@/entities/Statistics';
 import { buildName } from '@/shared/lib/helpers/buildName';
+import { getAvatarSrc } from '@/shared/const/avatars';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import { EditProfileModal } from '@/features/EditProfile';
 import { AccuracyTimeCards } from '@/widgets/AccuracyTimeCards';
 import { StreakHeatmap } from '@/widgets/StreakHeatmap';
 import { MasteryChart } from '@/widgets/MasteryChart';
@@ -17,8 +23,9 @@ import cls from './ProfilePage.module.scss';
 const ProfilePage = () => {
     const { t } = useTranslation();
     const user = useUserInfo();
+    const [editOpen, setEditOpen] = useState(false);
 
-    const userPhoto = user?.avatar_file?.url;
+    const userPhoto = getAvatarSrc(user?.avatar);
 
     const tz = useMemo(
         () => user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
@@ -44,7 +51,12 @@ const ProfilePage = () => {
 
     return (
         <VStack max gap="24">
-            <Typography.Title level={1}>{t('Личный кабинет')}</Typography.Title>
+            <HStack max justify="between" align="center" wrap gap="12">
+                <Typography.Title level={1}>{t('Личный кабинет')}</Typography.Title>
+                <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)}>
+                    {t('Редактировать')}
+                </Button>
+            </HStack>
 
             <Card className={cls.headerCard} variant="borderless">
                 <div className={cls.header}>
@@ -65,7 +77,7 @@ const ProfilePage = () => {
                             </Typography.Title>
                             {user?.role?.name && (
                                 <Tag color="processing" className={cls.roleTag}>
-                                    {user.role.name}
+                                    {t(ROLE_NAMES[user.role.name])}
                                 </Tag>
                             )}
                         </HStack>
@@ -77,9 +89,16 @@ const ProfilePage = () => {
                                 </HStack>
                             ))}
                         </HStack>
+                        {user?.description && (
+                            <MyTypography.Base type="secondary">
+                                {user.description}
+                            </MyTypography.Base>
+                        )}
                     </VStack>
                 </div>
             </Card>
+
+            <EditProfileModal open={editOpen} onClose={() => setEditOpen(false)} />
 
             <Typography.Title level={2}>{t('Статистика')}</Typography.Title>
             {hasData ? (

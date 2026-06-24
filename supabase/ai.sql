@@ -19,6 +19,7 @@ create policy "read own ai usage" on public.ai_usage
 
 -- 2. consume_ai_credit — атомарно резервирует один запрос к ИИ.
 -- Бросает AI_LIMIT_EXCEEDED при достижении лимита. Возвращает остаток после списания.
+-- Админ (is_admin) не упирается в лимит и не расходует счётчик. См. supabase/roles.sql.
 create or replace function public.consume_ai_credit(p_limit int default 5)
 returns int
 language plpgsql
@@ -28,6 +29,10 @@ as $$
 declare
   cur int;
 begin
+  if public.is_admin() then
+    return 9999;
+  end if;
+
   insert into public.ai_usage (user_id, count)
   values (auth.uid(), 0)
   on conflict (user_id) do nothing;
@@ -70,6 +75,10 @@ as $$
 declare
   cur int;
 begin
+  if public.is_admin() then
+    return 9999;
+  end if;
+
   select count into cur from public.ai_usage where user_id = auth.uid();
   return p_limit - coalesce(cur, 0);
 end;

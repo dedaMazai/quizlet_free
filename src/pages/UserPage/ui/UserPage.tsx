@@ -3,9 +3,10 @@ import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Card, Typography } from 'antd';
 import { useParams } from 'react-router';
 import { HStack, VStack } from '@/shared/ui/Stack';
-import { useGetUserQuery, useUserInfo } from '@/entities/User';
+import { useGetUserQuery, useUserInfo, ROLE_NAMES } from '@/entities/User';
 import { buildName } from '@/shared/lib/helpers/buildName';
 import { GENDER } from '@/shared/const/const';
+import { getAvatarSrc } from '@/shared/const/avatars';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { formatDateTime } from '@/shared/lib/formatters';
 
@@ -18,7 +19,7 @@ const UserPage = () => {
         skip: !userUuid,
     });
 
-    const userPhoto = user?.avatar_file?.url;
+    const userPhoto = getAvatarSrc(user?.avatar);
 
     if (!userUuid) {
         return null;
@@ -88,7 +89,7 @@ const UserPage = () => {
                                     },
                                     {
                                         label: t('Роль'),
-                                        value: user?.role?.name || '—',
+                                        value: user?.role?.name ? t(ROLE_NAMES[user.role.name]) : '—',
                                     },
                                     {
                                         label: t('Последний сеанс'),

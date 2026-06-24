@@ -3,7 +3,9 @@ import {
     useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { HomeOutlined, StarFilled, UserOutlined } from '@ant-design/icons';
+import {
+    HomeOutlined, SettingOutlined, StarFilled, UserOutlined,
+} from '@ant-design/icons';
 import { Button } from 'antd';
 import { useLocation, useNavigate } from 'react-router';
 import { BrowserView } from 'react-device-detect';
@@ -134,6 +136,21 @@ export const Sidebar = memo(() => {
                                 {!collapsed && (
                                     <MyTypography.Base className={cls.moduleLabel}>
                                         {t('Личный кабинет')}
+                                    </MyTypography.Base>
+                                )}
+                            </HStack>
+                        </div>
+                        <div
+                            className={classNames(cls.moduleHeader, {
+                                [cls.moduleHeaderActive]: location.pathname.startsWith(RoutePath.SETTINGS()),
+                            })}
+                            onClick={() => handleNavigate(RoutePath.SETTINGS())}
+                        >
+                            <HStack align="center" gap="8" max>
+                                <span className={cls.moduleIcon}><SettingOutlined /></span>
+                                {!collapsed && (
+                                    <MyTypography.Base className={cls.moduleLabel}>
+                                        {t('Настройки')}
                                     </MyTypography.Base>
                                 )}
                             </HStack>

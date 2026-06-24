@@ -28,6 +28,11 @@ declare module '*.svg' {
     export default src;
 }
 
+declare module '*.svg?url' {
+    const src: string;
+    export default src;
+}
+
 // React 19 JSX namespace support
 declare global {
     namespace JSX {

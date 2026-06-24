@@ -6,7 +6,8 @@ import {
 import { supabase, supabaseError } from '@/shared/api/supabaseClient';
 import { userActions } from '../slice/userSlice';
 import { TLanguageUser, UserInfo, UserInfoCreate, RoleName } from '../types/user';
-import { mapSupabaseUser } from '../lib/mapSupabaseUser';
+import { fetchUserInfo } from '../lib/fetchUserInfo';
+import { mapProfile, ProfileRow } from '../lib/mapProfile';
 import { OrderingType, PaginationResult } from '@/shared/types/types';
 import { GenderUser, IS_OLD_SAFARI } from '@/shared/const/const';
 
@@ -52,9 +53,11 @@ export interface UserFiltersSearch {
 
 export interface UpdateMeInfo {
   surname?: string
-  name?: string
+  name: string
   middle_name?: string
   tel?: string
+  description?: string
+  avatar?: string
   gender?: GenderUser
   language?: TLanguageUser
   timezone?: string
@@ -99,7 +102,7 @@ const userApi = rtkApi.injectEndpoints({
       queryFn: async ({ email, password }) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) return supabaseError(error.message);
-        return { data: mapSupabaseUser(data.user) };
+        return { data: await fetchUserInfo(data.user) };
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
@@ -119,7 +122,7 @@ const userApi = rtkApi.injectEndpoints({
         });
         if (error) return supabaseError(error.message);
         // Если в проекте включено подтверждение email — сессии ещё нет (data.session === null).
-        return { data: data.session && data.user ? mapSupabaseUser(data.user) : null };
+        return { data: data.session && data.user ? await fetchUserInfo(data.user) : null };
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
@@ -204,7 +207,7 @@ const userApi = rtkApi.injectEndpoints({
         const { data, error } = await supabase.auth.getSession();
         if (error) return supabaseError(error.message);
         if (!data.session) return { error: { status: 401, data: 'No session' } };
-        return { data: mapSupabaseUser(data.session.user) };
+        return { data: await fetchUserInfo(data.session.user) };
       },
       providesTags: (user) => user ? [{
         type: ApiTag.User,
@@ -225,15 +228,39 @@ const userApi = rtkApi.injectEndpoints({
       },
     }),
     updateMeInfo: build.mutation<UserInfo, UpdateMeInfo>({
-      query: (body) => ({
-        url: '/users/me',
-        method: 'PUT',
-        body,
-      }),
+      // Обновляем свою строку profiles (RLS пропускает только собственные поля; роль не передаём).
+      queryFn: async (body) => {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const authUser = sessionData.session?.user;
+        if (!authUser) return supabaseError('NOT_AUTHENTICATED');
+
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            surname: body.surname ?? null,
+            name: body.name,
+            middle_name: body.middle_name ?? null,
+            tel: body.tel ?? null,
+            description: body.description ?? null,
+            avatar: body.avatar ?? null,
+          })
+          .eq('id', authUser.id);
+        if (error) return supabaseError(error.message);
+
+        return { data: await fetchUserInfo(authUser) };
+      },
       invalidatesTags: (user) => user ? [{
         type: ApiTag.User,
         id: user.uuid,
       }] : [],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(userActions.setUserData(data));
+        } catch (err) {
+          console.error('Update profile error:', err);
+        }
+      },
     }),
     createUser: build.mutation<UserInfo, UserInfoCreate>({
       query: (body) => ({
@@ -245,34 +272,30 @@ const userApi = rtkApi.injectEndpoints({
         ApiTag.Users,
       ],
     }),
-    getUsers: build.query<PaginationResult<UserInfo>, UserFilters | void>({
-      query: (params) => {
-        const urlParams = new URLSearchParams();
+    getUsers: build.query<UserInfo[], UserFilters | void>({
+      // Список пользователей из таблицы profiles. Поиск по name/email — на клиенте (список небольшой).
+      queryFn: async (params) => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .order('email');
+        if (error) return supabaseError(error.message);
 
-        if (params) {
-            Object.entries(params).forEach(([key, value]) => {
-              // Пропускаем undefined и null
-              if (value === undefined || value === null) {
-                  return;
-              }
+        let users = (data as ProfileRow[]).map(mapProfile);
 
-              // Проверяем на пустоту (булевые значения всегда пройдут проверку)
-              if (!`${value}`.trim()) {
-                  return;
-              }
-
-              urlParams.append(key, `${value}`)
-            })
+        const search = params?.name || params?.email;
+        if (search) {
+          const q = search.toLowerCase();
+          users = users.filter(
+            (u) => u.email.toLowerCase().includes(q)
+              || (u.name?.toLowerCase().includes(q) ?? false),
+          );
         }
 
-        return ({
-            url: '/users',
-            method: 'GET',
-            params: urlParams
-        })
-    },
+        return { data: users };
+      },
       providesTags: (res) => {
-        const result = res?.objects.map(({ uuid }) => ({
+        const result = res?.map(({ uuid }) => ({
           type: ApiTag.User,
           id: uuid,
         }))
@@ -316,10 +339,15 @@ const userApi = rtkApi.injectEndpoints({
       },
     }),
     getUser: build.query<UserInfo, string>({
-      query: (uuid) => ({
-        url: `/users/${uuid}`,
-        method: 'GET',
-      }),
+      queryFn: async (uuid) => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', uuid)
+          .single<ProfileRow>();
+        if (error) return supabaseError(error.message);
+        return { data: mapProfile(data) };
+      },
       providesTags: (_res, _error, uuid) => ([{
         type: ApiTag.User,
         id: uuid,
@@ -345,13 +373,14 @@ const userApi = rtkApi.injectEndpoints({
       user_uuid: string
       role: RoleName
     }>({
-      query: ({ user_uuid, role }) => ({
-        url: `/users/${user_uuid}/roles`,
-        method: 'PUT',
-        body: {
-          role,
-        },
-      }),
+      queryFn: async ({ user_uuid, role }) => {
+        const { error } = await supabase.rpc('set_user_role', {
+          p_user_id: user_uuid,
+          p_role: role,
+        });
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
       invalidatesTags: (_res, _error, { user_uuid }) => [
         {
           type: ApiTag.User,
@@ -361,10 +390,11 @@ const userApi = rtkApi.injectEndpoints({
       ],
     }),
     deleteUser: build.mutation<void, string>({
-      query: (uuid) => ({
-        url: `/users/${uuid}`,
-        method: 'DELETE',
-      }),
+      queryFn: async (uuid) => {
+        const { error } = await supabase.rpc('delete_user', { p_user_id: uuid });
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
       invalidatesTags: () => [ApiTag.Users],
     }),
   }),

@@ -6,9 +6,7 @@ import { GenderUser } from "@/shared/const/const";
 
 export const ROLE_NAMES = {
   admin: 'Администратор',
-  editor: 'Редактор',
-  viewer: 'Зритель',
-  guest: 'Гость',
+  user: 'Пользователь',
 } as const;
 
 export type RoleName = keyof typeof ROLE_NAMES;
@@ -43,6 +41,8 @@ export interface UserInfoCreate {
   gender?: GenderUser
   role: RoleName
   avatar_file_uuid?: string
+  avatar?: string
+  description?: string
   language?: TLanguageUser
   timezone?: string
 }
@@ -56,6 +56,8 @@ export interface UserInfo {
   tel?: string
   gender?: GenderUser
   avatar_file_uuid?: string
+  avatar?: string
+  description?: string
   language?: TLanguageUser
   timezone?: string
 

@@ -1,17 +1,22 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Typography } from 'antd';
+import { useSearchParams } from 'react-router';
+import { Card, Tabs, Typography } from 'antd';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import {
     BgColorsOutlined,
     GlobalOutlined,
     SoundOutlined,
+    TeamOutlined,
 } from '@ant-design/icons';
 import { VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { ThemeSwitcher } from '@/features/ThemeSwitcher';
 import { LangSwitcher } from '@/features/LangSwitcher';
 import { VoiceSwitcher } from '@/features/VoiceSwitcher';
+import { useUserAccesses, checkRequireAccesses } from '@/entities/User';
+import { Accesses } from '@/shared/types/accesses';
+import { UsersTable } from '@/widgets/UsersTable';
 import cls from './SettingPage.module.scss';
 
 interface SettingRowProps {
@@ -44,16 +49,16 @@ const SettingRow: FC<SettingRowProps> = (props) => {
 
 const SettingPage = () => {
     const { t } = useTranslation();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const userAccesses = useUserAccesses();
 
-    return (
-        <VStack max fullHeight gap="24">
-            <VStack gap="4">
-                <Typography.Title level={2}>{t('Настройки')}</Typography.Title>
-                <Typography.Paragraph type="secondary">
-                    {t('Персонализация приложения')}
-                </Typography.Paragraph>
-            </VStack>
+    const canManageUsers = useMemo(
+        () => checkRequireAccesses({ accesses: [Accesses.users_can_read], userAccesses }),
+        [userAccesses],
+    );
 
+    const preferences = (
+        <VStack max gap="24">
             <Card className={cls.card} variant="borderless">
                 <VStack max>
                     <div className={cls.sectionTitle}>{t('Оформление')}</div>
@@ -85,6 +90,47 @@ const SettingPage = () => {
                     />
                 </VStack>
             </Card>
+        </VStack>
+    );
+
+    const tabItems = [
+        {
+            key: 'Settings',
+            label: t('Настройки'),
+            children: preferences,
+        },
+        ...(canManageUsers ? [{
+            key: 'Users',
+            label: (
+                <span><TeamOutlined /> {t('Пользователи')}</span>
+            ),
+            children: <UsersTable />,
+        }] : []),
+    ];
+
+    const activeKey = searchParams.get('activeTab') === 'Users' && canManageUsers
+        ? 'Users'
+        : 'Settings';
+
+    const handleTabChange = (key: string) => {
+        if (key === 'Settings') {
+            searchParams.delete('activeTab');
+        } else {
+            searchParams.set('activeTab', key);
+        }
+        setSearchParams(searchParams);
+    };
+
+    return (
+        <VStack max fullHeight gap="24">
+            <VStack gap="4">
+                <Typography.Title level={2}>{t('Настройки')}</Typography.Title>
+                <Typography.Paragraph type="secondary">
+                    {t('Персонализация приложения')}
+                </Typography.Paragraph>
+            </VStack>
+
+            <Tabs activeKey={activeKey} onChange={handleTabChange} items={tabItems} />
         </VStack>
     );
 };
