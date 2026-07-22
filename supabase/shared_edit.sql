@@ -3,7 +3,10 @@
 -- Применять ПОСЛЕ sharing.sql и roles.sql (использует is_deck_shared_with_me, owns_deck, is_admin).
 
 -- 1. Настройка владельца «могут редактировать все, у кого есть доступ».
-alter table public.decks add column if not exists allow_shared_edit boolean not null default false;
+-- По умолчанию включена: в большинстве случаев участники должны редактировать.
+alter table public.decks add column if not exists allow_shared_edit boolean not null default true;
+-- На случай, если колонка уже была создана с другим дефолтом (add column if not exists его не меняет).
+alter table public.decks alter column allow_shared_edit set default true;
 
 -- 2. Кто может править карточки колоды: владелец, гость при allow_shared_edit, админ-гость.
 -- SECURITY DEFINER — иначе рекурсия политик decks <-> cards (см. комментарий в sharing.sql).

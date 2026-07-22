@@ -91,9 +91,10 @@ const deckApi = rtkApi.injectEndpoints({
     createDeck: build.mutation<Deck, DeckCreateDto>({
       queryFn: async (dto) => {
         const currentUserId = await getCurrentUserId();
+        // Общее редактирование включено по умолчанию: чаще всего участники должны редактировать.
         const { data, error } = await supabase
           .from('decks')
-          .insert({ name: dto.name, description: dto.description ?? null })
+          .insert({ name: dto.name, description: dto.description ?? null, allow_shared_edit: true })
           .select(DECK_SELECT)
           .single();
         if (error) return supabaseError(error.message);
@@ -131,7 +132,11 @@ const deckApi = rtkApi.injectEndpoints({
         const currentUserId = await getCurrentUserId();
         const { data: newDeck, error: deckError } = await supabase
           .from('decks')
-          .insert({ name: `${source.name} (копия)`, description: source.description ?? null })
+          .insert({
+            name: `${source.name} (копия)`,
+            description: source.description ?? null,
+            allow_shared_edit: true,
+          })
           .select(DECK_SELECT)
           .single();
         if (deckError) return supabaseError(deckError.message);
