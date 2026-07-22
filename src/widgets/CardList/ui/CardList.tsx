@@ -1,15 +1,13 @@
 import { FC, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Table, Empty, Tag,
+  Button, Table, Empty, Pagination, Tag,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import {
   Card,
-  useGetCardsQuery,
   useDeleteCardMutation,
-  useGetFavoritesQuery,
   FavoriteToggle,
 } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
@@ -22,13 +20,22 @@ import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './CardList.module.scss';
 
+/** Серверная пагинация: список в cards — одна страница из total строк. */
+interface CardListPagination {
+  current: number;
+  pageSize: number;
+  total: number;
+  onChange: (page: number, pageSize: number) => void;
+}
+
 interface CardListProps {
-  /** Если задан — показываются слова только этой колоды, иначе все слова. */
+  /** Если задан — слова одной колоды (скрывается колонка «Колода»). */
   deckUuid?: string;
-  /** Если true — показываются только избранные слова (из всех колод). */
-  favoritesOnly?: boolean;
-  /** Явный список слов (переопределяет загрузку — для фильтрации на стороне страницы). */
+  /** Список слов (при серверной пагинации — текущая страница). */
   cards?: Card[];
+  /** Серверная пагинация; без неё список пагинируется на клиенте. */
+  pagination?: CardListPagination;
+  loading?: boolean;
   /** Текст пустого состояния (например, «Ничего не найдено» при поиске). */
   emptyText?: string;
   /** Если true — скрыть кнопки редактирования/удаления (чужая, расшаренная колода). */
@@ -37,27 +44,14 @@ interface CardListProps {
 
 export const CardList: FC<CardListProps> = (props) => {
   const {
-    deckUuid, favoritesOnly, cards: cardsProp, emptyText, readOnly,
+    deckUuid, cards, pagination, loading, emptyText, readOnly,
   } = props;
   const { t } = useTranslation();
   const { modal, message } = useAntdApp();
   const { isMobile } = useMatchMedia();
 
-  const { data: allCards, isLoading } = useGetCardsQuery(deckUuid ?? undefined, {
-    skip: Boolean(cardsProp),
-  });
-  const { data: favorites } = useGetFavoritesQuery(undefined, { skip: !favoritesOnly });
   const { data: decks } = useGetDecksQuery(undefined, { skip: Boolean(deckUuid) });
   const [deleteCard] = useDeleteCardMutation();
-
-  const cards = useMemo(() => {
-    if (cardsProp) {
-      return cardsProp;
-    }
-    return favoritesOnly
-      ? (allCards ?? []).filter((card) => favorites?.includes(card.uuid))
-      : allCards;
-  }, [cardsProp, allCards, favorites, favoritesOnly]);
 
   const [editingCard, setEditingCard] = useState<Card | undefined>(undefined);
 
@@ -149,14 +143,12 @@ export const CardList: FC<CardListProps> = (props) => {
         ]),
   ];
 
-  if (isLoading) {
+  if (loading) {
     return <Loader />;
   }
 
   if (!cards?.length) {
-    const description = emptyText
-      ?? (favoritesOnly ? t('В избранном пока нет слов') : t('Пока нет слов'));
-    return <Empty description={description} />;
+    return <Empty description={emptyText ?? t('Пока нет слов')} />;
   }
 
   const editor = readOnly ? null : (
@@ -217,6 +209,17 @@ export const CardList: FC<CardListProps> = (props) => {
               </HStack>
             </div>
           ))}
+          {pagination && pagination.total > pagination.pageSize && (
+            <HStack max justify="center">
+              <Pagination
+                simple
+                current={pagination.current}
+                pageSize={pagination.pageSize}
+                total={pagination.total}
+                onChange={pagination.onChange}
+              />
+            </HStack>
+          )}
         </VStack>
         {editor}
       </>
@@ -231,13 +234,20 @@ export const CardList: FC<CardListProps> = (props) => {
           dataSource={cards}
           columns={columns}
           pagination={
-            cards.length > 20
+            pagination
               ? {
+                  current: pagination.current,
+                  pageSize: pagination.pageSize,
+                  total: pagination.total,
+                  showSizeChanger: true,
+                  pageSizeOptions: [10, 20, 50, 100],
+                  onChange: pagination.onChange,
+                }
+              : cards.length > 20 && {
                   defaultPageSize: 20,
                   showSizeChanger: true,
                   pageSizeOptions: [10, 20, 50, 100],
                 }
-              : false
           }
           size="middle"
         />

@@ -1,6 +1,8 @@
 import { ApiTag, rtkApi } from '@/shared/api/rtkApi';
 import { supabase, supabaseError, getCurrentUserId } from '@/shared/api/supabaseClient';
-import { Card, CardCreateDto, CardUpdateDto } from '../types/card';
+import {
+  Card, CardCreateDto, CardUpdateDto, CardsPage, CardsPageArgs,
+} from '../types/card';
 import { LearnProgress } from '../types/learnProgress';
 import { AiCheckInput, AiCheckResult } from '../types/aiCheck';
 
@@ -31,15 +33,95 @@ const mapCard = (row: CardRow): Card => ({
   updated_at: row.updated_at,
 });
 
+// Шаблон для ilike внутри or(): экранируем спецсимволы LIKE и кавычки,
+// сам шаблон берём в двойные кавычки — иначе запятые/скобки в запросе ломают синтаксис or().
+const toSearchPattern = (raw: string): string => {
+  const escaped = raw.replace(/[\\%_"]/g, (char) => `\\${char}`);
+  return `"%${escaped}%"`;
+};
+
 const cardApi = rtkApi.injectEndpoints({
   endpoints: (build) => ({
     getCards: build.query<Card[], string | void>({
       queryFn: async (deckUuid) => {
-        let query = supabase.from('cards').select('*').order('created_at', { ascending: true });
+        // PostgREST отдаёт максимум 1000 строк за запрос — выбираем все постранично.
+        // Вторичная сортировка по id: created_at совпадает у карточек из bulk-вставки,
+        // без неё страницы могут пересекаться или терять строки.
+        const PAGE_SIZE = 1000;
+        const rows: CardRow[] = [];
+        for (let from = 0; ; from += PAGE_SIZE) {
+          let query = supabase
+            .from('cards')
+            .select('*')
+            .order('created_at', { ascending: true })
+            .order('id', { ascending: true })
+            .range(from, from + PAGE_SIZE - 1);
+          if (deckUuid) {
+            query = query.eq('deck_id', deckUuid);
+          }
+          const { data, error } = await query;
+          if (error) return supabaseError(error.message);
+          const page = data as CardRow[];
+          rows.push(...page);
+          if (page.length < PAGE_SIZE) break;
+        }
+        return { data: rows.map(mapCard) };
+      },
+      providesTags: [ApiTag.Cards],
+    }),
+    // Страница слов с сервера: пагинация, поиск и фильтры без загрузки всей таблицы.
+    getCardsPage: build.query<CardsPage, CardsPageArgs>({
+      queryFn: async ({
+        page, pageSize, search, deckUuid, uuids,
+      }) => {
+        if (uuids && uuids.length === 0) {
+          return { data: { cards: [], total: 0 } };
+        }
+        let query = supabase
+          .from('cards')
+          .select('*', { count: 'exact' })
+          .order('created_at', { ascending: true })
+          .order('id', { ascending: true })
+          .range((page - 1) * pageSize, page * pageSize - 1);
         if (deckUuid) {
           query = query.eq('deck_id', deckUuid);
         }
-        const { data, error } = await query;
+        if (uuids) {
+          query = query.in('id', uuids);
+        }
+        const trimmed = search?.trim();
+        if (trimmed) {
+          const pattern = toSearchPattern(trimmed);
+          query = query.or(
+            `term.ilike.${pattern},translation.ilike.${pattern},example.ilike.${pattern}`,
+          );
+        }
+        const { data, error, count } = await query;
+        if (error) return supabaseError(error.message);
+        return { data: { cards: (data as CardRow[]).map(mapCard), total: count ?? 0 } };
+      },
+      providesTags: [ApiTag.Cards],
+    }),
+    // Общее число слов пользователя (без загрузки строк).
+    getCardsCount: build.query<number, void>({
+      queryFn: async () => {
+        const { count, error } = await supabase
+          .from('cards')
+          .select('*', { count: 'exact', head: true });
+        if (error) return supabaseError(error.message);
+        return { data: count ?? 0 };
+      },
+      providesTags: [ApiTag.Cards],
+    }),
+    // Последние добавленные слова (для блока на главной).
+    getRecentCards: build.query<Card[], number>({
+      queryFn: async (limit) => {
+        const { data, error } = await supabase
+          .from('cards')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .limit(limit);
         if (error) return supabaseError(error.message);
         return { data: (data as CardRow[]).map(mapCard) };
       },
@@ -231,6 +313,9 @@ const cardApi = rtkApi.injectEndpoints({
 
 export const {
   useGetCardsQuery,
+  useGetCardsPageQuery,
+  useGetCardsCountQuery,
+  useGetRecentCardsQuery,
   useCreateCardMutation,
   useCreateCardsMutation,
   useUpdateCardMutation,

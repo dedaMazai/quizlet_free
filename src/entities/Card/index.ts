@@ -1,8 +1,13 @@
-export type { Card, CardCreateDto, CardUpdateDto } from './model/types/card';
+export type {
+  Card, CardCreateDto, CardUpdateDto, CardsPage, CardsPageArgs,
+} from './model/types/card';
 export type { CardLevel, LearnProgress } from './model/types/learnProgress';
 export type { AiCheckInput, AiCheckResult } from './model/types/aiCheck';
 export {
   useGetCardsQuery,
+  useGetCardsPageQuery,
+  useGetCardsCountQuery,
+  useGetRecentCardsQuery,
   useCreateCardMutation,
   useCreateCardsMutation,
   useUpdateCardMutation,

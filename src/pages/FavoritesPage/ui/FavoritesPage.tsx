@@ -1,8 +1,9 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { ReadOutlined, BulbOutlined, StarFilled } from '@ant-design/icons';
-import { useGetFavoritesQuery } from '@/entities/Card';
+import { useGetFavoritesQuery, useGetCardsPageQuery } from '@/entities/Card';
 import { CardList } from '@/widgets/CardList';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
@@ -14,8 +15,25 @@ const FavoritesPage = () => {
   const navigate = useNavigate();
 
   const { data: favorites } = useGetFavoritesQuery();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+
+  // Сортированная копия — стабильный ключ кэша RTK Query при том же наборе избранного.
+  const uuids = useMemo(() => [...(favorites ?? [])].sort(), [favorites]);
+  const { data: cardsPage, isLoading } = useGetCardsPageQuery(
+    { page, pageSize, uuids },
+    { skip: !favorites },
+  );
+
   const count = favorites?.length ?? 0;
   const isEmpty = count === 0;
+  const total = cardsPage?.total ?? 0;
+
+  // Если текущая страница опустела (сняли звёздочки) — откатываемся назад.
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(total / pageSize));
+    if (page > maxPage) setPage(maxPage);
+  }, [total, page, pageSize]);
 
   return (
     <VStack max fullHeight gap="16">
@@ -48,7 +66,20 @@ const FavoritesPage = () => {
         </HStack>
       </HStack>
 
-      <CardList favoritesOnly />
+      <CardList
+        cards={cardsPage?.cards}
+        loading={isLoading || !favorites}
+        pagination={{
+          current: page,
+          pageSize,
+          total,
+          onChange: (nextPage, nextPageSize) => {
+            setPage(nextPage);
+            setPageSize(nextPageSize);
+          },
+        }}
+        emptyText={t('В избранном пока нет слов')}
+      />
     </VStack>
   );
 };

@@ -17,6 +17,7 @@ interface DeckRow {
   description: string | null;
   user_id: string;
   owner: OwnerProfile | OwnerProfile[] | null;
+  cards: { count: number }[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -35,12 +36,13 @@ const mapDeck = (row: DeckRow, currentUserId: string | null): Deck => {
     is_owner: row.user_id === currentUserId,
     owner_name: owner?.name ?? undefined,
     owner_email: owner?.email ?? undefined,
+    cards_count: row.cards?.[0]?.count ?? 0,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
 };
 
-const DECK_SELECT = '*, owner:profiles!decks_owner_profile_fkey(email, name)';
+const DECK_SELECT = '*, owner:profiles!decks_owner_profile_fkey(email, name), cards(count)';
 
 // Понятные сообщения для ошибок RPC share_deck_by_email.
 const shareErrorMessage = (raw: string): string => {
@@ -67,7 +69,8 @@ const deckApi = rtkApi.injectEndpoints({
         if (error) return supabaseError(error.message);
         return { data: (data as DeckRow[]).map((row) => mapDeck(row, currentUserId)) };
       },
-      providesTags: [ApiTag.Decks],
+      // Cards — чтобы счётчики слов обновлялись после мутаций карточек.
+      providesTags: [ApiTag.Decks, ApiTag.Cards],
     }),
     getDeck: build.query<Deck | undefined, string>({
       queryFn: async (uuid) => {
@@ -80,7 +83,8 @@ const deckApi = rtkApi.injectEndpoints({
         if (error) return supabaseError(error.message);
         return { data: data ? mapDeck(data as DeckRow, currentUserId) : undefined };
       },
-      providesTags: (result) => (result ? [{ type: ApiTag.Deck, id: result.uuid }] : []),
+      providesTags: (result) =>
+        (result ? [{ type: ApiTag.Deck, id: result.uuid }, ApiTag.Cards] : [ApiTag.Cards]),
     }),
     createDeck: build.mutation<Deck, DeckCreateDto>({
       queryFn: async (dto) => {
@@ -208,6 +212,15 @@ const deckApi = rtkApi.injectEndpoints({
     // Удаление доступа: владельцем (отзыв) или гостем по своему userId («убрать из своих»).
     removeDeckShare: build.mutation<void, { deckUuid: string; userId: string }>({
       queryFn: async ({ deckUuid, userId }) => {
+        const currentUserId = await getCurrentUserId();
+        // Гость убирает колоду у себя — RPC чистит его прогресс, если тот нулевой
+        // (learn_progress и append-only study_events недоступны для delete с клиента).
+        if (userId === currentUserId) {
+          const { error } = await supabase.rpc('leave_shared_deck', { p_deck_id: deckUuid });
+          if (error) return supabaseError(error.message);
+          return { data: undefined };
+        }
+        // Владелец отзывает доступ у другого пользователя — прогресс гостя не трогаем.
         const { error } = await supabase
           .from('deck_shares')
           .delete()
@@ -216,7 +229,7 @@ const deckApi = rtkApi.injectEndpoints({
         if (error) return supabaseError(error.message);
         return { data: undefined };
       },
-      invalidatesTags: [ApiTag.DeckShares, ApiTag.Decks],
+      invalidatesTags: [ApiTag.DeckShares, ApiTag.Decks, ApiTag.LearnProgress, ApiTag.StudyStats],
     }),
   }),
 });

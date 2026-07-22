@@ -6,7 +6,12 @@ import {
 } from 'antd';
 import { SearchOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { useGetDecksQuery } from '@/entities/Deck';
-import { useGetCardsQuery, useGetFavoritesQuery } from '@/entities/Card';
+import {
+    useGetCardsPageQuery,
+    useGetCardsCountQuery,
+    useGetRecentCardsQuery,
+    useGetFavoritesQuery,
+} from '@/entities/Card';
 import { useUserInfo } from '@/entities/User';
 import { DeckList } from '@/widgets/DeckList';
 import { HStack, VStack } from '@/shared/ui/Stack';
@@ -34,17 +39,23 @@ const MainPage: FC = () => {
     const userInfo = useUserInfo();
 
     const { data: decks } = useGetDecksQuery();
-    const { data: allCards } = useGetCardsQuery();
+    const { data: wordsCount } = useGetCardsCountQuery();
+    const { data: recentCards } = useGetRecentCardsQuery(6);
     const { data: favorites } = useGetFavoritesQuery();
 
     const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
     const [filter, setFilter] = useState<DeckFilter>('all');
 
+    const hasSearch = Boolean(debouncedSearch.trim());
+    const { data: searchResults } = useGetCardsPageQuery(
+        { page: 1, pageSize: 20, search: debouncedSearch.trim() },
+        { skip: !hasSearch },
+    );
+
     const name = userInfo?.name ?? '';
     const greeting = t(getGreetingKey(new Date().getHours()));
 
     const deckList = useMemo(() => decks ?? [], [decks]);
-    const cardList = useMemo(() => allCards ?? [], [allCards]);
 
     const deckNameByUuid = useMemo(() => {
         const map: Record<string, string> = {};
@@ -58,8 +69,6 @@ const MainPage: FC = () => {
         () => deckList.filter((deck) => !deck.is_owner).length,
         [deckList],
     );
-
-    const hasSearch = Boolean(debouncedSearch.trim());
 
     return (
         <VStack max gap="24">
@@ -89,14 +98,14 @@ const MainPage: FC = () => {
                 <GlobalSearchResults
                     query={debouncedSearch}
                     decks={deckList}
-                    cards={cardList}
+                    cards={searchResults?.cards ?? []}
                     deckNameByUuid={deckNameByUuid}
                 />
             ) : (
                 <>
                     <StatsStrip
                         decksCount={deckList.length}
-                        wordsCount={cardList.length}
+                        wordsCount={wordsCount ?? 0}
                         favoritesCount={favorites?.length ?? 0}
                         sharedCount={sharedCount}
                     />
@@ -133,7 +142,7 @@ const MainPage: FC = () => {
                         <MyTypography.Large strong>
                             {t('Недавно добавленные слова')}
                         </MyTypography.Large>
-                        <RecentWords cards={cardList} deckNameByUuid={deckNameByUuid} />
+                        <RecentWords cards={recentCards ?? []} deckNameByUuid={deckNameByUuid} />
                     </VStack>
                 </>
             )}

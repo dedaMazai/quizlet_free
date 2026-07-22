@@ -147,3 +147,38 @@ create policy "read own or shared cards" on public.cards
   for select to authenticated
   using (user_id = auth.uid() or public.is_deck_shared_with_me(deck_id));
 -- insert/update/delete остаются owner-only — гость не может менять слова.
+
+-- 6. RPC: гость убирает расшаренную колоду у себя; нулевой прогресс чистится, реальный — остаётся.
+-- «Нулевой» = ни одна карточка не дошла до уровня > 0 (в профиле такая колода шумит строкой «0%»).
+-- study_events по RLS append-only, поэтому очистка возможна только через SECURITY DEFINER.
+-- Удаляются только собственные строки вызывающего (auth.uid()) — данные других не задеваются.
+create or replace function public.leave_shared_deck(p_deck_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  has_progress boolean;
+begin
+  delete from public.deck_shares
+  where deck_id = p_deck_id and user_id = auth.uid();
+
+  select exists (
+    select 1
+    from public.learn_progress lp
+    cross join lateral jsonb_each_text(lp.levels) as kv(card_id, value)
+    where lp.user_id = auth.uid()
+      and lp.deck_key = p_deck_id::text
+      and (kv.value)::int > 0
+  ) into has_progress;
+
+  if not has_progress then
+    delete from public.learn_progress
+    where deck_key = p_deck_id::text and user_id = auth.uid();
+
+    delete from public.study_events
+    where deck_key = p_deck_id::text and user_id = auth.uid();
+  end if;
+end;
+$$;

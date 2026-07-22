@@ -24,7 +24,6 @@ import {
   useRemoveDeckShareMutation,
 } from '@/entities/Deck';
 import {
-  useGetCardsQuery,
   useDeleteCardsByDeckMutation,
   useGetFavoritesQuery,
 } from '@/entities/Card';
@@ -58,7 +57,6 @@ export const DeckList: FC<DeckListProps> = (props) => {
   const userInfo = useUserInfo();
 
   const { data: decks, isLoading } = useGetDecksQuery();
-  const { data: allCards } = useGetCardsQuery();
   const { data: favorites } = useGetFavoritesQuery();
   const [deleteDeck] = useDeleteDeckMutation();
   const [duplicateDeck] = useDuplicateDeckMutation();
@@ -70,14 +68,6 @@ export const DeckList: FC<DeckListProps> = (props) => {
   const [editingDeck, setEditingDeck] = useState<Deck | undefined>(undefined);
   const [formOpen, setFormOpen] = useState(false);
   const [sharingDeckUuid, setSharingDeckUuid] = useState<string | undefined>(undefined);
-
-  const countByDeck = useMemo(() => {
-    const map: Record<string, number> = {};
-    allCards?.forEach((card) => {
-      map[card.deck_uuid] = (map[card.deck_uuid] ?? 0) + 1;
-    });
-    return map;
-  }, [allCards]);
 
   const visibleDecks = useMemo(() => {
     let list = decks ?? [];
@@ -276,7 +266,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
                   <MyTypography.Base type="secondary">{deck.description}</MyTypography.Base>
                 )}
                 <span className={cls.countBadge}>
-                  {t('{{count}} слов', { count: countByDeck[deck.uuid] ?? 0 })}
+                  {t('{{count}} слов', { count: deck.cards_count })}
                 </span>
               </VStack>
 

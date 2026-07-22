@@ -8,6 +8,8 @@ export interface Deck {
   /** Имя автора (для показа на расшаренной колоде). */
   owner_name?: string;
   owner_email?: string;
+  /** Число слов в колоде (считается на сервере через embed cards(count)). */
+  cards_count: number;
   created_at: string;
   updated_at: string;
 }

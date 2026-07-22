@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Input, Select } from 'antd';
 import { ReadOutlined, BulbOutlined, SearchOutlined } from '@ant-design/icons';
-import { useGetCardsQuery } from '@/entities/Card';
+import { useGetCardsPageQuery, useGetCardsCountQuery } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { CardList } from '@/widgets/CardList';
 import { HStack, VStack } from '@/shared/ui/Stack';
@@ -16,31 +16,41 @@ const AllWordsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { data: cards } = useGetCardsQuery();
   const { data: decks } = useGetDecksQuery();
+  const { data: totalWords } = useGetCardsCountQuery();
 
   const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
   const [deckFilter, setDeckFilter] = useState<string | undefined>(undefined);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+
+  const trimmedSearch = debouncedSearch.trim();
+  const { data: cardsPage, isLoading } = useGetCardsPageQuery({
+    page,
+    pageSize,
+    search: trimmedSearch || undefined,
+    deckUuid: deckFilter,
+  });
+  const total = cardsPage?.total ?? 0;
+
+  // При смене поиска/фильтра начинаем с первой страницы.
+  useEffect(() => {
+    setPage(1);
+  }, [trimmedSearch, deckFilter]);
+
+  // Если текущая страница опустела (например, после удаления слов) — откатываемся назад.
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(total / pageSize));
+    if (page > maxPage) setPage(maxPage);
+  }, [total, page, pageSize]);
 
   const deckOptions = useMemo(
     () => (decks ?? []).map((deck) => ({ value: deck.uuid, label: deck.name })),
     [decks],
   );
 
-  const filtered = useMemo(() => {
-    const query = debouncedSearch.trim().toLowerCase();
-    return (cards ?? []).filter((card) => {
-      if (deckFilter && card.deck_uuid !== deckFilter) return false;
-      if (!query) return true;
-      return card.term.toLowerCase().includes(query)
-        || card.translation.toLowerCase().includes(query)
-        || (card.example?.toLowerCase().includes(query) ?? false);
-    });
-  }, [cards, deckFilter, debouncedSearch]);
-
-  const totalCount = cards?.length ?? 0;
-  const isEmpty = totalCount === 0;
-  const hasFilter = Boolean(debouncedSearch.trim() || deckFilter);
+  const isEmpty = (totalWords ?? 0) === 0;
+  const hasFilter = Boolean(trimmedSearch || deckFilter);
 
   return (
     <VStack max fullHeight gap="16">
@@ -48,7 +58,7 @@ const AllWordsPage = () => {
         <VStack gap="4">
           <MyTypography.Large strong>{t('Все слова')}</MyTypography.Large>
           <MyTypography.Base type="secondary">
-            {t('{{count}} слов', { count: filtered.length })}
+            {t('{{count}} слов', { count: total })}
           </MyTypography.Base>
         </VStack>
         <HStack gap="8" wrap>
@@ -90,7 +100,17 @@ const AllWordsPage = () => {
       </HStack>
 
       <CardList
-        cards={filtered}
+        cards={cardsPage?.cards}
+        loading={isLoading}
+        pagination={{
+          current: page,
+          pageSize,
+          total,
+          onChange: (nextPage, nextPageSize) => {
+            setPage(nextPage);
+            setPageSize(nextPageSize);
+          },
+        }}
         emptyText={hasFilter ? t('Ничего не найдено') : undefined}
       />
     </VStack>
