@@ -139,14 +139,18 @@ drop policy if exists "read own or shared decks" on public.decks;
 create policy "read own or shared decks" on public.decks
   for select to authenticated
   using (user_id = auth.uid() or public.is_deck_shared_with_me(id));
--- insert/update/delete остаются owner-only (политики auth.uid() = user_id не меняем).
+-- insert/delete остаются owner-only; update для админа-гостя добавляется в shared_edit.sql.
 
--- 5. RLS cards: видеть карточку может её владелец ИЛИ гость колоды.
+-- 5. RLS cards: видеть карточку может её владелец, владелец колоды ИЛИ гость колоды.
+-- owns_deck нужен для общего редактирования (shared_edit.sql): карточка, добавленная
+-- гостем, имеет user_id гостя — без owns_deck владелец колоды её бы не видел.
 drop policy if exists "read own or shared cards" on public.cards;
 create policy "read own or shared cards" on public.cards
   for select to authenticated
-  using (user_id = auth.uid() or public.is_deck_shared_with_me(deck_id));
--- insert/update/delete остаются owner-only — гость не может менять слова.
+  using (user_id = auth.uid()
+      or public.owns_deck(deck_id)
+      or public.is_deck_shared_with_me(deck_id));
+-- Политики записи для гостей и админа — в shared_edit.sql (owner-only остаются как OR-ветка).
 
 -- 6. RPC: гость убирает расшаренную колоду у себя; нулевой прогресс чистится, реальный — остаётся.
 -- «Нулевой» = ни одна карточка не дошла до уровня > 0 (в профиле такая колода шумит строкой «0%»).
@@ -164,21 +168,24 @@ begin
   delete from public.deck_shares
   where deck_id = p_deck_id and user_id = auth.uid();
 
+  -- Ключи прогресса колоды: сама колода и её избранное («__favorites__:<uuid>»).
   select exists (
     select 1
     from public.learn_progress lp
     cross join lateral jsonb_each_text(lp.levels) as kv(card_id, value)
     where lp.user_id = auth.uid()
-      and lp.deck_key = p_deck_id::text
+      and lp.deck_key in (p_deck_id::text, '__favorites__:' || p_deck_id::text)
       and (kv.value)::int > 0
   ) into has_progress;
 
   if not has_progress then
     delete from public.learn_progress
-    where deck_key = p_deck_id::text and user_id = auth.uid();
+    where deck_key in (p_deck_id::text, '__favorites__:' || p_deck_id::text)
+      and user_id = auth.uid();
 
     delete from public.study_events
-    where deck_key = p_deck_id::text and user_id = auth.uid();
+    where deck_key in (p_deck_id::text, '__favorites__:' || p_deck_id::text)
+      and user_id = auth.uid();
   end if;
 end;
 $$;

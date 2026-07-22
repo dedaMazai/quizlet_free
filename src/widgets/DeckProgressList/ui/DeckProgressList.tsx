@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card } from 'antd';
 import {
   ALL_WORDS_PROGRESS_KEY,
+  DECK_FAVORITES_PROGRESS_PREFIX,
   FAVORITES_PROGRESS_KEY,
 } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
@@ -18,6 +19,7 @@ interface DeckProgressListProps {
 }
 
 interface DeckRow {
+  key: string;
   name: string;
   mastered: number;
   total: number;
@@ -30,27 +32,46 @@ export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) =
   const { data: decks } = useGetDecksQuery();
 
   const rows = useMemo<DeckRow[]>(() => {
-    const liveNames = new Map((decks ?? []).map((d) => [d.uuid, d.name]));
+    // Пока колоды не загружены, строки не строим — иначе всё отфильтруется и блок мигнёт.
+    if (!decks) return [];
+    const liveNames = new Map(decks.map((d) => [d.uuid, d.name]));
 
-    const labelFor = (deckKey: string, snapshot: string | null): string => {
+    // Показываем только доступные колоды: удалённые и отшаренные скрываем.
+    const isAccessible = (deckKey: string): boolean => {
+      if (deckKey === FAVORITES_PROGRESS_KEY || deckKey === ALL_WORDS_PROGRESS_KEY) return true;
+      if (deckKey.startsWith(DECK_FAVORITES_PROGRESS_PREFIX)) {
+        return liveNames.has(deckKey.slice(DECK_FAVORITES_PROGRESS_PREFIX.length));
+      }
+      return liveNames.has(deckKey);
+    };
+
+    const labelFor = (deckKey: string): string => {
       if (deckKey === FAVORITES_PROGRESS_KEY) return t('Избранное');
       if (deckKey === ALL_WORDS_PROGRESS_KEY) return t('Все слова');
-      return liveNames.get(deckKey) || snapshot || t('Колода');
+      if (deckKey.startsWith(DECK_FAVORITES_PROGRESS_PREFIX)) {
+        const deckName = liveNames.get(deckKey.slice(DECK_FAVORITES_PROGRESS_PREFIX.length));
+        return `${deckName} · ${t('Избранное')}`;
+      }
+      return liveNames.get(deckKey) || t('Колода');
     };
 
     const byKey = new Map<string, DeckRow>();
     (mastery?.perDeck ?? []).forEach((d) => {
+      if (!isAccessible(d.deckKey)) return;
       byKey.set(d.deckKey, {
-        name: labelFor(d.deckKey, null),
+        key: d.deckKey,
+        name: labelFor(d.deckKey),
         mastered: d.mastered,
         total: d.new + d.learning + d.mastered,
       });
     });
     (progress ?? []).forEach((p) => {
-      const existing = byKey.get(p.deckKey);
-      const name = labelFor(p.deckKey, p.deckName);
-      if (existing) existing.name = name;
-      else byKey.set(p.deckKey, { name, mastered: 0, total: 0 });
+      if (!isAccessible(p.deckKey)) return;
+      if (!byKey.has(p.deckKey)) {
+        byKey.set(p.deckKey, {
+          key: p.deckKey, name: labelFor(p.deckKey), mastered: 0, total: 0,
+        });
+      }
     });
 
     return Array.from(byKey.values());
@@ -66,7 +87,7 @@ export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) =
           {rows.map((r) => {
             const percent = r.total > 0 ? Math.round((r.mastered / r.total) * 100) : 0;
             return (
-              <VStack max gap="6" key={r.name}>
+              <VStack max gap="6" key={r.key}>
                 <HStack max justify="between" align="center" gap="12">
                   <MyTypography.Base className={cls.name}>{r.name}</MyTypography.Base>
                   <MyTypography.Small type="secondary">

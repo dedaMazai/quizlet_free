@@ -21,6 +21,7 @@ import { LearnPage } from '@/pages/LearnPage';
 import { FavoritesPage } from '@/pages/FavoritesPage';
 import { FavoriteFlashcardsPage } from '@/pages/FavoriteFlashcardsPage';
 import { FavoriteLearnPage } from '@/pages/FavoriteLearnPage';
+import { DeckFavoriteLearnPage } from '@/pages/DeckFavoriteLearnPage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -161,6 +162,29 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.LEARN(`${params.deckId}`),
                     label: i18n.t('Заучивание'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.DECK_FAVORITES_LEARN(':deckId'),
+        element: <DeckFavoriteLearnPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.DECKS(),
+                    label: i18n.t('Колоды'),
+                },
+                {
+                    path: () => RoutePath.DECK(`${params.deckId}`),
+                    label: i18n.t('Колода'),
+                    type: 'deck',
+                },
+                {
+                    path: () => RoutePath.DECK_FAVORITES_LEARN(`${params.deckId}`),
+                    label: i18n.t('Заучивание избранного'),
                 },
             ]),
         },

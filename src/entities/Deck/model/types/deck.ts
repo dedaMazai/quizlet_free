@@ -10,6 +10,8 @@ export interface Deck {
   owner_email?: string;
   /** Число слов в колоде (считается на сервере через embed cards(count)). */
   cards_count: number;
+  /** Владелец разрешил редактировать слова всем, у кого есть доступ. */
+  allow_shared_edit: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -16,6 +16,7 @@ interface DeckRow {
   name: string;
   description: string | null;
   user_id: string;
+  allow_shared_edit: boolean;
   owner: OwnerProfile | OwnerProfile[] | null;
   cards: { count: number }[] | null;
   created_at: string;
@@ -37,6 +38,7 @@ const mapDeck = (row: DeckRow, currentUserId: string | null): Deck => {
     owner_name: owner?.name ?? undefined,
     owner_email: owner?.email ?? undefined,
     cards_count: row.cards?.[0]?.count ?? 0,
+    allow_shared_edit: row.allow_shared_edit,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -157,6 +159,22 @@ const deckApi = rtkApi.injectEndpoints({
       },
       invalidatesTags: [ApiTag.Decks, ApiTag.Cards],
     }),
+    // Переключение общего редактирования (RLS разрешает update только владельцу).
+    setDeckSharedEdit: build.mutation<Deck, { uuid: string; allow: boolean }>({
+      queryFn: async ({ uuid, allow }) => {
+        const currentUserId = await getCurrentUserId();
+        const { data, error } = await supabase
+          .from('decks')
+          .update({ allow_shared_edit: allow })
+          .eq('id', uuid)
+          .select(DECK_SELECT)
+          .single();
+        if (error) return supabaseError(error.message);
+        return { data: mapDeck(data as DeckRow, currentUserId) };
+      },
+      invalidatesTags: (result) =>
+        (result ? [ApiTag.Decks, { type: ApiTag.Deck, id: result.uuid }] : [ApiTag.Decks]),
+    }),
     // Поделиться колодой по email (только владелец, проверка в RPC).
     shareDeck: build.mutation<void, { deckUuid: string; email: string }>({
       queryFn: async ({ deckUuid, email }) => {
@@ -241,6 +259,7 @@ export const {
   useUpdateDeckMutation,
   useDeleteDeckMutation,
   useDuplicateDeckMutation,
+  useSetDeckSharedEditMutation,
   useShareDeckMutation,
   useGetShareableUsersQuery,
   useGetDeckSharesQuery,

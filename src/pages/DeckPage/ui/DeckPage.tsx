@@ -14,14 +14,19 @@ import {
   MoreOutlined,
   RobotOutlined,
   SearchOutlined,
+  StarOutlined,
 } from '@ant-design/icons';
 import {
   useGetDeckQuery,
   useDuplicateDeckMutation,
   useRemoveDeckShareMutation,
 } from '@/entities/Deck';
-import { useUserInfo } from '@/entities/User';
-import { useGetCardsQuery, findDuplicateGroups } from '@/entities/Card';
+import { useUserInfo, useUserAccesses } from '@/entities/User';
+import {
+  useGetCardsQuery,
+  useGetFavoritesQuery,
+  findDuplicateGroups,
+} from '@/entities/Card';
 import { CardList } from '@/widgets/CardList';
 import { CardEditor } from '@/features/CardEditor';
 import { ShareDeckModal } from '@/features/ShareDeck';
@@ -32,6 +37,7 @@ import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { Accesses } from '@/shared/types/accesses';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
 import cls from './DeckPage.module.scss';
@@ -51,7 +57,13 @@ const DeckPage = () => {
   const [duplicateDeck, { isLoading: isDuplicating }] = useDuplicateDeckMutation();
   const [removeShare, { isLoading: isLeaving }] = useRemoveDeckShareMutation();
   const { data: cards } = useGetCardsQuery(deckId!, { skip: !deckId });
+  const { data: favorites } = useGetFavoritesQuery();
+  const userAccesses = useUserAccesses();
   const dupCount = useMemo(() => findDuplicateGroups(cards ?? []).length, [cards]);
+  const favCount = useMemo(
+    () => (cards ?? []).filter((card) => favorites?.includes(card.uuid)).length,
+    [cards, favorites],
+  );
 
   const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
   const filtered = useMemo(() => {
@@ -72,6 +84,10 @@ const DeckPage = () => {
   if (!deck) return <Empty description={t('Колода не найдена')} />;
 
   const isOwner = deck.is_owner;
+  const isAdmin = userAccesses.includes(Accesses.administration);
+  // Видимая чужая колода по RLS всегда расшарена с нами: правка слов доступна
+  // владельцу, гостю при общем редактировании и админу.
+  const canEditCards = isOwner || deck.allow_shared_edit || isAdmin;
   const authorLabel = deck.owner_name ?? deck.owner_email;
 
   const handleDuplicate = async () => {
@@ -98,6 +114,12 @@ const DeckPage = () => {
   // Второстепенные действия колоды собраны в одно меню «...».
   const moreItems: MenuProps['items'] = [
     {
+      key: 'learn-favorites',
+      icon: <StarOutlined />,
+      label: t('Заучивание избранного'),
+      disabled: favCount === 0,
+    },
+    {
       key: 'export',
       icon: <ExportOutlined />,
       label: t('Экспорт'),
@@ -108,13 +130,13 @@ const DeckPage = () => {
         { key: 'export:markdown', label: t('Markdown') },
       ],
     },
-    isOwner
+    canEditCards
       ? { key: 'ai-check', icon: <RobotOutlined />, label: t('Проверить через ИИ') }
       : null,
     isOwner
       ? { key: 'share', icon: <ShareAltOutlined />, label: t('Поделиться') }
       : null,
-    isOwner && dupCount > 0
+    canEditCards && dupCount > 0
       ? { key: 'dedup', icon: <DiffOutlined />, label: t('Дубли ({{count}})', { count: dupCount }) }
       : null,
     !isOwner
@@ -130,6 +152,7 @@ const DeckPage = () => {
       exportDeck(key.split(':')[1] as ExportFormat);
       return;
     }
+    if (key === 'learn-favorites') navigate(RoutePath.DECK_FAVORITES_LEARN(deckId));
     if (key === 'ai-check') setAiOpen(true);
     if (key === 'share') setShareOpen(true);
     if (key === 'dedup') setDupOpen(true);
@@ -192,7 +215,7 @@ const DeckPage = () => {
           placeholder={t('Поиск слов')}
           onChange={(e) => setSearchDebounced(e.target.value)}
         />
-        {isOwner && (
+        {canEditCards && (
           <Button
             className={cls.addButton}
             icon={<PlusOutlined />}
@@ -205,18 +228,20 @@ const DeckPage = () => {
 
       <CardList
         deckUuid={deckId}
-        readOnly={!isOwner}
+        readOnly={!canEditCards}
         cards={filtered}
         emptyText={hasSearch ? t('Ничего не найдено') : undefined}
       />
 
-      {isOwner && (
+      {canEditCards && (
         <>
           <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
-          <ShareDeckModal open={shareOpen} deckUuid={deckId} onClose={() => setShareOpen(false)} />
           <DuplicateCardsModal open={dupOpen} deckUuid={deckId} onClose={() => setDupOpen(false)} />
           <CheckTranslationsModal open={aiOpen} deckUuid={deckId} onClose={() => setAiOpen(false)} />
         </>
+      )}
+      {isOwner && (
+        <ShareDeckModal open={shareOpen} deckUuid={deckId} onClose={() => setShareOpen(false)} />
       )}
     </VStack>
   );

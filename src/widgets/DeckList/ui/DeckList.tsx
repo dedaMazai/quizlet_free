@@ -27,13 +27,14 @@ import {
   useDeleteCardsByDeckMutation,
   useGetFavoritesQuery,
 } from '@/entities/Card';
-import { useUserInfo } from '@/entities/User';
+import { useUserInfo, useUserAccesses } from '@/entities/User';
 import { DeckForm } from '@/features/DeckForm';
 import { ShareDeckModal } from '@/features/ShareDeck';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { Accesses } from '@/shared/types/accesses';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import cls from './DeckList.module.scss';
 
@@ -55,6 +56,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
   const navigate = useNavigate();
   const { modal, message } = useAntdApp();
   const userInfo = useUserInfo();
+  const isAdmin = useUserAccesses().includes(Accesses.administration);
 
   const { data: decks, isLoading } = useGetDecksQuery();
   const { data: favorites } = useGetFavoritesQuery();
@@ -124,60 +126,67 @@ export const DeckList: FC<DeckListProps> = (props) => {
     });
   };
 
-  const deckMenuItems = (deck: Deck): MenuProps['items'] =>
-    (deck.is_owner
-      ? [
-          {
-            key: 'edit',
-            icon: <EditOutlined />,
-            label: t('Редактировать'),
-            onClick: ({ domEvent }) => {
-              domEvent.stopPropagation();
-              setEditingDeck(deck);
-              setFormOpen(true);
-            },
+  const deckMenuItems = (deck: Deck): MenuProps['items'] => {
+    const editItem: NonNullable<MenuProps['items']>[number] = {
+      key: 'edit',
+      icon: <EditOutlined />,
+      label: t('Редактировать'),
+      onClick: ({ domEvent }) => {
+        domEvent.stopPropagation();
+        setEditingDeck(deck);
+        setFormOpen(true);
+      },
+    };
+
+    if (deck.is_owner) {
+      return [
+        editItem,
+        {
+          key: 'share',
+          icon: <ShareAltOutlined />,
+          label: t('Поделиться'),
+          onClick: ({ domEvent }) => {
+            domEvent.stopPropagation();
+            setSharingDeckUuid(deck.uuid);
           },
-          {
-            key: 'share',
-            icon: <ShareAltOutlined />,
-            label: t('Поделиться'),
-            onClick: ({ domEvent }) => {
-              domEvent.stopPropagation();
-              setSharingDeckUuid(deck.uuid);
-            },
+        },
+        {
+          key: 'delete',
+          icon: <DeleteOutlined />,
+          label: t('Удалить'),
+          danger: true,
+          onClick: ({ domEvent }) => {
+            domEvent.stopPropagation();
+            handleDelete(deck);
           },
-          {
-            key: 'delete',
-            icon: <DeleteOutlined />,
-            label: t('Удалить'),
-            danger: true,
-            onClick: ({ domEvent }) => {
-              domEvent.stopPropagation();
-              handleDelete(deck);
-            },
-          },
-        ]
-      : [
-          {
-            key: 'duplicate',
-            icon: <CopyOutlined />,
-            label: t('Дублировать'),
-            onClick: ({ domEvent }) => {
-              domEvent.stopPropagation();
-              handleDuplicate(deck);
-            },
-          },
-          {
-            key: 'leave',
-            icon: <UserDeleteOutlined />,
-            label: t('Убрать из своих'),
-            danger: true,
-            onClick: ({ domEvent }) => {
-              domEvent.stopPropagation();
-              handleLeave(deck);
-            },
-          },
-        ]);
+        },
+      ];
+    }
+
+    return [
+      // Админ может редактировать расшаренную с ним колоду (без удаления и шаринга).
+      ...(isAdmin ? [editItem] : []),
+      {
+        key: 'duplicate',
+        icon: <CopyOutlined />,
+        label: t('Дублировать'),
+        onClick: ({ domEvent }) => {
+          domEvent.stopPropagation();
+          handleDuplicate(deck);
+        },
+      },
+      {
+        key: 'leave',
+        icon: <UserDeleteOutlined />,
+        label: t('Убрать из своих'),
+        danger: true,
+        onClick: ({ domEvent }) => {
+          domEvent.stopPropagation();
+          handleLeave(deck);
+        },
+      },
+    ];
+  };
 
   if (isLoading) {
     return <Loader />;

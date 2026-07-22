@@ -1,15 +1,17 @@
 import { FC, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, List, Modal, Select,
+  Button, List, Modal, Select, Switch,
 } from 'antd';
 import type { DefaultOptionType } from 'antd/es/select';
 import { DeleteOutlined, UserAddOutlined } from '@ant-design/icons';
 import {
   useShareDeckMutation,
   useGetShareableUsersQuery,
+  useGetDeckQuery,
   useGetDeckSharesQuery,
   useRemoveDeckShareMutation,
+  useSetDeckSharedEditMutation,
 } from '@/entities/Deck';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
@@ -39,6 +41,8 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
   const [removeShare] = useRemoveDeckShareMutation();
   const { data: shares, isLoading } = useGetDeckSharesQuery(deckUuid, { skip: !open });
   const { data: users, isLoading: isUsersLoading } = useGetShareableUsersQuery(undefined, { skip: !open });
+  const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
+  const [setSharedEdit, { isLoading: isToggling }] = useSetDeckSharedEditMutation();
 
   // Кандидаты на доступ — все пользователи, кроме тех, у кого доступ уже есть.
   const options = useMemo<ShareOption[]>(() => {
@@ -62,6 +66,14 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
     } catch (err) {
       const text = (err as { error?: string })?.error;
       message.error(text ? t(text) : t('Не удалось открыть доступ'));
+    }
+  };
+
+  const handleToggleSharedEdit = async (allow: boolean) => {
+    try {
+      await setSharedEdit({ uuid: deckUuid, allow }).unwrap();
+    } catch {
+      message.error(t('Не удалось изменить настройку'));
     }
   };
 
@@ -162,6 +174,17 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
             )}
           />
         </VStack>
+
+        <HStack max gap="8" align="center">
+          <Switch
+            checked={deck?.allow_shared_edit ?? false}
+            loading={isToggling}
+            onChange={handleToggleSharedEdit}
+          />
+          <MyTypography.Base>
+            {t('Разрешить редактирование всем, у кого есть доступ')}
+          </MyTypography.Base>
+        </HStack>
       </VStack>
     </Modal>
   );

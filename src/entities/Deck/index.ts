@@ -8,6 +8,7 @@ export {
   useUpdateDeckMutation,
   useDeleteDeckMutation,
   useDuplicateDeckMutation,
+  useSetDeckSharedEditMutation,
   useShareDeckMutation,
   useGetShareableUsersQuery,
   useGetDeckSharesQuery,
