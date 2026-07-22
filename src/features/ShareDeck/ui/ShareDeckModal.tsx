@@ -177,7 +177,7 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
 
         <HStack max gap="8" align="center">
           <Switch
-            checked={deck?.allow_shared_edit ?? false}
+            checked={deck?.allow_shared_edit ?? true}
             loading={isToggling || !deck}
             onChange={handleToggleSharedEdit}
           />
