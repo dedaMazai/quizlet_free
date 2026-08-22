@@ -1,45 +1,61 @@
 import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
-import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  ExclamationCircleFilled,
+} from '@ant-design/icons';
 import { Card, FavoriteToggle } from '@/entities/Card';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { useSpeech } from '@/shared/lib/hooks/useSpeech';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import cls from './LearnSession.module.scss';
+import { AnswerGrade } from '../model/lib/writeEngine';
+import cls from './WriteSession.module.scss';
 
-interface AnswerFeedbackProps {
+interface WriteFeedbackProps {
   card: Card;
-  correct: boolean;
+  grade: AnswerGrade;
+  expected: string;
   userInput: string;
   onNext: () => void;
 }
 
-export const AnswerFeedback: FC<AnswerFeedbackProps> = (props) => {
+const gradeIcons = {
+  correct: <CheckCircleFilled />,
+  almost: <ExclamationCircleFilled />,
+  wrong: <CloseCircleFilled />,
+};
+
+export const WriteFeedback: FC<WriteFeedbackProps> = (props) => {
   const {
-    card, correct, userInput, onNext,
+    card, grade, expected, userInput, onNext,
   } = props;
   const { t } = useTranslation();
   const { speak } = useSpeech();
 
-  // Автоозвучка правильного слова при показе фидбэка
+  // Автоозвучка английского слова при показе фидбэка
   useEffect(() => {
     speak(card.term, 'en-US');
   }, [card.term, speak]);
 
+  const gradeTitles: Record<AnswerGrade, string> = {
+    correct: t('Верно'),
+    almost: t('Почти верно'),
+    wrong: t('Неверно'),
+  };
+
   return (
     <VStack max gap="16" align="center">
-      <div className={classNames(cls.feedbackIcon, { [cls.correct]: correct, [cls.wrong]: !correct })}>
-        {correct ? <CheckCircleFilled /> : <CloseCircleFilled />}
+      <div className={classNames(cls.feedbackIcon, [cls[grade]])}>
+        {gradeIcons[grade]}
       </div>
 
-      <MyTypography.Large strong>
-        {correct ? t('Верно') : t('Неверно')}
-      </MyTypography.Large>
+      <MyTypography.Large strong>{gradeTitles[grade]}</MyTypography.Large>
 
-      {!correct && userInput.trim() && (
+      {grade !== 'correct' && userInput.trim() && (
         <MyTypography.Base type="secondary">
           {t('Ваш ответ')}: {userInput}
         </MyTypography.Base>
@@ -47,7 +63,7 @@ export const AnswerFeedback: FC<AnswerFeedbackProps> = (props) => {
 
       <HStack gap="8" align="center">
         <MyTypography.Base type="secondary">{t('Правильный ответ')}:</MyTypography.Base>
-        <MyTypography.Base strong>{card.term}</MyTypography.Base>
+        <MyTypography.Base strong>{expected}</MyTypography.Base>
         <SpeakButton text={card.term} />
         <FavoriteToggle cardUuid={card.uuid} />
       </HStack>

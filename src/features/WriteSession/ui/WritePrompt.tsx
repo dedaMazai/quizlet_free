@@ -1,19 +1,24 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Input, InputRef } from 'antd';
-import { LearnQuestion } from '../model/lib/learnEngine';
-import { FavoriteToggle } from '@/entities/Card';
+import { Card, FavoriteToggle } from '@/entities/Card';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { HStack, VStack } from '@/shared/ui/Stack';
-import cls from './LearnSession.module.scss';
+import { WriteDirection } from '../model/lib/writeEngine';
+import cls from './WriteSession.module.scss';
 
-interface WriteQuestionProps {
-  question: LearnQuestion;
+interface WritePromptProps {
+  card: Card;
+  prompt: string;
+  direction: WriteDirection;
   onAnswer: (value: string) => void;
+  onSkip: () => void;
 }
 
-export const WriteQuestion: FC<WriteQuestionProps> = (props) => {
-  const { question, onAnswer } = props;
+export const WritePrompt: FC<WritePromptProps> = (props) => {
+  const {
+    card, prompt, direction, onAnswer, onSkip,
+  } = props;
   const { t } = useTranslation();
   const [value, setValue] = useState('');
   const inputRef = useRef<InputRef>(null);
@@ -22,19 +27,27 @@ export const WriteQuestion: FC<WriteQuestionProps> = (props) => {
   useEffect(() => {
     setValue('');
     inputRef.current?.focus();
-  }, [question.card.uuid]);
+  }, [card.uuid]);
 
   const submit = () => {
     if (!value.trim()) return;
     onAnswer(value);
   };
 
+  const skip = () => {
+    onSkip();
+    // При очереди из одной карточки скип — no-op, но фокус возвращаем всегда.
+    inputRef.current?.focus();
+  };
+
   return (
     <VStack max gap="16" align="center">
-      <MyTypography.Small type="secondary">{t('Напишите слово по-английски')}</MyTypography.Small>
+      <MyTypography.Small type="secondary">
+        {direction === 'ru-en' ? t('Напишите слово по-английски') : t('Напишите перевод по-русски')}
+      </MyTypography.Small>
       <HStack gap="8" align="center">
-        <MyTypography.ExtraLarge strong>{question.card.translation}</MyTypography.ExtraLarge>
-        <FavoriteToggle cardUuid={question.card.uuid} className={cls.favoriteLarge} />
+        <MyTypography.ExtraLarge strong>{prompt}</MyTypography.ExtraLarge>
+        <FavoriteToggle cardUuid={card.uuid} className={cls.favoriteLarge} />
       </HStack>
 
       <HStack max gap="8" className={cls.writeRow}>
@@ -56,6 +69,10 @@ export const WriteQuestion: FC<WriteQuestionProps> = (props) => {
           {t('Ответить')}
         </Button>
       </HStack>
+
+      <Button type="text" onClick={skip}>
+        {t('Пропустить')}
+      </Button>
     </VStack>
   );
 };

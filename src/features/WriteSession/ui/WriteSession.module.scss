@@ -1,0 +1,51 @@
+.stage {
+  width: 100%;
+  max-width: 560px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progressRow {
+  max-width: 560px;
+}
+
+.writeRow {
+  max-width: 480px;
+}
+
+.feedbackIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  font-size: 48px;
+
+  &.correct {
+    color: var(--color-success);
+    background: var(--color-success-soft);
+  }
+
+  &.almost {
+    color: var(--color-warning);
+    background: var(--color-warning-soft);
+  }
+
+  &.wrong {
+    color: var(--color-error);
+    background: var(--color-error-soft);
+  }
+}
+
+.example {
+  max-width: 480px;
+  text-align: center;
+  font-style: italic;
+}
+
+.favoriteLarge {
+  font-size: 24px;
+}

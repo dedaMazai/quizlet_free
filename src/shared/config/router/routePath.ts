@@ -16,6 +16,7 @@ export const RoutePath = {
   [RouteNames.ALL_WORDS_LEARN]: () => '/words/learn',
   [RouteNames.FLASHCARDS]: (id: string) => `/decks/${id}/flashcards`,
   [RouteNames.LEARN]: (id: string) => `/decks/${id}/learn`,
+  [RouteNames.WRITE]: (id: string) => `/decks/${id}/write`,
   [RouteNames.DECK_FAVORITES_LEARN]: (id: string) => `/decks/${id}/learn-favorites`,
   [RouteNames.FAVORITES]: () => '/favorites',
   [RouteNames.FAVORITES_FLASHCARDS]: () => '/favorites/flashcards',

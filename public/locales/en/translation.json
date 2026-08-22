@@ -1502,5 +1502,17 @@
   "Не удалось проверить переводы": "Failed to check translations",
   "Изменения применены": "Changes applied",
   "Не удалось применить изменения": "Failed to apply changes",
-  "Исправлено ИИ": "AI-corrected"
+  "Исправлено ИИ": "AI-corrected",
+  "Письмо": "Writing",
+  "Русский → английский": "Russian → English",
+  "Английский → русский": "English → Russian",
+  "Засчитывать ответ с опечаткой": "Accept answers with a typo",
+  "Начать": "Start",
+  "Пропустить": "Skip",
+  "Почти верно": "Almost correct",
+  "Напишите перевод по-русски": "Type the translation in Russian",
+  "Нет слов для письма": "No words to write",
+  "Все слова написаны!": "All words completed!",
+  "Прогресс": "Progress",
+  "Слов: {{count}}, ошибок: {{wrong}}, с опечаткой: {{almost}}": "Words: {{count}}, mistakes: {{wrong}}, with typos: {{almost}}"
 }

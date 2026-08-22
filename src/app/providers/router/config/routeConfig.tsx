@@ -22,6 +22,7 @@ import { FavoritesPage } from '@/pages/FavoritesPage';
 import { FavoriteFlashcardsPage } from '@/pages/FavoriteFlashcardsPage';
 import { FavoriteLearnPage } from '@/pages/FavoriteLearnPage';
 import { DeckFavoriteLearnPage } from '@/pages/DeckFavoriteLearnPage';
+import { WritePage } from '@/pages/WritePage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -162,6 +163,29 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.LEARN(`${params.deckId}`),
                     label: i18n.t('Заучивание'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.WRITE(':deckId'),
+        element: <WritePage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.DECKS(),
+                    label: i18n.t('Колоды'),
+                },
+                {
+                    path: () => RoutePath.DECK(`${params.deckId}`),
+                    label: i18n.t('Колода'),
+                    type: 'deck',
+                },
+                {
+                    path: () => RoutePath.WRITE(`${params.deckId}`),
+                    label: i18n.t('Письмо'),
                 },
             ]),
         },

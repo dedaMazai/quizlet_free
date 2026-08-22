@@ -6,6 +6,7 @@ import {
   PlusOutlined,
   ReadOutlined,
   BulbOutlined,
+  EditOutlined,
   ShareAltOutlined,
   CopyOutlined,
   UserDeleteOutlined,
@@ -180,6 +181,12 @@ const DeckPage = () => {
             onClick={() => navigate(RoutePath.FLASHCARDS(deckId))}
           >
             {t('Карточки')}
+          </Button>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => navigate(RoutePath.WRITE(deckId))}
+          >
+            {t('Письмо')}
           </Button>
           <Button
             type="primary"
