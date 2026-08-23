@@ -1,6 +1,5 @@
 import { AnswerGrade } from '@/shared/lib/text';
-import { CardLevel } from '../types/learnProgress';
-import { CardReview } from '../types/cardReview';
+import { CardLevel, CardReview } from '../types/cardReview';
 
 /**
  * SM-2 lite. FSRS сознательно не берём: он требует подгонки параметров на истории

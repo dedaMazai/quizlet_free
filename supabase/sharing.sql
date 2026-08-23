@@ -152,40 +152,9 @@ create policy "read own or shared cards" on public.cards
       or public.is_deck_shared_with_me(deck_id));
 -- Политики записи для гостей и админа — в shared_edit.sql (owner-only остаются как OR-ветка).
 
--- 6. RPC: гость убирает расшаренную колоду у себя; нулевой прогресс чистится, реальный — остаётся.
--- «Нулевой» = ни одна карточка не дошла до уровня > 0 (в профиле такая колода шумит строкой «0%»).
--- study_events по RLS append-only, поэтому очистка возможна только через SECURITY DEFINER.
--- Удаляются только собственные строки вызывающего (auth.uid()) — данные других не задеваются.
-create or replace function public.leave_shared_deck(p_deck_id uuid)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  has_progress boolean;
-begin
-  delete from public.deck_shares
-  where deck_id = p_deck_id and user_id = auth.uid();
-
-  -- Ключи прогресса колоды: сама колода и её избранное («__favorites__:<uuid>»).
-  select exists (
-    select 1
-    from public.learn_progress lp
-    cross join lateral jsonb_each_text(lp.levels) as kv(card_id, value)
-    where lp.user_id = auth.uid()
-      and lp.deck_key in (p_deck_id::text, '__favorites__:' || p_deck_id::text)
-      and (kv.value)::int > 0
-  ) into has_progress;
-
-  if not has_progress then
-    delete from public.learn_progress
-    where deck_key in (p_deck_id::text, '__favorites__:' || p_deck_id::text)
-      and user_id = auth.uid();
-
-    delete from public.study_events
-    where deck_key in (p_deck_id::text, '__favorites__:' || p_deck_id::text)
-      and user_id = auth.uid();
-  end if;
-end;
-$$;
+-- 6. RPC leave_shared_deck ПЕРЕЕХАЛА в srs.sql: критерий «нулевого прогресса»
+-- считается по card_reviews, а не по learn_progress (та таблица снимается в
+-- srs_cleanup.sql). Функция намеренно удалена отсюда, иначе повторный прогон
+-- этого скрипта вернул бы версию, обращающуюся к несуществующей таблице.
+-- Смысл не изменился: гость убирает расшаренную колоду у себя, нулевой прогресс
+-- чистится, реальный — остаётся; grant выдаётся там же.

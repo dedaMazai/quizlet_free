@@ -4,7 +4,6 @@ import {
   Card, CardCreateDto, CardType, CardUpdateDto, CardsPage, CardsPageArgs,
 } from '../types/card';
 import { inferCardType } from '../lib/inferCardType';
-import { LearnProgress } from '../types/learnProgress';
 import { CardReview, DueCard } from '../types/cardReview';
 import { AiCheckInput, AiCheckResult } from '../types/aiCheck';
 import { AiChunkInput, AiChunksResult } from '../types/aiChunks';
@@ -45,11 +44,6 @@ interface DueRow extends CardRow {
   last_reviewed_at: string | null;
 }
 
-interface ProgressRow {
-  deck_key: string;
-  levels: LearnProgress['levels'];
-  updated_at: string;
-}
 
 const mapReview = (row: ReviewRow): CardReview => ({
   card_uuid: row.card_id,
@@ -343,43 +337,6 @@ const cardApi = rtkApi.injectEndpoints({
       },
       providesTags: [ApiTag.CardReviews, ApiTag.Cards],
     }),
-    getLearnProgress: build.query<LearnProgress | null, string>({
-      queryFn: async (deckUuid) => {
-        const { data, error } = await supabase
-          .from('learn_progress')
-          .select('*')
-          .eq('deck_key', deckUuid)
-          .maybeSingle();
-        if (error) return supabaseError(error.message);
-        if (!data) return { data: null };
-        const row = data as ProgressRow;
-        return {
-          data: { deck_uuid: row.deck_key, levels: row.levels, updated_at: row.updated_at },
-        };
-      },
-      providesTags: [ApiTag.LearnProgress],
-    }),
-    saveLearnProgress: build.mutation<LearnProgress, LearnProgress>({
-      queryFn: async (progress) => {
-        const userId = await getCurrentUserId();
-        if (!userId) return supabaseError('Not authenticated');
-        const updatedAt = new Date().toISOString();
-        const { error } = await supabase
-          .from('learn_progress')
-          .upsert(
-            {
-              user_id: userId,
-              deck_key: progress.deck_uuid,
-              levels: progress.levels,
-              updated_at: updatedAt,
-            },
-            { onConflict: 'user_id,deck_key' },
-          );
-        if (error) return supabaseError(error.message);
-        return { data: { ...progress, updated_at: updatedAt } };
-      },
-      invalidatesTags: [ApiTag.LearnProgress],
-    }),
     getFavorites: build.query<string[], void>({
       queryFn: async () => {
         const { data, error } = await supabase.from('favorites').select('card_id');
@@ -484,8 +441,6 @@ export const {
   useUpdateCardsBulkMutation,
   useDeleteCardMutation,
   useDeleteCardsByDeckMutation,
-  useGetLearnProgressQuery,
-  useSaveLearnProgressMutation,
   useGetCardReviewsQuery,
   useSaveCardReviewsMutation,
   useResetCardReviewsMutation,

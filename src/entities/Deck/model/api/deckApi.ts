@@ -237,7 +237,7 @@ const deckApi = rtkApi.injectEndpoints({
       queryFn: async ({ deckUuid, userId }) => {
         const currentUserId = await getCurrentUserId();
         // Гость убирает колоду у себя — RPC чистит его прогресс, если тот нулевой
-        // (learn_progress и append-only study_events недоступны для delete с клиента).
+        // (card_reviews и append-only study_events недоступны для delete с клиента).
         if (userId === currentUserId) {
           const { error } = await supabase.rpc('leave_shared_deck', { p_deck_id: deckUuid });
           if (error) return supabaseError(error.message);
@@ -252,7 +252,7 @@ const deckApi = rtkApi.injectEndpoints({
         if (error) return supabaseError(error.message);
         return { data: undefined };
       },
-      invalidatesTags: [ApiTag.DeckShares, ApiTag.Decks, ApiTag.LearnProgress, ApiTag.StudyStats],
+      invalidatesTags: [ApiTag.DeckShares, ApiTag.Decks, ApiTag.CardReviews, ApiTag.StudyStats],
     }),
   }),
 });

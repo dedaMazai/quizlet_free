@@ -23,7 +23,6 @@ export enum ApiTag {
     DeckShares = 'DeckShares',
     Card = 'Card',
     Cards = 'Cards',
-    LearnProgress = 'LearnProgress',
     CardReviews = 'CardReviews',
     Favorites = 'Favorites',
     StudyStats = 'StudyStats',

@@ -1,5 +1,7 @@
 import { Card } from './card';
-import { CardLevel } from './learnProgress';
+
+/** Уровень освоенности карточки: производное от состояния повторения (см. srs.ts). */
+export type CardLevel = 0 | 1 | 2; // 0 = новая/заваленная, 1 = изучается, 2 = усвоена
 
 /** Состояние интервального повторения одной карточки у текущего пользователя. */
 export interface CardReview {

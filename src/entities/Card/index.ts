@@ -1,8 +1,7 @@
 export type {
   Card, CardCreateDto, CardType, CardUpdateDto, CardsPage, CardsPageArgs,
 } from './model/types/card';
-export type { CardLevel, LearnProgress } from './model/types/learnProgress';
-export type { CardReview, DueCard } from './model/types/cardReview';
+export type { CardLevel, CardReview, DueCard } from './model/types/cardReview';
 export type { AiCheckInput, AiCheckResult } from './model/types/aiCheck';
 export type { AiChunk, AiChunkInput, AiChunksResult } from './model/types/aiChunks';
 export {
@@ -16,8 +15,6 @@ export {
   useUpdateCardsBulkMutation,
   useDeleteCardMutation,
   useDeleteCardsByDeckMutation,
-  useGetLearnProgressQuery,
-  useSaveLearnProgressMutation,
   useGetCardReviewsQuery,
   useSaveCardReviewsMutation,
   useResetCardReviewsMutation,
