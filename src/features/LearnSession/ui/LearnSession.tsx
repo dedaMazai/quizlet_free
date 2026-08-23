@@ -13,6 +13,7 @@ import {
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { Loader } from '@/shared/ui/Loader';
+import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useLearnSession } from '../model/hooks/useLearnSession';
 import { ChoiceQuestion } from './ChoiceQuestion';
 import { WriteQuestion } from './WriteQuestion';
@@ -24,13 +25,17 @@ interface LearnSessionInnerProps {
   deckName: string;
   cards: Card[];
   savedReviews?: CardReview[];
+  allowReset: boolean;
+  finishedTitle?: string;
+  finishedSubtitle?: string;
 }
 
 const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
   const {
-    deckKey, deckName, cards, savedReviews,
+    deckKey, deckName, cards, savedReviews, allowReset, finishedTitle, finishedSubtitle,
   } = props;
   const { t } = useTranslation();
+  const { modal, message } = useAntdApp();
   const [resetReviews] = useResetCardReviewsMutation();
 
   const session = useLearnSession(cards, savedReviews, { deckKey, deckName });
@@ -50,17 +55,29 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
     return acc;
   }, [cards, session.reviews, session.steps]);
 
+  // Сброс удаляет состояние повторения безвозвратно, поэтому спрашиваем подтверждение.
   const handleReset = () => {
-    resetReviews(cards.map((card) => card.uuid));
-    session.reset();
+    modal.confirm({
+      title: t('Сбросить прогресс по {{count}} словам?', { count: cards.length }),
+      content: t('Интервалы повторения обнулятся, слова снова станут новыми.'),
+      okText: t('Сбросить'),
+      okButtonProps: { danger: true },
+      cancelText: t('Отмена'),
+      onOk: async () => {
+        await resetReviews(cards.map((card) => card.uuid)).unwrap();
+        session.reset();
+        message.success(t('Прогресс сброшен'));
+      },
+    });
   };
 
   if (session.phase === 'finished') {
     return (
       <Result
         status="success"
-        title={t('Колода выучена!')}
-        subTitle={t('Вы усвоили все {{count}} слов', { count: session.total })}
+        title={finishedTitle ?? t('Колода выучена!')}
+        subTitle={finishedSubtitle
+          ?? t('Вы усвоили все {{count}} слов', { count: session.total })}
         extra={(
           <Button type="primary" onClick={session.reset}>
             {t('Пройти заново')}
@@ -129,9 +146,11 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
         )}
       </div>
 
-      <Button type="text" danger onClick={handleReset}>
-        {t('Сбросить прогресс')}
-      </Button>
+      {allowReset && (
+        <Button type="text" danger onClick={handleReset}>
+          {t('Сбросить прогресс')}
+        </Button>
+      )}
     </VStack>
   );
 };
@@ -146,11 +165,20 @@ interface LearnSessionProps {
   reviewsDeckUuid?: string;
   /** Готовые повторения: если переданы, отдельный запрос не делается. */
   reviews?: CardReview[];
+  /**
+   * Показывать «Сбросить прогресс». Отключается там, где набор карточек собран
+   * из разных колод (очередь повторов) — сброс стёр бы прогресс по всей библиотеке.
+   */
+  allowReset?: boolean;
+  /** Заголовок экрана завершения; по умолчанию — «Колода выучена!». */
+  finishedTitle?: string;
+  finishedSubtitle?: string;
 }
 
 export const LearnSession: FC<LearnSessionProps> = (props) => {
   const {
-    cards, deckKey, deckName, reviewsDeckUuid, reviews: providedReviews,
+    cards, deckKey, deckName, reviewsDeckUuid, reviews: providedReviews, allowReset = true,
+    finishedTitle, finishedSubtitle,
   } = props;
   const { t } = useTranslation();
 
@@ -175,6 +203,9 @@ export const LearnSession: FC<LearnSessionProps> = (props) => {
       deckName={deckName}
       cards={cards}
       savedReviews={reviews}
+      allowReset={allowReset}
+      finishedTitle={finishedTitle}
+      finishedSubtitle={finishedSubtitle}
     />
   );
 };

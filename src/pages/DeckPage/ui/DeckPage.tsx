@@ -43,6 +43,7 @@ import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from '@/shared/types/accesses';
+import { MenuItem } from '@/shared/const/menu';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
 import cls from './DeckPage.module.scss';
@@ -122,57 +123,82 @@ const DeckPage = () => {
   };
 
   // Второстепенные действия колоды собраны в одно меню «...».
-  const moreItems: MenuProps['items'] = [
+  // Пунктов до десяти, поэтому они разложены по смысловым группам:
+  // режимы занятий, работа со словами, действия над самой колодой.
+  const moreGroups: { key: string; label: string; items: MenuItem[] }[] = [
     {
-      key: 'cloze',
-      icon: <FormOutlined />,
-      label: t('Пропуски'),
-      // Режим строится на поле «Пример»: без примеров пропуск делать не из чего.
-      disabled: !cards?.some((card) => card.example),
+      key: 'modes',
+      label: t('Режимы'),
+      items: [
+        {
+          key: 'cloze',
+          icon: <FormOutlined />,
+          label: t('Пропуски'),
+          // Режим строится на поле «Пример»: без примеров пропуск делать не из чего.
+          disabled: !cards?.some((card) => card.example),
+        },
+        {
+          key: 'order',
+          icon: <BuildOutlined />,
+          label: t('Собери фразу'),
+          // Собирать имеет смысл только фразы: одиночное слово собирать нечего.
+          disabled: !cards?.some((card) => card.card_type === 'phrase'),
+        },
+        {
+          key: 'learn-favorites',
+          icon: <StarOutlined />,
+          label: t('Заучивание избранного'),
+          disabled: favCount === 0,
+        },
+      ].filter(Boolean),
     },
     {
-      key: 'order',
-      icon: <BuildOutlined />,
-      label: t('Собери фразу'),
-      // Собирать имеет смысл только фразы: одиночное слово собирать нечего.
-      disabled: !cards?.some((card) => card.card_type === 'phrase'),
+      key: 'words',
+      label: t('Слова'),
+      items: [
+        canEditCards
+          ? { key: 'ai-check', icon: <RobotOutlined />, label: t('Проверить через ИИ') }
+          : null,
+        canEditCards
+          ? { key: 'ai-chunks', icon: <RobotOutlined />, label: t('Сгенерировать фразы (ИИ)') }
+          : null,
+        canEditCards && dupCount > 0
+          ? { key: 'dedup', icon: <DiffOutlined />, label: t('Дубли ({{count}})', { count: dupCount }) }
+          : null,
+      ].filter(Boolean),
     },
     {
-      key: 'learn-favorites',
-      icon: <StarOutlined />,
-      label: t('Заучивание избранного'),
-      disabled: favCount === 0,
+      key: 'deck',
+      label: t('Колода'),
+      items: [
+        {
+          key: 'export',
+          icon: <ExportOutlined />,
+          label: t('Экспорт'),
+          disabled: exportDisabled,
+          children: [
+            { key: 'export:excel', label: t('Excel') },
+            { key: 'export:json', label: t('JSON') },
+            { key: 'export:markdown', label: t('Markdown') },
+          ],
+        },
+        isOwner
+          ? { key: 'share', icon: <ShareAltOutlined />, label: t('Поделиться') }
+          : null,
+        !isOwner
+          ? { key: 'duplicate', icon: <CopyOutlined />, label: t('Дублировать') }
+          : null,
+        !isOwner
+          ? { key: 'leave', icon: <UserDeleteOutlined />, label: t('Убрать из своих') }
+          : null,
+      ].filter(Boolean),
     },
-    {
-      key: 'export',
-      icon: <ExportOutlined />,
-      label: t('Экспорт'),
-      disabled: exportDisabled,
-      children: [
-        { key: 'export:excel', label: t('Excel') },
-        { key: 'export:json', label: t('JSON') },
-        { key: 'export:markdown', label: t('Markdown') },
-      ],
-    },
-    canEditCards
-      ? { key: 'ai-check', icon: <RobotOutlined />, label: t('Проверить через ИИ') }
-      : null,
-    canEditCards
-      ? { key: 'ai-chunks', icon: <RobotOutlined />, label: t('Сгенерировать фразы (ИИ)') }
-      : null,
-    isOwner
-      ? { key: 'share', icon: <ShareAltOutlined />, label: t('Поделиться') }
-      : null,
-    canEditCards && dupCount > 0
-      ? { key: 'dedup', icon: <DiffOutlined />, label: t('Дубли ({{count}})', { count: dupCount }) }
-      : null,
-    !isOwner
-      ? { key: 'duplicate', icon: <CopyOutlined />, label: t('Дублировать') }
-      : null,
-    !isOwner
-      ? { key: 'leave', icon: <UserDeleteOutlined />, label: t('Убрать из своих') }
-      : null,
-  ].filter(Boolean);
+  ];
+
+  // Пустая группа оставила бы висящий заголовок.
+  const moreItems: MenuProps['items'] = moreGroups
+    .filter((group) => group.items.length > 0)
+    .map((group) => ({ key: group.key, type: 'group', label: group.label, children: group.items }));
 
   const handleMoreClick: MenuProps['onClick'] = ({ key }) => {
     if (key.startsWith('export:')) {

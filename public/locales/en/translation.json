@@ -1546,5 +1546,13 @@
   "В колоде нет фраз для сборки": "This deck has no phrases to build",
   "Отметьте слова как фразы или подберите их через ИИ": "Mark words as phrases or generate them with AI",
   "Все фразы собраны!": "All phrases built!",
-  "Фраз: {{count}}, ошибок: {{wrong}}": "Phrases: {{count}}, mistakes: {{wrong}}"
+  "Фраз: {{count}}, ошибок: {{wrong}}": "Phrases: {{count}}, mistakes: {{wrong}}",
+  "Сбросить прогресс по {{count}} словам?": "Reset progress for {{count}} words?",
+  "Интервалы повторения обнулятся, слова снова станут новыми.": "Review intervals will be cleared and the words will become new again.",
+  "Прогресс сброшен": "Progress reset",
+  "Повторение завершено": "Review complete",
+  "Повторено слов: {{count}}": "Words reviewed: {{count}}",
+  "Режимы": "Study modes",
+  "Все слова выучены!": "All words learned!",
+  "Избранное выучено!": "Starred words learned!"
 }

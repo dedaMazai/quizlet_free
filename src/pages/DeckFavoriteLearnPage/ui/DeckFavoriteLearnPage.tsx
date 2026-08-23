@@ -50,6 +50,7 @@ const DeckFavoriteLearnPage = () => {
         deckKey={getDeckFavoritesProgressKey(deckId)}
         reviewsDeckUuid={deckId}
         deckName={deck.name}
+        finishedTitle={t('Избранное выучено!')}
       />
     </VStack>
   );

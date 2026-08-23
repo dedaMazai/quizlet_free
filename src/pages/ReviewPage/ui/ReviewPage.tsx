@@ -56,6 +56,9 @@ const ReviewPage = () => {
         reviews={reviews}
         deckKey={REVIEW_EVENTS_KEY}
         deckName={t('К повторению')}
+        allowReset={false}
+        finishedTitle={t('Повторение завершено')}
+        finishedSubtitle={t('Повторено слов: {{count}}', { count: cards.length })}
       />
     </VStack>
   );
