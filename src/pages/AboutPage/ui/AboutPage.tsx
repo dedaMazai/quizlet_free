@@ -272,7 +272,7 @@ const AboutPage = () => {
                                 <th scope="col" className={cls.compareCriterion}>{t('Возможности')}</th>
                                 <th scope="col">{ANKI}</th>
                                 <th scope="col">{QUIZLET}</th>
-                                <th scope="col" className={cls.compareApp}>{t('Это приложение')}</th>
+                                <th scope="col" className={cls.compareApp}>{t('Zubrika')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -281,7 +281,7 @@ const AboutPage = () => {
                                     <th scope="row" className={cls.compareCriterion}>{row.criterion}</th>
                                     <td data-label={ANKI}>{row.anki}</td>
                                     <td data-label={QUIZLET}>{row.quizlet}</td>
-                                    <td className={cls.compareApp} data-label={t('Это приложение')}>
+                                    <td className={cls.compareApp} data-label={t('Zubrika')}>
                                         {row.app}
                                     </td>
                                 </tr>

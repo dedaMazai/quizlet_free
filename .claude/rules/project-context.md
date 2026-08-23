@@ -3,7 +3,7 @@ paths:
   - "src/**"
 ---
 
-# English Flashcards App — Project Context
+# Zubrika — Project Context
 
 Prototype web app for learning English vocabulary through flashcards. Users create decks of cards (term ↔ translation/definition) and practice them in study modes. Product reference: [quizlet.com](https://quizlet.com).
 

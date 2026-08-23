@@ -1,7 +1,7 @@
 {
-  "name": "english-flashcards-app",
+  "name": "zubrika",
   "version": "1.0.0",
-  "description": "English vocabulary learning app — flashcards, decks and study modes (Quizlet-style prototype). React 19 / TypeScript / Webpack 5.",
+  "description": "Zubrika — English vocabulary learning app: decks, cards and study modes. React 19 / TypeScript / Webpack 5.",
   "main": "index.js",
   "private": true,
   "license": "UNLICENSED",

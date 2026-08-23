@@ -28,7 +28,7 @@ export const PublicFooter = memo(() => {
                     </NavLink>
                 </nav>
                 <MyTypography.Small type="secondary">
-                    {t('English Flashcards — учите английский фразами и не забывайте выученное')}
+                    {t('Zubrika — учите английский фразами и не забывайте выученное')}
                 </MyTypography.Small>
             </VStack>
         </footer>

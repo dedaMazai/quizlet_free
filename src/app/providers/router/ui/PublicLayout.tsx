@@ -7,7 +7,7 @@ import { PublicFooter } from '@/widgets/PublicFooter';
 import { RoutePath } from '@/shared/config/router/routePath';
 
 /** Название продукта не переводится. */
-const BASE_TITLE = 'Flashcards';
+const BASE_TITLE = 'Zubrika';
 
 export const PublicLayout = () => {
     const { pathname } = useLocation();

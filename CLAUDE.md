@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-English Flashcards App — prototype web app for learning English vocabulary through flashcards. Users create decks of cards (term ↔ translation/definition) and practice them in study modes. Product reference: quizlet.com. React 19 / TypeScript 5.9+ / Webpack 5 frontend.
+Zubrika — prototype web app for learning English vocabulary through flashcards. Users create decks of cards (term ↔ translation/definition) and practice them in study modes. Product reference: quizlet.com. React 19 / TypeScript 5.9+ / Webpack 5 frontend.
 
 Current state: a clean boilerplate — the previous business domain was removed. Only infrastructure and the base entities `User`, `UserSettings`, `Notifications` remain. New language-learning features (decks, cards, study modes, progress) are built on top of this shell.
 
