@@ -8,6 +8,13 @@
     }
 }
 
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+}
+
 .header {
     text-align: center;
 }

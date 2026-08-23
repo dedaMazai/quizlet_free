@@ -211,20 +211,20 @@ const FeaturesPage = () => {
                 </MyTypography.Large>
             </VStack>
 
-            <VStack max gap="24">
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>{t('Библиотека')}</Title>
                 {renderGrid(library)}
-            </VStack>
+            </section>
 
-            <VStack max gap="24">
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>{t('Режимы занятий')}</Title>
                 {renderGrid(modes)}
                 <MyTypography.Base type="secondary">
                     {t('Все режимы, кроме «Карточек», записывают результат в общее состояние повторения и в журнал статистики.')}
                 </MyTypography.Base>
-            </VStack>
+            </section>
 
-            <VStack max gap="24">
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>{t('Интервальные повторения')}</Title>
                 <Card variant="borderless" className={cls.listCard}>
                     <ul className={cls.list}>
@@ -233,9 +233,9 @@ const FeaturesPage = () => {
                         ))}
                     </ul>
                 </Card>
-            </VStack>
+            </section>
 
-            <VStack max gap="24">
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>{t('Прогресс')}</Title>
                 <Card variant="borderless" className={cls.listCard}>
                     <ul className={cls.list}>
@@ -244,12 +244,12 @@ const FeaturesPage = () => {
                         ))}
                     </ul>
                 </Card>
-            </VStack>
+            </section>
 
-            <VStack max gap="24">
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>{t('Помощь и удобство')}</Title>
                 {renderGrid(rest)}
-            </VStack>
+            </section>
 
             <HStack max gap="12" wrap justify="center">
                 <Button type="primary" size="large" onClick={() => navigate(RoutePath.LOGIN())}>

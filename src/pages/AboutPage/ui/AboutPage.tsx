@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { Button, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Button, Tag, Typography } from 'antd';
 import {
     AimOutlined,
     BuildOutlined,
     BulbOutlined,
+    CheckOutlined,
     ClockCircleOutlined,
     EditOutlined,
     FireOutlined,
@@ -19,6 +19,7 @@ import {
     TranslationOutlined,
 } from '@ant-design/icons';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import { FeatureCard } from '@/shared/ui/FeatureCard';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { HStack, VStack } from '@/shared/ui/Stack';
@@ -27,17 +28,21 @@ import cls from './AboutPage.module.scss';
 
 const { Title } = Typography;
 
-interface CompareRow {
-    key: string;
-    criterion: string;
-    anki: string;
-    quizlet: string;
-    app: string;
-}
+/** Демонстрация режима «Пропуски» — английский текст не переводится. */
+const DEMO_SENTENCE_START = 'I want to';
+const DEMO_SENTENCE_END = 'with native speakers.';
+const DEMO_ANSWER = 'engage in conversation';
+const DEMO_OPTIONS = ['take place', 'engage in conversation', 'look forward', 'make sense'];
+
+/** Названия сторонних продуктов не переводятся. */
+const ANKI = 'Anki';
+const QUIZLET = 'Quizlet';
 
 const AboutPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+
+    const goToLogin = () => navigate(RoutePath.LOGIN());
 
     const reasons = [
         {
@@ -135,32 +140,25 @@ const AboutPage = () => {
         },
     ];
 
-    const compareColumns: ColumnsType<CompareRow> = [
+    const steps = [
         {
-            title: '',
-            dataIndex: 'criterion',
-            key: 'criterion',
-            width: 260,
+            key: 'deck',
+            title: t('Создайте колоду'),
+            description: t('Название и описание — колода готова.'),
         },
         {
-            title: 'Anki',
-            dataIndex: 'anki',
-            key: 'anki',
+            key: 'words',
+            title: t('Добавьте слова'),
+            description: t('Вручную, массовым вводом с автопереводом или импортом из Excel.'),
         },
         {
-            title: 'Quizlet',
-            dataIndex: 'quizlet',
-            key: 'quizlet',
-        },
-        {
-            title: t('Это приложение'),
-            dataIndex: 'app',
-            key: 'app',
-            render: (value: string) => <Tag color="processing">{value}</Tag>,
+            key: 'learn',
+            title: t('Занимайтесь и повторяйте'),
+            description: t('Выберите режим — расписание повторов приложение составит само.'),
         },
     ];
 
-    const compareData: CompareRow[] = [
+    const compareRows = [
         {
             key: 'srs',
             criterion: t('Интервальные повторения'),
@@ -200,24 +198,54 @@ const AboutPage = () => {
 
     return (
         <VStack max gap="64" className={cls.AboutPage}>
-            <VStack max gap="24" align="center" className={cls.hero}>
-                <Title level={1} className={cls.heroTitle}>
-                    {t('Учите английский фразами — и не забывайте выученное')}
-                </Title>
-                <MyTypography.Large type="secondary" className={cls.heroSubtitle}>
-                    {t('Гибкость колод как у Quizlet, память как у Anki, плюс контекст и ИИ, которых нет ни у одного из них.')}
-                </MyTypography.Large>
-                <HStack gap="12" wrap justify="center">
-                    <Button type="primary" size="large" onClick={() => navigate(RoutePath.LOGIN())}>
-                        {t('Начать бесплатно')}
-                    </Button>
-                    <Button size="large" onClick={() => navigate(RoutePath.FEATURES())}>
-                        {t('Все возможности')}
-                    </Button>
-                </HStack>
-            </VStack>
+            <section className={cls.hero}>
+                <VStack gap="20" align="start" className={cls.heroText}>
+                    <Tag className={cls.badge} variant="filled">
+                        {t('Бесплатно, без установки')}
+                    </Tag>
+                    <Title level={1} className={cls.heroTitle}>
+                        {t('Учите английский фразами — и не забывайте выученное')}
+                    </Title>
+                    <MyTypography.Large type="secondary" className={cls.heroSubtitle}>
+                        {t('Гибкость колод как у Quizlet, память как у Anki, плюс контекст и ИИ, которых нет ни у одного из них.')}
+                    </MyTypography.Large>
+                    <HStack gap="12" wrap>
+                        <Button type="primary" size="large" onClick={goToLogin}>
+                            {t('Начать бесплатно')}
+                        </Button>
+                        <Button size="large" onClick={() => navigate(RoutePath.FEATURES())}>
+                            {t('Все возможности')}
+                        </Button>
+                    </HStack>
+                </VStack>
 
-            <VStack max gap="24">
+                <div className={cls.demo} aria-hidden="true">
+                    <MyTypography.Small type="secondary">
+                        {t('Так выглядит режим «Пропуски»')}
+                    </MyTypography.Small>
+                    <p className={cls.demoSentence}>
+                        {DEMO_SENTENCE_START}
+                        <span className={cls.demoBlank} />
+                        {DEMO_SENTENCE_END}
+                    </p>
+                    <div className={cls.demoOptions}>
+                        {DEMO_OPTIONS.map((option, index) => (
+                            <span
+                                key={option}
+                                className={classNames(cls.demoOption, {
+                                    [cls.demoOptionCorrect]: option === DEMO_ANSWER,
+                                })}
+                            >
+                                <span className={cls.demoOptionIndex}>{index + 1}</span>
+                                {option}
+                                {option === DEMO_ANSWER && <CheckOutlined className={cls.demoOptionCheck} />}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>
                     {t('На чём основаны решения')}
                 </Title>
@@ -231,22 +259,39 @@ const AboutPage = () => {
                         />
                     ))}
                 </div>
-            </VStack>
+            </section>
 
-            <VStack max gap="24">
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>
                     {t('Зачем это, если есть Quizlet и Anki')}
                 </Title>
-                <Table<CompareRow>
-                    columns={compareColumns}
-                    dataSource={compareData}
-                    pagination={false}
-                    size="middle"
-                    scroll={{ x: 720 }}
-                />
-            </VStack>
+                <div className={cls.compareWrapper}>
+                    <table className={cls.compare}>
+                        <thead>
+                            <tr>
+                                <th scope="col" className={cls.compareCriterion}>{t('Возможности')}</th>
+                                <th scope="col">{ANKI}</th>
+                                <th scope="col">{QUIZLET}</th>
+                                <th scope="col" className={cls.compareApp}>{t('Это приложение')}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {compareRows.map((row) => (
+                                <tr key={row.key}>
+                                    <th scope="row" className={cls.compareCriterion}>{row.criterion}</th>
+                                    <td data-label={ANKI}>{row.anki}</td>
+                                    <td data-label={QUIZLET}>{row.quizlet}</td>
+                                    <td className={cls.compareApp} data-label={t('Это приложение')}>
+                                        {row.app}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-            <VStack max gap="24">
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>
                     {t('Режимы занятий')}
                 </Title>
@@ -260,12 +305,12 @@ const AboutPage = () => {
                         />
                     ))}
                 </div>
-                <MyTypography.Base type="secondary">
+                <MyTypography.Base type="secondary" className={cls.note}>
                     {t('Занятие проходится целиком с клавиатуры: стрелки двигают выбор, цифры 1–4 отвечают сразу, Enter подтверждает.')}
                 </MyTypography.Base>
-            </VStack>
+            </section>
 
-            <VStack max gap="24">
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>
                     {t('ИИ помогает наполнять колоды')}
                 </Title>
@@ -279,9 +324,9 @@ const AboutPage = () => {
                         />
                     ))}
                 </div>
-            </VStack>
+            </section>
 
-            <VStack max gap="24">
+            <section className={cls.section}>
                 <Title level={2} className={cls.sectionTitle}>
                     {t('Видно, как идёт прогресс')}
                 </Title>
@@ -295,24 +340,41 @@ const AboutPage = () => {
                         />
                     ))}
                 </div>
-            </VStack>
+            </section>
 
-            <VStack max gap="16" align="center" className={cls.cta}>
+            <section className={cls.section}>
+                <Title level={2} className={cls.sectionTitle}>
+                    {t('Как начать')}
+                </Title>
+                <ol className={cls.steps}>
+                    {steps.map((step, index) => (
+                        <li key={step.key} className={cls.step}>
+                            <span className={cls.stepIndex}>{index + 1}</span>
+                            <VStack gap="4">
+                                <MyTypography.Large strong>{step.title}</MyTypography.Large>
+                                <MyTypography.Small type="secondary">{step.description}</MyTypography.Small>
+                            </VStack>
+                        </li>
+                    ))}
+                </ol>
+            </section>
+
+            <section className={classNames(cls.section, {}, [cls.cta])}>
                 <Title level={2} className={cls.sectionTitle}>
                     {t('Начните с первой колоды')}
                 </Title>
-                <MyTypography.Base type="secondary">
+                <MyTypography.Base type="secondary" className={cls.note}>
                     {t('Регистрация по email занимает минуту, все функции доступны сразу.')}
                 </MyTypography.Base>
                 <HStack gap="12" wrap justify="center">
-                    <Button type="primary" size="large" onClick={() => navigate(RoutePath.LOGIN())}>
+                    <Button type="primary" size="large" onClick={goToLogin}>
                         {t('Создать аккаунт')}
                     </Button>
                     <Button size="large" onClick={() => navigate(RoutePath.FAQ())}>
                         {t('Вопросы и ответы')}
                     </Button>
                 </HStack>
-            </VStack>
+            </section>
         </VStack>
     );
 };

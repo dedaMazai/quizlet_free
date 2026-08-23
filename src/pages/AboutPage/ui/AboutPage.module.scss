@@ -1,28 +1,142 @@
 .AboutPage {
     max-width: 1200px;
-    padding: 64px 24px 80px;
+    padding: 56px 24px 96px;
     margin: 0 auto;
 
     @media (width <= 767px) {
-        padding: 32px 12px 48px;
+        padding: 32px 16px 56px;
     }
 }
 
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+}
+
+/* ---------- Hero ---------- */
+
 .hero {
-    padding: 24px 0 8px;
-    text-align: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 48px;
+    align-items: center;
+    width: 100%;
+    padding: 24px 0 16px;
+
+    @media (width <= 991px) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+    }
+}
+
+.heroText {
+    max-width: 640px;
+}
+
+.badge {
+    padding: 4px 12px;
+    margin: 0;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--color-accent-soft);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
 }
 
 .heroTitle {
-    max-width: 900px;
     margin-bottom: 0;
+    font-size: 48px;
+    line-height: 1.15;
+
+    @media (width <= 767px) {
+        font-size: 32px;
+    }
 }
 
 .heroSubtitle {
-    max-width: 720px;
+    max-width: 560px;
 }
 
+/* ---------- Демонстрация режима «Пропуски» ---------- */
+
+.demo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    background: var(--card-bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+}
+
+.demoSentence {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+.demoBlank {
+    display: inline-block;
+    width: 96px;
+    height: 2px;
+    margin: 0 8px 4px;
+    vertical-align: middle;
+    background: var(--color-accent);
+}
+
+.demoOptions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.demoOption {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    background: var(--hover-bg-light);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+}
+
+.demoOptionCorrect {
+    color: var(--text);
+    background: var(--color-success-soft);
+    border-color: transparent;
+}
+
+.demoOptionIndex {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    background: var(--active-bg);
+    border-radius: 6px;
+}
+
+.demoOptionCheck {
+    margin-left: auto;
+    color: var(--color-success);
+}
+
+/* ---------- Общие блоки ---------- */
+
 .sectionTitle {
+    margin-bottom: 0;
+}
+
+.note {
+    max-width: 760px;
     margin-bottom: 0;
 }
 
@@ -33,8 +147,117 @@
     width: 100%;
 }
 
+/* ---------- Таблица сравнения ---------- */
+
+.compareWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.compare {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    text-align: left;
+
+    th,
+    td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    thead th {
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    tbody td {
+        color: var(--text-secondary);
+    }
+
+    @media (width <= 767px) {
+        min-width: 0;
+
+        thead {
+            display: none;
+        }
+
+        tr {
+            display: block;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+        }
+
+        th,
+        td {
+            display: flex;
+            gap: 16px;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: none;
+        }
+
+        td::before {
+            font-weight: 600;
+            color: var(--text-secondary);
+            content: attr(data-label);
+        }
+    }
+}
+
+.compareCriterion {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.compareApp {
+    font-weight: 600;
+    color: var(--text);
+    background: var(--color-accent-soft);
+}
+
+/* ---------- Шаги ---------- */
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+}
+
+.stepIndex {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    font-weight: 700;
+    color: var(--text);
+    background: var(--color-accent-soft);
+    border-radius: 10px;
+}
+
+/* ---------- Финальный CTA ---------- */
+
 .cta {
-    padding: 48px 24px;
+    align-items: center;
+    padding: 56px 24px;
     text-align: center;
     background: var(--card-bg);
     border: 1px solid var(--border-subtle);

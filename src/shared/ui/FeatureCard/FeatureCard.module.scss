@@ -1,5 +1,6 @@
 .FeatureCard {
     height: 100%;
+    border: 1px solid var(--border-subtle);
     border-radius: 16px;
     box-shadow: var(--shadow-sm);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -7,6 +8,14 @@
     &:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-card-hover);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+
+        &:hover {
+            transform: none;
+        }
     }
 }
 
