@@ -1,0 +1,25 @@
+.PublicFooter {
+    flex-shrink: 0;
+    width: 100%;
+    padding: 32px 24px;
+    border-top: 1px solid var(--border-subtle);
+
+    @media (width <= 767px) {
+        padding: 24px 12px;
+    }
+}
+
+.inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.link {
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+
+    &:hover {
+        color: var(--color-accent);
+    }
+}

@@ -8,6 +8,7 @@ export type AppRoutesProps = RouteObject & {
     authOnly?: boolean;
     notAuthOnly?: boolean;
     withSidebar?: boolean;
+    publicLayout?: boolean;
     withFooter?: boolean;
     accesses?: Accesses[];
     forbiddenRoles?: RoleName[];

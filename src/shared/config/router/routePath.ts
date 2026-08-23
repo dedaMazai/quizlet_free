@@ -25,6 +25,9 @@ export const RoutePath = {
   [RouteNames.FAVORITES_LEARN]: () => '/favorites/learn',
   [RouteNames.PROGRESS]: () => '/progress',
   [RouteNames.REVIEW]: () => '/review',
+  [RouteNames.ABOUT]: () => '/about',
+  [RouteNames.FEATURES]: () => '/features',
+  [RouteNames.FAQ]: () => '/faq',
   // last
   [RouteNames.NOT_FOUND]: () => '/*',
 };
@@ -33,6 +36,9 @@ export const PUBLIC_PAGES = [
   RoutePath.LOGIN(),
   RoutePath.CHANGE_PASSWORD(),
   RoutePath.PRIVACY(),
+  RoutePath.ABOUT(),
+  RoutePath.FEATURES(),
+  RoutePath.FAQ(),
 ] as const;
 
 

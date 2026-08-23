@@ -23,6 +23,9 @@ export const RouteNames = {
   FAVORITES_LEARN: 'FAVORITES_LEARN',
   PROGRESS: 'PROGRESS',
   REVIEW: 'REVIEW',
+  ABOUT: 'ABOUT',
+  FEATURES: 'FEATURES',
+  FAQ: 'FAQ',
   // last
   NOT_FOUND: 'NOT_FOUND',
 } as const;

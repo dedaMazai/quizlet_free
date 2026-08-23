@@ -27,6 +27,9 @@ import { DeckFavoriteLearnPage } from '@/pages/DeckFavoriteLearnPage';
 import { WritePage } from '@/pages/WritePage';
 import { ClozePage } from '@/pages/ClozePage';
 import { OrderPage } from '@/pages/OrderPage';
+import { AboutPage } from '@/pages/AboutPage';
+import { FeaturesPage } from '@/pages/FeaturesPage';
+import { FaqPage } from '@/pages/FaqPage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -394,6 +397,21 @@ export const routeConfig: AppRoutesProps[] = [
     {
         path: RoutePath.PRIVACY(),
         element: <PrivacyPage />,
+    },
+    {
+        path: RoutePath.ABOUT(),
+        element: <AboutPage />,
+        publicLayout: true,
+    },
+    {
+        path: RoutePath.FEATURES(),
+        element: <FeaturesPage />,
+        publicLayout: true,
+    },
+    {
+        path: RoutePath.FAQ(),
+        element: <FaqPage />,
+        publicLayout: true,
     },
     {
         path: RoutePath.FORBIDDEN(),

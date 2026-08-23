@@ -312,6 +312,11 @@ const LoginPage = () => {
                         </Button>
                     </HStack>
                 )}
+                <HStack max justify="center" style={{ marginBottom: 12 }}>
+                    <NavLink to={RoutePath.ABOUT()}>
+                        {t('О сервисе')}
+                    </NavLink>
+                </HStack>
                 <HStack max justify="center">
                     <MyTypography.Small style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
                         {t('Нажимая «Войти», вы принимаете')}{' '}

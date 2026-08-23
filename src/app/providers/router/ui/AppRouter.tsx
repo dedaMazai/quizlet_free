@@ -9,6 +9,7 @@ import { RequireNotAuth } from './RequireNotAuth';
 import { App } from '@/app/App';
 import { RouterErrorBoundary } from './RouterErrorBoundary';
 import { AuthLayout } from './AuthLayout';
+import { PublicLayout } from './PublicLayout';
 
 const toRouteObject = (route: AppRoutesProps): RouteObject => {
     let { element } = route;
@@ -39,6 +40,7 @@ export const AppRouter = () => {
     const router = useMemo(() => {
         const sidebarRoutes: AppRoutesProps[] = [];
         const authNoSidebarRoutes: AppRoutesProps[] = [];
+        const publicLayoutRoutes: AppRoutesProps[] = [];
         const publicRoutes: AppRoutesProps[] = [];
 
         for (const route of routeConfig) {
@@ -46,6 +48,8 @@ export const AppRouter = () => {
                 sidebarRoutes.push(route);
             } else if (route.authOnly) {
                 authNoSidebarRoutes.push(route);
+            } else if (route.publicLayout) {
+                publicLayoutRoutes.push(route);
             } else {
                 publicRoutes.push(route);
             }
@@ -62,6 +66,10 @@ export const AppRouter = () => {
                     {
                         element: <AuthLayout withSidebar={false} />,
                         children: authNoSidebarRoutes.map(toRouteObject),
+                    },
+                    {
+                        element: <PublicLayout />,
+                        children: publicLayoutRoutes.map(toRouteObject),
                     },
                     {
                         element: (

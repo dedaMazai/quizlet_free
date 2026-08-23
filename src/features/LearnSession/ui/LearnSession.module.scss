@@ -72,7 +72,9 @@
 }
 
 .choiceBtn {
+  position: relative;
   height: 64px;
+  padding: 0 44px;
   border-radius: 14px;
   font-size: 16px;
   box-shadow: var(--shadow-sm);
@@ -85,6 +87,33 @@
     background: var(--color-accent-soft) !important;
     box-shadow: var(--shadow-md);
   }
+}
+
+// Вариант, выбранный клавиатурой: подсветка как у наведения, но без сдвига —
+// иначе кнопка прыгает на каждое нажатие стрелки
+.choiceActive {
+  border-color: var(--color-accent) !important;
+  color: var(--color-accent) !important;
+  background: var(--color-accent-soft) !important;
+  box-shadow: var(--shadow-md);
+}
+
+// Номер варианта для выбора цифрой с клавиатуры
+.choiceIndex {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1;
 }
 
 .writeRow {

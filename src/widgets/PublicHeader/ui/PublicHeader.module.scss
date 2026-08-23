@@ -1,0 +1,47 @@
+.PublicHeader {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    width: 100%;
+    padding: 12px 24px;
+    background: var(--bg-color);
+    border-bottom: 1px solid var(--border-subtle);
+    backdrop-filter: blur(8px);
+
+    @media (width <= 767px) {
+        padding: 8px 12px;
+    }
+}
+
+.inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    display: flex;
+    flex-shrink: 0;
+    color: var(--color-logo);
+}
+
+.nav {
+    @media (width <= 767px) {
+        display: none;
+    }
+}
+
+.link {
+    padding: 6px 12px;
+    color: var(--text-secondary);
+    border-radius: var(--border-radius);
+    transition: color 0.2s ease, background 0.2s ease;
+
+    &:hover {
+        color: var(--text);
+        background: var(--hover-bg);
+    }
+
+    &.active {
+        color: var(--color-accent);
+    }
+}

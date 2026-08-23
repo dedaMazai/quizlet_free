@@ -1,0 +1,30 @@
+.FaqPage {
+    max-width: 900px;
+    padding: 64px 24px 80px;
+    margin: 0 auto;
+
+    @media (width <= 767px) {
+        padding: 32px 12px 48px;
+    }
+}
+
+.header {
+    text-align: center;
+}
+
+.pageTitle {
+    margin-bottom: 0;
+}
+
+.subtitle {
+    max-width: 640px;
+}
+
+.collapse {
+    width: 100%;
+}
+
+.answer {
+    margin-bottom: 0;
+    color: var(--text-secondary);
+}
