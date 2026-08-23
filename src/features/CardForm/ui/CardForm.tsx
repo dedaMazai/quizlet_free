@@ -1,8 +1,10 @@
 import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Form, Input, Modal } from 'antd';
+import { Form, Input, Modal, Segmented } from 'antd';
 import {
   Card,
+  CardType,
+  inferCardType,
   useCreateCardMutation,
   useUpdateCardMutation,
 } from '@/entities/Card';
@@ -12,6 +14,7 @@ interface CardFormValues {
   term: string;
   translation: string;
   example?: string;
+  card_type: CardType;
 }
 
 interface CardFormProps {
@@ -38,6 +41,7 @@ export const CardForm: FC<CardFormProps> = (props) => {
         term: card?.term ?? '',
         translation: card?.translation ?? '',
         example: card?.example ?? '',
+        card_type: card?.card_type ?? inferCardType(card?.term ?? ''),
       });
     }
   }, [open, card, form]);
@@ -88,6 +92,14 @@ export const CardForm: FC<CardFormProps> = (props) => {
         </Form.Item>
         <Form.Item name="example" label={t('Пример')}>
           <Input.TextArea rows={2} placeholder={t('Необязательно')} />
+        </Form.Item>
+        <Form.Item name="card_type" label={t('Тип')}>
+          <Segmented
+            options={[
+              { label: t('Слово'), value: 'word' },
+              { label: t('Фраза'), value: 'phrase' },
+            ]}
+          />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,11 +1,6 @@
 import { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from 'antd';
-import {
-  ALL_WORDS_PROGRESS_KEY,
-  DECK_FAVORITES_PROGRESS_PREFIX,
-  FAVORITES_PROGRESS_KEY,
-} from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { useGetDeckProgressQuery, useGetMasteryQuery } from '@/entities/Statistics';
 import { HStack, VStack } from '@/shared/ui/Stack';
@@ -36,24 +31,12 @@ export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) =
     if (!decks) return [];
     const liveNames = new Map(decks.map((d) => [d.uuid, d.name]));
 
-    // Показываем только доступные колоды: удалённые и отшаренные скрываем.
-    const isAccessible = (deckKey: string): boolean => {
-      if (deckKey === FAVORITES_PROGRESS_KEY || deckKey === ALL_WORDS_PROGRESS_KEY) return true;
-      if (deckKey.startsWith(DECK_FAVORITES_PROGRESS_PREFIX)) {
-        return liveNames.has(deckKey.slice(DECK_FAVORITES_PROGRESS_PREFIX.length));
-      }
-      return liveNames.has(deckKey);
-    };
+    // Только реальные колоды: удалённые и отшаренные скрываем, а синтетические ключи
+    // журнала («Избранное», «Все слова», «К повторению») дали бы строки с нулевой
+    // освоенностью — прогресс с переходом на card_reviews считается по колодам.
+    const isAccessible = (deckKey: string): boolean => liveNames.has(deckKey);
 
-    const labelFor = (deckKey: string): string => {
-      if (deckKey === FAVORITES_PROGRESS_KEY) return t('Избранное');
-      if (deckKey === ALL_WORDS_PROGRESS_KEY) return t('Все слова');
-      if (deckKey.startsWith(DECK_FAVORITES_PROGRESS_PREFIX)) {
-        const deckName = liveNames.get(deckKey.slice(DECK_FAVORITES_PROGRESS_PREFIX.length));
-        return `${deckName} · ${t('Избранное')}`;
-      }
-      return liveNames.get(deckKey) || t('Колода');
-    };
+    const labelFor = (deckKey: string): string => liveNames.get(deckKey) || t('Колода');
 
     const byKey = new Map<string, DeckRow>();
     (mastery?.perDeck ?? []).forEach((d) => {

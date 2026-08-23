@@ -10,6 +10,8 @@ import { Accesses } from '@/shared/types/accesses';
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 import { ProfilePage } from '@/pages/ProfilePage';
+import { ProgressPage } from '@/pages/ProgressPage';
+import { ReviewPage } from '@/pages/ReviewPage';
 import { MainPage } from '@/pages/MainPage';
 import { DecksPage } from '@/pages/DecksPage';
 import { DeckPage } from '@/pages/DeckPage';
@@ -23,6 +25,8 @@ import { FavoriteFlashcardsPage } from '@/pages/FavoriteFlashcardsPage';
 import { FavoriteLearnPage } from '@/pages/FavoriteLearnPage';
 import { DeckFavoriteLearnPage } from '@/pages/DeckFavoriteLearnPage';
 import { WritePage } from '@/pages/WritePage';
+import { ClozePage } from '@/pages/ClozePage';
+import { OrderPage } from '@/pages/OrderPage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -191,6 +195,52 @@ export const routeConfig: AppRoutesProps[] = [
         },
     },
     {
+        path: RoutePath.CLOZE(':deckId'),
+        element: <ClozePage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.DECKS(),
+                    label: i18n.t('Колоды'),
+                },
+                {
+                    path: () => RoutePath.DECK(`${params.deckId}`),
+                    label: i18n.t('Колода'),
+                    type: 'deck',
+                },
+                {
+                    path: () => RoutePath.CLOZE(`${params.deckId}`),
+                    label: i18n.t('Пропуски'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.ORDER(':deckId'),
+        element: <OrderPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.DECKS(),
+                    label: i18n.t('Колоды'),
+                },
+                {
+                    path: () => RoutePath.DECK(`${params.deckId}`),
+                    label: i18n.t('Колода'),
+                    type: 'deck',
+                },
+                {
+                    path: () => RoutePath.ORDER(`${params.deckId}`),
+                    label: i18n.t('Собери фразу'),
+                },
+            ]),
+        },
+    },
+    {
         path: RoutePath.DECK_FAVORITES_LEARN(':deckId'),
         element: <DeckFavoriteLearnPage />,
         authOnly: true,
@@ -259,6 +309,34 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.ALL_WORDS_LEARN(),
                     label: i18n.t('Заучивание'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.REVIEW(),
+        element: <ReviewPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.REVIEW(),
+                    label: i18n.t('К повторению'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.PROGRESS(),
+        element: <ProgressPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.PROGRESS(),
+                    label: i18n.t('Прогресс'),
                 },
             ]),
         },

@@ -1,0 +1,48 @@
+.stage {
+  width: 100%;
+  max-width: 640px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progressRow {
+  max-width: 640px;
+}
+
+.answerRow {
+  min-height: 48px;
+  padding: 8px;
+  border-bottom: 2px solid var(--color-border-secondary, rgb(0 0 0 / 12%));
+}
+
+.chip {
+  cursor: pointer;
+}
+
+.feedbackIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  font-size: 40px;
+
+  &.correct {
+    color: var(--color-success);
+    background: var(--color-success-soft);
+  }
+
+  &.wrong {
+    color: var(--color-error);
+    background: var(--color-error-soft);
+  }
+}
+
+.example {
+  max-width: 560px;
+  text-align: center;
+  font-style: italic;
+}

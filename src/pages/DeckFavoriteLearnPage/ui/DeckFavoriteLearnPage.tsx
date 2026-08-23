@@ -47,7 +47,8 @@ const DeckFavoriteLearnPage = () => {
       </HStack>
       <LearnSession
         cards={favCards}
-        progressKey={getDeckFavoritesProgressKey(deckId)}
+        deckKey={getDeckFavoritesProgressKey(deckId)}
+        reviewsDeckUuid={deckId}
         deckName={deck.name}
       />
     </VStack>

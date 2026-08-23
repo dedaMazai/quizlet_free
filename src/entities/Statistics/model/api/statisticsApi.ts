@@ -112,7 +112,7 @@ const statisticsApi = rtkApi.injectEndpoints({
           },
         };
       },
-      providesTags: [ApiTag.StudyStats, ApiTag.LearnProgress],
+      providesTags: [ApiTag.StudyStats, ApiTag.CardReviews],
     }),
   }),
 });

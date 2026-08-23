@@ -33,7 +33,12 @@ const LearnPage = () => {
           {t('Заучивание')}{deck ? `: ${deck.name}` : ''}
         </MyTypography.Large>
       </HStack>
-      <LearnSession cards={cards ?? []} progressKey={deckId} deckName={deck?.name ?? ''} />
+      <LearnSession
+        cards={cards ?? []}
+        deckKey={deckId}
+        deckName={deck?.name ?? ''}
+        reviewsDeckUuid={deckId}
+      />
     </VStack>
   );
 };

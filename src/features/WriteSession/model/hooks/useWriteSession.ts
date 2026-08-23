@@ -1,12 +1,18 @@
 import {
   useCallback, useEffect, useMemo, useReducer, useRef,
 } from 'react';
-import { Card } from '@/entities/Card';
-import { StudyEventDraft, useLogStudyEventsMutation } from '@/entities/Statistics';
 import {
-  AnswerGrade,
+  Card,
+  CardReview,
+  applyReview,
+  gradeFromAnswer,
+  levelOf,
+  useSaveCardReviewsMutation,
+} from '@/entities/Card';
+import { StudyEventDraft, useLogStudyEventsMutation } from '@/entities/Statistics';
+import { AnswerGrade, checkAnswer } from '@/shared/lib/text';
+import {
   buildQueue,
-  checkAnswer,
   expectedFor,
   promptFor,
   statsMode,
@@ -14,6 +20,9 @@ import {
 } from '../lib/writeEngine';
 
 type Phase = 'setup' | 'question' | 'feedback' | 'finished';
+
+/** Сколько ответов копим, прежде чем сбросить пачку на сервер. */
+const FLUSH_EVERY = 10;
 
 interface WriteState {
   phase: Phase;
@@ -93,7 +102,11 @@ interface SessionMeta {
   deckName: string;
 }
 
-export const useWriteSession = (cards: Card[], meta: SessionMeta) => {
+export const useWriteSession = (
+  cards: Card[],
+  savedReviews: CardReview[] | undefined,
+  meta: SessionMeta,
+) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const currentCard = useMemo(
@@ -104,10 +117,23 @@ export const useWriteSession = (cards: Card[], meta: SessionMeta) => {
   const prompt = currentCard ? promptFor(currentCard, state.settings.direction) : '';
   const expected = currentCard ? expectedFor(currentCard, state.settings.direction) : '';
 
-  // Логирование статистики: копим события в буфере и отправляем батчем при flush.
+  // Статистика и состояние повторений копятся в буферах и уходят батчами.
   const [logEvents] = useLogStudyEventsMutation();
+  const [saveReviews] = useSaveCardReviewsMutation();
   const eventsRef = useRef<StudyEventDraft[]>([]);
+  const reviewsRef = useRef<CardReview[]>([]);
   const questionStartRef = useRef(0);
+
+  // Актуальное состояние повторения по карточкам сессии; обновляется на каждый ответ.
+  const reviewsByUuid = useRef(new Map<string, CardReview | null>());
+  useEffect(() => {
+    reviewsByUuid.current = new Map(
+      cards.map((card) => [
+        card.uuid,
+        savedReviews?.find((review) => review.card_uuid === card.uuid) ?? null,
+      ]),
+    );
+  }, [cards, savedReviews]);
 
   // Засекаем момент показа нового вопроса — для duration_ms.
   useEffect(() => {
@@ -117,11 +143,17 @@ export const useWriteSession = (cards: Card[], meta: SessionMeta) => {
   }, [state.phase, currentCard]);
 
   const flushEvents = useCallback(() => {
-    if (eventsRef.current.length === 0) return;
-    const events = eventsRef.current;
-    eventsRef.current = [];
-    logEvents({ deckKey: meta.deckKey, deckName: meta.deckName, events });
-  }, [logEvents, meta.deckKey, meta.deckName]);
+    if (eventsRef.current.length > 0) {
+      const events = eventsRef.current;
+      eventsRef.current = [];
+      logEvents({ deckKey: meta.deckKey, deckName: meta.deckName, events });
+    }
+    if (reviewsRef.current.length > 0) {
+      const reviews = reviewsRef.current;
+      reviewsRef.current = [];
+      saveReviews(reviews);
+    }
+  }, [logEvents, saveReviews, meta.deckKey, meta.deckName]);
 
   // Отправляем накопленное при завершении сессии и при уходе со страницы.
   useEffect(() => {
@@ -135,15 +167,23 @@ export const useWriteSession = (cards: Card[], meta: SessionMeta) => {
 
   const answer = (input: string) => {
     if (!currentCard) return;
+    const uuid = currentCard.uuid;
     const grade = checkAnswer(expected, input, state.settings.typoTolerance);
+    const before = reviewsByUuid.current.get(uuid) ?? null;
+    const review = applyReview(before, uuid, gradeFromAnswer(grade));
+    reviewsByUuid.current.set(uuid, review);
+
     eventsRef.current.push({
-      card_id: currentCard.uuid,
+      card_id: uuid,
       is_correct: grade !== 'wrong',
-      level_before: 0,
-      level_after: 0,
+      level_before: levelOf(before),
+      level_after: review.level,
       mode: statsMode(state.settings.direction),
       duration_ms: Math.round(performance.now() - questionStartRef.current),
     });
+    reviewsRef.current.push(review);
+    if (eventsRef.current.length >= FLUSH_EVERY) flushEvents();
+
     dispatch({ type: 'ANSWER', grade, input });
   };
 

@@ -1,4 +1,4 @@
-import { Card, CardLevel } from '@/entities/Card';
+import { Card, CardReview, LEARNING_STEPS } from '@/entities/Card';
 import { shuffle } from '@/shared/lib/utils';
 
 export const ROUND_SIZE = 7;
@@ -9,7 +9,11 @@ export const FRESH_MIN = 3;
 
 export type QuestionType = 'choice' | 'write';
 
-export type Levels = Record<string, CardLevel>;
+/**
+ * Шаг обучения карточки в рамках ТЕКУЩЕЙ сессии. В БД не сохраняется:
+ * долговременное состояние живёт в card_reviews, шаг — только в памяти сессии.
+ */
+export type SessionSteps = Record<string, number>;
 
 export interface LearnQuestion {
   card: Card;
@@ -18,9 +22,9 @@ export interface LearnQuestion {
   choices: string[];
 }
 
-/** Тип вопроса в зависимости от уровня карточки: 0 → выбор, 1 → написание. */
-export const questionTypeForLevel = (level: CardLevel): QuestionType =>
-  (level === 0 ? 'choice' : 'write');
+/** Первый шаг — выбор из вариантов, дальше — ввод с клавиатуры. */
+export const questionTypeForStep = (step: number): QuestionType =>
+  (step === 0 ? 'choice' : 'write');
 
 /** Нормализация ответа для сравнения. */
 const normalize = (value: string): string =>
@@ -31,24 +35,22 @@ export const gradeAnswer = (card: Card, input: string): boolean =>
   normalize(input) === normalize(card.term);
 
 /**
- * Инициализирует карту уровней: берёт сохранённые значения для существующих
- * карточек, остальным ставит 0. Удалённые карточки отбрасываются.
+ * Начальные шаги сессии: новая карточка проходит оба шага (выбор → ввод),
+ * уже выпущенная попадает сразу на ввод — один верный ответ закрывает её.
  */
-export const initLevels = (cards: Card[], saved?: Levels): Levels => {
-  const result: Levels = {};
+export const initSteps = (cards: Card[], reviews?: CardReview[]): SessionSteps => {
+  const byUuid = new Map((reviews ?? []).map((review) => [review.card_uuid, review]));
+  const result: SessionSteps = {};
   cards.forEach((card) => {
-    result[card.uuid] = saved?.[card.uuid] ?? 0;
+    const review = byUuid.get(card.uuid);
+    result[card.uuid] = review && review.reps > 0 ? LEARNING_STEPS - 1 : 0;
   });
   return result;
 };
 
-/** Колода выучена, когда все карточки на уровне 2. */
-export const isFinished = (cards: Card[], levels: Levels): boolean =>
-  cards.length > 0 && cards.every((card) => levels[card.uuid] === 2);
-
-/** Кол-во усвоенных карточек (уровень 2). */
-export const masteredCount = (cards: Card[], levels: Levels): number =>
-  cards.filter((card) => levels[card.uuid] === 2).length;
+/** Сессия закончена, когда все карточки прошли все шаги обучения. */
+export const isFinished = (cards: Card[], steps: SessionSteps): boolean =>
+  cards.length > 0 && cards.every((card) => (steps[card.uuid] ?? 0) >= LEARNING_STEPS);
 
 /** Формирует 4 варианта ответа: правильный term + до 3 случайных дистракторов. */
 export const buildChoices = (card: Card, allCards: Card[]): string[] => {
@@ -59,13 +61,14 @@ export const buildChoices = (card: Card, allCards: Card[]): string[] => {
 };
 
 /**
- * Выбирает карточки для нового раунда, перемешивая «активные» (уровень 1, написание)
- * и новые (уровень 0, выбор). Пока есть новые слова, под них резервируется минимум
- * FRESH_MIN слотов — так старые на написании и новые на выборе идут вперемешку.
+ * Выбирает карточки для нового раунда, перемешивая «активные» (в середине обучения,
+ * написание) и новые (выбор). Пока есть новые слова, под них резервируется минимум
+ * FRESH_MIN слотов — так старые и новые идут вперемешку.
  */
-export const selectRoundCards = (cards: Card[], levels: Levels): Card[] => {
-  const active = cards.filter((c) => levels[c.uuid] === 1);
-  const fresh = cards.filter((c) => levels[c.uuid] === 0);
+export const selectRoundCards = (cards: Card[], steps: SessionSteps): Card[] => {
+  const stepOf = (card: Card) => steps[card.uuid] ?? 0;
+  const active = cards.filter((c) => stepOf(c) > 0 && stepOf(c) < LEARNING_STEPS);
+  const fresh = cards.filter((c) => stepOf(c) === 0);
 
   const freshTake = Math.min(fresh.length, Math.max(FRESH_MIN, ROUND_SIZE - active.length));
   const activeTake = Math.min(active.length, ROUND_SIZE - freshTake);
@@ -74,22 +77,15 @@ export const selectRoundCards = (cards: Card[], levels: Levels): Card[] => {
 };
 
 /** Очередь uuid'ов карточек текущего раунда (в перемешанном порядке). */
-export const buildRoundQueue = (cards: Card[], levels: Levels): string[] =>
-  shuffle(selectRoundCards(cards, levels)).map((c) => c.uuid);
+export const buildRoundQueue = (cards: Card[], steps: SessionSteps): string[] =>
+  shuffle(selectRoundCards(cards, steps)).map((c) => c.uuid);
 
-/** Строит вопрос для карточки по её текущему уровню. */
-export const buildQuestion = (card: Card, allCards: Card[], levels: Levels): LearnQuestion => {
-  const type = questionTypeForLevel(levels[card.uuid] ?? 0);
+/** Строит вопрос для карточки по её текущему шагу. */
+export const buildQuestion = (card: Card, allCards: Card[], steps: SessionSteps): LearnQuestion => {
+  const type = questionTypeForStep(steps[card.uuid] ?? 0);
   return {
     card,
     type,
     choices: type === 'choice' ? buildChoices(card, allCards) : [],
   };
-};
-
-/** Применяет результат ответа: верно → уровень +1 (макс 2), неверно → сброс в 0. */
-export const applyAnswer = (levels: Levels, cardUuid: string, correct: boolean): Levels => {
-  const current = levels[cardUuid] ?? 0;
-  const next: CardLevel = correct ? (Math.min(current + 1, 2) as CardLevel) : 0;
-  return { ...levels, [cardUuid]: next };
 };

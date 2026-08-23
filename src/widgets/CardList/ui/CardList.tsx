@@ -85,6 +85,9 @@ export const CardList: FC<CardListProps> = (props) => {
           <HStack gap="8" align="center">
             <span className={cls.term}>{card.term}</span>
             <SpeakButton text={card.term} />
+            {card.card_type === 'phrase' && (
+              <Tag bordered={false}>{t('Фраза')}</Tag>
+            )}
           </HStack>
           {card.example && (
             <MyTypography.Small type="secondary" className={cls.example}>
@@ -171,6 +174,9 @@ export const CardList: FC<CardListProps> = (props) => {
                   <HStack gap="4" align="center">
                     <span className={cls.term}>{card.term}</span>
                     <SpeakButton text={card.term} />
+                    {card.card_type === 'phrase' && (
+                      <Tag bordered={false}>{t('Фраза')}</Tag>
+                    )}
                   </HStack>
                   <MyTypography.Base>{card.translation}</MyTypography.Base>
                   {card.example && (

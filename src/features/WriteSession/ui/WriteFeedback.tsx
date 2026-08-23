@@ -12,7 +12,7 @@ import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { useSpeech } from '@/shared/lib/hooks/useSpeech';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { AnswerGrade } from '../model/lib/writeEngine';
+import { AnswerGrade } from '@/shared/lib/text';
 import cls from './WriteSession.module.scss';
 
 interface WriteFeedbackProps {

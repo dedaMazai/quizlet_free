@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Dropdown, Empty, Input, MenuProps, Tag } from 'antd';
+import { Button, Dropdown, Empty, Input, MenuProps, Segmented, Tag } from 'antd';
 import {
   PlusOutlined,
   ReadOutlined,
@@ -16,6 +16,8 @@ import {
   RobotOutlined,
   SearchOutlined,
   StarOutlined,
+  FormOutlined,
+  BuildOutlined,
 } from '@ant-design/icons';
 import {
   useGetDeckQuery,
@@ -24,6 +26,7 @@ import {
 } from '@/entities/Deck';
 import { useUserInfo, useUserAccesses } from '@/entities/User';
 import {
+  CardType,
   useGetCardsQuery,
   useGetFavoritesQuery,
   findDuplicateGroups,
@@ -33,6 +36,7 @@ import { CardEditor } from '@/features/CardEditor';
 import { ShareDeckModal } from '@/features/ShareDeck';
 import { DuplicateCardsModal } from '@/features/DuplicateCardsModal';
 import { CheckTranslationsModal } from '@/features/CheckTranslationsAI';
+import { GenerateChunksModal } from '@/features/GenerateChunksAI';
 import { useDeckExport, ExportFormat } from '@/features/ExportDeck';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
@@ -53,6 +57,7 @@ const DeckPage = () => {
   const [shareOpen, setShareOpen] = useState(false);
   const [dupOpen, setDupOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [chunksOpen, setChunksOpen] = useState(false);
 
   const { data: deck, isLoading } = useGetDeckQuery(deckId!, { skip: !deckId });
   const [duplicateDeck, { isLoading: isDuplicating }] = useDuplicateDeckMutation();
@@ -67,13 +72,17 @@ const DeckPage = () => {
   );
 
   const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
+  const [typeFilter, setTypeFilter] = useState<CardType | 'all'>('all');
   const filtered = useMemo(() => {
     const query = debouncedSearch.trim().toLowerCase();
-    if (!query) return cards ?? [];
-    return (cards ?? []).filter((card) => card.term.toLowerCase().includes(query)
-      || card.translation.toLowerCase().includes(query)
-      || (card.example?.toLowerCase().includes(query) ?? false));
-  }, [cards, debouncedSearch]);
+    return (cards ?? []).filter((card) => {
+      if (typeFilter !== 'all' && card.card_type !== typeFilter) return false;
+      if (!query) return true;
+      return card.term.toLowerCase().includes(query)
+        || card.translation.toLowerCase().includes(query)
+        || (card.example?.toLowerCase().includes(query) ?? false);
+    });
+  }, [cards, debouncedSearch, typeFilter]);
   const hasSearch = Boolean(debouncedSearch.trim());
   const { exportDeck, exporting, disabled: exportDisabled } = useDeckExport(
     deckId ?? '',
@@ -115,6 +124,20 @@ const DeckPage = () => {
   // Второстепенные действия колоды собраны в одно меню «...».
   const moreItems: MenuProps['items'] = [
     {
+      key: 'cloze',
+      icon: <FormOutlined />,
+      label: t('Пропуски'),
+      // Режим строится на поле «Пример»: без примеров пропуск делать не из чего.
+      disabled: !cards?.some((card) => card.example),
+    },
+    {
+      key: 'order',
+      icon: <BuildOutlined />,
+      label: t('Собери фразу'),
+      // Собирать имеет смысл только фразы: одиночное слово собирать нечего.
+      disabled: !cards?.some((card) => card.card_type === 'phrase'),
+    },
+    {
       key: 'learn-favorites',
       icon: <StarOutlined />,
       label: t('Заучивание избранного'),
@@ -133,6 +156,9 @@ const DeckPage = () => {
     },
     canEditCards
       ? { key: 'ai-check', icon: <RobotOutlined />, label: t('Проверить через ИИ') }
+      : null,
+    canEditCards
+      ? { key: 'ai-chunks', icon: <RobotOutlined />, label: t('Сгенерировать фразы (ИИ)') }
       : null,
     isOwner
       ? { key: 'share', icon: <ShareAltOutlined />, label: t('Поделиться') }
@@ -153,8 +179,11 @@ const DeckPage = () => {
       exportDeck(key.split(':')[1] as ExportFormat);
       return;
     }
+    if (key === 'cloze') navigate(RoutePath.CLOZE(deckId));
+    if (key === 'order') navigate(RoutePath.ORDER(deckId));
     if (key === 'learn-favorites') navigate(RoutePath.DECK_FAVORITES_LEARN(deckId));
     if (key === 'ai-check') setAiOpen(true);
+    if (key === 'ai-chunks') setChunksOpen(true);
     if (key === 'share') setShareOpen(true);
     if (key === 'dedup') setDupOpen(true);
     if (key === 'duplicate') handleDuplicate();
@@ -222,6 +251,15 @@ const DeckPage = () => {
           placeholder={t('Поиск слов')}
           onChange={(e) => setSearchDebounced(e.target.value)}
         />
+        <Segmented<CardType | 'all'>
+          value={typeFilter}
+          onChange={setTypeFilter}
+          options={[
+            { label: t('Все'), value: 'all' },
+            { label: t('Слова'), value: 'word' },
+            { label: t('Фразы'), value: 'phrase' },
+          ]}
+        />
         {canEditCards && (
           <Button
             className={cls.addButton}
@@ -245,6 +283,11 @@ const DeckPage = () => {
           <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
           <DuplicateCardsModal open={dupOpen} deckUuid={deckId} onClose={() => setDupOpen(false)} />
           <CheckTranslationsModal open={aiOpen} deckUuid={deckId} onClose={() => setAiOpen(false)} />
+          <GenerateChunksModal
+            open={chunksOpen}
+            deckUuid={deckId}
+            onClose={() => setChunksOpen(false)}
+          />
         </>
       )}
       {isOwner && (

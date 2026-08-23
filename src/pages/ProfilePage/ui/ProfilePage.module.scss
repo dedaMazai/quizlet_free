@@ -37,19 +37,6 @@
   color: var(--color-accent);
 }
 
-.chartsGrid {
-  display: grid;
-  grid-template-columns: minmax(280px, 360px) 1fr;
-  gap: 24px;
-  align-items: stretch;
-}
-
-@media (width <= 900px) {
-  .chartsGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (width <= 560px) {
   .header {
     flex-direction: column;

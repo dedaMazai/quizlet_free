@@ -33,7 +33,12 @@ const WritePage = () => {
           {t('Письмо')}{deck ? `: ${deck.name}` : ''}
         </MyTypography.Large>
       </HStack>
-      <WriteSession cards={cards ?? []} deckKey={deckId} deckName={deck?.name ?? ''} />
+      <WriteSession
+        cards={cards ?? []}
+        deckKey={deckId}
+        deckName={deck?.name ?? ''}
+        reviewsDeckUuid={deckId}
+      />
     </VStack>
   );
 };

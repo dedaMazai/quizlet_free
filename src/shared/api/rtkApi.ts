@@ -24,6 +24,7 @@ export enum ApiTag {
     Card = 'Card',
     Cards = 'Cards',
     LearnProgress = 'LearnProgress',
+    CardReviews = 'CardReviews',
     Favorites = 'Favorites',
     StudyStats = 'StudyStats',
     AiUsage = 'AiUsage',

@@ -12,7 +12,7 @@ create table if not exists public.study_events (
   is_correct   boolean not null,
   level_before smallint not null,        -- 0|1|2
   level_after  smallint not null,        -- 0|1|2
-  mode         text not null,            -- 'choice' | 'write'
+  mode         text not null,            -- 'choice' | 'write_ru_en' | 'write_en_ru' | 'cloze' | 'order'
   duration_ms  integer,                  -- время на ответ (nullable)
   created_at   timestamptz not null default now()
 );
@@ -121,41 +121,11 @@ as $$
   ) t;
 $$;
 
--- 2.4 Освоенность из learn_progress.levels. Синтетические колоды (__*) исключены из overall
--- (иначе одни и те же карточки считались бы дважды), но остаются отдельными в per_deck.
-create or replace function public.get_mastery()
-returns jsonb
-language sql
-stable
-as $$
-  with lvl as (
-    select lp.deck_key, (kv.value)::int as level
-    from public.learn_progress lp
-    cross join lateral jsonb_each_text(lp.levels) as kv(card_id, value)
-    where lp.user_id = auth.uid()
-  ),
-  per_deck as (
-    select deck_key,
-           count(*) filter (where level = 0) as new,
-           count(*) filter (where level = 1) as learning,
-           count(*) filter (where level = 2) as mastered
-    from lvl
-    group by deck_key
-  )
-  select jsonb_build_object(
-    'overall', jsonb_build_object(
-      'new',      coalesce(sum(new)      filter (where left(deck_key, 2) <> '__'), 0),
-      'learning', coalesce(sum(learning) filter (where left(deck_key, 2) <> '__'), 0),
-      'mastered', coalesce(sum(mastered) filter (where left(deck_key, 2) <> '__'), 0)
-    ),
-    'per_deck', coalesce(jsonb_agg(jsonb_build_object(
-        'deck_key', deck_key, 'new', new, 'learning', learning, 'mastered', mastered
-      )), '[]'::jsonb)
-  )
-  from per_deck;
-$$;
+-- 2.4 get_mastery ПЕРЕЕХАЛА в srs.sql: освоенность считается по card_reviews,
+-- а не по learn_progress.levels. Функция намеренно удалена отсюда, иначе повторный
+-- прогон этого скрипта откатил бы новую версию (оба скрипта идемпотентны и
+-- запускаются вручную). Grant на неё выдаётся там же.
 
 grant execute on function public.get_study_overview(text) to authenticated;
 grant execute on function public.get_study_heatmap(text, int) to authenticated;
 grant execute on function public.get_deck_progress(text) to authenticated;
-grant execute on function public.get_mastery() to authenticated;

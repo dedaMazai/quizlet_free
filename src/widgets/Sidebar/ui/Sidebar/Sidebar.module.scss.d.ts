@@ -23,8 +23,10 @@ export type Styles = {
   moduleLabel: string;
   modulesContainer: string;
   open: string;
+  recentSection: string;
   resizeHandle: string;
   resizeHandleDragging: string;
+  sectionTitle: string;
   Sidebar: string;
 };
 

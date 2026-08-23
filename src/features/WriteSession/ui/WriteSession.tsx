@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Button, Empty, Progress, Result,
 } from 'antd';
-import { Card } from '@/entities/Card';
+import { Card, useGetCardReviewsQuery } from '@/entities/Card';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { useWriteSession } from '../model/hooks/useWriteSession';
@@ -18,13 +18,18 @@ interface WriteSessionProps {
   deckKey: string;
   /** Имя колоды для снапшота в статистике. */
   deckName: string;
+  /** Колода, по которой сузить выборку повторений; не задана — берутся все. */
+  reviewsDeckUuid?: string;
 }
 
 export const WriteSession: FC<WriteSessionProps> = (props) => {
-  const { cards, deckKey, deckName } = props;
+  const {
+    cards, deckKey, deckName, reviewsDeckUuid,
+  } = props;
   const { t } = useTranslation();
 
-  const session = useWriteSession(cards, { deckKey, deckName });
+  const { data: reviews } = useGetCardReviewsQuery(reviewsDeckUuid);
+  const session = useWriteSession(cards, reviews, { deckKey, deckName });
 
   if (!cards.length) {
     return <Empty description={t('Нет слов для письма')} />;

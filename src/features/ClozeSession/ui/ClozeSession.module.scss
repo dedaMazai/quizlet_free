@@ -1,0 +1,60 @@
+.stage {
+  width: 100%;
+  max-width: 640px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progressRow {
+  max-width: 640px;
+}
+
+.sentence {
+  max-width: 600px;
+  text-align: center;
+  line-height: 1.8;
+}
+
+.gap {
+  display: inline-block;
+  min-width: 96px;
+  border-bottom: 2px solid var(--color-primary);
+  vertical-align: baseline;
+}
+
+.answerRow {
+  max-width: 480px;
+}
+
+.feedbackIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  font-size: 48px;
+
+  &.correct {
+    color: var(--color-success);
+    background: var(--color-success-soft);
+  }
+
+  &.almost {
+    color: var(--color-warning);
+    background: var(--color-warning-soft);
+  }
+
+  &.wrong {
+    color: var(--color-error);
+    background: var(--color-error-soft);
+  }
+}
+
+.example {
+  max-width: 560px;
+  text-align: center;
+  font-style: italic;
+}

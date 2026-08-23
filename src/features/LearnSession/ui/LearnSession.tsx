@@ -1,66 +1,59 @@
-import {
-  FC, useEffect, useMemo, useRef,
-} from 'react';
+import { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button, Empty, Result,
 } from 'antd';
 import {
   Card,
-  useGetLearnProgressQuery,
-  useSaveLearnProgressMutation,
+  CardReview,
+  levelOf,
+  useGetCardReviewsQuery,
+  useResetCardReviewsMutation,
 } from '@/entities/Card';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { Loader } from '@/shared/ui/Loader';
 import { useLearnSession } from '../model/hooks/useLearnSession';
-import { Levels } from '../model/lib/learnEngine';
 import { ChoiceQuestion } from './ChoiceQuestion';
 import { WriteQuestion } from './WriteQuestion';
 import { AnswerFeedback } from './AnswerFeedback';
 import cls from './LearnSession.module.scss';
 
 interface LearnSessionInnerProps {
-  progressKey: string;
+  deckKey: string;
   deckName: string;
   cards: Card[];
-  savedLevels?: Levels;
+  savedReviews?: CardReview[];
 }
 
 const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
   const {
-    progressKey, deckName, cards, savedLevels,
+    deckKey, deckName, cards, savedReviews,
   } = props;
   const { t } = useTranslation();
-  const [saveProgress] = useSaveLearnProgressMutation();
+  const [resetReviews] = useResetCardReviewsMutation();
 
-  const session = useLearnSession(cards, savedLevels, { deckKey: progressKey, deckName });
-
-  // Сохраняем прогресс при каждом изменении уровней (пропускаем первый рендер)
-  const isFirst = useRef(true);
-  useEffect(() => {
-    if (isFirst.current) {
-      isFirst.current = false;
-      return;
-    }
-    saveProgress({
-      deck_uuid: progressKey,
-      levels: session.levels,
-      updated_at: new Date().toISOString(),
-    });
-  }, [session.levels, progressKey, saveProgress]);
+  const session = useLearnSession(cards, savedReviews, { deckKey, deckName });
 
   // Распределение слов по стадиям освоения: 0 — новые, 1 — изучаю, 2 — усвоено.
+  // Начатая в этой сессии карточка сразу считается изучаемой, хотя в card_reviews
+  // попадёт только на выпуске — иначе верный ответ визуально ничего не менял бы.
   const counts = useMemo(() => {
     const acc = { fresh: 0, learning: 0, mastered: 0 };
     cards.forEach((card) => {
-      const level = session.levels[card.uuid] ?? 0;
+      const level = levelOf(session.reviews[card.uuid] ?? null);
+      const started = (session.steps[card.uuid] ?? 0) > 0;
       if (level === 2) acc.mastered += 1;
-      else if (level === 1) acc.learning += 1;
+      else if (level === 1 || started) acc.learning += 1;
       else acc.fresh += 1;
     });
     return acc;
-  }, [cards, session.levels]);
+  }, [cards, session.reviews, session.steps]);
+
+  const handleReset = () => {
+    resetReviews(cards.map((card) => card.uuid));
+    session.reset();
+  };
 
   if (session.phase === 'finished') {
     return (
@@ -85,7 +78,7 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
             {t('Раунд {{n}}', { n: session.round })}
           </MyTypography.Small>
           <MyTypography.Small type="secondary">
-            {t('Усвоено')}: {session.mastered} / {session.total}
+            {t('Усвоено')}: {counts.mastered} / {session.total}
           </MyTypography.Small>
         </HStack>
 
@@ -136,7 +129,7 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
         )}
       </div>
 
-      <Button type="text" danger onClick={session.reset}>
+      <Button type="text" danger onClick={handleReset}>
         {t('Сбросить прогресс')}
       </Button>
     </VStack>
@@ -145,17 +138,28 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
 
 interface LearnSessionProps {
   cards: Card[];
-  /** Ключ, под которым хранится прогресс заучивания (deck_uuid или ключ избранного). */
-  progressKey: string;
+  /** Ключ журнала статистики: deck_uuid или синтетический ключ избранного/всех слов. */
+  deckKey: string;
   /** Имя колоды для снапшота в статистике (для синтетических колод — сам ключ). */
   deckName: string;
+  /** Колода, по которой сузить выборку повторений; не задана — берутся все. */
+  reviewsDeckUuid?: string;
+  /** Готовые повторения: если переданы, отдельный запрос не делается. */
+  reviews?: CardReview[];
 }
 
 export const LearnSession: FC<LearnSessionProps> = (props) => {
-  const { cards, progressKey, deckName } = props;
+  const {
+    cards, deckKey, deckName, reviewsDeckUuid, reviews: providedReviews,
+  } = props;
   const { t } = useTranslation();
 
-  const { data: progress, isLoading } = useGetLearnProgressQuery(progressKey);
+  // Очередь повторов уже приносит состояние вместе с карточками — второй запрос,
+  // да ещё и по всем словам пользователя, там был бы чистой тратой.
+  const { data: fetchedReviews, isLoading } = useGetCardReviewsQuery(reviewsDeckUuid, {
+    skip: Boolean(providedReviews),
+  });
+  const reviews = providedReviews ?? fetchedReviews;
 
   if (isLoading) {
     return <Loader />;
@@ -167,10 +171,10 @@ export const LearnSession: FC<LearnSessionProps> = (props) => {
 
   return (
     <LearnSessionInner
-      progressKey={progressKey}
+      deckKey={deckKey}
       deckName={deckName}
       cards={cards}
-      savedLevels={progress?.levels}
+      savedReviews={reviews}
     />
   );
 };

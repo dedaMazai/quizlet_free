@@ -7,7 +7,9 @@ import {
     UnorderedListOutlined,
     StarOutlined,
     BulbOutlined,
+    HistoryOutlined,
 } from '@ant-design/icons';
+import { useGetDueCountQuery } from '@/entities/Card';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { RoutePath } from '@/shared/config/router/routePath';
@@ -25,7 +27,17 @@ export const QuickActions: FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
+    // Долг по повторам показываем и здесь: в мобильном меню бейджа сайдбара нет.
+    const { data: due } = useGetDueCountQuery(undefined);
+
     const actions: ActionItem[] = [
+        ...(due?.count ? [{
+            key: 'review',
+            icon: <HistoryOutlined />,
+            title: t('К повторению'),
+            description: t('{{count}} слов ждут повторения', { count: due.count }),
+            onClick: () => navigate(RoutePath.REVIEW()),
+        }] : []),
         {
             key: 'decks',
             icon: <AppstoreOutlined />,

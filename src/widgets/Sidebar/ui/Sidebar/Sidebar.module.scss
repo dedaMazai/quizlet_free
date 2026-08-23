@@ -249,3 +249,19 @@
 .dragging {
     transition: none !important;
 }
+
+.sectionTitle {
+    padding: 8px 12px 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.recentSection {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border-secondary, rgb(255, 255, 255, 0.08));
+}

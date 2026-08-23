@@ -1,23 +1,36 @@
 import {
   useCallback, useEffect, useMemo, useReducer, useRef,
 } from 'react';
-import { Card } from '@/entities/Card';
+import {
+  Card,
+  CardReview,
+  LEARNING_STEPS,
+  applyReview,
+  gradeFromAnswer,
+  levelOf,
+  useSaveCardReviewsMutation,
+} from '@/entities/Card';
 import { StudyEventDraft, useLogStudyEventsMutation } from '@/entities/Statistics';
 import {
-  applyAnswer,
   buildQuestion,
   buildRoundQueue,
   gradeAnswer,
-  initLevels,
+  initSteps,
   isFinished,
-  Levels,
-  masteredCount,
+  SessionSteps,
 } from '../lib/learnEngine';
 
 type Phase = 'question' | 'feedback' | 'finished';
 
+/** Сколько ответов копим, прежде чем сбросить пачку на сервер. */
+const FLUSH_EVERY = 10;
+
+type Reviews = Record<string, CardReview | null>;
+
 interface SessionState {
-  levels: Levels;
+  steps: SessionSteps;
+  /** Актуальное состояние повторения по карточкам (null — карточка ещё не изучалась). */
+  reviews: Reviews;
   queue: string[]; // uuid'ы карточек, оставшиеся в текущем раунде
   round: number;
   phase: Phase;
@@ -26,21 +39,31 @@ interface SessionState {
 }
 
 type Action =
-  | { type: 'ANSWER'; cardUuid: string; correct: boolean; input: string }
+  | { type: 'ANSWER'; cardUuid: string; correct: boolean; input: string; review: CardReview | null }
   | { type: 'NEXT' }
   | { type: 'RESET' };
 
 interface InitArg {
   cards: Card[];
-  savedLevels?: Levels;
+  savedReviews?: CardReview[];
 }
 
-const createInitialState = ({ cards, savedLevels }: InitArg): SessionState => {
-  const levels = initLevels(cards, savedLevels);
-  const finished = isFinished(cards, levels);
+const toReviewMap = (cards: Card[], saved?: CardReview[]): Reviews => {
+  const byUuid = new Map((saved ?? []).map((review) => [review.card_uuid, review]));
+  const result: Reviews = {};
+  cards.forEach((card) => {
+    result[card.uuid] = byUuid.get(card.uuid) ?? null;
+  });
+  return result;
+};
+
+const createInitialState = ({ cards, savedReviews }: InitArg): SessionState => {
+  const steps = initSteps(cards, savedReviews);
+  const finished = isFinished(cards, steps);
   return {
-    levels,
-    queue: finished ? [] : buildRoundQueue(cards, levels),
+    steps,
+    reviews: toReviewMap(cards, savedReviews),
+    queue: finished ? [] : buildRoundQueue(cards, steps),
     round: 1,
     phase: finished ? 'finished' : 'question',
     lastCorrect: null,
@@ -51,10 +74,14 @@ const createInitialState = ({ cards, savedLevels }: InitArg): SessionState => {
 const makeReducer = (cards: Card[]) => (state: SessionState, action: Action): SessionState => {
   switch (action.type) {
     case 'ANSWER': {
-      const levels = applyAnswer(state.levels, action.cardUuid, action.correct);
+      const step = state.steps[action.cardUuid] ?? 0;
       return {
         ...state,
-        levels,
+        // Верно — шаг вперёд; ошибка — обратно в начало обучения этой карточки.
+        steps: { ...state.steps, [action.cardUuid]: action.correct ? step + 1 : 0 },
+        reviews: action.review
+          ? { ...state.reviews, [action.cardUuid]: action.review }
+          : state.reviews,
         phase: 'feedback',
         lastCorrect: action.correct,
         lastInput: action.input,
@@ -68,10 +95,10 @@ const makeReducer = (cards: Card[]) => (state: SessionState, action: Action): Se
       const phase: Phase = 'question';
 
       if (queue.length === 0) {
-        if (isFinished(cards, state.levels)) {
+        if (isFinished(cards, state.steps)) {
           return { ...state, queue: [], phase: 'finished', lastCorrect: null };
         }
-        queue = buildRoundQueue(cards, state.levels);
+        queue = buildRoundQueue(cards, state.steps);
         round += 1;
       }
 
@@ -87,17 +114,21 @@ const makeReducer = (cards: Card[]) => (state: SessionState, action: Action): Se
 };
 
 interface SessionMeta {
-  /** Ключ прогресса/статистики: deck_uuid или синтетический ключ избранного/всех слов. */
+  /** Ключ журнала статистики: deck_uuid или синтетический ключ избранного/всех слов. */
   deckKey: string;
   /** Имя колоды для снапшота в журнале событий. */
   deckName: string;
 }
 
-export const useLearnSession = (cards: Card[], savedLevels: Levels | undefined, meta: SessionMeta) => {
+export const useLearnSession = (
+  cards: Card[],
+  savedReviews: CardReview[] | undefined,
+  meta: SessionMeta,
+) => {
   const reducer = useMemo(() => makeReducer(cards), [cards]);
   const [state, dispatch] = useReducer(
     reducer,
-    { cards, savedLevels },
+    { cards, savedReviews },
     createInitialState,
   );
 
@@ -107,13 +138,15 @@ export const useLearnSession = (cards: Card[], savedLevels: Levels | undefined, 
   );
 
   const question = useMemo(
-    () => (currentCard ? buildQuestion(currentCard, cards, state.levels) : null),
-    [currentCard, cards, state.levels],
+    () => (currentCard ? buildQuestion(currentCard, cards, state.steps) : null),
+    [currentCard, cards, state.steps],
   );
 
-  // Логирование статистики: копим события в буфере и отправляем батчем при flush.
+  // Статистика и состояние повторений копятся в буферах и уходят батчами.
   const [logEvents] = useLogStudyEventsMutation();
+  const [saveReviews] = useSaveCardReviewsMutation();
   const eventsRef = useRef<StudyEventDraft[]>([]);
+  const reviewsRef = useRef<CardReview[]>([]);
   const questionStartRef = useRef(0);
 
   // Засекаем момент показа нового вопроса — для duration_ms.
@@ -123,37 +156,53 @@ export const useLearnSession = (cards: Card[], savedLevels: Levels | undefined, 
     }
   }, [state.phase, currentCard]);
 
-  const flushEvents = useCallback(() => {
-    if (eventsRef.current.length === 0) return;
-    const events = eventsRef.current;
-    eventsRef.current = [];
-    logEvents({ deckKey: meta.deckKey, deckName: meta.deckName, events });
-  }, [logEvents, meta.deckKey, meta.deckName]);
+  const flush = useCallback(() => {
+    if (eventsRef.current.length > 0) {
+      const events = eventsRef.current;
+      eventsRef.current = [];
+      logEvents({ deckKey: meta.deckKey, deckName: meta.deckName, events });
+    }
+    if (reviewsRef.current.length > 0) {
+      const reviews = reviewsRef.current;
+      reviewsRef.current = [];
+      saveReviews(reviews);
+    }
+  }, [logEvents, saveReviews, meta.deckKey, meta.deckName]);
 
   // Отправляем накопленное при завершении колоды и при уходе со страницы.
   useEffect(() => {
-    if (state.phase === 'finished') flushEvents();
-  }, [state.phase, flushEvents]);
+    if (state.phase === 'finished') flush();
+  }, [state.phase, flush]);
 
-  useEffect(() => () => flushEvents(), [flushEvents]);
+  useEffect(() => () => flush(), [flush]);
 
   const answer = (input: string) => {
     if (!currentCard) return;
-    const levelBefore = state.levels[currentCard.uuid] ?? 0;
+    const uuid = currentCard.uuid;
+    const before = state.reviews[uuid] ?? null;
     const correct = gradeAnswer(currentCard, input);
+    const nextStep = correct ? (state.steps[uuid] ?? 0) + 1 : 0;
+
+    // В card_reviews пишем только на выпуске карточки и на ошибке:
+    // промежуточный шаг обучения — состояние сессии, а не долговременной памяти.
+    const graduated = correct && nextStep >= LEARNING_STEPS;
+    const review = (graduated || !correct)
+      ? applyReview(before, uuid, gradeFromAnswer(correct))
+      : null;
+
     eventsRef.current.push({
-      card_id: currentCard.uuid,
+      card_id: uuid,
       is_correct: correct,
-      level_before: levelBefore,
-      level_after: correct ? Math.min(levelBefore + 1, 2) : 0,
+      level_before: levelOf(before),
+      level_after: review ? review.level : levelOf(before),
       mode: question?.type ?? 'choice',
       duration_ms: Math.round(performance.now() - questionStartRef.current),
     });
+    if (review) reviewsRef.current.push(review);
+    if (eventsRef.current.length >= FLUSH_EVERY) flush();
+
     dispatch({
-      type: 'ANSWER',
-      cardUuid: currentCard.uuid,
-      correct,
-      input,
+      type: 'ANSWER', cardUuid: uuid, correct, input, review,
     });
   };
 
@@ -163,11 +212,11 @@ export const useLearnSession = (cards: Card[], savedLevels: Levels | undefined, 
   return {
     phase: state.phase,
     round: state.round,
-    levels: state.levels,
+    reviews: state.reviews,
+    steps: state.steps,
     question,
     lastCorrect: state.lastCorrect,
     lastInput: state.lastInput,
-    mastered: masteredCount(cards, state.levels),
     total: cards.length,
     answer,
     next,

@@ -17,10 +17,14 @@ export const RoutePath = {
   [RouteNames.FLASHCARDS]: (id: string) => `/decks/${id}/flashcards`,
   [RouteNames.LEARN]: (id: string) => `/decks/${id}/learn`,
   [RouteNames.WRITE]: (id: string) => `/decks/${id}/write`,
+  [RouteNames.CLOZE]: (id: string) => `/decks/${id}/cloze`,
+  [RouteNames.ORDER]: (id: string) => `/decks/${id}/order`,
   [RouteNames.DECK_FAVORITES_LEARN]: (id: string) => `/decks/${id}/learn-favorites`,
   [RouteNames.FAVORITES]: () => '/favorites',
   [RouteNames.FAVORITES_FLASHCARDS]: () => '/favorites/flashcards',
   [RouteNames.FAVORITES_LEARN]: () => '/favorites/learn',
+  [RouteNames.PROGRESS]: () => '/progress',
+  [RouteNames.REVIEW]: () => '/review',
   // last
   [RouteNames.NOT_FOUND]: () => '/*',
 };

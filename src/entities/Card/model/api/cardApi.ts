@@ -1,10 +1,13 @@
 import { ApiTag, rtkApi } from '@/shared/api/rtkApi';
 import { supabase, supabaseError, getCurrentUserId } from '@/shared/api/supabaseClient';
 import {
-  Card, CardCreateDto, CardUpdateDto, CardsPage, CardsPageArgs,
+  Card, CardCreateDto, CardType, CardUpdateDto, CardsPage, CardsPageArgs,
 } from '../types/card';
+import { inferCardType } from '../lib/inferCardType';
 import { LearnProgress } from '../types/learnProgress';
+import { CardReview, DueCard } from '../types/cardReview';
 import { AiCheckInput, AiCheckResult } from '../types/aiCheck';
+import { AiChunkInput, AiChunksResult } from '../types/aiChunks';
 
 // Строка таблицы cards в Supabase (RLS ограничивает выборку текущим пользователем).
 interface CardRow {
@@ -13,8 +16,33 @@ interface CardRow {
   term: string;
   translation: string;
   example: string | null;
+  card_type: CardType;
+  parent_card_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// Строка card_reviews; card_uuid на клиенте = card_id в базе.
+interface ReviewRow {
+  card_id: string;
+  level: number;
+  reps: number;
+  lapses: number;
+  ease: number;
+  interval_days: number;
+  due_at: string;
+  last_reviewed_at: string | null;
+}
+
+// Выдача get_due_cards: поля карточки + поля повторения в одной строке.
+interface DueRow extends CardRow {
+  level: number | null;
+  reps: number | null;
+  lapses: number | null;
+  ease: number | null;
+  interval_days: number | null;
+  due_at: string | null;
+  last_reviewed_at: string | null;
 }
 
 interface ProgressRow {
@@ -23,12 +51,39 @@ interface ProgressRow {
   updated_at: string;
 }
 
+const mapReview = (row: ReviewRow): CardReview => ({
+  card_uuid: row.card_id,
+  level: row.level as CardReview['level'],
+  reps: row.reps,
+  lapses: row.lapses,
+  ease: row.ease,
+  interval_days: row.interval_days,
+  due_at: row.due_at,
+  last_reviewed_at: row.last_reviewed_at ?? undefined,
+});
+
+const mapDueCard = (row: DueRow): DueCard => ({
+  card: mapCard(row),
+  review: row.due_at === null ? null : mapReview({
+    card_id: row.id,
+    level: row.level ?? 0,
+    reps: row.reps ?? 0,
+    lapses: row.lapses ?? 0,
+    ease: row.ease ?? 0,
+    interval_days: row.interval_days ?? 0,
+    due_at: row.due_at,
+    last_reviewed_at: row.last_reviewed_at,
+  }),
+});
+
 const mapCard = (row: CardRow): Card => ({
   uuid: row.id,
   deck_uuid: row.deck_id,
   term: row.term,
   translation: row.translation,
   example: row.example ?? undefined,
+  card_type: row.card_type,
+  parent_card_uuid: row.parent_card_id ?? undefined,
   created_at: row.created_at,
   updated_at: row.updated_at,
 });
@@ -136,6 +191,8 @@ const cardApi = rtkApi.injectEndpoints({
             term: dto.term,
             translation: dto.translation,
             example: dto.example ?? null,
+            card_type: dto.card_type ?? inferCardType(dto.term),
+            parent_card_id: dto.parent_card_uuid ?? null,
           })
           .select()
           .single();
@@ -152,6 +209,7 @@ const cardApi = rtkApi.injectEndpoints({
             term: dto.term,
             translation: dto.translation,
             example: dto.example ?? null,
+            card_type: dto.card_type ?? inferCardType(dto.term),
             updated_at: new Date().toISOString(),
           })
           .eq('id', dto.uuid)
@@ -172,6 +230,8 @@ const cardApi = rtkApi.injectEndpoints({
               term: dto.term,
               translation: dto.translation,
               example: dto.example ?? null,
+              card_type: dto.card_type ?? inferCardType(dto.term),
+              parent_card_id: dto.parent_card_uuid ?? null,
             })),
           )
           .select();
@@ -204,6 +264,84 @@ const cardApi = rtkApi.injectEndpoints({
         return { data: undefined };
       },
       invalidatesTags: [ApiTag.Cards],
+    }),
+    // --- Интервальные повторы (SRS) ---
+    // Прогресс лежит на карточке: deck_uuid здесь лишь сужает выборку.
+    getCardReviews: build.query<CardReview[], string | undefined>({
+      queryFn: async (deckUuid) => {
+        // Сужение по колоде делаем inner join'ом, а не списком id в .in():
+        // у колоды на сотни слов такой список раздул бы URL до отказа запроса.
+        const query = deckUuid
+          ? supabase
+            .from('card_reviews')
+            .select('*, cards!inner(deck_id)')
+            .eq('cards.deck_id', deckUuid)
+          : supabase.from('card_reviews').select('*');
+        const { data, error } = await query;
+        if (error) return supabaseError(error.message);
+        return { data: (data as ReviewRow[]).map(mapReview) };
+      },
+      providesTags: [ApiTag.CardReviews],
+    }),
+    // Батч: сессия копит изменения и сбрасывает их пачкой, а не на каждый ответ.
+    saveCardReviews: build.mutation<void, CardReview[]>({
+      queryFn: async (reviews) => {
+        if (reviews.length === 0) return { data: undefined };
+        const userId = await getCurrentUserId();
+        if (!userId) return supabaseError('Not authenticated');
+        const { error } = await supabase
+          .from('card_reviews')
+          .upsert(
+            reviews.map((review) => ({
+              user_id: userId,
+              card_id: review.card_uuid,
+              level: review.level,
+              reps: review.reps,
+              lapses: review.lapses,
+              ease: review.ease,
+              interval_days: review.interval_days,
+              due_at: review.due_at,
+              last_reviewed_at: review.last_reviewed_at ?? null,
+            })),
+            { onConflict: 'user_id,card_id' },
+          );
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
+      invalidatesTags: [ApiTag.CardReviews, ApiTag.StudyStats],
+    }),
+    resetCardReviews: build.mutation<void, string[]>({
+      queryFn: async (cardUuids) => {
+        if (cardUuids.length === 0) return { data: undefined };
+        const { error } = await supabase
+          .from('card_reviews')
+          .delete()
+          .in('card_id', cardUuids);
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
+      invalidatesTags: [ApiTag.CardReviews, ApiTag.StudyStats],
+    }),
+    getDueCards: build.query<DueCard[], { deckUuid?: string } | undefined>({
+      queryFn: async (args) => {
+        const { data, error } = await supabase.rpc('get_due_cards', {
+          p_deck_id: args?.deckUuid ?? null,
+        });
+        if (error) return supabaseError(error.message);
+        return { data: (data as DueRow[]).map(mapDueCard) };
+      },
+      providesTags: [ApiTag.CardReviews, ApiTag.Cards],
+    }),
+    getDueCount: build.query<{ count: number; nextDueAt: string | null }, string | undefined>({
+      queryFn: async (deckUuid) => {
+        const { data, error } = await supabase.rpc('get_due_count', {
+          p_deck_id: deckUuid ?? null,
+        });
+        if (error) return supabaseError(error.message);
+        const row = data as { count: number; next_due_at: string | null };
+        return { data: { count: row.count, nextDueAt: row.next_due_at } };
+      },
+      providesTags: [ApiTag.CardReviews, ApiTag.Cards],
     }),
     getLearnProgress: build.query<LearnProgress | null, string>({
       queryFn: async (deckUuid) => {
@@ -251,6 +389,30 @@ const cardApi = rtkApi.injectEndpoints({
       providesTags: [ApiTag.Favorites],
     }),
     // Проверка переводов через Edge Function. Лимит запросов проверяется на сервере.
+    generateChunks: build.mutation<AiChunksResult[], AiChunkInput[]>({
+      queryFn: async (cards) => {
+        const { data, error } = await supabase.functions.invoke('generate-chunks', {
+          body: { cards },
+        });
+        if (error) {
+          // Достаём код ошибки из тела ответа функции (например, AI_LIMIT_EXCEEDED).
+          let code = error.message;
+          const ctx = (error as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            try {
+              const body = await ctx.json();
+              if (body?.error) code = body.error;
+            } catch {
+              // Тело не JSON — оставляем исходное сообщение.
+            }
+          }
+          return supabaseError(code);
+        }
+        const results = (data as { results?: AiChunksResult[] })?.results ?? [];
+        return { data: results };
+      },
+      invalidatesTags: [ApiTag.AiUsage],
+    }),
     checkTranslations: build.mutation<AiCheckResult[], AiCheckInput[]>({
       queryFn: async (cards) => {
         const { data, error } = await supabase.functions.invoke('check-translations', {
@@ -324,8 +486,14 @@ export const {
   useDeleteCardsByDeckMutation,
   useGetLearnProgressQuery,
   useSaveLearnProgressMutation,
+  useGetCardReviewsQuery,
+  useSaveCardReviewsMutation,
+  useResetCardReviewsMutation,
+  useGetDueCardsQuery,
+  useGetDueCountQuery,
   useGetFavoritesQuery,
   useToggleFavoriteMutation,
   useCheckTranslationsMutation,
+  useGenerateChunksMutation,
   useGetAiUsageQuery,
 } = cardApi;
