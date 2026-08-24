@@ -39,6 +39,10 @@ export const AnswerFeedback: FC<AnswerFeedbackProps> = (props) => {
         {correct ? t('Верно') : t('Неверно')}
       </MyTypography.Large>
 
+      <MyTypography.Base type="secondary">
+        {card.translation}
+      </MyTypography.Base>
+
       {!correct && userInput.trim() && (
         <MyTypography.Base type="secondary">
           {t('Ваш ответ')}: {userInput}
