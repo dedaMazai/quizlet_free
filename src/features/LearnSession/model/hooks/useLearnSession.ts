@@ -19,6 +19,13 @@ import {
   isFinished,
   SessionSteps,
 } from '../lib/learnEngine';
+import {
+  clearStoredSteps,
+  drainOutbox,
+  pushToOutbox,
+  readStoredSteps,
+  writeStoredSteps,
+} from '../lib/sessionPersistence';
 
 type Phase = 'question' | 'feedback' | 'finished';
 
@@ -46,6 +53,8 @@ type Action =
 interface InitArg {
   cards: Card[];
   savedReviews?: CardReview[];
+  /** Ключ для восстановления шагов сессии из localStorage; RESET его не передаёт. */
+  deckKey?: string;
 }
 
 const toReviewMap = (cards: Card[], saved?: CardReview[]): Reviews => {
@@ -57,8 +66,17 @@ const toReviewMap = (cards: Card[], saved?: CardReview[]): Reviews => {
   return result;
 };
 
-const createInitialState = ({ cards, savedReviews }: InitArg): SessionState => {
+const createInitialState = ({ cards, savedReviews, deckKey }: InitArg): SessionState => {
   const steps = initSteps(cards, savedReviews);
+  // Перезагрузка страницы не должна откатывать шаги текущей сессии:
+  // сохранённый в localStorage шаг важнее выведенного из card_reviews.
+  const stored = deckKey ? readStoredSteps(deckKey) : null;
+  if (stored) {
+    cards.forEach((card) => {
+      const step = stored[card.uuid];
+      if (step !== undefined) steps[card.uuid] = step;
+    });
+  }
   const finished = isFinished(cards, steps);
   return {
     steps,
@@ -128,7 +146,7 @@ export const useLearnSession = (
   const reducer = useMemo(() => makeReducer(cards), [cards]);
   const [state, dispatch] = useReducer(
     reducer,
-    { cards, savedReviews },
+    { cards, savedReviews, deckKey: meta.deckKey },
     createInitialState,
   );
 
@@ -175,6 +193,45 @@ export const useLearnSession = (
   }, [state.phase, flush]);
 
   useEffect(() => () => flush(), [flush]);
+
+  // Зеркалим шаги сессии в localStorage; по завершении запись удаляем,
+  // чтобы следующий заход начал новую сессию от card_reviews.
+  useEffect(() => {
+    if (state.phase === 'finished') {
+      clearStoredSteps(meta.deckKey);
+    } else {
+      writeStoredSteps(meta.deckKey, state.steps);
+    }
+  }, [state.steps, state.phase, meta.deckKey]);
+
+  // Доотправляем пачки, не успевшие уйти при прошлом закрытии/перезагрузке страницы.
+  useEffect(() => {
+    drainOutbox().forEach((entry) => {
+      if (entry.events.length > 0) {
+        logEvents({ deckKey: entry.deckKey, deckName: entry.deckName, events: entry.events });
+      }
+      if (entry.reviews.length > 0) saveReviews(entry.reviews);
+    });
+  }, [logEvents, saveReviews]);
+
+  // При жёсткой перезагрузке/закрытии вкладки React не размонтирует компонент,
+  // а сетевой запрос при выгрузке страницы может не дойти — буфер синхронно
+  // уходит в outbox и доотправится при следующем открытии режима.
+  useEffect(() => {
+    const persistPending = () => {
+      if (eventsRef.current.length === 0 && reviewsRef.current.length === 0) return;
+      pushToOutbox({
+        deckKey: meta.deckKey,
+        deckName: meta.deckName,
+        events: eventsRef.current,
+        reviews: reviewsRef.current,
+      });
+      eventsRef.current = [];
+      reviewsRef.current = [];
+    };
+    window.addEventListener('pagehide', persistPending);
+    return () => window.removeEventListener('pagehide', persistPending);
+  }, [meta.deckKey, meta.deckName]);
 
   const answer = (input: string) => {
     if (!currentCard) return;
