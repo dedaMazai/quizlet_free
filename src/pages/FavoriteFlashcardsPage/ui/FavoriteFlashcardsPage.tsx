@@ -36,7 +36,7 @@ const FavoriteFlashcardsPage = () => {
           {t('Карточки')}: {t('Избранное')}
         </MyTypography.Large>
       </HStack>
-      <FlashcardsGame cards={favCards} />
+      <FlashcardsGame cards={favCards} withFavoriteFilter={false} />
     </VStack>
   );
 };

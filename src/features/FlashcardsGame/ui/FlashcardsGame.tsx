@@ -2,11 +2,11 @@ import {
   FC, useEffect, useMemo, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty } from 'antd';
+import { Button, Empty, Segmented } from 'antd';
 import {
   LeftOutlined, RightOutlined, RetweetOutlined,
 } from '@ant-design/icons';
-import { Card, FavoriteToggle } from '@/entities/Card';
+import { Card, FavoriteToggle, useGetFavoritesQuery } from '@/entities/Card';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
@@ -15,32 +15,46 @@ import { useArrowPressed } from '@/shared/lib/hooks/useArrowPressed';
 import { shuffle } from '@/shared/lib/utils';
 import cls from './FlashcardsGame.module.scss';
 
+type FavoriteFilter = 'all' | 'favorite' | 'notFavorite';
+
 interface FlashcardsGameProps {
   cards: Card[];
+  withFavoriteFilter?: boolean;
 }
 
 export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
-  const { cards } = props;
+  const { cards, withFavoriteFilter = true } = props;
   const { t } = useTranslation();
 
-  const [order, setOrder] = useState<Card[]>(cards);
+  const [filter, setFilter] = useState<FavoriteFilter>('all');
+  const { data: favorites } = useGetFavoritesQuery(undefined, { skip: !withFavoriteFilter });
+
+  const filteredCards = useMemo(() => {
+    if (!withFavoriteFilter || filter === 'all') return cards;
+    const favSet = new Set(favorites ?? []);
+    return cards.filter((card) => (filter === 'favorite' ? favSet.has(card.uuid) : !favSet.has(card.uuid)));
+  }, [cards, filter, favorites, withFavoriteFilter]);
+
+  const [order, setOrder] = useState<Card[]>(filteredCards);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
 
   useEffect(() => {
-    setOrder(cards);
+    setOrder(filteredCards);
     setIndex(0);
     setFlipped(false);
-  }, [cards]);
+  }, [filteredCards]);
 
   const current = order[index];
 
   const goPrev = () => {
+    if (!order.length) return;
     setFlipped(false);
     setIndex((i) => (i - 1 + order.length) % order.length);
   };
 
   const goNext = () => {
+    if (!order.length) return;
     setFlipped(false);
     setIndex((i) => (i + 1) % order.length);
   };
@@ -71,8 +85,30 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
     return <Empty description={t('В колоде нет слов')} />;
   }
 
+  const filterControl = withFavoriteFilter && (
+    <Segmented<FavoriteFilter>
+      value={filter}
+      onChange={setFilter}
+      options={[
+        { label: t('Все'), value: 'all' },
+        { label: t('Избранные'), value: 'favorite' },
+        { label: t('Неизбранные'), value: 'notFavorite' },
+      ]}
+    />
+  );
+
+  if (!current) {
+    return (
+      <VStack max gap="16" align="center">
+        {filterControl}
+        <Empty description={t('Нет карточек по выбранному фильтру')} />
+      </VStack>
+    );
+  }
+
   return (
     <VStack max gap="16" align="center">
+      {filterControl}
       <MyTypography.Base type="secondary">{progress}</MyTypography.Base>
 
       <div
