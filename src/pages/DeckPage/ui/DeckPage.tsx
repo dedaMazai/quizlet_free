@@ -74,16 +74,19 @@ const DeckPage = () => {
 
   const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
   const [typeFilter, setTypeFilter] = useState<CardType | 'all'>('all');
+  const [favFilter, setFavFilter] = useState<'all' | 'favorite' | 'notFavorite'>('all');
   const filtered = useMemo(() => {
     const query = debouncedSearch.trim().toLowerCase();
+    const favSet = new Set(favorites ?? []);
     return (cards ?? []).filter((card) => {
       if (typeFilter !== 'all' && card.card_type !== typeFilter) return false;
+      if (favFilter !== 'all' && favSet.has(card.uuid) !== (favFilter === 'favorite')) return false;
       if (!query) return true;
       return card.term.toLowerCase().includes(query)
         || card.translation.toLowerCase().includes(query)
         || (card.example?.toLowerCase().includes(query) ?? false);
     });
-  }, [cards, debouncedSearch, typeFilter]);
+  }, [cards, debouncedSearch, typeFilter, favFilter, favorites]);
   const hasSearch = Boolean(debouncedSearch.trim());
   const { exportDeck, exporting, disabled: exportDisabled } = useDeckExport(
     deckId ?? '',
@@ -286,6 +289,15 @@ const DeckPage = () => {
             { label: t('Фразы'), value: 'phrase' },
           ]}
         />
+        <Segmented<'all' | 'favorite' | 'notFavorite'>
+          value={favFilter}
+          onChange={setFavFilter}
+          options={[
+            { label: t('Все'), value: 'all' },
+            { label: t('Избранные'), value: 'favorite' },
+            { label: t('Неизбранные'), value: 'notFavorite' },
+          ]}
+        />
         {canEditCards && (
           <Button
             className={cls.addButton}
@@ -301,7 +313,7 @@ const DeckPage = () => {
         deckUuid={deckId}
         readOnly={!canEditCards}
         cards={filtered}
-        emptyText={hasSearch ? t('Ничего не найдено') : undefined}
+        emptyText={hasSearch || favFilter !== 'all' ? t('Ничего не найдено') : undefined}
       />
 
       {canEditCards && (
