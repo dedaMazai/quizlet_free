@@ -6,6 +6,7 @@ import {
 import {
   Card,
   CardReview,
+  LEARNING_STEPS,
   levelOf,
   useGetCardReviewsQuery,
   useResetCardReviewsMutation,
@@ -40,16 +41,17 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
 
   const session = useLearnSession(cards, savedReviews, { deckKey, deckName });
 
-  // Распределение слов по стадиям освоения: 0 — новые, 1 — изучаю, 2 — усвоено.
-  // Начатая в этой сессии карточка сразу считается изучаемой, хотя в card_reviews
-  // попадёт только на выпуске — иначе верный ответ визуально ничего не менял бы.
+  // Распределение слов по стадиям: «усвоено» — карточка прошла все шаги этой сессии
+  // (или уже в долгой памяти по SRS), «изучаю» — начата в сессии или на повторении.
+  // Считаем по шагам сессии, а не по SRS-уровню: level 2 требует интервала 21+ дней
+  // и внутри одной сессии недостижим — счётчик «Усвоено» стоял бы на нуле.
   const counts = useMemo(() => {
     const acc = { fresh: 0, learning: 0, mastered: 0 };
     cards.forEach((card) => {
       const level = levelOf(session.reviews[card.uuid] ?? null);
-      const started = (session.steps[card.uuid] ?? 0) > 0;
-      if (level === 2) acc.mastered += 1;
-      else if (level === 1 || started) acc.learning += 1;
+      const step = session.steps[card.uuid] ?? 0;
+      if (step >= LEARNING_STEPS || level === 2) acc.mastered += 1;
+      else if (step > 0 || level === 1) acc.learning += 1;
       else acc.fresh += 1;
     });
     return acc;
