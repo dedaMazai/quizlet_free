@@ -24,10 +24,28 @@ export interface OutboxEntry {
 const stepsKey = (deckKey: string): string => `learn_steps:${deckKey}`;
 const OUTBOX_KEY = 'learn_outbox';
 
+/**
+ * Срок жизни сохранённых шагов. Интервалы SRS не короче суток, поэтому
+ * легитимное восстановление сессии всегда происходит в тот же день; более
+ * старые шаги — брошенная сессия, которая молча «доучила» бы новую выборку
+ * (особенно опасно для общего ключа очереди повторов).
+ */
+const STEPS_TTL_MS = 12 * 60 * 60 * 1000;
+
+interface StoredSteps {
+  savedAt: number;
+  steps: SessionSteps;
+}
+
 export const readStoredSteps = (deckKey: string): SessionSteps | null => {
   try {
     const raw = localStorage.getItem(stepsKey(deckKey));
-    return raw ? (JSON.parse(raw) as SessionSteps) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<StoredSteps>;
+    // Legacy-формат (сырая карта шагов без savedAt) считаем устаревшим.
+    if (typeof parsed.savedAt !== 'number' || parsed.steps === undefined) return null;
+    if (Date.now() - parsed.savedAt > STEPS_TTL_MS) return null;
+    return parsed.steps;
   } catch {
     return null;
   }
@@ -35,7 +53,8 @@ export const readStoredSteps = (deckKey: string): SessionSteps | null => {
 
 export const writeStoredSteps = (deckKey: string, steps: SessionSteps): void => {
   try {
-    localStorage.setItem(stepsKey(deckKey), JSON.stringify(steps));
+    const stored: StoredSteps = { savedAt: Date.now(), steps };
+    localStorage.setItem(stepsKey(deckKey), JSON.stringify(stored));
   } catch {
     // localStorage недоступен (приватный режим/квота) — работаем без персистентности.
   }

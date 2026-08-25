@@ -30,7 +30,8 @@ const DeckFavoriteLearnPage = () => {
   );
 
   if (!deckId) return null;
-  if (isLoading || isDeckLoading) return <Loader />;
+  // !cards ловит смену deckId без кэша: isLoading уже false, а данных ещё нет.
+  if (isLoading || isDeckLoading || !cards) return <Loader />;
   if (!deck) return <Empty description={t('Колода не найдена')} />;
 
   return (

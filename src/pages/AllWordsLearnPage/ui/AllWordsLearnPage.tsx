@@ -15,7 +15,7 @@ const AllWordsLearnPage = () => {
 
   const { data: cards, isLoading } = useGetCardsQuery();
 
-  if (isLoading) return <Loader />;
+  if (isLoading || !cards) return <Loader />;
 
   return (
     <VStack max fullHeight gap="24">
@@ -30,7 +30,7 @@ const AllWordsLearnPage = () => {
         </MyTypography.Large>
       </HStack>
       <LearnSession
-        cards={cards ?? []}
+        cards={cards}
         deckKey={ALL_WORDS_PROGRESS_KEY}
         deckName={ALL_WORDS_PROGRESS_KEY}
         finishedTitle={t('Все слова выучены!')}

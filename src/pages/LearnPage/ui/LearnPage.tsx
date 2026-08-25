@@ -19,7 +19,8 @@ const LearnPage = () => {
   const { data: cards, isLoading } = useGetCardsQuery(deckId ?? undefined, { skip: !deckId });
 
   if (!deckId) return null;
-  if (isLoading) return <Loader />;
+  // !cards ловит смену deckId без кэша: isLoading уже false, а данных ещё нет.
+  if (isLoading || !cards) return <Loader />;
 
   return (
     <VStack max fullHeight gap="24">
@@ -34,7 +35,7 @@ const LearnPage = () => {
         </MyTypography.Large>
       </HStack>
       <LearnSession
-        cards={cards ?? []}
+        cards={cards}
         deckKey={deckId}
         deckName={deck?.name ?? ''}
         reviewsDeckUuid={deckId}

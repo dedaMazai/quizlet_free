@@ -1,13 +1,12 @@
 import { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Empty, Result,
+  Button, Empty, Progress, Result,
 } from 'antd';
 import {
   Card,
   CardReview,
   LEARNING_STEPS,
-  levelOf,
   useGetCardReviewsQuery,
   useResetCardReviewsMutation,
 } from '@/entities/Card';
@@ -41,21 +40,20 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
 
   const session = useLearnSession(cards, savedReviews, { deckKey, deckName });
 
-  // Распределение слов по стадиям: «усвоено» — карточка прошла все шаги этой сессии
-  // (или уже в долгой памяти по SRS), «изучаю» — начата в сессии или на повторении.
-  // Считаем по шагам сессии, а не по SRS-уровню: level 2 требует интервала 21+ дней
-  // и внутри одной сессии недостижим — счётчик «Усвоено» стоял бы на нуле.
+  // Стадии карточек в рамках ЭТОЙ сессии (не SRS-уровень): «усвоено» — прошла
+  // все шаги, «изучаю» — начата, «новые» — шаг 0 (сюда же попадает карточка,
+  // сброшенная ошибкой). Так прогресс всегда стартует с нуля и монотонно растёт:
+  // выпущенные карточки в раунды больше не попадают и назад не откатываются.
   const counts = useMemo(() => {
     const acc = { fresh: 0, learning: 0, mastered: 0 };
     cards.forEach((card) => {
-      const level = levelOf(session.reviews[card.uuid] ?? null);
       const step = session.steps[card.uuid] ?? 0;
-      if (step >= LEARNING_STEPS || level === 2) acc.mastered += 1;
-      else if (step > 0 || level === 1) acc.learning += 1;
+      if (step >= LEARNING_STEPS) acc.mastered += 1;
+      else if (step > 0) acc.learning += 1;
       else acc.fresh += 1;
     });
     return acc;
-  }, [cards, session.reviews, session.steps]);
+  }, [cards, session.steps]);
 
   // Сброс удаляет состояние повторения безвозвратно, поэтому спрашиваем подтверждение.
   const handleReset = () => {
@@ -101,17 +99,11 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
           </MyTypography.Small>
         </HStack>
 
-        <div className={cls.segbar}>
-          {counts.fresh > 0 && (
-            <div className={cls.segFresh} style={{ flexGrow: counts.fresh }} />
-          )}
-          {counts.learning > 0 && (
-            <div className={cls.segLearning} style={{ flexGrow: counts.learning }} />
-          )}
-          {counts.mastered > 0 && (
-            <div className={cls.segMastered} style={{ flexGrow: counts.mastered }} />
-          )}
-        </div>
+        <Progress
+          percent={(counts.mastered / session.total) * 100}
+          showInfo={false}
+          size="small"
+        />
 
         <HStack max gap="16" wrap justify="center">
           <span className={cls.legendItem}>
@@ -146,6 +138,9 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
         {session.phase === 'question' && session.question?.type === 'write' && (
           <WriteQuestion question={session.question} onAnswer={session.answer} />
         )}
+
+        {/* Кадр между рефетчем карточек и PRUNE: вопроса ещё нет, тупика быть не должно. */}
+        {session.phase === 'question' && !session.question && <Loader />}
       </div>
 
       {allowReset && (
@@ -201,6 +196,7 @@ export const LearnSession: FC<LearnSessionProps> = (props) => {
 
   return (
     <LearnSessionInner
+      key={deckKey}
       deckKey={deckKey}
       deckName={deckName}
       cards={cards}

@@ -48,6 +48,7 @@ interface SessionState {
 type Action =
   | { type: 'ANSWER'; cardUuid: string; correct: boolean; input: string; review: CardReview | null }
   | { type: 'NEXT' }
+  | { type: 'PRUNE' }
   | { type: 'RESET' };
 
 interface InitArg {
@@ -107,8 +108,13 @@ const makeReducer = (cards: Card[]) => (state: SessionState, action: Action): Se
     }
     case 'NEXT': {
       // Верно — убираем карточку из очереди; неверно — переносим в конец (повтор в этом раунде).
-      const [head, ...rest] = state.queue;
-      let queue = state.lastCorrect ? rest : [...rest, head];
+      let queue: string[];
+      if (state.queue.length === 0) {
+        queue = [];
+      } else {
+        const [head, ...rest] = state.queue;
+        queue = state.lastCorrect ? rest : [...rest, head];
+      }
       let { round } = state;
       const phase: Phase = 'question';
 
@@ -122,6 +128,25 @@ const makeReducer = (cards: Card[]) => (state: SessionState, action: Action): Se
 
       return {
         ...state, queue, round, phase, lastCorrect: null, lastInput: '',
+      };
+    }
+    case 'PRUNE': {
+      // Выборка карточек могла обновиться (рефетч из-за инвалидации кэша) —
+      // выбрасываем из очереди uuid'ы, которых больше нет среди cards, иначе
+      // текущий вопрос строился бы по несуществующей карточке (пустой экран).
+      const uuids = new Set(cards.map((card) => card.uuid));
+      const queue = state.queue.filter((uuid) => uuids.has(uuid));
+      if (queue.length > 0) return { ...state, queue };
+      if (isFinished(cards, state.steps)) {
+        return { ...state, queue: [], phase: 'finished', lastCorrect: null };
+      }
+      return {
+        ...state,
+        queue: buildRoundQueue(cards, state.steps),
+        round: state.round + 1,
+        phase: 'question',
+        lastCorrect: null,
+        lastInput: '',
       };
     }
     case 'RESET':
@@ -154,6 +179,12 @@ export const useLearnSession = (
     () => cards.find((c) => c.uuid === state.queue[0]),
     [cards, state.queue],
   );
+
+  // Самовосстановление после смены набора карточек (см. PRUNE).
+  const cardUuids = useMemo(() => new Set(cards.map((c) => c.uuid)), [cards]);
+  useEffect(() => {
+    if (state.queue.some((uuid) => !cardUuids.has(uuid))) dispatch({ type: 'PRUNE' });
+  }, [state.queue, cardUuids]);
 
   const question = useMemo(
     () => (currentCard ? buildQuestion(currentCard, cards, state.steps) : null),

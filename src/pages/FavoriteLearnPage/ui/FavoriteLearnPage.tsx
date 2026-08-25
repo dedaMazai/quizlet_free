@@ -26,7 +26,7 @@ const FavoriteLearnPage = () => {
     [cards, favorites],
   );
 
-  if (isLoading) return <Loader />;
+  if (isLoading || !cards) return <Loader />;
 
   return (
     <VStack max fullHeight gap="24">
