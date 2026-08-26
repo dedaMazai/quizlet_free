@@ -28,6 +28,10 @@ export const RoutePath = {
   [RouteNames.ABOUT]: () => '/about',
   [RouteNames.FEATURES]: () => '/features',
   [RouteNames.FAQ]: () => '/faq',
+  [RouteNames.GRAMMAR_TENSES]: () => '/grammar/tenses',
+  [RouteNames.GRAMMAR_TENSE_GROUP]: (group: string) => `/grammar/tenses/${group}`,
+  [RouteNames.GRAMMAR_PRACTICE]: () => '/grammar/practice',
+  [RouteNames.IRREGULAR_VERBS]: () => '/grammar/irregular-verbs',
   // last
   [RouteNames.NOT_FOUND]: () => '/*',
 };

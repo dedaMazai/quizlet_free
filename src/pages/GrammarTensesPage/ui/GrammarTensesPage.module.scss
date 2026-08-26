@@ -1,0 +1,86 @@
+.GrammarTensesPage {
+    max-width: 1100px;
+}
+
+.pageTitle {
+    margin-bottom: 0;
+}
+
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tenseTable {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: separate;
+    border-spacing: 4px;
+
+    th,
+    td {
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+        border-radius: var(--border-radius);
+    }
+}
+
+.timeHeader {
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+
+.tenseCell {
+    cursor: pointer;
+    transition: filter 0.15s ease;
+
+    &:hover {
+        filter: brightness(0.95);
+    }
+}
+
+.cellFormula {
+    font-family: monospace;
+}
+
+.formulaHint {
+    font-family: monospace;
+}
+
+.cellSimple {
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+}
+
+.cellContinuous {
+    background: color-mix(in srgb, var(--color-link) 10%, transparent);
+}
+
+.cellPerfect {
+    background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+}
+
+.cellPerfectContinuous {
+    background: color-mix(in srgb, var(--color-error) 10%, transparent);
+}
+
+.iterationCard {
+    width: 100%;
+}
+
+.iterationNumber {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    font-weight: 600;
+    color: var(--color-primary-bg);
+    background: var(--color-primary);
+    border-radius: 50%;
+}
+
+.answerTag {
+    margin-inline-start: auto;
+}

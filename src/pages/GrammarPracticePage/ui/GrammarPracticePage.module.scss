@@ -1,0 +1,47 @@
+.GrammarPracticePage {
+    max-width: 800px;
+}
+
+.setupCard {
+    width: 100%;
+}
+
+.groupTag {
+    padding: 4px 12px;
+    border: 1px solid var(--text-secondary);
+    border-radius: var(--border-radius);
+}
+
+.taskCard {
+    width: 100%;
+}
+
+.sentence {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    font-size: 16px;
+}
+
+.answerInput {
+    width: 220px;
+}
+
+.verbTag {
+    font-family: monospace;
+}
+
+.okIcon {
+    color: var(--color-success);
+    font-size: 18px;
+}
+
+.errorIcon {
+    color: var(--color-error);
+    font-size: 18px;
+}
+
+.correctAnswer {
+    color: var(--color-success);
+}

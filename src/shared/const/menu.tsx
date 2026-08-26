@@ -4,6 +4,8 @@ import type { TFunction } from 'i18next';
 import Icon, {
     HomeOutlined, AppstoreOutlined, UnorderedListOutlined, SettingOutlined,
     StarOutlined, LineChartOutlined, UserOutlined, HistoryOutlined,
+    ReadOutlined, FieldTimeOutlined, SyncOutlined, CheckCircleOutlined,
+    HourglassOutlined, OrderedListOutlined, ThunderboltOutlined,
 } from '@ant-design/icons';
 import { filterValuesForAccess } from "@/entities/User";
 import { RoutePath } from '@/shared/config/router/routePath';
@@ -66,6 +68,48 @@ export const getNavSections = ({
                     key: RoutePath.REVIEW(),
                     label: t('К повторению'),
                     icon: <Icon component={HistoryOutlined} />,
+                },
+            ],
+        },
+        {
+            key: 'grammar',
+            label: t('Грамматика'),
+            items: [
+                {
+                    key: RoutePath.GRAMMAR_TENSES(),
+                    label: t('Времена: план и обзор'),
+                    icon: <Icon component={ReadOutlined} />,
+                    exact: true,
+                },
+                {
+                    key: RoutePath.GRAMMAR_TENSE_GROUP('simple'),
+                    label: 'Simple',
+                    icon: <Icon component={FieldTimeOutlined} />,
+                },
+                {
+                    key: RoutePath.GRAMMAR_TENSE_GROUP('continuous'),
+                    label: 'Continuous',
+                    icon: <Icon component={SyncOutlined} />,
+                },
+                {
+                    key: RoutePath.GRAMMAR_TENSE_GROUP('perfect'),
+                    label: 'Perfect',
+                    icon: <Icon component={CheckCircleOutlined} />,
+                },
+                {
+                    key: RoutePath.GRAMMAR_TENSE_GROUP('perfect-continuous'),
+                    label: 'Perfect Continuous',
+                    icon: <Icon component={HourglassOutlined} />,
+                },
+                {
+                    key: RoutePath.GRAMMAR_PRACTICE(),
+                    label: t('Практика времён'),
+                    icon: <Icon component={ThunderboltOutlined} />,
+                },
+                {
+                    key: RoutePath.IRREGULAR_VERBS(),
+                    label: t('Неправильные глаголы'),
+                    icon: <Icon component={OrderedListOutlined} />,
                 },
             ],
         },

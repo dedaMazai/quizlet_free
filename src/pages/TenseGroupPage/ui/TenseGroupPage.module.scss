@@ -1,0 +1,98 @@
+.TenseGroupPage {
+    max-width: 1100px;
+}
+
+.pageTitle {
+    margin-bottom: 0;
+}
+
+.formulaTag {
+    font-family: monospace;
+}
+
+.tensesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    width: 100%;
+    align-items: stretch;
+}
+
+.tenseCard {
+    height: 100%;
+}
+
+/* Цветовой акцент группы: тот же цвет, что у колонки в сводной таблице. */
+.accentSimple {
+    border-top: 3px solid var(--color-success);
+}
+
+.accentContinuous {
+    border-top: 3px solid var(--color-link);
+}
+
+.accentPerfect {
+    border-top: 3px solid var(--color-warning);
+}
+
+.accentPerfectContinuous {
+    border-top: 3px solid var(--color-error);
+}
+
+.formulaBlock {
+    padding: 12px;
+    background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+    border-radius: var(--border-radius);
+}
+
+.formula {
+    font-family: monospace;
+}
+
+.formulaSign {
+    width: 16px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.signPlus {
+    color: var(--color-success);
+}
+
+.signMinus {
+    color: var(--color-error);
+}
+
+.signQuestion {
+    color: var(--color-link);
+}
+
+.usageList {
+    padding-left: 20px;
+    margin: 0;
+}
+
+.rightAnswer {
+    color: var(--color-success);
+}
+
+.comparisonCard {
+    width: 100%;
+}
+
+.comparisonRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+
+    @media (width <= 767px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.comparisonSide {
+    padding: 12px;
+    background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+    border-radius: var(--border-radius);
+}

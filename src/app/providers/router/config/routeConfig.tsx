@@ -30,6 +30,10 @@ import { OrderPage } from '@/pages/OrderPage';
 import { AboutPage } from '@/pages/AboutPage';
 import { FeaturesPage } from '@/pages/FeaturesPage';
 import { FaqPage } from '@/pages/FaqPage';
+import { GrammarTensesPage } from '@/pages/GrammarTensesPage';
+import { TenseGroupPage } from '@/pages/TenseGroupPage';
+import { IrregularVerbsPage } from '@/pages/IrregularVerbsPage';
+import { GrammarPracticePage } from '@/pages/GrammarPracticePage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -390,6 +394,70 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.FAVORITES_LEARN(),
                     label: i18n.t('Заучивание'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.GRAMMAR_TENSES(),
+        element: <GrammarTensesPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.GRAMMAR_TENSES(),
+                    label: i18n.t('Времена английского'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.GRAMMAR_TENSE_GROUP(':group'),
+        element: <TenseGroupPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.GRAMMAR_TENSES(),
+                    label: i18n.t('Времена английского'),
+                },
+                {
+                    path: () => RoutePath.GRAMMAR_TENSE_GROUP(`${params.group}`),
+                    label: i18n.t('Группа времён'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.GRAMMAR_PRACTICE(),
+        element: <GrammarPracticePage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.GRAMMAR_TENSES(),
+                    label: i18n.t('Времена английского'),
+                },
+                {
+                    path: () => RoutePath.GRAMMAR_PRACTICE(),
+                    label: i18n.t('Практика времён'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.IRREGULAR_VERBS(),
+        element: <IrregularVerbsPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.IRREGULAR_VERBS(),
+                    label: i18n.t('Неправильные глаголы'),
                 },
             ]),
         },
