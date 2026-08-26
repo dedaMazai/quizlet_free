@@ -1,0 +1,30 @@
+.RoadmapPage {
+    max-width: 800px;
+}
+
+.progressCard,
+.stageCard {
+    width: 100%;
+}
+
+.stepRow {
+    width: 100%;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    transition: background 0.2s ease;
+
+    &:hover {
+        background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+    }
+}
+
+.stepDone {
+    opacity: 0.6;
+}
+
+.stepArrow {
+    align-self: center;
+    margin-left: auto;
+    color: var(--text-secondary);
+}

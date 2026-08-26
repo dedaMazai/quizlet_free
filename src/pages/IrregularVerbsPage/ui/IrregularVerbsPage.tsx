@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { Button, Card, Input, Table, Typography } from 'antd';
+import { Button, Card, Input, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { IrregularVerb, VERB_BANDS } from '@/shared/const/grammar';
@@ -12,6 +12,13 @@ import { useImportVerbsDeck } from '../model/useImportVerbsDeck';
 import cls from './IrregularVerbsPage.module.scss';
 
 const { Title, Text } = Typography;
+
+/** Подпись и цвет группы по её номеру (с единицы) — глаголы идут по убыванию частотности. */
+const BAND_BADGES: { label: string; color: string }[] = [
+    { label: 'самые употребительные', color: 'green' },
+    { label: 'часто употребляются', color: 'blue' },
+    { label: 'реже употребляются', color: 'default' },
+];
 
 const IrregularVerbsPage = () => {
     const { t } = useTranslation();
@@ -56,6 +63,9 @@ const IrregularVerbsPage = () => {
                 <MyTypography.Large type="secondary">
                     {t('Три формы самых частотных неправильных глаголов. Создайте колоду из группы и учите формы в привычных режимах: карточки, выбор, письмо.')}
                 </MyTypography.Large>
+                <Text type="secondary">
+                    {t('Глаголы упорядочены по частоте употребления и разбиты на три группы: группа 1 — самые популярные, дальше — реже. Начинайте с первой.')}
+                </Text>
             </VStack>
 
             <Input
@@ -71,12 +81,24 @@ const IrregularVerbsPage = () => {
                 if (normalizedSearch && visibleVerbs.length === 0) return null;
 
                 const existingDeck = findExistingDeck(band);
+                const badge = BAND_BADGES[band.index - 1] ?? BAND_BADGES[BAND_BADGES.length - 1];
 
                 return (
                     <Card
                         key={band.index}
                         className={cls.bandCard}
-                        title={t('Глаголы {{from}}–{{to}}', { from: band.from, to: band.to })}
+                        title={(
+                            <HStack gap="8" wrap>
+                                <span>
+                                    {t('Группа {{index}} · глаголы {{from}}–{{to}}', {
+                                        index: band.index,
+                                        from: band.from,
+                                        to: band.to,
+                                    })}
+                                </span>
+                                <Tag color={badge.color}>{t(badge.label)}</Tag>
+                            </HStack>
+                        )}
                         extra={existingDeck ? (
                             <Button onClick={() => navigate(RoutePath.DECK(existingDeck.uuid))}>
                                 {t('Открыть колоду')}

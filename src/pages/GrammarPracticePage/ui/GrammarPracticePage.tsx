@@ -2,9 +2,11 @@ import { Fragment, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import {
-    Alert, Button, Card, Input, Segmented, Tag, Typography,
+    Alert, Button, Card, Input, Segmented, Tag, Tooltip, Typography,
 } from 'antd';
-import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import {
+    CheckCircleFilled, CloseCircleFilled, EyeInvisibleOutlined, EyeOutlined,
+} from '@ant-design/icons';
 import { useGetAiUsageQuery } from '@/entities/Card';
 import {
     AiCheckResultItem,
@@ -47,6 +49,7 @@ const GrammarPracticePage = () => {
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [results, setResults] = useState<Record<string, AiCheckResultItem>>({});
     const [advice, setAdvice] = useState('');
+    const [showTranslations, setShowTranslations] = useState(false);
 
     const { data: aiRemaining } = useGetAiUsageQuery();
     const [generateExercises, { isLoading: isGenerating }] = useGenerateGrammarExercisesMutation();
@@ -68,6 +71,7 @@ const GrammarPracticePage = () => {
         setAnswers({});
         setResults({});
         setAdvice('');
+        setShowTranslations(false);
 
         if (mode === 'templates') {
             setTasks(buildTemplateTasks(groups, TASKS_COUNT));
@@ -154,7 +158,9 @@ const GrammarPracticePage = () => {
                             ? <CheckCircleFilled className={cls.okIcon} />
                             : <CloseCircleFilled className={cls.errorIcon} />)}
                     </div>
-                    <Text type="secondary">{task.translation}</Text>
+                    {(showTranslations || phase === 'checked') && (
+                        <Text type="secondary">{task.translation}</Text>
+                    )}
                     {result && !result.ok && (
                         <Text>
                             {`${t('Правильный ответ')}: `}
@@ -181,18 +187,36 @@ const GrammarPracticePage = () => {
                     <VStack max gap="16">
                         <VStack max gap="8">
                             <Text strong>{t('Какие времена практиковать')}</Text>
+                            <Text type="secondary">
+                                {t('Каждая группа — это три времени: настоящее, прошедшее и будущее. Задания берутся только из выбранных групп: одна группа — прицельная тренировка, несколько — задания вперемешку. Наведите на группу, чтобы вспомнить её идею.')}
+                            </Text>
                             <HStack gap="8" wrap>
                                 {ASPECT_GROUP_ORDER.map((groupId) => (
-                                    <Tag.CheckableTag
+                                    <Tooltip
                                         key={groupId}
-                                        checked={groups.includes(groupId)}
-                                        onChange={() => toggleGroup(groupId)}
-                                        className={cls.groupTag}
+                                        title={`${t(ASPECT_GROUPS[groupId].idea)} (${ASPECT_GROUPS[groupId].formulaHint})`}
                                     >
-                                        {ASPECT_GROUPS[groupId].name}
-                                    </Tag.CheckableTag>
+                                        <Tag.CheckableTag
+                                            checked={groups.includes(groupId)}
+                                            onChange={() => toggleGroup(groupId)}
+                                            className={cls.groupTag}
+                                        >
+                                            {ASPECT_GROUPS[groupId].name}
+                                        </Tag.CheckableTag>
+                                    </Tooltip>
                                 ))}
                             </HStack>
+                            {groups.length === 0 ? (
+                                <Text type="warning">
+                                    {t('Выберите хотя бы одну группу, чтобы начать.')}
+                                </Text>
+                            ) : (
+                                <Text type="secondary">
+                                    {t('В тренировку войдут: {{tenses}}', {
+                                        tenses: tenseNamesForGroups(groups).join(', '),
+                                    })}
+                                </Text>
+                            )}
                         </VStack>
 
                         <VStack max gap="8">
@@ -222,6 +246,7 @@ const GrammarPracticePage = () => {
                                 type="primary"
                                 size="large"
                                 loading={isGenerating}
+                                disabled={groups.length === 0}
                                 onClick={startSession}
                             >
                                 {t('Начать')}
@@ -233,6 +258,20 @@ const GrammarPracticePage = () => {
 
             {phase !== 'setup' && (
                 <VStack max gap="16">
+                    {phase === 'answering' && (
+                        <HStack max justify="end">
+                            <Tooltip
+                                title={t('Русские переводы предложений скрыты, чтобы не подсказывать. Нажмите, чтобы показать их.')}
+                            >
+                                <Button
+                                    icon={showTranslations ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                                    onClick={() => setShowTranslations((prev) => !prev)}
+                                >
+                                    {showTranslations ? t('Скрыть переводы') : t('Показать переводы')}
+                                </Button>
+                            </Tooltip>
+                        </HStack>
+                    )}
                     {phase === 'checked' && (
                         <Alert
                             type={correctCount === tasks.length ? 'success' : 'info'}

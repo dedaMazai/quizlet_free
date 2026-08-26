@@ -34,6 +34,8 @@ import { GrammarTensesPage } from '@/pages/GrammarTensesPage';
 import { TenseGroupPage } from '@/pages/TenseGroupPage';
 import { IrregularVerbsPage } from '@/pages/IrregularVerbsPage';
 import { GrammarPracticePage } from '@/pages/GrammarPracticePage';
+import { GrammarTopicPage } from '@/pages/GrammarTopicPage';
+import { RoadmapPage } from '@/pages/RoadmapPage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -458,6 +460,38 @@ export const routeConfig: AppRoutesProps[] = [
                 {
                     path: () => RoutePath.IRREGULAR_VERBS(),
                     label: i18n.t('Неправильные глаголы'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.GRAMMAR_TOPIC(':topic'),
+        element: <GrammarTopicPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.ROADMAP(),
+                    label: i18n.t('Дорожная карта'),
+                },
+                {
+                    path: () => RoutePath.GRAMMAR_TOPIC(`${params.topic}`),
+                    label: i18n.t('Тема грамматики'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.ROADMAP(),
+        element: <RoadmapPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.ROADMAP(),
+                    label: i18n.t('Дорожная карта'),
                 },
             ]),
         },

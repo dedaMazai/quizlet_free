@@ -6,8 +6,8 @@ export interface IrregularVerb {
     translation: string;
 }
 
-/** Размер одной частотной группы (и будущей колоды). */
-export const VERB_BAND_SIZE = 35;
+/** Размер одной частотной группы (и будущей колоды): 105 глаголов → ровно 3 группы. */
+export const VERB_BAND_SIZE = 36;
 
 /** Глаголы упорядочены по убыванию частотности. */
 export const IRREGULAR_VERBS: IrregularVerb[] = [

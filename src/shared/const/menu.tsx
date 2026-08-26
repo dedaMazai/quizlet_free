@@ -5,7 +5,7 @@ import Icon, {
     HomeOutlined, AppstoreOutlined, UnorderedListOutlined, SettingOutlined,
     StarOutlined, LineChartOutlined, UserOutlined, HistoryOutlined,
     ReadOutlined, FieldTimeOutlined, SyncOutlined, CheckCircleOutlined,
-    HourglassOutlined, OrderedListOutlined, ThunderboltOutlined,
+    HourglassOutlined, OrderedListOutlined, ThunderboltOutlined, CompassOutlined,
 } from '@ant-design/icons';
 import { filterValuesForAccess } from "@/entities/User";
 import { RoutePath } from '@/shared/config/router/routePath';
@@ -64,6 +64,11 @@ export const getNavSections = ({
             key: 'study',
             label: t('Учить'),
             items: [
+                {
+                    key: RoutePath.ROADMAP(),
+                    label: t('Дорожная карта'),
+                    icon: <Icon component={CompassOutlined} />,
+                },
                 {
                     key: RoutePath.REVIEW(),
                     label: t('К повторению'),

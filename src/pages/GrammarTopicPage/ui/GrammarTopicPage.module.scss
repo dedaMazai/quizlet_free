@@ -1,0 +1,32 @@
+.GrammarTopicPage {
+    max-width: 1100px;
+}
+
+.pageTitle {
+    margin-bottom: 0;
+}
+
+.enNameTag,
+.formulaTag {
+    font-family: monospace;
+}
+
+.rulesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    width: 100%;
+    align-items: stretch;
+}
+
+.ruleCard {
+    height: 100%;
+}
+
+.mistakesCard {
+    width: 100%;
+}
+
+.rightAnswer {
+    color: var(--color-success);
+}

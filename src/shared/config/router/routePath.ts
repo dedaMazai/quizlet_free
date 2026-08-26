@@ -31,7 +31,9 @@ export const RoutePath = {
   [RouteNames.GRAMMAR_TENSES]: () => '/grammar/tenses',
   [RouteNames.GRAMMAR_TENSE_GROUP]: (group: string) => `/grammar/tenses/${group}`,
   [RouteNames.GRAMMAR_PRACTICE]: () => '/grammar/practice',
+  [RouteNames.GRAMMAR_TOPIC]: (topic: string) => `/grammar/topics/${topic}`,
   [RouteNames.IRREGULAR_VERBS]: () => '/grammar/irregular-verbs',
+  [RouteNames.ROADMAP]: () => '/roadmap',
   // last
   [RouteNames.NOT_FOUND]: () => '/*',
 };
