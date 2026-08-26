@@ -12,6 +12,8 @@ export interface SessionTask {
     translation: string;
     /** Принимаемые ответы (только у шаблонных заданий). */
     expected?: string[];
+    /** Пояснение при ошибке (только у шаблонных заданий). */
+    tip?: string;
 }
 
 const shuffle = <T, >(items: T[]): T[] => [...items].sort(() => Math.random() - 0.5);
@@ -29,6 +31,7 @@ export const buildTemplateTasks = (groups: AspectGroupId[], count: number): Sess
         tense: TENSES.find((tense) => tense.id === exercise.tenseId)?.name ?? exercise.tenseId,
         translation: exercise.translation,
         expected: exercise.answers,
+        tip: exercise.tip,
     }));
 };
 
@@ -38,11 +41,12 @@ export const checkTemplateAnswers = (
 ): AiCheckResultItem[] => tasks.map((task) => {
     const expected = task.expected ?? [];
     const given = normalizeAnswer(answers[task.id] ?? '');
+    const ok = expected.some((answer) => normalizeAnswer(answer) === given);
     return {
         id: task.id,
-        ok: expected.some((answer) => normalizeAnswer(answer) === given),
+        ok,
         correct: expected[0] ?? '',
-        tip: null,
+        tip: ok ? null : task.tip ?? null,
     };
 });
 
