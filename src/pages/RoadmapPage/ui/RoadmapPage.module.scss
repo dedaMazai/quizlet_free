@@ -2,9 +2,193 @@
     max-width: 800px;
 }
 
-.progressCard,
+.progressCard {
+    width: 100%;
+}
+
+.overallSegments {
+    width: 100%;
+}
+
+.overallSegment {
+    flex: 1;
+}
+
+.timeline {
+    width: 100%;
+}
+
+.stage {
+    --stage-color: var(--color-primary);
+
+    position: relative;
+    width: 100%;
+    padding-bottom: 20px;
+    padding-left: 56px;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 44px;
+        bottom: 0;
+        left: 19px;
+        width: 2px;
+        background: var(--border-subtle);
+    }
+}
+
+.stageBasics {
+    --stage-color: var(--color-success);
+}
+
+.stageVocabulary {
+    --stage-color: var(--color-link);
+}
+
+.stageGrammarA2 {
+    --stage-color: var(--color-warning);
+}
+
+.stageGrammarB1 {
+    --stage-color: var(--color-error);
+}
+
+.stageNode {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-weight: 600;
+    color: var(--stage-color);
+    background: color-mix(in srgb, var(--stage-color) 12%, var(--card-bg));
+    border: 3px solid var(--stage-color);
+    border-radius: 50%;
+}
+
+.nodePulse {
+    animation: roadmap-pulse 2s ease-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}
+
+@keyframes roadmap-pulse {
+    0% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--stage-color) 45%, transparent);
+    }
+
+    70% {
+        box-shadow: 0 0 0 12px transparent;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 transparent;
+    }
+}
+
 .stageCard {
     width: 100%;
+    border-left: 3px solid var(--stage-color);
+}
+
+.stageCurrent {
+    .stageCard {
+        box-shadow: var(--shadow-md);
+    }
+}
+
+.stageLocked {
+    --stage-color: var(--text-secondary);
+
+    .stageNode {
+        color: var(--text-secondary);
+        background: var(--card-bg);
+        border-color: var(--border-subtle);
+    }
+
+    .stageCard {
+        border-left-color: var(--border-subtle);
+        opacity: 0.75;
+    }
+}
+
+.stageCompleted {
+    .stageCard {
+        background: color-mix(in srgb, var(--stage-color) 4%, var(--card-bg));
+    }
+}
+
+.stageHeader {
+    cursor: pointer;
+}
+
+.stageHeading {
+    flex: 1;
+    min-width: 0;
+}
+
+.stageRing {
+    flex-shrink: 0;
+}
+
+/* составной селектор — чтобы перебить ширину antd .ant-btn-icon-only */
+.stageHeader .continueButton {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    font-size: 18px;
+}
+
+.stageCount {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.collapseChevron {
+    align-self: center;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.hereTag,
+.nextTag {
+    color: var(--stage-color);
+    background: color-mix(in srgb, var(--stage-color) 12%, transparent);
+    border-color: transparent;
+}
+
+.doneTag {
+    color: var(--color-success);
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    border-color: transparent;
+}
+
+.stepIcon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    color: var(--stage-color);
+    background: color-mix(in srgb, var(--stage-color) 12%, transparent);
+    border-radius: var(--border-radius);
 }
 
 .stepRow {
@@ -15,7 +199,19 @@
     transition: background 0.2s ease;
 
     &:hover {
-        background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+        background: var(--hover-bg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.stepNext {
+    background: color-mix(in srgb, var(--stage-color) 6%, transparent);
+
+    &:hover {
+        background: color-mix(in srgb, var(--stage-color) 10%, transparent);
     }
 }
 
@@ -27,4 +223,45 @@
     align-self: center;
     margin-left: auto;
     color: var(--text-secondary);
+}
+
+.finishStage {
+    --stage-color: var(--color-warning);
+
+    padding-bottom: 0;
+
+    &::before {
+        display: none;
+    }
+}
+
+.finishNode {
+    font-size: 18px;
+}
+
+.finishLocked {
+    color: var(--text-secondary);
+    background: var(--card-bg);
+    border-color: var(--border-subtle);
+}
+
+.finishText {
+    justify-content: center;
+    min-height: 40px;
+}
+
+@media (width <= 767px) {
+    .stage {
+        padding-left: 44px;
+
+        &::before {
+            top: 36px;
+            left: 15px;
+        }
+    }
+
+    .stageNode {
+        width: 32px;
+        height: 32px;
+    }
 }
