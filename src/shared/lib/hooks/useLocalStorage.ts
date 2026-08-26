@@ -33,7 +33,6 @@ export const useLocalStorage = <T>(key: string, initialValue: T) => {
 
   const setStoredValue = useCallback((newValue: T | ((prevValue: T) => T)) => {
     setValue((prevValue) => {
-      console.log('11111', typeof newValue === 'function');
       const valueToStore = typeof newValue === 'function'
         ? (newValue as (prevValue: T) => T)(prevValue)
         : newValue;
