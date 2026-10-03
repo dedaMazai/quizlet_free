@@ -1,0 +1,75 @@
+.stage {
+  width: 100%;
+  max-width: 560px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progressRow {
+  max-width: 560px;
+}
+
+.writeRow {
+  max-width: 480px;
+}
+
+// Кнопки не сжимаются, поле ввода забирает оставшуюся ширину.
+.rowButton {
+  flex-shrink: 0;
+}
+
+.answerInput {
+  flex: 1;
+  min-width: 0;
+}
+
+// Место под подсмотренный ответ резервируется, чтобы форма не прыгала.
+.peekAnswer {
+  min-height: 24px;
+  color: var(--color-accent);
+  visibility: hidden;
+
+  &.visible {
+    visibility: visible;
+  }
+}
+
+// Удержание пальцем не должно выделять текст и открывать контекстное меню.
+.peekButton {
+  flex-shrink: 0;
+  user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+.feedbackIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  font-size: 48px;
+
+  &.correct {
+    color: var(--color-success);
+    background: var(--color-success-soft);
+  }
+
+  &.almost {
+    color: var(--color-warning);
+    background: var(--color-warning-soft);
+  }
+
+  &.wrong {
+    color: var(--color-error);
+    background: var(--color-error-soft);
+  }
+}
+
+.mistakes {
+  width: 100%;
+  max-width: 480px;
+}

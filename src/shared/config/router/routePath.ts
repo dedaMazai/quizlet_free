@@ -34,6 +34,9 @@ export const RoutePath = {
   [RouteNames.GRAMMAR_TOPIC]: (topic: string) => `/grammar/topics/${topic}`,
   [RouteNames.IRREGULAR_VERBS]: () => '/grammar/irregular-verbs',
   [RouteNames.ROADMAP]: () => '/roadmap',
+  [RouteNames.CYCLES]: () => '/cycles',
+  [RouteNames.CYCLE]: (id: string) => `/cycles/${id}`,
+  [RouteNames.CYCLE_STUDY]: (id: string, mode: string) => `/cycles/${id}/study/${mode}`,
   // last
   [RouteNames.NOT_FOUND]: () => '/*',
 };

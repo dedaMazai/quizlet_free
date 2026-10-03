@@ -4,4 +4,5 @@ export {
   normalize,
   damerauLevenshtein,
   checkAnswer,
+  checkAnswerVariants,
 } from './answerGrading';

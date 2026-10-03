@@ -32,6 +32,9 @@ export const RouteNames = {
   GRAMMAR_TOPIC: 'GRAMMAR_TOPIC',
   IRREGULAR_VERBS: 'IRREGULAR_VERBS',
   ROADMAP: 'ROADMAP',
+  CYCLES: 'CYCLES',
+  CYCLE: 'CYCLE',
+  CYCLE_STUDY: 'CYCLE_STUDY',
   // last
   NOT_FOUND: 'NOT_FOUND',
 } as const;

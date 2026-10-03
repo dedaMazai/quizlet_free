@@ -9,13 +9,14 @@ import {
 import Icon from '@ant-design/icons';
 import { useGetUserQuery, useUserInfo } from '@/entities/User';
 import { useGetDeckQuery } from '@/entities/Deck';
+import { useGetCycleQuery } from '@/entities/LearningCycle';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { ReactComponent as Home } from '@/shared/assets/icons/Home.svg';
 import { HStack } from '@/shared/ui/Stack';
 import { buildName } from '@/shared/lib/helpers/buildName';
 
-type CrumbType = 'user' | 'deck';
+type CrumbType = 'user' | 'deck' | 'cycle';
 
 export type Crumb = {
     path: (value?: string) => string;
@@ -29,6 +30,7 @@ export const BreadcrumbsCustom = ({ breadcrumbs }: { breadcrumbs: Crumb[] }) => 
     const {
         id_user: userUuid,
         deckId,
+        cycleId,
     } = useParams();
 
     const { data: user } = useGetUserQuery(userUuid!, {
@@ -37,6 +39,10 @@ export const BreadcrumbsCustom = ({ breadcrumbs }: { breadcrumbs: Crumb[] }) => 
 
     const { data: deck } = useGetDeckQuery(deckId!, {
         skip: !deckId,
+    });
+
+    const { data: cycle } = useGetCycleQuery(cycleId!, {
+        skip: !cycleId,
     });
 
     const createLabel = (label: string, type?: CrumbType) => {
@@ -55,6 +61,10 @@ export const BreadcrumbsCustom = ({ breadcrumbs }: { breadcrumbs: Crumb[] }) => 
 
         if (type === 'deck') {
             return deck?.name || label
+        }
+
+        if (type === 'cycle') {
+            return cycle?.name || label
         }
 
         return label

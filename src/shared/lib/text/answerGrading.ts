@@ -60,3 +60,19 @@ export const checkAnswer = (expected: string, input: string, typoTolerance: bool
   }
   return 'wrong';
 };
+
+/** «ё» и «е» на письме взаимозаменяемы — не считаем это ошибкой. */
+const unifyYo = (value: string): string => value.replace(/ё/g, 'е').replace(/Ё/g, 'Е');
+
+/**
+ * Как checkAnswer, но эталон может перечислять варианты через «,» или «;»
+ * («собака, пёс»): засчитывается вся строка целиком или любой из вариантов.
+ */
+export const checkAnswerVariants = (expected: string, input: string, typoTolerance: boolean): AnswerGrade => {
+  const unifiedExpected = unifyYo(expected);
+  const variants = [unifiedExpected, ...unifiedExpected.split(/[,;]/)].filter((v) => v.trim());
+  const grades = variants.map((variant) => checkAnswer(variant, unifyYo(input), typoTolerance));
+  if (grades.includes('correct')) return 'correct';
+  if (grades.includes('almost')) return 'almost';
+  return 'wrong';
+};

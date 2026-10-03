@@ -6,6 +6,7 @@ import Icon, {
     StarOutlined, LineChartOutlined, UserOutlined, HistoryOutlined,
     ReadOutlined, FieldTimeOutlined, SyncOutlined, CheckCircleOutlined,
     HourglassOutlined, OrderedListOutlined, ThunderboltOutlined, CompassOutlined,
+    RetweetOutlined,
 } from '@ant-design/icons';
 import { filterValuesForAccess } from "@/entities/User";
 import { RoutePath } from '@/shared/config/router/routePath';
@@ -73,6 +74,11 @@ export const getNavSections = ({
                     key: RoutePath.REVIEW(),
                     label: t('К повторению'),
                     icon: <Icon component={HistoryOutlined} />,
+                },
+                {
+                    key: RoutePath.CYCLES(),
+                    label: t('Циклы заучивания'),
+                    icon: <Icon component={RetweetOutlined} />,
                 },
             ],
         },

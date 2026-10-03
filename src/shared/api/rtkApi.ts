@@ -27,6 +27,9 @@ export enum ApiTag {
     Favorites = 'Favorites',
     StudyStats = 'StudyStats',
     AiUsage = 'AiUsage',
+    LearningCycle = 'LearningCycle',
+    LearningCycles = 'LearningCycles',
+    LearningCycleWords = 'LearningCycleWords',
 }
 
 const mutex = new Mutex();

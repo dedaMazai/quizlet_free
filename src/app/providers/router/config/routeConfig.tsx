@@ -36,6 +36,9 @@ import { IrregularVerbsPage } from '@/pages/IrregularVerbsPage';
 import { GrammarPracticePage } from '@/pages/GrammarPracticePage';
 import { GrammarTopicPage } from '@/pages/GrammarTopicPage';
 import { RoadmapPage } from '@/pages/RoadmapPage';
+import { CyclesPage } from '@/pages/CyclesPage';
+import { CyclePage } from '@/pages/CyclePage';
+import { CycleStudyPage } from '@/pages/CycleStudyPage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -395,6 +398,62 @@ export const routeConfig: AppRoutesProps[] = [
                 },
                 {
                     path: () => RoutePath.FAVORITES_LEARN(),
+                    label: i18n.t('Заучивание'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.CYCLES(),
+        element: <CyclesPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: () => ([
+                {
+                    path: () => RoutePath.CYCLES(),
+                    label: i18n.t('Циклы заучивания'),
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.CYCLE(':cycleId'),
+        element: <CyclePage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.CYCLES(),
+                    label: i18n.t('Циклы заучивания'),
+                },
+                {
+                    path: () => RoutePath.CYCLE(`${params.cycleId}`),
+                    label: i18n.t('Цикл'),
+                    type: 'cycle',
+                },
+            ]),
+        },
+    },
+    {
+        path: RoutePath.CYCLE_STUDY(':cycleId', ':mode'),
+        element: <CycleStudyPage />,
+        authOnly: true,
+        withSidebar: true,
+        handle: {
+            crumbs: (params: Record<string, string | undefined>) => ([
+                {
+                    path: () => RoutePath.CYCLES(),
+                    label: i18n.t('Циклы заучивания'),
+                },
+                {
+                    path: () => RoutePath.CYCLE(`${params.cycleId}`),
+                    label: i18n.t('Цикл'),
+                    type: 'cycle',
+                },
+                {
+                    path: () => RoutePath.CYCLE_STUDY(`${params.cycleId}`, `${params.mode}`),
                     label: i18n.t('Заучивание'),
                 },
             ]),

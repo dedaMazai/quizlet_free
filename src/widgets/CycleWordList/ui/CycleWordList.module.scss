@@ -1,0 +1,87 @@
+// Каждая строка — отдельная сетка, поэтому колонка статуса фиксированная:
+// иначе перевод «гуляет» между строками с тегом и без.
+$status-width: 104px;
+
+.list {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-elevated-bg);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto 40px minmax(0, 1fr) minmax(0, 1fr) $status-width auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  // Фон только у перетаскиваемой строки — она проезжает поверх соседних.
+  &.dragging {
+    position: relative;
+    z-index: 1;
+    border-radius: 12px;
+    background: var(--color-elevated-bg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &.locked,
+  &.skipped {
+    opacity: 0.6;
+  }
+
+  // Тень вместо рамки: метка точки старта не сдвигает содержимое строки.
+  &.startPoint {
+    box-shadow: inset 3px 0 0 var(--color-accent);
+  }
+}
+
+.handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.index {
+  color: var(--color-icon-secondary);
+}
+
+.important {
+  color: var(--color-star);
+}
+
+@media (width <= 767px) {
+  .row {
+    grid-template-columns: auto 32px minmax(0, 1fr) auto;
+    row-gap: 4px;
+  }
+
+  // Перевод и статус уходят под слово; ручка, номер и действия — сбоку на всю высоту.
+  .handle,
+  .index {
+    grid-row: 1 / span 3;
+  }
+
+  .translation {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .status {
+    grid-column: 3;
+    grid-row: 3;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  .actions {
+    grid-column: 4;
+    grid-row: 1 / span 3;
+  }
+}
