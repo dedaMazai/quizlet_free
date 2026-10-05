@@ -12,6 +12,8 @@ export enum MasteryBarSize {
     MD = 'md',
     /** 10px — страница колоды */
     LG = 'lg',
+    /** 28px — освоение слов на странице прогресса */
+    XL = 'xl',
 }
 
 interface MasteryBarProps {

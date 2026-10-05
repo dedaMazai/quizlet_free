@@ -1,51 +1,148 @@
-.card {
-  width: 100%;
-  height: 100%;
-  border-radius: 16px;
-  box-shadow: var(--shadow-sm);
-}
+$swatch-size: 10px;
+$bar-height: 28px;
+$bar-height-mobile: 20px;
+$total-skeleton-width: 72px;
+$total-skeleton-height: 11px;
+$value-skeleton-width: 64px;
+$value-skeleton-height: 34px;
+$value-skeleton-height-mobile: 26px;
 
-.cardTitle {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-}
-
-.bar {
+.MasteryChart {
   display: flex;
-  height: 12px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: var(--border-subtle);
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px;
 }
 
-.segment {
-  height: 100%;
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
 
-.barEmpty {
-  width: 100%;
-  height: 100%;
+.title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 22px;
+  white-space: nowrap;
 }
 
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.total {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-neutral-700);
 }
 
-// Цвета соответствуют легенде заучивания (LearnSession).
+.totalSkeleton {
+  width: $total-skeleton-width;
+  height: $total-skeleton-height;
+}
+
+// Селектор с родителем — перебивает высоту размера XL у MasteryBar
+.MasteryChart .bar {
+  height: $bar-height;
+}
+
+.valueSkeleton {
+  width: $value-skeleton-width;
+  height: $value-skeleton-height;
+}
+
+.legend {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.legendItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legendLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-neutral-800);
+}
+
+.legendValue {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 34px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.swatch {
+  width: $swatch-size;
+  height: $swatch-size;
+}
+
+// Цвета — как сегменты MasteryBar
 .mastered {
+  background: var(--color-accent-700);
+}
+
+.success {
   background: var(--color-success);
 }
 
 .learning {
-  background: var(--color-warning);
+  background: var(--color-accent-400);
 }
 
-.new {
-  background: #bfbfbf;
+.fresh {
+  background: var(--color-neutral-300);
+}
+
+// Мобильная 6.55: без рамки, компактнее, легенда без квадратиков
+@media (width <= 650px) {
+  .MasteryChart {
+    gap: 10px;
+    padding: 0;
+    border: 0;
+
+    > i {
+      display: none;
+    }
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .MasteryChart .bar {
+    height: $bar-height-mobile;
+  }
+
+  .legend {
+    gap: 8px;
+  }
+
+  .legendItem {
+    gap: 0;
+  }
+
+  .legendLabel {
+    font-size: 12px;
+    color: var(--color-neutral-700);
+  }
+
+  .legendValue {
+    font-size: 26px;
+    line-height: normal;
+  }
+
+  .swatch {
+    display: none;
+  }
+
+  .valueSkeleton {
+    height: $value-skeleton-height-mobile;
+  }
 }

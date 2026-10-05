@@ -1,12 +1,62 @@
+.ProgressPage {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
+
+.period {
+  padding: 0;
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
+}
+
+.periodItem {
+  border-radius: 0;
+
+  & + & {
+    border-left: 1px solid var(--color-divider);
+  }
+}
+
+.periodLabel {
+  min-height: auto;
+  padding: 7px 14px;
+  font-size: 13px;
+  line-height: normal;
+}
+
 .chartsGrid {
   display: grid;
-  grid-template-columns: minmax(280px, 360px) 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 24px;
-  align-items: stretch;
 }
 
 @media (width <= 900px) {
   .chartsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// Мобильная 6.55
+@media (width <= 650px) {
+  .ProgressPage {
+    gap: 18px;
+  }
+
+  .header {
+    h1 {
+      font-size: 34px;
+    }
+
+    > div {
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+  }
+
+  .periodLabel {
+    padding: 8px 10px;
+    font-size: 12px;
   }
 }

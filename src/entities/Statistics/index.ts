@@ -12,10 +12,15 @@ export type {
   DueSummary,
   DueSummaryArgs,
   DeckClozeStats,
+  PeriodStats,
+  ProgressSummary,
+  ProgressSummaryArgs,
 } from './model/types/statistics';
+export { StatsPeriod } from './model/types/statistics';
 export {
   useLogStudyEventsMutation,
   useGetStudyOverviewQuery,
+  useGetProgressSummaryQuery,
   useGetStudyHeatmapQuery,
   useGetDeckProgressQuery,
   useGetMasteryQuery,
@@ -26,3 +31,4 @@ export {
   WEEK_DAYS, formatDayInTz, lastWeekDates, formatDayWeekday,
 } from './model/lib/days';
 export { useTodayAnswers } from './model/hooks/useTodayAnswers';
+export { useTodayKey } from './model/hooks/useTodayKey';

@@ -1,63 +1,112 @@
-.card {
+$cell-gap: 3px;
+$swatch-size: 10px;
+$months-max-width: 88%;
+$active-days-skeleton-width: 140px;
+$active-days-skeleton-height: 13px;
+
+.StreakHeatmap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   width: 100%;
-  border-radius: 16px;
-  box-shadow: var(--shadow-sm);
 }
 
-.cardTitle {
-  font-size: 12px;
+.activeDays {
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--color-neutral-700);
+}
+
+.activeDaysSkeleton {
+  width: $active-days-skeleton-width;
+  height: $active-days-skeleton-height;
+}
+
+// Мобильная 6.55: заголовок без линии
+.mobileHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+
+  .activeDays {
+    font-size: 12px;
+  }
+}
+
+.mobileTitle {
+  font-family: var(--font-heading);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
+  font-size: 20px;
 }
 
 .grid {
-  display: grid;
-  grid-template-rows: repeat(7, 13px);
-  grid-auto-flow: column;
-  grid-auto-columns: 13px;
-  gap: 3px;
-  overflow-x: auto;
-  padding-bottom: 4px;
+  display: flex;
+  gap: $cell-gap;
+}
+
+.week {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $cell-gap;
+}
+
+.cell {
+  aspect-ratio: 1;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+}
+
+.months {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  max-width: $months-max-width;
 }
 
 .legend {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 4px;
-  font-size: 12px;
-  color: var(--text-secondary);
 }
 
-.cell {
-  width: 13px;
-  height: 13px;
-  border-radius: 3px;
-  background: var(--border-subtle);
+.swatch {
+  width: $swatch-size;
+  height: $swatch-size;
 }
 
 .level0 {
-  background: var(--border-subtle);
+  background: var(--color-neutral-200);
 }
 
 .level1 {
-  background: var(--color-success);
-  opacity: 0.3;
+  background: var(--color-accent-300);
 }
 
 .level2 {
-  background: var(--color-success);
-  opacity: 0.5;
+  background: var(--color-accent-500);
 }
 
 .level3 {
-  background: var(--color-success);
-  opacity: 0.75;
+  background: var(--color-accent-700);
 }
 
 .level4 {
-  background: var(--color-success);
-  opacity: 1;
+  background: var(--color-accent-900);
+}
+
+@media (width <= 650px) {
+  .StreakHeatmap {
+    gap: 8px;
+  }
 }

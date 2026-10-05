@@ -125,6 +125,8 @@ export const useWriteSession = (
   const eventsRef = useRef<StudyEventDraft[]>([]);
   const reviewsRef = useRef<CardReview[]>([]);
   const questionStartRef = useRef(0);
+  // Сессия для статистики — сколько раз садились заниматься
+  const sessionIdRef = useRef(crypto.randomUUID());
 
   // Актуальное состояние повторения по карточкам сессии; обновляется на каждый ответ.
   const reviewsByUuid = useRef(new Map<string, CardReview | null>());
@@ -172,6 +174,7 @@ export const useWriteSession = (
     setAnswers([]);
     setLastReview(null);
     setStartedAt(Date.now());
+    sessionIdRef.current = crypto.randomUUID();
   };
 
   const start = (settings: WriteSettings) => {
@@ -194,6 +197,7 @@ export const useWriteSession = (
       level_after: review.level,
       mode: statsMode(state.settings.direction),
       duration_ms: Math.round(performance.now() - questionStartRef.current),
+      session_id: sessionIdRef.current,
     });
     reviewsRef.current.push(review);
     if (eventsRef.current.length >= FLUSH_EVERY) flushEvents();

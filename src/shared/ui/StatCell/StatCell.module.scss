@@ -57,3 +57,36 @@
         color: var(--streak-#{$i});
     }
 }
+
+// Мобильная 6.55: компактная ячейка, число с единицей одним кеглем, без дельты
+@media (width <= 650px) {
+    .StatCell {
+        gap: 6px;
+        padding: 14px 16px;
+    }
+
+    .label {
+        font-size: 9px;
+        letter-spacing: 0.12em;
+    }
+
+    .row {
+        gap: 4px;
+    }
+
+    .value,
+    .unit {
+        font-weight: 600;
+        font-size: 38px;
+        line-height: 0.9;
+        letter-spacing: normal;
+    }
+
+    .unit {
+        color: inherit;
+    }
+
+    .delta {
+        display: none;
+    }
+}

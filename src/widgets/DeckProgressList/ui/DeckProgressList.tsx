@@ -1,12 +1,19 @@
-import { FC, useMemo } from 'react';
+import { CSSProperties, FC, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Card } from 'antd';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { useGetDeckProgressQuery, useGetMasteryQuery } from '@/entities/Statistics';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { Blueprint } from '@/shared/ui/Blueprint';
+import { MASTERY_SUCCESS_THRESHOLD } from '@/shared/ui/MasteryBar';
+import { Skeleton } from '@/shared/ui/Skeleton';
+import { RoutePath } from '@/shared/config/router/routePath';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import cls from './DeckProgressList.module.scss';
+
+const PERCENT = 100;
+/** Сколько колод показывать — остальные по ссылке «Все N» */
+const VISIBLE_DECKS = 5;
+const SKELETON_ROWS = Array.from({ length: VISIBLE_DECKS }, (_, i) => i);
 
 interface DeckProgressListProps {
   className?: string;
@@ -16,15 +23,20 @@ interface DeckProgressListProps {
 interface DeckRow {
   key: string;
   name: string;
-  mastered: number;
-  total: number;
+  percent: number;
 }
 
+const percentOf = (part: number, total: number): number => (
+  total > 0 ? Math.round((part / total) * PERCENT) : 0
+);
+
+/** Освоенность колод: 5 лучших, от 80% — сигналом «результат» (6.23) */
 export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) => {
   const { t } = useTranslation();
-  const { data: mastery } = useGetMasteryQuery();
-  const { data: progress } = useGetDeckProgressQuery(tz);
-  const { data: decks } = useGetDecksQuery();
+  const { data: mastery, isLoading: masteryLoading } = useGetMasteryQuery();
+  const { data: progress, isLoading: progressLoading } = useGetDeckProgressQuery(tz);
+  const { data: decks, isLoading: decksLoading } = useGetDecksQuery();
+  const loading = masteryLoading || progressLoading || decksLoading;
 
   const rows = useMemo<DeckRow[]>(() => {
     // Пока колоды не загружены, строки не строим — иначе всё отфильтруется и блок мигнёт.
@@ -44,47 +56,65 @@ export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) =
       byKey.set(d.deckKey, {
         key: d.deckKey,
         name: labelFor(d.deckKey),
-        mastered: d.mastered,
-        total: d.new + d.learning + d.mastered,
+        percent: percentOf(d.mastered, d.new + d.learning + d.mastered),
       });
     });
     (progress ?? []).forEach((p) => {
       if (!isAccessible(p.deckKey)) return;
       if (!byKey.has(p.deckKey)) {
         byKey.set(p.deckKey, {
-          key: p.deckKey, name: labelFor(p.deckKey), mastered: 0, total: 0,
+          key: p.deckKey, name: labelFor(p.deckKey), percent: 0,
         });
       }
     });
 
-    return Array.from(byKey.values());
+    return Array.from(byKey.values())
+      .sort((a, b) => b.percent - a.percent)
+      .slice(0, VISIBLE_DECKS);
   }, [mastery, progress, decks, t]);
+
+  if (loading) {
+    return (
+      <Blueprint className={classNames(cls.DeckProgressList, [className])}>
+        <div className={cls.header}>
+          <span className={cls.title}>{t('По колодам')}</span>
+        </div>
+        {SKELETON_ROWS.map((i) => (
+          <div key={i} className={cls.row}>
+            <Skeleton className={cls.nameSkeleton} />
+            <Skeleton className={cls.trackSkeleton} />
+            <Skeleton className={cls.percentSkeleton} />
+          </div>
+        ))}
+      </Blueprint>
+    );
+  }
 
   if (!rows.length) return null;
 
   return (
-    <Card className={classNames(cls.card, [className])} variant="borderless">
-      <VStack max gap="16">
-        <div className={cls.cardTitle}>{t('Прогресс по колодам')}</div>
-        <VStack max gap="16">
-          {rows.map((r) => {
-            const percent = r.total > 0 ? Math.round((r.mastered / r.total) * 100) : 0;
-            return (
-              <VStack max gap="6" key={r.key}>
-                <HStack max justify="between" align="center" gap="12">
-                  <MyTypography.Base className={cls.name}>{r.name}</MyTypography.Base>
-                  <MyTypography.Small type="secondary">
-                    {`${r.mastered}/${r.total} · ${percent}%`}
-                  </MyTypography.Small>
-                </HStack>
-                <div className={cls.track}>
-                  <div className={cls.fill} style={{ width: `${percent}%` }} />
-                </div>
-              </VStack>
-            );
-          })}
-        </VStack>
-      </VStack>
-    </Card>
+    <Blueprint className={classNames(cls.DeckProgressList, [className])}>
+      <div className={cls.header}>
+        <span className={cls.title}>{t('По колодам')}</span>
+        <Link to={RoutePath.DECKS()} className={cls.all}>
+          {t('Все {{value}}', { value: decks?.length ?? 0 })}
+        </Link>
+      </div>
+      {rows.map((r) => (
+        <div key={r.key} className={cls.row}>
+          <span className={cls.name}>{r.name}</span>
+          <div className={cls.track}>
+            <div
+              className={classNames(cls.fill, [], {
+                [cls.success]: r.percent >= MASTERY_SUCCESS_THRESHOLD,
+              })}
+              // Ширина — данные, а не оформление
+              style={{ '--percent': `${r.percent}%` } as CSSProperties}
+            />
+          </div>
+          <span className={cls.percent}>{`${r.percent}%`}</span>
+        </div>
+      ))}
+    </Blueprint>
   );
 };

@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography } from 'antd';
-import { VStack } from '@/shared/ui/Stack';
+import { Segmented } from 'antd';
 import { useUserInfo } from '@/entities/User';
-import { useGetStudyOverviewQuery } from '@/entities/Statistics';
+import { StatsPeriod, useGetStudyOverviewQuery } from '@/entities/Statistics';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import { PageHeader } from '@/shared/ui/PageHeader';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { AccuracyTimeCards } from '@/widgets/AccuracyTimeCards';
 import { StreakHeatmap } from '@/widgets/StreakHeatmap';
 import { MasteryChart } from '@/widgets/MasteryChart';
@@ -14,28 +15,48 @@ import cls from './ProgressPage.module.scss';
 const ProgressPage = () => {
     const { t } = useTranslation();
     const user = useUserInfo();
+    const [period, setPeriod] = useState<StatsPeriod>(StatsPeriod.YEAR);
+    const { isMobile } = useMatchMedia();
 
     const tz = useMemo(
         () => user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
         [user?.timezone],
     );
 
-    const { data: overview } = useGetStudyOverviewQuery(tz);
-    const hasData = (overview?.totalAnswers ?? 0) > 0;
+    const { data: overview, isLoading } = useGetStudyOverviewQuery(tz);
+    // Пока сводка грузится, виджеты показывают скелетоны — пустое состояние не мелькает
+    const showStats = isLoading || (overview?.totalAnswers ?? 0) > 0;
 
     return (
-        <VStack max gap="24">
-            <Typography.Title level={1}>{t('Прогресс')}</Typography.Title>
+        <div className={cls.ProgressPage}>
+            <PageHeader
+                className={cls.header}
+                title={t('Прогресс')}
+                extra={showStats && (
+                    <Segmented<StatsPeriod>
+                        className={cls.period}
+                        classNames={{ item: cls.periodItem, label: cls.periodLabel }}
+                        value={period}
+                        onChange={setPeriod}
+                        options={[
+                            // Мобильная 6.55 — сокращения
+                            { label: isMobile ? t('Нед.') : t('Неделя'), value: StatsPeriod.WEEK },
+                            { label: isMobile ? t('Мес.') : t('Месяц'), value: StatsPeriod.MONTH },
+                            { label: t('Год'), value: StatsPeriod.YEAR },
+                        ]}
+                    />
+                )}
+            />
 
-            {hasData ? (
-                <VStack max gap="24">
-                    <AccuracyTimeCards tz={tz} />
+            {showStats ? (
+                <>
+                    <AccuracyTimeCards tz={tz} period={period} />
                     <StreakHeatmap tz={tz} />
                     <div className={cls.chartsGrid}>
                         <MasteryChart />
                         <DeckProgressList tz={tz} />
                     </div>
-                </VStack>
+                </>
             ) : (
                 <EmptyState
                     type="recent"
@@ -43,7 +64,7 @@ const ProgressPage = () => {
                     description={t('Пройдите заучивание, чтобы увидеть свой прогресс')}
                 />
             )}
-        </VStack>
+        </div>
     );
 };
 

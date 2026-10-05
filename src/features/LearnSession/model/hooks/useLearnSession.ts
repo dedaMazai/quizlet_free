@@ -198,6 +198,8 @@ export const useLearnSession = (
   const eventsRef = useRef<StudyEventDraft[]>([]);
   const reviewsRef = useRef<CardReview[]>([]);
   const questionStartRef = useRef(0);
+  // Сессия для статистики — сколько раз садились заниматься
+  const sessionIdRef = useRef(crypto.randomUUID());
 
   // Засекаем момент показа нового вопроса — для duration_ms.
   useEffect(() => {
@@ -273,6 +275,7 @@ export const useLearnSession = (
     setAnswers([]);
     setLastReview(null);
     setStartedAt(Date.now());
+    sessionIdRef.current = crypto.randomUUID();
   };
 
   const answer = (input: string) => {
@@ -296,6 +299,7 @@ export const useLearnSession = (
       level_after: review ? review.level : levelOf(before),
       mode: question?.type ?? 'choice',
       duration_ms: Math.round(performance.now() - questionStartRef.current),
+      session_id: sessionIdRef.current,
     });
     if (review) reviewsRef.current.push(review);
     if (eventsRef.current.length >= FLUSH_EVERY) flush();

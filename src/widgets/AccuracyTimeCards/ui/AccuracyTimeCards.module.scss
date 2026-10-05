@@ -1,33 +1,40 @@
-.card {
-  flex: 1;
-  min-width: 160px;
-  border-radius: 16px;
-  box-shadow: var(--shadow-sm);
+.AccuracyTimeCards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.iconBox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  font-size: 18px;
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
+$value-skeleton-width: 96px;
+$value-skeleton-height: 48px;
+$value-skeleton-height-mobile: 34px;
+$delta-skeleton-width: 140px;
+$delta-skeleton-height: 14px;
+
+// Геометрия как у числа (56px, lh .85) и строки дельты (12px)
+.valueSkeleton {
+  width: $value-skeleton-width;
+  height: $value-skeleton-height;
 }
 
-.value {
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 32px;
-  color: var(--text);
+.deltaSkeleton {
+  width: $delta-skeleton-width;
+  height: $delta-skeleton-height;
 }
 
-.label {
-  margin-top: 2px;
-  font-size: 12px;
-  line-height: 20px;
-  color: var(--text-secondary);
+// Мобильная 6.55: сетка 2×2. Ячейки — div после четырёх <i> меток Blueprint
+@media (width <= 650px) {
+  .AccuracyTimeCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    > div:nth-of-type(odd) {
+      border-left: 0;
+    }
+
+    > div:nth-of-type(n + 3) {
+      border-top: 1px solid var(--color-divider);
+    }
+  }
+
+  .valueSkeleton {
+    height: $value-skeleton-height-mobile;
+  }
 }

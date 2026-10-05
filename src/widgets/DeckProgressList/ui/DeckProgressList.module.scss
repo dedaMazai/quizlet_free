@@ -1,16 +1,40 @@
-.card {
-  width: 100%;
-  height: 100%;
-  border-radius: 16px;
-  box-shadow: var(--shadow-sm);
+$track-width: 150px;
+$percent-width: 44px;
+$name-skeleton-width: 60%;
+$text-skeleton-height: 14px;
+$track-height: 6px;
+
+.DeckProgressList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
 }
 
-.cardTitle {
-  font-size: 12px;
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.title {
+  font-family: var(--font-heading);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
+  font-size: 22px;
+  white-space: nowrap;
+}
+
+.all {
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) $track-width $percent-width;
+  gap: 14px;
+  align-items: center;
+  font-size: 14px;
 }
 
 .name {
@@ -19,16 +43,39 @@
   white-space: nowrap;
 }
 
+.nameSkeleton {
+  width: $name-skeleton-width;
+  height: $text-skeleton-height;
+}
+
+.percentSkeleton {
+  height: $text-skeleton-height;
+}
+
+.trackSkeleton {
+  height: $track-height;
+}
+
 .track {
-  width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: var(--border-subtle);
+  position: relative;
+  height: $track-height;
+  background: var(--color-neutral-200);
 }
 
 .fill {
-  height: 100%;
-  border-radius: 999px;
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--percent);
+  background: var(--color-accent-700);
+}
+
+.success {
   background: var(--color-success);
+}
+
+.percent {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
 }

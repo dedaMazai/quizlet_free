@@ -1,0 +1,43 @@
+$shimmer-size: 800px;
+$shimmer-duration: 1.4s;
+
+// Быстрая загрузка не мигает заглушкой
+$appear-delay: 200ms;
+
+.Skeleton {
+    display: block;
+    border-radius: 0;
+    background: linear-gradient(
+        90deg,
+        var(--color-neutral-200),
+        var(--color-neutral-100),
+        var(--color-neutral-200)
+    );
+    background-size: $shimmer-size 100%;
+    opacity: 0;
+    animation:
+        appear var(--motion-base) var(--ease-enter) $appear-delay forwards,
+        shimmer $shimmer-duration linear infinite;
+}
+
+@keyframes appear {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes shimmer {
+    from {
+        background-position: -$shimmer-size 0;
+    }
+
+    to {
+        background-position: $shimmer-size 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .Skeleton {
+        animation: appear var(--motion-instant) linear $appear-delay forwards;
+    }
+}

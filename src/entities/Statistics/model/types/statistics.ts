@@ -6,6 +6,8 @@ export interface StudyEventDraft {
   level_after: number;
   mode: 'choice' | 'write' | 'write_ru_en' | 'write_en_ru' | 'cloze' | 'order';
   duration_ms: number;
+  /** Один запуск режима; новый и при «Заново» */
+  session_id: string;
 }
 
 /** Аргумент мутации логирования: ключ/имя колоды + накопленные события. */
@@ -88,4 +90,31 @@ export interface DeckClozeStats {
   deckUuid: string;
   examplesCount: number;
   lastClozeAt: string | null;
+}
+
+/** Период KPI-полосы на странице прогресса */
+export enum StatsPeriod {
+  WEEK = 'week',
+  MONTH = 'month',
+  YEAR = 'year',
+}
+
+/** Показатели за один период */
+export interface PeriodStats {
+  totalAnswers: number;
+  correctAnswers: number;
+  totalDurationMs: number;
+  /** Ответы без перерыва дольше 30 минут */
+  sessions: number;
+}
+
+export interface ProgressSummaryArgs {
+  tz: string;
+  period: StatsPeriod;
+}
+
+/** Текущий период и такой же период до него — для дельт ▲ */
+export interface ProgressSummary {
+  current: PeriodStats;
+  previous: PeriodStats;
 }

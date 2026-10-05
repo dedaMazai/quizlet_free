@@ -8,8 +8,19 @@ import {
   HeatmapDay,
   LogStudyEventsDto,
   MasteryStats,
+  PeriodStats,
+  ProgressSummary,
+  ProgressSummaryArgs,
+  StatsPeriod,
   StudyOverview,
 } from '../types/statistics';
+
+/** Длина периода в днях — окно get_progress_summary */
+const PERIOD_DAYS: Record<StatsPeriod, number> = {
+  [StatsPeriod.WEEK]: 7,
+  [StatsPeriod.MONTH]: 30,
+  [StatsPeriod.YEAR]: 365,
+};
 
 interface OverviewRow {
   total_answers: number;
@@ -38,6 +49,25 @@ interface DueSummaryRow {
   per_deck: { deck_id: string; due: number; new: number }[];
 }
 
+interface PeriodStatsRow {
+  total_answers: number;
+  correct_answers: number;
+  total_duration_ms: number;
+  sessions: number;
+}
+
+interface ProgressSummaryRow {
+  current: PeriodStatsRow;
+  previous: PeriodStatsRow;
+}
+
+const mapPeriodStats = (row: PeriodStatsRow): PeriodStats => ({
+  totalAnswers: row.total_answers,
+  correctAnswers: row.correct_answers,
+  totalDurationMs: row.total_duration_ms,
+  sessions: row.sessions,
+});
+
 interface ClozeStatsRow {
   deck_id: string;
   examples_count: number;
@@ -60,6 +90,8 @@ const statisticsApi = rtkApi.injectEndpoints({
           level_after: e.level_after,
           mode: e.mode,
           duration_ms: e.duration_ms,
+          // Пачки из outbox, сохранённые до появления поля, уходят без сессии
+          session_id: e.session_id ?? null,
         }));
         const { error } = await supabase.from('study_events').insert(rows);
         if (error) return supabaseError(error.message);
@@ -80,6 +112,23 @@ const statisticsApi = rtkApi.injectEndpoints({
             totalDurationMs: row.total_duration_ms,
             currentStreak: row.current_streak,
             longestStreak: row.longest_streak,
+          },
+        };
+      },
+      providesTags: [ApiTag.StudyStats],
+    }),
+    getProgressSummary: build.query<ProgressSummary, ProgressSummaryArgs>({
+      queryFn: async ({ tz, period }) => {
+        const { data, error } = await supabase.rpc('get_progress_summary', {
+          p_tz: tz,
+          p_days: PERIOD_DAYS[period],
+        });
+        if (error) return supabaseError(error.message);
+        const row = data as ProgressSummaryRow;
+        return {
+          data: {
+            current: mapPeriodStats(row.current),
+            previous: mapPeriodStats(row.previous),
           },
         };
       },
@@ -162,6 +211,7 @@ const statisticsApi = rtkApi.injectEndpoints({
 export const {
   useLogStudyEventsMutation,
   useGetStudyOverviewQuery,
+  useGetProgressSummaryQuery,
   useGetStudyHeatmapQuery,
   useGetDeckProgressQuery,
   useGetMasteryQuery,
