@@ -39,6 +39,7 @@ import { RoadmapPage } from '@/pages/RoadmapPage';
 import { CyclesPage } from '@/pages/CyclesPage';
 import { CyclePage } from '@/pages/CyclePage';
 import { CycleStudyPage } from '@/pages/CycleStudyPage';
+import { DevUiPage } from '@/pages/DevUiPage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -579,6 +580,13 @@ export const routeConfig: AppRoutesProps[] = [
         element: <ForbiddenPage />,
         authOnly: true,
     },
+    // Проверочная страница примитивов shared/ui — только в dev-сборке
+    ...(__IS_DEV__ ? [{
+        path: RoutePath.DEV_UI(),
+        element: <DevUiPage />,
+        authOnly: true,
+        withSidebar: true,
+    }] : []),
     {
         path: '*',
         element: <NotFoundPage />,

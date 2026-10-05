@@ -35,6 +35,7 @@ export const RouteNames = {
   CYCLES: 'CYCLES',
   CYCLE: 'CYCLE',
   CYCLE_STUDY: 'CYCLE_STUDY',
+  DEV_UI: 'DEV_UI',
   // last
   NOT_FOUND: 'NOT_FOUND',
 } as const;

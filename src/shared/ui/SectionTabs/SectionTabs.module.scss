@@ -1,0 +1,33 @@
+.SectionTabs {
+    display: flex;
+    gap: 28px;
+    border-bottom: 1px solid var(--color-divider);
+    font-size: 15px;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 2px 12px;
+    border-bottom: 2px solid transparent;
+    color: var(--color-neutral-700);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.active {
+    border-bottom-color: var(--color-accent);
+    color: var(--color-accent-800);
+}
+
+.count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.highlighted {
+    padding: 1px 5px;
+    background: var(--color-accent-100);
+}

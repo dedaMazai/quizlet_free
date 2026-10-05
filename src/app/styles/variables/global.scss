@@ -155,6 +155,11 @@
     --streak-4: oklch(50% 0.17 25deg);
     --streak-4-tint: oklch(90% 0.06 25deg);
 
+    // Typography
+    --font-heading: "Fira Sans Condensed", system-ui, sans-serif;
+    --font-body: "Fira Sans", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
     // Motion
     --motion-instant: 80ms;
     --motion-fast: 140ms;

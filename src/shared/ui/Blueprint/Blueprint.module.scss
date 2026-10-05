@@ -1,0 +1,65 @@
+$corner-size: 11px;
+$corner-offset: -6px;
+$corner-center: 5px;
+
+.Blueprint {
+    position: relative;
+    border: 1px solid var(--color-divider);
+    border-radius: 0;
+}
+
+.corner {
+    position: absolute;
+    width: $corner-size;
+    height: $corner-size;
+    pointer-events: none;
+
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        background: currentcolor;
+    }
+
+    &::before {
+        left: $corner-center;
+        top: 0;
+        width: 1px;
+        height: 100%;
+    }
+
+    &::after {
+        top: $corner-center;
+        left: 0;
+        width: 100%;
+        height: 1px;
+    }
+}
+
+.default {
+    color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+
+.light {
+    color: var(--color-accent-400);
+}
+
+.tl {
+    top: $corner-offset;
+    left: $corner-offset;
+}
+
+.tr {
+    top: $corner-offset;
+    right: $corner-offset;
+}
+
+.bl {
+    bottom: $corner-offset;
+    left: $corner-offset;
+}
+
+.br {
+    bottom: $corner-offset;
+    right: $corner-offset;
+}

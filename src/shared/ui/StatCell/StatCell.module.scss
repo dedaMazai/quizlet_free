@@ -1,0 +1,59 @@
+.StatCell {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 22px 18px;
+
+    & + & {
+        border-left: 1px solid var(--color-divider);
+    }
+}
+
+.label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-neutral-700);
+}
+
+.row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.value {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 56px;
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    color: var(--color-text);
+}
+
+.unit {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 20px;
+    white-space: nowrap;
+    color: var(--color-neutral-700);
+}
+
+.delta {
+    font-size: 12px;
+    color: var(--color-neutral-700);
+}
+
+.success .delta {
+    color: var(--color-success-text);
+}
+
+@for $i from 0 through 4 {
+    .streak#{$i} .value,
+    .streak#{$i} .delta {
+        color: var(--streak-#{$i});
+    }
+}

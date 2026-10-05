@@ -1,0 +1,36 @@
+.TickProgress {
+    display: flex;
+    gap: 3px;
+}
+
+.tick {
+    flex: 1;
+}
+
+.sm .tick {
+    height: 6px;
+}
+
+.md .tick {
+    height: 8px;
+}
+
+.done {
+    background: var(--color-accent-700);
+}
+
+.correct {
+    background: var(--color-success);
+}
+
+.wrong {
+    background: var(--pattern-error-hatch);
+}
+
+.current {
+    background: var(--color-accent-400);
+}
+
+.todo {
+    background: var(--color-neutral-300);
+}

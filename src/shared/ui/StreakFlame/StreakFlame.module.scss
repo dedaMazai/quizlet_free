@@ -1,0 +1,16 @@
+$tile-size: 56px;
+
+.StreakFlame {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: $tile-size;
+    height: $tile-size;
+}
+
+@for $i from 0 through 4 {
+    .level#{$i} {
+        background: var(--streak-#{$i}-tint);
+        color: var(--streak-#{$i});
+    }
+}

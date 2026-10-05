@@ -1,0 +1,28 @@
+.Kicker {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.sm {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+}
+
+.md {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+}
+
+.default {
+    color: var(--color-neutral-700);
+}
+
+.accent {
+    color: var(--color-accent-700);
+}
+
+.onDark {
+    color: var(--color-accent-300);
+}

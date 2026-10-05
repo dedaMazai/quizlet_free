@@ -1,0 +1,23 @@
+.DueBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 7px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.normal {
+    background: var(--color-accent-100);
+    color: var(--color-accent-800);
+}
+
+.urgent {
+    background: var(--color-warning-tint);
+    color: var(--color-warning-text);
+}
+
+.clear {
+    padding-inline: 0;
+    color: var(--color-neutral-700);
+}

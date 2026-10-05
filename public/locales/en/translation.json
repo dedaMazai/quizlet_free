@@ -2066,5 +2066,9 @@
   "Слов: {{count}}": "Words: {{count}}",
   "Не удалось загрузить циклы": "Failed to load cycles",
   "Не удалось добавить слово «{{term}}»": "Failed to add the word “{{term}}”",
-  "Сегодняшние слова перейдут в повтор, и откроется следующая порция (слов: {{count}}).": "Today's words will move to review and the next portion will be unlocked (words: {{count}})."
+  "Сегодняшние слова перейдут в повтор, и откроется следующая порция (слов: {{count}}).": "Today's words will move to review and the next portion will be unlocked (words: {{count}}).",
+  "Всё повторено": "All reviewed",
+  "Много слов ждут — повторите сегодня": "Many words are waiting — review them today",
+  "Слова, которые пора повторить": "Words due for review",
+  "{{count}} к повторению": "{{count}} to review"
 }

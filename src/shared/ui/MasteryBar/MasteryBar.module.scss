@@ -1,0 +1,31 @@
+.MasteryBar {
+    display: flex;
+    gap: 2px;
+}
+
+.sm {
+    height: 5px;
+}
+
+.md {
+    height: 6px;
+}
+
+.mastered {
+    width: var(--mastered);
+    background: var(--color-accent-700);
+}
+
+.success {
+    background: var(--color-success);
+}
+
+.learning {
+    width: var(--learning);
+    background: var(--color-accent-400);
+}
+
+.fresh {
+    flex: 1;
+    background: var(--color-neutral-300);
+}

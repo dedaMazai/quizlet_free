@@ -37,6 +37,7 @@ export const RoutePath = {
   [RouteNames.CYCLES]: () => '/cycles',
   [RouteNames.CYCLE]: (id: string) => `/cycles/${id}`,
   [RouteNames.CYCLE_STUDY]: (id: string, mode: string) => `/cycles/${id}/study/${mode}`,
+  [RouteNames.DEV_UI]: () => '/dev/ui',
   // last
   [RouteNames.NOT_FOUND]: () => '/*',
 };

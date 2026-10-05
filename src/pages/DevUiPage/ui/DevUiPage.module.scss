@@ -1,0 +1,89 @@
+$box-size: 96px;
+$light-box-size: 48px;
+$grid-column: 220px;
+
+.DevUiPage {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+}
+
+.title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.demo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.demoTitle {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-accent-700);
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax($grid-column, 1fr));
+    gap: 24px;
+}
+
+.case {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.caption {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-neutral-600);
+}
+
+.box {
+    display: grid;
+    place-items: center;
+    width: $box-size;
+    height: $box-size;
+}
+
+.lightBox {
+    width: $light-box-size;
+    height: $light-box-size;
+    border-color: var(--color-bg);
+    background: var(--color-bg);
+}
+
+.panel {
+    padding: 24px;
+}
+
+.extra {
+    font-size: 13px;
+    color: var(--color-neutral-700);
+    white-space: nowrap;
+}
+
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
