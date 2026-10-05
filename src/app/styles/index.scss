@@ -304,10 +304,10 @@ input:-webkit-autofill:active {
 }
 
 /* Оверлеи: в тёмной теме — рамка divider вместо тени (BACKLOG §6) */
-.ant-modal-container,
-.ant-dropdown-menu,
-.ant-select-dropdown,
-.ant-popover-inner,
+.ant-modal .ant-modal-container,
+.ant-dropdown .ant-dropdown-menu,
+.ant-select-dropdown.ant-select-dropdown,
+.ant-popover .ant-popover-inner,
 .ant-picker-dropdown .ant-picker-panel-container {
     border: var(--overlay-border);
 }

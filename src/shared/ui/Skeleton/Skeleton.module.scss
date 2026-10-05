@@ -23,9 +23,9 @@ $appear-delay: 200ms;
 .onDark {
     background-image: linear-gradient(
         90deg,
-        var(--color-accent-800),
-        var(--color-accent-700),
-        var(--color-accent-800)
+        var(--color-field-skeleton),
+        var(--color-field-line),
+        var(--color-field-skeleton)
     );
 }
 
