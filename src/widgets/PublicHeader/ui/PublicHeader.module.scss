@@ -73,8 +73,15 @@
 
 .actions {
     display: flex;
+    align-items: center;
     gap: 8px;
     margin-left: auto;
+
+    // Переключатели языка и темы — в высоту кнопок шапки
+    :global(.ant-btn-icon-only) {
+        width: 40px;
+        height: 40px;
+    }
 }
 
 .button {

@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router';
 import { Button } from 'antd';
 import { ReactComponent as Logo } from '@/shared/assets/icons/LogoZubrika.svg';
 import { useUserInfo } from '@/entities/User';
+import { LangSwitcher } from '@/features/LangSwitcher';
+import { ThemeSwitcher } from '@/features/ThemeSwitcher';
 import { AboutAnchor, getAboutAnchorPath, RoutePath } from '@/shared/config/router/routePath';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
@@ -42,6 +44,8 @@ export const PublicHeader = memo(() => {
             </nav>
 
             <div className={cls.actions}>
+                <LangSwitcher />
+                <ThemeSwitcher />
                 {userInfo ? (
                     <Button type="primary" className={cls.button} onClick={goToApp}>
                         <BlueprintMarks />
