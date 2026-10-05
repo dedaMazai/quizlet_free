@@ -32,21 +32,6 @@ export interface RoleInfo {
   accesses: Accesses[]
 }
 
-export interface UserInfoCreate {
-  email?: string
-  surname?: string
-  name: string
-  middle_name?: string
-  tel?: string
-  gender?: GenderUser
-  role: RoleName
-  avatar_file_uuid?: string
-  avatar?: string
-  description?: string
-  language?: TLanguageUser
-  timezone?: string
-}
-
 export interface UserInfo {
   uuid: string
   email: string

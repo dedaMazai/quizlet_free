@@ -1,15 +1,14 @@
-import { setCookie } from 'typescript-cookie';
 import {
   ApiTag,
   rtkApi,
 } from '@/shared/api/rtkApi';
 import { supabase, supabaseError } from '@/shared/api/supabaseClient';
 import { userActions } from '../slice/userSlice';
-import { TLanguageUser, UserInfo, UserInfoCreate, RoleName } from '../types/user';
+import { TLanguageUser, UserInfo, RoleName } from '../types/user';
 import { fetchUserInfo } from '../lib/fetchUserInfo';
 import { mapProfile, ProfileRow } from '../lib/mapProfile';
 import { OrderingType, PaginationResult } from '@/shared/types/types';
-import { GenderUser, IS_OLD_SAFARI } from '@/shared/const/const';
+import { GenderUser } from '@/shared/const/const';
 
 interface RequestLogin {
   password: string
@@ -20,15 +19,6 @@ interface RequestRegister {
   email: string
   password: string
   name?: string
-}
-
-interface RequestLoginOidc {
-  username: string
-  password: string
-}
-interface ResAuth extends UserInfo {
-  access_token: string
-  refresh_token: string
 }
 
 /** Сводка по пользователю для админа (admin_user_stats). */
@@ -73,38 +63,6 @@ export interface UpdateMeInfo {
 
 const userApi = rtkApi.injectEndpoints({
   endpoints: (build) => ({
-    checkOidc: build.mutation<{ authorization_url: string }, void>({
-      query: () => ({
-        url: '/auth/oidc',
-        method: 'GET',
-      }),
-    }),
-    loginOidc: build.mutation<ResAuth, RequestLoginOidc>({
-      query: (body) => ({
-        url: '/auth/oidc/login',
-        method: 'POST',
-        body,
-      }),
-      async onQueryStarted(_arg, {
-        dispatch,
-        queryFulfilled,
-      }) {
-        try {
-          const { data } = await queryFulfilled;
-          const {
-            access_token,
-            refresh_token,
-            ...userData
-          } = data;
-          if (__IS_DEV__ || IS_OLD_SAFARI) {
-            setCookie('dev_access_token', access_token);
-          }
-          dispatch(userActions.setUserData(userData));
-        } catch (err) {
-          console.error('Login error:', err);
-        }
-      },
-    }),
     login: build.mutation<UserInfo, RequestLogin>({
       queryFn: async ({ email, password }) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -163,15 +121,6 @@ const userApi = rtkApi.injectEndpoints({
           dispatch(rtkApi.util.resetApiState());
         }
       },
-    }),
-    sendEmailPasswordChange: build.mutation<void, string>({
-      query: (email) => ({
-        url: '/users/password/recovery',
-        method: 'POST',
-        body: {
-          email,
-        }
-      })
     }),
     passwordRecovery: build.mutation<void, {
       new_password: string
@@ -251,16 +200,6 @@ const userApi = rtkApi.injectEndpoints({
           console.error('Update profile error:', err);
         }
       },
-    }),
-    createUser: build.mutation<UserInfo, UserInfoCreate>({
-      query: (body) => ({
-        url: '/users',
-        method: 'POST',
-        body,
-      }),
-      invalidatesTags: () => [
-        ApiTag.Users,
-      ],
     }),
     getUsers: build.query<UserInfo[], UserFilters | void>({
       // Список пользователей из таблицы profiles. Поиск по name/email — на клиенте (список небольшой).
@@ -342,22 +281,6 @@ const userApi = rtkApi.injectEndpoints({
         type: ApiTag.User,
         id: uuid,
       }])
-    }),
-    updateUser: build.mutation<void, {
-      uuid: string
-    } & Partial<UserInfoCreate>>({
-      query: ({ uuid, ...body }) => ({
-        url: `/users/${uuid}`,
-        method: 'PUT',
-        body,
-      }),
-      invalidatesTags: (_res, _error, { uuid }) => [
-        {
-          type: ApiTag.User,
-          id: uuid,
-        },
-        ApiTag.Users,
-      ],
     }),
     updateUserRole: build.mutation<void, {
       user_uuid: string
@@ -490,19 +413,14 @@ const userApi = rtkApi.injectEndpoints({
 });
 
 export const {
-  useCheckOidcMutation,
   useUserInfoQuery,
   useUpdateMeInfoMutation,
   useGetUserQuery,
-  useCreateUserMutation,
   useLoginMutation,
   useRegisterMutation,
-  useLoginOidcMutation,
   useLogoutMutation,
-  useUpdateUserMutation,
   useUpdateUserRoleMutation,
   usePasswordRecoveryMutation,
-  useSendEmailPasswordChangeMutation,
   useGetUsersQuery,
   useDeleteUserMutation,
   useGetUsersSearchQuery,

@@ -28,7 +28,6 @@ export type {
   UserSchema,
   UserInfo,
   TLanguageUser,
-  UserInfoCreate,
   RoleName,
 } from './model/types/user';
 
@@ -41,19 +40,14 @@ export type {
 } from './model/api/userApi';
 
 export {
-  useCheckOidcMutation,
   useUserInfoQuery,
   useUpdateMeInfoMutation,
   useGetUserQuery,
-  useCreateUserMutation,
   useLoginMutation,
   useRegisterMutation,
-  useLoginOidcMutation,
   useLogoutMutation,
-  useUpdateUserMutation,
   useUpdateUserRoleMutation,
   usePasswordRecoveryMutation,
-  useSendEmailPasswordChangeMutation,
   useGetUsersQuery,
   useDeleteUserMutation,
   useGetUsersSearchQuery,
