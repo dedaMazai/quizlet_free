@@ -26,6 +26,9 @@ export interface CycleWord {
   created_at: string;
 }
 
+/** Слово цикла без текста — для раскладки по порциям. */
+export type CycleWordPortion = Pick<CycleWord, 'uuid' | 'portion'>;
+
 export interface CycleCreateDto {
   name: string;
   daily_new_count: number;
@@ -75,3 +78,14 @@ export type CycleWordStatus = 'today' | 'unlocked' | 'skipped' | 'locked';
 
 /** Режим сессии: только сегодняшние новые или повтор всего цикла. */
 export type CycleStudyMode = 'new' | 'review';
+
+/** Раскладка цикла на сегодня: день (номер порции) и слова по статусам. */
+export interface CycleDayPlan {
+  day: number;
+  /** Открытые в прошлые дни слова. */
+  review: number;
+  /** Сегодняшняя порция. */
+  today: number;
+  /** Ещё не открытые слова. */
+  locked: number;
+}

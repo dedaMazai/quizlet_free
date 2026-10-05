@@ -10,6 +10,7 @@ export type {
   ForecastDay,
   DeckDue,
   DueSummary,
+  DueSummaryArgs,
   DeckClozeStats,
 } from './model/types/statistics';
 export {

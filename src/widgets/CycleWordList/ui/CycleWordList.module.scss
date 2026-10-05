@@ -1,87 +1,171 @@
-// Каждая строка — отдельная сетка, поэтому колонка статуса фиксированная:
-// иначе перевод «гуляет» между строками с тегом и без.
-$status-width: 104px;
+// Каждая строка — отдельная сетка, поэтому колонки фиксированные:
+// иначе перевод «гуляет» между строками.
+$handle-width: 20px;
+$index-width: 36px;
+$tag-width: 120px;
+$icon-cell: 24px;
 
 .list {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background: var(--color-elevated-bg);
+  border-top: 1px solid var(--color-divider);
 }
 
 .row {
   display: grid;
-  grid-template-columns: auto 40px minmax(0, 1fr) minmax(0, 1fr) $status-width auto;
-  gap: 12px;
+  grid-template-columns:
+    $handle-width $index-width minmax(0, 1fr) minmax(0, 1fr)
+    $tag-width $icon-cell $icon-cell $icon-cell;
+  gap: 14px;
   align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--color-border);
-
-  &:last-child {
-    border-bottom: none;
-  }
+  padding: 10px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  font-size: 14px;
 
   // Фон только у перетаскиваемой строки — она проезжает поверх соседних.
   &.dragging {
     position: relative;
     z-index: 1;
-    border-radius: 12px;
-    background: var(--color-elevated-bg);
+    background: var(--color-bg);
     box-shadow: var(--shadow-sm);
-  }
-
-  &.locked,
-  &.skipped {
-    opacity: 0.6;
-  }
-
-  // Тень вместо рамки: метка точки старта не сдвигает содержимое строки.
-  &.startPoint {
-    box-shadow: inset 3px 0 0 var(--color-accent);
   }
 }
 
+.today {
+  background: var(--color-accent-100);
+}
+
+.locked,
+.skipped {
+  opacity: 0.6;
+}
+
+.handle,
+.iconButton {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
 .handle {
+  color: var(--color-neutral-500);
   cursor: grab;
   touch-action: none;
 }
 
 .index {
-  color: var(--color-icon-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--color-neutral-700);
+}
+
+.term {
+  font-weight: 500;
+}
+
+.tag {
+  justify-self: start;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.unlockedTag {
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+}
+
+.todayTag {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.lockedTag {
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-700);
+}
+
+.skippedTag {
+  background: transparent;
+  color: var(--color-neutral-600);
+}
+
+.iconButton {
+  color: var(--color-neutral-300);
 }
 
 .important {
-  color: var(--color-star);
+  color: var(--color-accent-600);
+}
+
+// Точка старта видна всегда, остальные — по наведению на строку
+.startButton {
+  color: transparent;
+}
+
+.startPoint {
+  color: var(--color-accent-700);
+}
+
+.deleteButton {
+  opacity: 0;
+}
+
+.row:hover,
+.row:focus-within {
+  .startButton:not(.startPoint) {
+    color: var(--color-neutral-400);
+  }
+
+  .deleteButton {
+    opacity: 1;
+  }
 }
 
 @media (width <= 767px) {
   .row {
-    grid-template-columns: auto 32px minmax(0, 1fr) auto;
+    grid-template-columns: $handle-width minmax(0, 1fr) auto $icon-cell $icon-cell;
     row-gap: 4px;
   }
 
-  // Перевод и статус уходят под слово; ручка, номер и действия — сбоку на всю высоту.
-  .handle,
+  // Номер скрыт; перевод и тег уходят под слово
   .index {
+    display: none;
+  }
+
+  .handle {
     grid-row: 1 / span 3;
+  }
+
+  .term {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .translation {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 2;
   }
 
-  .status {
-    grid-column: 3;
+  .tag {
+    grid-column: 2;
     grid-row: 3;
-
-    &:empty {
-      display: none;
-    }
   }
 
-  .actions {
-    grid-column: 4;
-    grid-row: 1 / span 3;
+  // На тач-экране наведения нет — действия видны всегда
+  .deleteButton {
+    opacity: 1;
+  }
+
+  .startButton:not(.startPoint) {
+    color: var(--color-neutral-400);
   }
 }

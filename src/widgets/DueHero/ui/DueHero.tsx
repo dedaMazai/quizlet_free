@@ -30,7 +30,7 @@ export const DueHero = memo((props: DueHeroProps) => {
     const navigate = useNavigate();
 
     const { data: due } = useGetDueCountQuery(undefined);
-    const { data: summary } = useGetDueSummaryQuery(tz);
+    const { data: summary } = useGetDueSummaryQuery({ tz });
 
     const count = due?.count ?? 0;
     const hasDebt = count > 0;

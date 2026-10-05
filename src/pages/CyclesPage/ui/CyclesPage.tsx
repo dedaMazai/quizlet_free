@@ -1,19 +1,58 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Button, Empty, Result } from 'antd';
+import { Plus } from 'lucide-react';
 import {
-  Button, Card, Empty, Result,
-} from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-import { useGetCyclesQuery } from '@/entities/LearningCycle';
+  CycleDayPlan,
+  CycleWordPortion,
+  LearningCycle,
+  getCycleDayPlan,
+  getLearnedToday,
+  getToday,
+  useGetCyclesQuery,
+  useGetCyclesWordPortionsQuery,
+} from '@/entities/LearningCycle';
 import { CycleForm } from '@/features/CycleForm';
 import { SectionPageHeader } from '@/widgets/SectionPage';
 import { NavSectionKey } from '@/shared/const/menu';
-import { VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
+import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import cls from './CyclesPage.module.scss';
+
+const ICON_SIZE = 16;
+const ICON_STROKE = 1.5;
+/** Ячеек в полосе карточки: доли слов «в повторе / сегодня / в очереди» */
+const CELLS_COUNT = 30;
+
+type CellKind = 'review' | 'today' | 'locked';
+
+const NO_WORDS: CycleWordPortion[] = [];
+
+const buildCells = (plan: CycleDayPlan): CellKind[] => {
+  const total = plan.review + plan.today + plan.locked;
+  if (!total) return Array<CellKind>(CELLS_COUNT).fill('locked');
+  const review = Math.round((plan.review / total) * CELLS_COUNT);
+  // Сегодняшняя порция видна хотя бы одной ячейкой
+  const today = plan.today > 0
+    ? Math.min(CELLS_COUNT - review, Math.max(1, Math.round((plan.today / total) * CELLS_COUNT)))
+    : 0;
+  return Array.from({ length: CELLS_COUNT }, (_, i) => {
+    if (i < review) return 'review';
+    return i < review + today ? 'today' : 'locked';
+  });
+};
+
+interface CycleCardData {
+  cycle: LearningCycle;
+  plan: CycleDayPlan;
+  /** Сегодняшние новые, ещё не выученные. */
+  todo: number;
+  cells: CellKind[];
+}
 
 const CyclesPage = () => {
   const { t } = useTranslation();
@@ -22,21 +61,44 @@ const CyclesPage = () => {
   const {
     data: cycles, isLoading, isError, refetch,
   } = useGetCyclesQuery();
+  const { data: portions } = useGetCyclesWordPortionsQuery();
+
+  const cards = useMemo<CycleCardData[]>(() => {
+    const today = getToday();
+    return (cycles ?? []).map((cycle) => {
+      const words = portions?.[cycle.uuid] ?? NO_WORDS;
+      const plan = getCycleDayPlan(cycle, words, today);
+      const learned = getLearnedToday(cycle.uuid, today);
+      const learnedCount = words
+        .filter((word) => word.portion === plan.day && learned.has(word.uuid)).length;
+      return {
+        cycle,
+        plan,
+        todo: Math.max(0, plan.today - learnedCount),
+        cells: buildCells(plan),
+      };
+    });
+  }, [cycles, portions]);
+
+  const createButton = (
+    <Button
+      type="primary"
+      className={cls.createButton}
+      icon={<Plus aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+      onClick={() => setFormOpen(true)}
+    >
+      <BlueprintMarks />
+      {t('Создать цикл')}
+    </Button>
+  );
 
   return (
-    <VStack max fullHeight gap="16">
-      <SectionPageHeader
-        section={NavSectionKey.LEARN}
-        extra={(
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-            {t('Создать цикл')}
-          </Button>
-        )}
-      />
+    <div className={cls.CyclesPage}>
+      <SectionPageHeader section={NavSectionKey.LEARN} extra={createButton} />
 
-      <MyTypography.Base type="secondary">
-        {t('Записывайте слова по порядку, учите по N новых в день и повторяйте все предыдущие — как в тетради.')}
-      </MyTypography.Base>
+      <p className={cls.lead}>
+        {t('Записывайте слова по порядку, как в тетради. Каждый день открывается N новых, а все предыдущие идут в повтор.')}
+      </p>
 
       {isLoading && <Loader />}
       {isError && (
@@ -48,39 +110,52 @@ const CyclesPage = () => {
       )}
       {!isLoading && !isError && !cycles?.length && (
         <Empty className={cls.empty} description={t('Циклов пока нет')}>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-            {t('Создать цикл')}
-          </Button>
+          {createButton}
         </Empty>
       )}
 
-      <div className={cls.grid}>
-        {cycles?.map((cycle) => (
-          <Card
-            key={cycle.uuid}
-            className={cls.card}
-            hoverable
-            onClick={() => navigate(RoutePath.CYCLE(cycle.uuid))}
-          >
-            <VStack gap="8">
-              <MyTypography.Large strong>{cycle.name}</MyTypography.Large>
-              <MyTypography.Small type="secondary">
-                {t('Слов: {{count}}', { count: cycle.words_count })}
-              </MyTypography.Small>
-              <MyTypography.Small type="secondary">
-                {t('Новых в день: {{count}}', { count: cycle.daily_new_count })}
-              </MyTypography.Small>
-            </VStack>
-          </Card>
-        ))}
-      </div>
+      {cards.length > 0 && (
+        <div className={cls.grid}>
+          {cards.map(({
+            cycle, plan, todo, cells,
+          }) => (
+            <Blueprint
+              key={cycle.uuid}
+              as="button"
+              type="button"
+              className={cls.card}
+              onClick={() => navigate(RoutePath.CYCLE(cycle.uuid))}
+            >
+              <div className={cls.cardTop}>
+                <Kicker size={KickerSize.SM} tone={KickerTone.ACCENT}>
+                  {t('День {{day}}', { day: plan.day })}
+                </Kicker>
+                {todo > 0 && (
+                  <span className={cls.todo}>{t('{{count}} новых', { count: todo })}</span>
+                )}
+              </div>
+              <span className={cls.name}>{cycle.name}</span>
+              <div className={cls.cells}>
+                {cells.map((kind, i) => (
+                  // Ячейки безымянны и не переставляются — индекс как ключ
+                  <i key={i} className={classNames(cls.cell, [cls[kind]])} />
+                ))}
+              </div>
+              <div className={cls.meta}>
+                <span>{t('{{count}} слов', { count: cycle.words_count })}</span>
+                <span>{t('{{count}} новых в день', { count: cycle.daily_new_count })}</span>
+              </div>
+            </Blueprint>
+          ))}
+        </div>
+      )}
 
       <CycleForm
         open={formOpen}
         onClose={() => setFormOpen(false)}
         onCreated={(cycle) => navigate(RoutePath.CYCLE(cycle.uuid))}
       />
-    </VStack>
+    </div>
   );
 };
 

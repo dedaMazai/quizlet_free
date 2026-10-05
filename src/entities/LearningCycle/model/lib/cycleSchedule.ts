@@ -1,4 +1,6 @@
-import { CycleWord, CycleWordStatus, LearningCycle } from '../types/cycle';
+import {
+  CycleDayPlan, CycleWord, CycleWordPortion, CycleWordStatus, LearningCycle,
+} from '../types/cycle';
 
 /**
  * Расписание цикла заучивания. Слово открывается в одной из порций (word.portion)
@@ -54,4 +56,28 @@ export const getWordStatus = (
   if (isToday(cycle, word)) return 'today';
   if (index < startIdx && !word.is_important) return 'skipped';
   return 'unlocked';
+};
+
+/**
+ * Раскладка на сегодня по порциям слов — так, как её оставит sync_cycle_portion:
+ * в новый день открывается следующая порция, неполная порция доливается из очереди.
+ * Нужна списку циклов, где порции ещё не открыты (их открывает вход в цикл).
+ */
+export const getCycleDayPlan = (
+  cycle: ScheduleCycle,
+  words: CycleWordPortion[],
+  today: string,
+): CycleDayPlan => {
+  const isNewDay = cycle.portion_date !== today;
+  const day = isNewDay ? cycle.current_portion + 1 : cycle.current_portion;
+  const opened = words.filter((w) => w.portion !== null);
+  const todayOpened = opened.filter((w) => w.portion === day).length;
+  const locked = words.length - opened.length;
+  const todayCount = Math.max(todayOpened, Math.min(cycle.daily_new_count, todayOpened + locked));
+  return {
+    day,
+    review: opened.length - todayOpened,
+    today: todayCount,
+    locked: locked - (todayCount - todayOpened),
+  };
 };

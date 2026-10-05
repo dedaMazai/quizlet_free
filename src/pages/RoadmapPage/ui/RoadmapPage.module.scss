@@ -1,267 +1,214 @@
+$done-size: 40px;
+$total-size: 26px;
+$track-height: 8px;
+$stage-header-min-height: 132px;
+$box-size: 20px;
+
 .RoadmapPage {
-    max-width: 800px;
-}
-
-.progressCard {
-    width: 100%;
-}
-
-.overallSegments {
-    width: 100%;
-}
-
-.overallSegment {
-    flex: 1;
-}
-
-.timeline {
-    width: 100%;
-}
-
-.stage {
-    --stage-color: var(--color-primary);
-
-    position: relative;
-    width: 100%;
-    padding-bottom: 20px;
-    padding-left: 56px;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 44px;
-        bottom: 0;
-        left: 19px;
-        width: 2px;
-        background: var(--border-subtle);
-    }
-}
-
-.stageBasics {
-    --stage-color: var(--color-success);
-}
-
-.stageVocabulary {
-    --stage-color: var(--color-link);
-}
-
-.stageGrammarA2 {
-    --stage-color: var(--color-warning);
-}
-
-.stageGrammarB1 {
-    --stage-color: var(--color-error);
-}
-
-.stageNode {
-    position: absolute;
-    top: 0;
-    left: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    font-weight: 600;
-    color: var(--stage-color);
-    background: color-mix(in srgb, var(--stage-color) 12%, var(--card-bg));
-    border: 3px solid var(--stage-color);
-    border-radius: 50%;
-}
-
-.nodePulse {
-    animation: roadmap-pulse 2s ease-out infinite;
-
-    @media (prefers-reduced-motion: reduce) {
-        animation: none;
-    }
-}
-
-@keyframes roadmap-pulse {
-    0% {
-        box-shadow: 0 0 0 0 color-mix(in srgb, var(--stage-color) 45%, transparent);
-    }
-
-    70% {
-        box-shadow: 0 0 0 12px transparent;
-    }
-
-    100% {
-        box-shadow: 0 0 0 0 transparent;
-    }
-}
-
-.stageCard {
+    flex-direction: column;
+    gap: 24px;
     width: 100%;
-    border-left: 3px solid var(--stage-color);
 }
 
-.stageCurrent {
-    .stageCard {
-        box-shadow: var(--shadow-md);
-    }
+.summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: center;
+    padding: 20px 24px;
 }
 
-.stageLocked {
-    --stage-color: var(--text-secondary);
-
-    .stageNode {
-        color: var(--text-secondary);
-        background: var(--card-bg);
-        border-color: var(--border-subtle);
-    }
-
-    .stageCard {
-        border-left-color: var(--border-subtle);
-        opacity: 0.75;
-    }
+.summaryInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.stageCompleted {
-    .stageCard {
-        background: color-mix(in srgb, var(--stage-color) 4%, var(--card-bg));
-    }
+.summaryCount {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
 }
 
-.stageHeader {
-    cursor: pointer;
+.done {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: $done-size;
+    line-height: 1;
 }
 
-.stageHeading {
+.total {
+    font-size: $total-size;
+    color: var(--color-neutral-600);
+}
+
+.goal {
+    font-size: 14px;
+    color: var(--color-neutral-800);
+}
+
+.track {
+    display: flex;
+    gap: 3px;
+}
+
+.trackStep {
     flex: 1;
-    min-width: 0;
+    height: $track-height;
+    background: var(--color-neutral-300);
 }
 
-.stageRing {
-    flex-shrink: 0;
+.trackDone {
+    background: var(--color-success);
 }
 
-/* составной селектор — чтобы перебить ширину antd .ant-btn-icon-only */
-.stageHeader .continueButton {
-    flex-shrink: 0;
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    font-size: 18px;
+.trackHere {
+    background: var(--color-accent-400);
 }
 
-.stageCount {
-    flex-shrink: 0;
+.continue {
+    height: auto;
+    gap: 10px;
+    padding: 12px 18px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 16px;
     white-space: nowrap;
 }
 
-.collapseChevron {
-    align-self: center;
-    flex-shrink: 0;
-    color: var(--text-secondary);
-    transition: transform 0.2s ease;
-
-    @media (prefers-reduced-motion: reduce) {
-        transition: none;
-    }
+.stages {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-top: 1px solid var(--color-divider);
+    border-left: 1px solid var(--color-divider);
 }
 
-.chevronOpen {
-    transform: rotate(180deg);
-}
-
-.hereTag,
-.nextTag {
-    color: var(--stage-color);
-    background: color-mix(in srgb, var(--stage-color) 12%, transparent);
-    border-color: transparent;
-}
-
-.doneTag {
-    color: var(--color-success);
-    background: color-mix(in srgb, var(--color-success) 12%, transparent);
-    border-color: transparent;
-}
-
-.stepIcon {
+.stage {
     display: flex;
-    flex-shrink: 0;
+    flex-direction: column;
+    border-right: 1px solid var(--color-divider);
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.stageHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: $stage-header-min-height;
+    padding: 16px;
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.completed .stageHeader {
+    background: var(--color-success-tint);
+}
+
+.current .stageHeader {
+    background: var(--color-accent-100);
+}
+
+.locked {
+    opacity: 0.75;
+}
+
+.stageTop {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-    color: var(--stage-color);
-    background: color-mix(in srgb, var(--stage-color) 12%, transparent);
-    border-radius: var(--border-radius);
+    justify-content: space-between;
+    gap: 8px;
 }
 
-.stepRow {
-    width: 100%;
-    padding: 8px 12px;
+.level {
+    padding: 2px 6px;
+    border: 1px solid var(--color-accent-400);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    white-space: nowrap;
+    color: var(--color-accent-800);
+}
+
+.stageTitle {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.1;
+}
+
+.stageGoal {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--color-neutral-700);
+    text-wrap: pretty;
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+
+.here {
+    background: var(--color-accent-100);
+}
+
+.box {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: $box-size;
+    height: $box-size;
+    margin-top: 1px;
+    padding: 0;
+    border: 1px solid var(--color-neutral-400);
+    background: transparent;
+    color: var(--color-bg);
     cursor: pointer;
-    border-radius: var(--border-radius);
-    transition: background 0.2s ease;
+}
+
+.here .box {
+    border-style: dashed;
+    border-color: var(--color-accent);
+}
+
+.boxDone {
+    border-color: var(--color-success);
+    background: var(--color-success);
+}
+
+.stepText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.stepTitle {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--color-text);
 
     &:hover {
-        background: var(--hover-bg);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        transition: none;
+        color: var(--color-accent-700);
     }
 }
 
-.stepNext {
-    background: color-mix(in srgb, var(--stage-color) 6%, transparent);
-
-    &:hover {
-        background: color-mix(in srgb, var(--stage-color) 10%, transparent);
+@media (width <= 1100px) {
+    .stages {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-.stepDone {
-    opacity: 0.6;
-}
-
-.stepArrow {
-    align-self: center;
-    margin-left: auto;
-    color: var(--text-secondary);
-}
-
-.finishStage {
-    --stage-color: var(--color-warning);
-
-    padding-bottom: 0;
-
-    &::before {
-        display: none;
-    }
-}
-
-.finishNode {
-    font-size: 18px;
-}
-
-.finishLocked {
-    color: var(--text-secondary);
-    background: var(--card-bg);
-    border-color: var(--border-subtle);
-}
-
-.finishText {
-    justify-content: center;
-    min-height: 40px;
-}
-
-@media (width <= 767px) {
-    .stage {
-        padding-left: 44px;
-
-        &::before {
-            top: 36px;
-            left: 15px;
-        }
+@media (width <= 650px) {
+    .summary {
+        grid-template-columns: minmax(0, 1fr);
     }
 
-    .stageNode {
-        width: 32px;
-        height: 32px;
+    .stages {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

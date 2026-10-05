@@ -5,6 +5,7 @@ import {
   CyclePortionSyncDto,
   CycleUpdateDto,
   CycleWord,
+  CycleWordPortion,
   CycleWordsAddDto,
   CycleWordsReorderDto,
   CycleWordUpdateDto,
@@ -72,7 +73,36 @@ const cycleApi = rtkApi.injectEndpoints({
         if (error) return supabaseError(error.message);
         return { data: (data as CycleRow[]).map(mapCycle) };
       },
-      providesTags: [ApiTag.LearningCycles],
+      // Порцию открывает sync_cycle_portion — он инвалидирует только тег своего цикла.
+      providesTags: (result) => [
+        ApiTag.LearningCycles,
+        ...(result ?? []).map((cycle) => ({ type: ApiTag.LearningCycle, id: cycle.uuid })),
+      ],
+    }),
+    // Порции слов всех циклов — для карточек списка, без N запросов слов.
+    getCyclesWordPortions: build.query<Record<string, CycleWordPortion[]>, void>({
+      queryFn: async () => {
+        const PAGE_SIZE = 1000;
+        const byCycle: Record<string, CycleWordPortion[]> = {};
+        for (let from = 0; ; from += PAGE_SIZE) {
+          const { data, error } = await supabase
+            .from('learning_cycle_words')
+            .select('id, cycle_id, portion')
+            .order('id', { ascending: true })
+            .range(from, from + PAGE_SIZE - 1);
+          if (error) return supabaseError(error.message);
+          const page = data as Pick<CycleWordRow, 'id' | 'cycle_id' | 'portion'>[];
+          page.forEach((row) => {
+            (byCycle[row.cycle_id] ??= []).push({ uuid: row.id, portion: row.portion });
+          });
+          if (page.length < PAGE_SIZE) break;
+        }
+        return { data: byCycle };
+      },
+      providesTags: (result) => [
+        ApiTag.LearningCycles,
+        ...Object.keys(result ?? {}).map((uuid) => ({ type: ApiTag.LearningCycleWords, id: uuid })),
+      ],
     }),
     getCycle: build.query<LearningCycle | undefined, string>({
       queryFn: async (uuid) => {
@@ -255,6 +285,7 @@ const cycleApi = rtkApi.injectEndpoints({
 
 export const {
   useGetCyclesQuery,
+  useGetCyclesWordPortionsQuery,
   useGetCycleQuery,
   useCreateCycleMutation,
   useUpdateCycleMutation,

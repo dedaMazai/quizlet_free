@@ -6,9 +6,12 @@ export type {
   CycleWordDraft,
   CycleWordStatus,
   CycleStudyMode,
+  CycleDayPlan,
+  CycleWordPortion,
 } from './model/types/cycle';
 export {
   useGetCyclesQuery,
+  useGetCyclesWordPortionsQuery,
   useGetCycleQuery,
   useCreateCycleMutation,
   useUpdateCycleMutation,
@@ -26,5 +29,7 @@ export {
   buildNewWords,
   buildReviewWords,
   getWordStatus,
+  getCycleDayPlan,
 } from './model/lib/cycleSchedule';
+export { getLearnedToday, addLearnedToday } from './model/lib/learnedToday';
 export { useCyclePortionSync, getToday } from './model/hooks/useCyclePortionSync';

@@ -47,7 +47,7 @@ export const NextSteps = memo((props: NextStepsProps) => {
 
     const { data: cycles } = useGetCyclesQuery();
     const { data: decks } = useGetDecksQuery();
-    const { data: summary } = useGetDueSummaryQuery(tz);
+    const { data: summary } = useGetDueSummaryQuery({ tz });
     const { data: clozeStats } = useGetClozeStatsQuery();
     const [roadmapDoneSteps] = useLocalStorage(LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY, NO_DONE_STEPS);
 

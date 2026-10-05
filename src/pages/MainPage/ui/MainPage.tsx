@@ -54,7 +54,7 @@ const MainPage: FC = () => {
     );
 
     const { data: decks } = useGetDecksQuery();
-    const { data: summary } = useGetDueSummaryQuery(tz);
+    const { data: summary } = useGetDueSummaryQuery({ tz });
     const { data: mastery } = useGetMasteryQuery();
     const todayAnswers = useTodayAnswers(tz);
     const goal = useDailyGoal();

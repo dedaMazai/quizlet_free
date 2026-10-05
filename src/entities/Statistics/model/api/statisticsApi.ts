@@ -4,6 +4,7 @@ import {
   DeckAccuracy,
   DeckClozeStats,
   DueSummary,
+  DueSummaryArgs,
   HeatmapDay,
   LogStudyEventsDto,
   MasteryStats,
@@ -127,9 +128,9 @@ const statisticsApi = rtkApi.injectEndpoints({
       },
       providesTags: [ApiTag.StudyStats, ApiTag.CardReviews],
     }),
-    getDueSummary: build.query<DueSummary, string>({
-      queryFn: async (tz) => {
-        const { data, error } = await supabase.rpc('get_due_summary', { p_tz: tz });
+    getDueSummary: build.query<DueSummary, DueSummaryArgs>({
+      queryFn: async ({ tz, days }) => {
+        const { data, error } = await supabase.rpc('get_due_summary', { p_tz: tz, p_days: days });
         if (error) return supabaseError(error.message);
         const row = data as DueSummaryRow;
         return {

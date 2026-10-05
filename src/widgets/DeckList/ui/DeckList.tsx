@@ -64,7 +64,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
   const tz = userInfo?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
   const { data: decks, isLoading } = useGetDecksQuery();
-  const { data: summary } = useGetDueSummaryQuery(tz);
+  const { data: summary } = useGetDueSummaryQuery({ tz });
   const { data: mastery } = useGetMasteryQuery();
   const [deleteDeck] = useDeleteDeckMutation();
   const [duplicateDeck] = useDuplicateDeckMutation();

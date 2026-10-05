@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Empty } from 'antd';
 import { CycleWord } from '@/entities/LearningCycle';
@@ -20,17 +20,24 @@ interface CycleSessionProps {
   /** Название в топбаре: «Цикл · Новые слова». */
   title: string;
   onExit: () => void;
+  /** Сессия пройдена до конца — оба прохода. */
+  onFinish?: () => void;
   renderResult: SessionResultRenderer;
 }
 
 export const CycleSession: FC<CycleSessionProps> = (props) => {
   const {
-    words, storageKey, title, onExit, renderResult,
+    words, storageKey, title, onExit, onFinish, renderResult,
   } = props;
   const { t } = useTranslation();
   const session = useCycleSession(words, storageKey);
 
   const finished = session.phase === 'finished';
+  useEffect(() => {
+    if (finished && words.length) onFinish?.();
+    // Только на переход в «пройдено»: новый onFinish на каждом рендере не должен звать его снова
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
   // Ошибки до перезагрузки страницы журнал не видел — добираем их из состояния цикла
   const summary = useMemo(() => {
     if (!finished) return null;

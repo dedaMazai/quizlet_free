@@ -1,0 +1,268 @@
+$due-size: 104px;
+$fresh-size: 56px;
+$chart-min-height: 160px;
+$bar-max-height: 130px;
+$deck-check: 24px;
+$deck-due: 120px;
+$deck-fresh: 90px;
+$deck-mastery: 200px;
+
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.session {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 28px;
+}
+
+.counts {
+  display: flex;
+  align-items: flex-end;
+  gap: 36px;
+}
+
+.countCol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dueCount {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: $due-size;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
+.freshCount {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: $fresh-size;
+  line-height: 0.8;
+  white-space: nowrap;
+  color: var(--color-accent-300);
+}
+
+.countLabel {
+  font-size: 14px;
+  color: var(--color-accent-300);
+}
+
+.hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-accent-200);
+  text-wrap: pretty;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: auto;
+}
+
+.start {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  border: 1px solid var(--color-bg);
+  background: var(--color-bg);
+  color: var(--color-accent-900);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--ease-standard);
+
+  &:hover:not(:disabled) {
+    background: var(--color-accent-100);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.load {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+
+.loadHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.loadTitle {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 22px;
+  white-space: nowrap;
+}
+
+.loadAverage {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-neutral-700);
+}
+
+.chart {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  gap: 6px;
+  min-height: $chart-min-height;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.averageLine {
+  position: absolute;
+  right: 0;
+  bottom: calc(#{$bar-max-height} * var(--ratio));
+  left: 0;
+  border-top: 1px dashed var(--color-neutral-400);
+}
+
+.barCol {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 100%;
+}
+
+.barValue {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  white-space: nowrap;
+  color: var(--color-neutral-700);
+}
+
+.bar {
+  width: 100%;
+  height: calc(#{$bar-max-height} * var(--ratio));
+  background: var(--color-accent-300);
+}
+
+.barToday {
+  background: var(--color-accent-700);
+}
+
+.axis {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+}
+
+.decks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.decksSummary {
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--color-neutral-700);
+}
+
+.deckList {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-divider);
+}
+
+.deckRow {
+  display: grid;
+  grid-template-columns: $deck-check minmax(0, 1fr) $deck-due $deck-fresh $deck-mastery;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--ease-standard);
+
+  &:hover {
+    background: var(--color-accent-100);
+  }
+}
+
+.excluded {
+  opacity: 0.5;
+}
+
+.deckName {
+  overflow: hidden;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.deckDue {
+  font-size: 13px;
+
+  b {
+    font-weight: 600;
+  }
+}
+
+.deckFresh {
+  font-size: 13px;
+  color: var(--color-neutral-700);
+}
+
+@media (width <= 900px) {
+  .top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (width <= 650px) {
+  .dueCount {
+    font-size: 80px;
+  }
+
+  .deckRow {
+    grid-template-columns: $deck-check minmax(0, 1fr) auto;
+    row-gap: 6px;
+  }
+
+  // Подписи и полоса освоения — второй строкой под названием
+  .deckFresh {
+    grid-column: 3;
+  }
+
+  .deckDue {
+    grid-column: 2;
+  }
+
+  .deckRow > :last-child {
+    grid-column: 2 / -1;
+  }
+}

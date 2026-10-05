@@ -71,6 +71,13 @@ export interface DeckDue {
   new: number;
 }
 
+export interface DueSummaryArgs {
+  /** Часовой пояс пользователя — границы дней прогноза */
+  tz: string;
+  /** Дней прогноза; по умолчанию 7 (как в RPC) */
+  days?: number;
+}
+
 export interface DueSummary {
   forecast: ForecastDay[];
   perDeck: DeckDue[];

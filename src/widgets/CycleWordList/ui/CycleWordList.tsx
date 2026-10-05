@@ -1,11 +1,11 @@
 import { FC, memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Popconfirm, Tag, Tooltip, Typography,
+  Button, Popconfirm, Tooltip, Typography,
 } from 'antd';
 import {
-  DeleteOutlined, FlagFilled, FlagOutlined, HolderOutlined, StarFilled, StarOutlined,
-} from '@ant-design/icons';
+  Menu, Play, Star, Trash2,
+} from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
@@ -34,9 +34,28 @@ import {
   useUpdateCycleMutation,
   useUpdateCycleWordMutation,
 } from '@/entities/LearningCycle';
-import { HStack } from '@/shared/ui/Stack';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import cls from './CycleWordList.module.scss';
+
+const ICON_SIZE = 14;
+const STAR_SIZE = 16;
+const ICON_STROKE = 1.5;
+/** Номер слова — двумя цифрами: «01» */
+const INDEX_DIGITS = 2;
+
+const ROW_CLASSES: Record<CycleWordStatus, string | undefined> = {
+  today: cls.today,
+  unlocked: undefined,
+  skipped: cls.skipped,
+  locked: cls.locked,
+};
+
+const TAG_CLASSES: Record<CycleWordStatus, string> = {
+  today: cls.todayTag,
+  unlocked: cls.unlockedTag,
+  skipped: cls.skippedTag,
+  locked: cls.lockedTag,
+};
 
 interface CycleWordListProps {
   cycle: LearningCycle;
@@ -64,77 +83,84 @@ const WordRow = memo((props: WordRowProps) => {
     attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging,
   } = useSortable({ id: word.uuid });
 
-  // Обычное открытое слово без тега — помечаем только отличия, чтобы список не пестрил.
-  const statusTags: Record<CycleWordStatus, { color?: string; label: string } | null> = {
-    today: { color: 'blue', label: t('Сегодня') },
-    unlocked: null,
-    skipped: { label: t('Пропускается') },
-    locked: { label: t('В очереди') },
+  const statusLabels: Record<CycleWordStatus, string> = {
+    today: t('Сегодня'),
+    unlocked: t('В повторе'),
+    skipped: t('Пропуск'),
+    locked: t('В очереди'),
   };
-  const statusTag = statusTags[status];
 
   return (
     <div
       ref={setNodeRef}
       // Позиция перетаскиваемой строки считается dnd-kit на лету — только инлайн.
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={classNames(cls.row, {
-        [cls.dragging]: isDragging,
-        [cls.locked]: status === 'locked',
-        [cls.skipped]: status === 'skipped',
-        [cls.startPoint]: isStartPoint,
-      })}
+      className={classNames(cls.row, [ROW_CLASSES[status]], { [cls.dragging]: isDragging })}
     >
-      <Button
+      <button
         ref={setActivatorNodeRef}
-        type="text"
-        size="small"
-        icon={<HolderOutlined />}
+        type="button"
         className={cls.handle}
         aria-label={t('Перетащить')}
         {...attributes}
         {...listeners}
-      />
-      <span className={cls.index}>{index + 1}</span>
-      <Typography.Text strong editable={{ onChange: (value) => onEdit(word, 'term', value) }}>
+      >
+        <Menu aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />
+      </button>
+      <span className={cls.index}>{String(index + 1).padStart(INDEX_DIGITS, '0')}</span>
+      <Typography.Text
+        className={cls.term}
+        ellipsis
+        editable={{ triggerType: ['text'], onChange: (value) => onEdit(word, 'term', value) }}
+      >
         {word.term}
       </Typography.Text>
       <Typography.Text
         className={cls.translation}
-        editable={{ onChange: (value) => onEdit(word, 'translation', value) }}
+        ellipsis
+        editable={{ triggerType: ['text'], onChange: (value) => onEdit(word, 'translation', value) }}
       >
         {word.translation}
       </Typography.Text>
-      <span className={cls.status}>
-        {statusTag && <Tag color={statusTag.color}>{statusTag.label}</Tag>}
-      </span>
-      <HStack gap="2" className={cls.actions}>
-        <Tooltip title={word.is_important ? t('Убрать из важных') : t('Пометить важным')}>
-          <Button
-            type="text"
-            size="small"
-            icon={word.is_important ? <StarFilled className={cls.important} /> : <StarOutlined />}
-            onClick={() => onToggleImportant(word)}
-          />
-        </Tooltip>
-        <Tooltip title={isStartPoint ? t('Точка старта повтора') : t('Начинать повтор с этого слова')}>
-          <Button
-            type="text"
-            size="small"
-            icon={isStartPoint ? <FlagFilled /> : <FlagOutlined />}
-            onClick={() => onSetStart(word)}
-          />
-        </Tooltip>
-        <Popconfirm
-          title={t('Удалить слово?')}
-          okText={t('Удалить')}
-          cancelText={t('Отмена')}
-          okButtonProps={{ danger: true }}
-          onConfirm={() => onDelete(word)}
+      <span className={classNames(cls.tag, [TAG_CLASSES[status]])}>{statusLabels[status]}</span>
+      <Tooltip title={word.is_important ? t('Убрать из важных') : t('Пометить важным')}>
+        <button
+          type="button"
+          className={classNames(cls.iconButton, [], { [cls.important]: word.is_important })}
+          aria-pressed={word.is_important}
+          aria-label={t('Пометить важным')}
+          onClick={() => onToggleImportant(word)}
         >
-          <Button type="text" size="small" danger icon={<DeleteOutlined />} />
-        </Popconfirm>
-      </HStack>
+          <Star aria-hidden size={STAR_SIZE} strokeWidth={ICON_STROKE} />
+        </button>
+      </Tooltip>
+      <Tooltip title={isStartPoint ? t('Точка старта повтора') : t('Начинать повтор с этого слова')}>
+        <button
+          type="button"
+          className={classNames(cls.iconButton, [cls.startButton], { [cls.startPoint]: isStartPoint })}
+          aria-pressed={isStartPoint}
+          aria-label={t('Начинать повтор с этого слова')}
+          onClick={() => onSetStart(word)}
+        >
+          <Play aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />
+        </button>
+      </Tooltip>
+      <Popconfirm
+        title={t('Удалить слово?')}
+        okText={t('Удалить')}
+        cancelText={t('Отмена')}
+        okButtonProps={{ danger: true }}
+        onConfirm={() => onDelete(word)}
+      >
+        <Button
+          type="text"
+          size="small"
+          danger
+          className={cls.deleteButton}
+          aria-label={t('Удалить')}
+          icon={<Trash2 aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+        />
+      </Popconfirm>
     </div>
   );
 });
