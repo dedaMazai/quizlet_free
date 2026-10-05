@@ -125,6 +125,7 @@
     "i18next-browser-languagedetector": "^8.0.4",
     "i18next-http-backend": "^3.0.2",
     "i18next-intervalplural-postprocessor": "^3.0.0",
+    "lucide-react": "^1.52.0",
     "react": "^19.2.5",
     "react-chartjs-2": "^5.3.0",
     "react-device-detect": "^2.2.3",

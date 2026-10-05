@@ -43,6 +43,9 @@
     --field-border-radius: 8px;
     --field-label-color: #A0A0A0;
 
+    // Disabled buttons
+    --btn-disabled-opacity: 1;
+
     // Sizes
     --navbar-height: 50px;
     --sidebar-width: 300px;
@@ -96,4 +99,69 @@
     --highlight-pink: #fbcfe8;
     --highlight-orange: #fed7aa;
     --highlight-purple: #ddd6fe;
+
+    // Design tokens (README §1): base
+    --color-bg: #f2f2f3;
+    --color-surface: #e9e9ea;
+    --color-text: #1d1f20;
+    --color-divider: rgb(29, 31, 32, 0.16);
+    --shadow-lg: 0 12px 32px rgb(43, 43, 45, 0.22);
+
+    // Accent ramp
+    --color-accent-100: #eef6ff;
+    --color-accent-200: #d6ebff;
+    --color-accent-300: #b5d9fd;
+    --color-accent-400: #94bce3;
+    --color-accent-500: #749dc4;
+    --color-accent-600: #597ea3;
+    --color-accent-700: #416180;
+    --color-accent-800: #2c455d;
+    --color-accent-900: #1d2d3d;
+
+    // Neutral ramp
+    --color-neutral-100: #f5f5f8;
+    --color-neutral-200: #e7e7ea;
+    --color-neutral-300: #d4d4d7;
+    --color-neutral-400: #b7b7ba;
+    --color-neutral-500: #98989b;
+    --color-neutral-600: #7a7a7d;
+    --color-neutral-700: #5d5d60;
+    --color-neutral-800: #424244;
+    --color-neutral-900: #2b2b2d;
+
+    // Signals
+    --color-success: oklch(60% 0.11 170deg);
+    --color-success-tint: oklch(95% 0.03 170deg);
+    --color-success-text: oklch(42% 0.08 155deg);
+    --color-error: oklch(50% 0.16 35deg);
+    --color-error-tint: oklch(95% 0.025 27deg);
+    --color-error-text: oklch(45% 0.11 27deg);
+
+    // Pattern, not a color: use with `background`
+    --pattern-error-hatch: repeating-linear-gradient(135deg, oklch(50% 0.16 35deg) 0 2px, oklch(90% 0.04 35deg) 2px 4px);
+    --color-warning: oklch(72% 0.12 80deg);
+    --color-warning-tint: oklch(95% 0.04 80deg);
+    --color-warning-text: oklch(45% 0.10 70deg);
+
+    // Streak levels
+    --streak-0: oklch(62% 0.02 250deg);
+    --streak-0-tint: oklch(94% 0.005 250deg);
+    --streak-1: oklch(72% 0.12 80deg);
+    --streak-1-tint: oklch(95% 0.04 80deg);
+    --streak-2: oklch(66% 0.15 55deg);
+    --streak-2-tint: oklch(94% 0.05 55deg);
+    --streak-3: oklch(58% 0.17 35deg);
+    --streak-3-tint: oklch(93% 0.05 35deg);
+    --streak-4: oklch(50% 0.17 25deg);
+    --streak-4-tint: oklch(90% 0.06 25deg);
+
+    // Motion
+    --motion-instant: 80ms;
+    --motion-fast: 140ms;
+    --motion-base: 220ms;
+    --motion-slow: 360ms;
+    --motion-deliberate: 600ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-enter: cubic-bezier(0, 0, 0, 1);
+    --ease-exit: cubic-bezier(0.3, 0, 1, 1);
 }

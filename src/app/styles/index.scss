@@ -2,33 +2,59 @@
 @use "variables/global";
 
 @font-face {
-    font-family: OpenSans;
-    src: url("./fonts/OpenSans-Light.ttf");
-    font-weight: 300;
-}
-
-@font-face {
-    font-family: OpenSans;
-    src: url("./fonts/OpenSans-Regular.ttf");
+    font-family: "Fira Sans";
+    src: url("./fonts/FiraSans-Regular.woff2") format("woff2");
     font-weight: 400;
+    font-display: swap;
 }
 
 @font-face {
-    font-family: OpenSans;
-    src: url("./fonts/OpenSans-Medium.ttf");
+    font-family: "Fira Sans";
+    src: url("./fonts/FiraSans-Medium.woff2") format("woff2");
     font-weight: 500;
+    font-display: swap;
 }
 
 @font-face {
-    font-family: OpenSans;
-    src: url("./fonts/OpenSans-SemiBold.ttf");
+    font-family: "Fira Sans";
+    src: url("./fonts/FiraSans-SemiBold.woff2") format("woff2");
     font-weight: 600;
+    font-display: swap;
 }
 
 @font-face {
-    font-family: OpenSans;
-    src: url("./fonts/OpenSans-Bold.ttf");
+    font-family: "Fira Sans Condensed";
+    src: url("./fonts/FiraSansCondensed-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Fira Sans Condensed";
+    src: url("./fonts/FiraSansCondensed-SemiBold.woff2") format("woff2");
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Fira Sans Condensed";
+    src: url("./fonts/FiraSansCondensed-Bold.woff2") format("woff2");
     font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    src: url("./fonts/JetBrainsMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    src: url("./fonts/JetBrainsMono-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-display: swap;
 }
 
 .app {
@@ -225,6 +251,23 @@
             color: var(--text);
         }
     }
+}
+
+/* Keyboard focus ring */
+:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+html .ant-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* Disabled buttons: opacity per theme (light: 0.45) */
+.ant-btn:disabled,
+.ant-btn.ant-btn-disabled {
+    opacity: var(--btn-disabled-opacity);
 }
 
 /* Primary button text color fix */
