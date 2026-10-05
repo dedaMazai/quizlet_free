@@ -49,7 +49,6 @@ export {
   useLoginMutation,
   useRegisterMutation,
   useLoginOidcMutation,
-  useLoginImpersonateMutation,
   useLogoutMutation,
   useUpdateUserMutation,
   useUpdateUserRoleMutation,

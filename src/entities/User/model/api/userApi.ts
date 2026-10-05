@@ -146,36 +146,6 @@ const userApi = rtkApi.injectEndpoints({
         }
       },
     }),
-    loginImpersonate: build.mutation<ResAuth, {
-      admin_email: string
-      admin_password: string
-      user_email: string
-    }>({
-      query: (body) => ({
-        url: '/auth/impersonate/email-password',
-        method: 'POST',
-        body,
-      }),
-      async onQueryStarted(_arg, {
-        dispatch,
-        queryFulfilled,
-      }) {
-        try {
-          const { data } = await queryFulfilled;
-          const {
-            access_token,
-            refresh_token,
-            ...userData
-          } = data;
-          if (__IS_DEV__ || IS_OLD_SAFARI) {
-            setCookie('dev_access_token', access_token);
-          }
-          dispatch(userActions.setUserData(userData));
-        } catch (err) {
-          console.error('Login error:', err);
-        }
-      },
-    }),
     logout: build.mutation<void, void>({
       queryFn: async () => {
         const { error } = await supabase.auth.signOut();
@@ -528,7 +498,6 @@ export const {
   useLoginMutation,
   useRegisterMutation,
   useLoginOidcMutation,
-  useLoginImpersonateMutation,
   useLogoutMutation,
   useUpdateUserMutation,
   useUpdateUserRoleMutation,
