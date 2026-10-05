@@ -16,6 +16,7 @@ import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { Loader } from '@/shared/ui/Loader';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useAutoSpeak } from '@/shared/lib/hooks/useAutoSpeak';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { useSpeech } from '@/shared/lib/hooks/useSpeech';
 import {
   buildSessionTicks,
@@ -59,6 +60,7 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
   const [resetReviews] = useResetCardReviewsMutation();
   const { autoSpeak, toggleAutoSpeak } = useAutoSpeak();
   const { speak } = useSpeech();
+  const { isMobile } = useMatchMedia();
   const [answered, setAnswered] = useState<AnsweredQuestion | null>(null);
 
   const session = useLearnSession(cards, savedReviews, { deckKey, deckName });
@@ -179,9 +181,14 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
   const chosenCard = feedback && !correct
     ? cards.find((card) => card.term === feedback.input)
     : undefined;
+  // Мобильный макет — короче: «Вернётся в этой сессии»
+  const returnNote = isMobile ? t('Вернётся в этой сессии') : t('Слово вернётся в эту же сессию');
   const wrongSubtitle = chosenCard
-    ? `«${chosenCard.term}» — ${chosenCard.translation}. ${t('Слово вернётся в эту же сессию')}`
-    : t('Слово вернётся в эту же сессию');
+    ? `«${chosenCard.term}» — ${chosenCard.translation}. ${returnNote}`
+    : returnNote;
+  const wrongTitle = isMobile
+    ? t('Правильно — «{{term}}»', { term: question?.card.term })
+    : t('Неверно — правильно «{{term}}»', { term: question?.card.term });
 
   return (
     <>
@@ -196,9 +203,7 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
           {feedback && (
             <AnswerFeedback
               tone={correct ? AnswerFeedbackTone.SUCCESS : AnswerFeedbackTone.ERROR}
-              title={correct
-                ? t('Верно')
-                : t('Неверно — правильно «{{term}}»', { term: question.card.term })}
+              title={correct ? t('Верно') : wrongTitle}
               subtitle={correct ? correctSubtitle : wrongSubtitle}
               onNext={handleNext}
               autoAdvance={correct}

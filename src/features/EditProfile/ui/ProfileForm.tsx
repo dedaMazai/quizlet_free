@@ -47,8 +47,13 @@ const getTimezoneLabel = (timeZone: string): string => {
 
 const BROWSER_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+interface ProfileFormProps {
+  /** Без «Сменить пароль» — когда смена пароля есть рядом отдельной строкой (мобильный аккаунт) */
+  hidePasswordChange?: boolean;
+}
+
 /** Профиль 6.24: аватар, поля профиля, «Сохранить» и «Сменить пароль» */
-export const ProfileForm: FC = () => {
+export const ProfileForm: FC<ProfileFormProps> = ({ hidePasswordChange }) => {
   const { t } = useTranslation();
   const { message } = useAntdApp();
   const user = useUserInfo();
@@ -167,13 +172,17 @@ export const ProfileForm: FC = () => {
             <BlueprintMarks />
             {t('Сохранить')}
           </Button>
-          <Button className={cls.button} onClick={() => setPasswordOpen(true)}>
-            {t('Сменить пароль')}
-          </Button>
+          {!hidePasswordChange && (
+            <Button className={cls.button} onClick={() => setPasswordOpen(true)}>
+              {t('Сменить пароль')}
+            </Button>
+          )}
         </div>
       </Form>
 
-      <ChangePasswordModal open={passwordOpen} onClose={() => setPasswordOpen(false)} />
+      {!hidePasswordChange && (
+        <ChangePasswordModal open={passwordOpen} onClose={() => setPasswordOpen(false)} />
+      )}
     </Blueprint>
   );
 };

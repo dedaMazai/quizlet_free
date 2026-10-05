@@ -1,0 +1,31 @@
+// 52px, поля 8px — компенсирует отступы страницы (8px 20px) у main
+.BackBar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    margin: -8px -20px 0;
+    padding: 0 8px;
+}
+
+.back {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 44px;
+    padding: 0 8px;
+    color: var(--color-accent-700);
+    font-size: 15px;
+    text-decoration: none;
+}
+
+.actions {
+    display: flex;
+
+    :global(.ant-btn) {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+    }
+}

@@ -1,39 +1,31 @@
-import {
-  useState, useLayoutEffect, useCallback,
-} from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 
+// Границы не пересекаются: на 650 и 1200 ровно один флаг true
 const queries = [
   '(max-width: 650px)',
-  '(min-width: 650px) and (max-width: 1200px)',
+  '(min-width: 650.02px) and (max-width: 1199.98px)',
   '(min-width: 1200px)',
 ];
 
 type MatchMedia = {isMobile: boolean, isTablet: boolean, isDesktop: boolean};
 
+const mediaQueryLists = queries.map((query) => matchMedia(query));
+
+const subscribe = (onChange: () => void) => {
+  mediaQueryLists.forEach((list) => list.addEventListener('change', onChange));
+
+  return () => mediaQueryLists.forEach((list) => list.removeEventListener('change', onChange));
+};
+
+// Снимок — индекс совпавшего запроса: примитив, стабилен между рендерами
+const getSnapshot = () => mediaQueryLists.findIndex((list) => list.matches);
+
 export const useMatchMedia = (): MatchMedia => {
-  const mediaQueryLists = queries.map((query) => matchMedia(query));
+  const index = useSyncExternalStore(subscribe, getSnapshot);
 
-  const getValues = useCallback(() => mediaQueryLists.map((list) => list.matches), [mediaQueryLists]);
-
-  const [values, setValues] = useState(getValues);
-
-  useLayoutEffect(() => {
-    const handler = () => setValues(getValues);
-
-    mediaQueryLists.forEach((list) => list.addEventListener('change', handler));
-
-    return () => mediaQueryLists.forEach((list) => list.removeEventListener('change', handler));
-  }, [getValues, mediaQueryLists]);
-
-  return [
-    'isMobile',
-    'isTablet',
-    'isDesktop',
-  ].reduce<any>(
-    (acc, screen, index) => ({
-      ...acc,
-      [screen]: values[index],
-    }),
-    {},
-  );
+  return useMemo(() => ({
+    isMobile: index === 0,
+    isTablet: index === 1,
+    isDesktop: index === 2,
+  }), [index]);
 };

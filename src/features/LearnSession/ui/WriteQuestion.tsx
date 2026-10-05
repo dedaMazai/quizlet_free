@@ -8,6 +8,7 @@ import { AnswerReveal, getRevealParts } from '@/shared/ui/AnswerReveal';
 import { Kicker } from '@/shared/ui/Kicker';
 import { SessionButton } from '@/shared/ui/SessionButton';
 import { SessionNextButton } from '@/shared/ui/SessionNextButton';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import cls from './LearnSession.module.scss';
 
 interface WriteQuestionProps {
@@ -46,8 +47,8 @@ export const WriteQuestion: FC<WriteQuestionProps> = (props) => {
 
   return (
     <>
-      <div className={cls.prompt}>
-        <Kicker>{t('Напишите по-английски')}</Kicker>
+      <div className={classNames(cls.prompt, [cls.writePrompt])}>
+        <Kicker className={cls.kicker}>{t('Напишите по-английски')}</Kicker>
         <div className={cls.wordRow}>
           <span className={cls.writeWord}>{question.card.translation}</span>
           <FavoriteToggle cardUuid={question.card.uuid} className={cls.favorite} />
@@ -78,9 +79,9 @@ export const WriteQuestion: FC<WriteQuestionProps> = (props) => {
 
       <div className={cls.actions}>
         {answered ? (
-          <SessionNextButton onNext={onNext} autoAdvance={answered.correct} />
+          <SessionNextButton onNext={onNext} autoAdvance={answered.correct} className={cls.cta} />
         ) : (
-          <SessionButton keyHint="ENTER" onClick={submit}>
+          <SessionButton keyHint="ENTER" className={cls.cta} onClick={submit}>
             {t('Проверить')}
           </SessionButton>
         )}

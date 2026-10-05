@@ -5,6 +5,8 @@ import { FavoriteToggle } from '@/entities/Card';
 import { AnswerOption, AnswerOptionState } from '@/shared/ui/AnswerOption';
 import { Kicker } from '@/shared/ui/Kicker';
 import { useKeyDown } from '@/shared/lib/hooks/useKeyDown';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import { splitTranslation } from '@/shared/lib/session';
 import cls from './LearnSession.module.scss';
 
@@ -28,6 +30,7 @@ const ARROW_DELTAS: Record<string, number> = {
 export const ChoiceQuestion: FC<ChoiceQuestionProps> = (props) => {
   const { question, chosen, onAnswer } = props;
   const { t } = useTranslation();
+  const { isMobile } = useMatchMedia();
   const [active, setActive] = useState(0);
   const answered = chosen !== null;
   const [word, gloss] = splitTranslation(question.card.translation);
@@ -46,6 +49,8 @@ export const ChoiceQuestion: FC<ChoiceQuestionProps> = (props) => {
       onAnswer(question.choices[digit - 1]);
       return;
     }
+    // На мобильном подсветки выбранного нет — Enter и стрелки не работают вслепую
+    if (isMobile) return;
     if (e.key === 'Enter') {
       e.preventDefault();
       onAnswer(question.choices[active]);
@@ -59,7 +64,8 @@ export const ChoiceQuestion: FC<ChoiceQuestionProps> = (props) => {
   }, { enabled: !answered });
 
   const stateOf = (choice: string, index: number): AnswerOptionState => {
-    if (!answered) return index === active ? AnswerOptionState.ACTIVE : AnswerOptionState.IDLE;
+    // На тач-экране клавиатурного выбора нет — без подсветки первого варианта
+    if (!answered) return !isMobile && index === active ? AnswerOptionState.ACTIVE : AnswerOptionState.IDLE;
     if (choice === question.card.term) return AnswerOptionState.CORRECT;
     if (choice === chosen) return AnswerOptionState.WRONG;
     return AnswerOptionState.DIM;
@@ -67,8 +73,8 @@ export const ChoiceQuestion: FC<ChoiceQuestionProps> = (props) => {
 
   return (
     <>
-      <div className={cls.prompt}>
-        <Kicker>{t('Выберите перевод')}</Kicker>
+      <div className={classNames(cls.prompt, [cls.choicePrompt])}>
+        <Kicker className={cls.kicker}>{t('Выберите перевод')}</Kicker>
         <div className={cls.wordRow}>
           <span className={cls.word}>{word}</span>
           <FavoriteToggle cardUuid={question.card.uuid} className={cls.favorite} />
@@ -89,7 +95,7 @@ export const ChoiceQuestion: FC<ChoiceQuestionProps> = (props) => {
         ))}
       </div>
 
-      {!answered && (
+      {!answered && !isMobile && (
         <div className={cls.hints}>
           <span>{t('1–4 — ответ')}</span>
           <span>{t('← → ↑ ↓ — выбор')}</span>

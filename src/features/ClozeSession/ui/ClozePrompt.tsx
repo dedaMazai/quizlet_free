@@ -80,7 +80,7 @@ export const ClozePrompt: FC<ClozePromptProps> = (props) => {
   return (
     <>
       <div className={cls.prompt}>
-        <Kicker>{t('Вставьте слово по смыслу')}</Kicker>
+        <Kicker className={cls.kicker}>{t('Вставьте слово по смыслу')}</Kicker>
         <div className={cls.sentence}>
           {item.before}
           {reveal ? (

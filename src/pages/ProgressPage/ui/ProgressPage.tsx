@@ -54,7 +54,8 @@ const ProgressPage = () => {
                     <StreakHeatmap tz={tz} />
                     <div className={cls.chartsGrid}>
                         <MasteryChart />
-                        <DeckProgressList tz={tz} />
+                        {/* Мобильная 6.55 — без списка колод */}
+                        {!isMobile && <DeckProgressList tz={tz} />}
                     </div>
                 </>
             ) : (

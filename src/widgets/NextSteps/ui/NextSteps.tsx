@@ -2,7 +2,7 @@ import { memo, ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
-    ArrowRight, BookOpen, GraduationCap, Repeat, Sparkles,
+    ArrowRight, BookOpen, ChevronRight, GraduationCap, Repeat, Sparkles,
 } from 'lucide-react';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { TenseMastery, useGetTenseMasteryQuery } from '@/entities/GrammarPractice';
@@ -17,12 +17,15 @@ import { PRACTICE_TASKS_COUNT } from '@/shared/const/grammar';
 import { LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY } from '@/shared/const/localstorage';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import {
     NEXT_STEP_TICKS, NextStep, NextStepKind, selectNextSteps,
 } from '../model/selectNextSteps';
 import cls from './NextSteps.module.scss';
 
 const ICON_SIZE = 18;
+const ICON_SIZE_MOBILE = 20;
+const CHEVRON_SIZE = 18;
 const ARROW_SIZE = 14;
 const ICON_STROKE = 1.5;
 const NO_DONE_STEPS: string[] = [];
@@ -47,6 +50,7 @@ interface NextStepsProps {
 export const NextSteps = memo((props: NextStepsProps) => {
     const { tz, className } = props;
     const { t } = useTranslation();
+    const { isMobile } = useMatchMedia();
 
     const { data: cycles } = useGetCyclesQuery();
     const { data: decks } = useGetDecksQuery();
@@ -68,7 +72,7 @@ export const NextSteps = memo((props: NextStepsProps) => {
 
     const toView = (step: NextStep): NextStepView => {
         const icon = (Icon: typeof Repeat) => (
-            <Icon aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />
+            <Icon aria-hidden size={isMobile ? ICON_SIZE_MOBILE : ICON_SIZE} strokeWidth={ICON_STROKE} />
         );
         switch (step.kind) {
         case NextStepKind.CYCLE:
@@ -126,10 +130,36 @@ export const NextSteps = memo((props: NextStepsProps) => {
 
     return (
         <section className={classNames(cls.NextSteps, [className])}>
-            <SectionHeader title={t('Следующий шаг')} size={SectionHeaderSize.LG} />
+            <SectionHeader
+                className={cls.header}
+                title={t('Следующий шаг')}
+                size={isMobile ? SectionHeaderSize.SM : SectionHeaderSize.LG}
+            />
             <div className={cls.grid}>
                 {steps.map((step) => {
                     const view = toView(step);
+                    // Мобильная (6.35): строка «иконка · кикер / заголовок / мета · шеврон»
+                    if (isMobile) {
+                        return (
+                            <Link key={step.key} to={step.path} className={cls.link}>
+                                <Blueprint className={cls.row}>
+                                    <span className={cls.rowIcon}>{view.icon}</span>
+                                    <span className={cls.rowText}>
+                                        <Kicker
+                                            size={KickerSize.SM}
+                                            tone={KickerTone.ACCENT}
+                                            className={cls.rowKicker}
+                                        >
+                                            {view.kicker}
+                                        </Kicker>
+                                        <span className={cls.rowTitle}>{view.title}</span>
+                                        <span className={cls.rowMeta}>{view.meta}</span>
+                                    </span>
+                                    <ChevronRight aria-hidden className={cls.chevron} size={CHEVRON_SIZE} />
+                                </Blueprint>
+                            </Link>
+                        );
+                    }
                     const ticks = Array.from(
                         { length: NEXT_STEP_TICKS },
                         (_, i) => (i < step.filled ? TickState.DONE : TickState.TODO),

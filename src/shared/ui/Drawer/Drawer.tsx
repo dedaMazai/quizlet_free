@@ -1,12 +1,14 @@
-import { memo, ReactNode, useCallback, useEffect } from 'react';
+import {
+    memo, ReactNode, useCallback, useEffect, useRef,
+} from 'react';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import {
     AnimationProvider,
     useAnimationLibs,
 } from '@/shared/lib/components/AnimationProvider';
-import cls from './Drawer.module.scss';
 import { Overlay } from '@/shared/ui/Overlay';
 import { Portal } from '@/shared/ui/Portal';
+import cls from './Drawer.module.scss';
 
 interface DrawerProps {
     className?: string;
@@ -15,12 +17,35 @@ interface DrawerProps {
     onClose?: () => void;
 }
 
-const height = window.innerHeight - 100;
+/** Отступ шторки от верха экрана (Mobile 6.37) */
+const SHEET_TOP = 90;
+const CLOSE_THRESHOLD = 0.5;
+const FLICK_VELOCITY = 2;
+/** CSS-переменная: на сколько клавиатура iOS перекрывает низ экрана */
+const KEYBOARD_VAR = '--sheet-keyboard-offset';
 
+const getSheetHeight = () => window.innerHeight - SHEET_TOP;
+
+/** Открытые шторки по порядку открытия: Esc закрывает только верхнюю */
+const openSheets: symbol[] = [];
+
+/** Esc сначала закрывает попапы AntD внутри шторки (выпадающие списки, подтверждения) */
+const hasOpenPopup = () => Boolean(document.querySelector(
+    '.ant-select-dropdown:not(.ant-select-dropdown-hidden), '
+    + '.ant-dropdown:not(.ant-dropdown-hidden), '
+    + '.ant-popover:not(.ant-popover-hidden), '
+    + '.ant-modal-wrap:not([style*="display: none"])',
+));
+
+/** Bottom-sheet: ручка, скрим, закрытие свайпом вниз, по скриму и Esc */
 export const DrawerContent = memo((props: DrawerProps) => {
     const { Spring, Gesture } = useAnimationLibs();
-    const [{ y }, api] = Spring.useSpring(() => ({ y: height }));
     const { className, children, onClose, isOpen } = props;
+    // Высота пересчитывается при каждом открытии: окно могло повернуться или измениться
+    const heightRef = useRef(getSheetHeight());
+    const closingRef = useRef(false);
+    const sheetRef = useRef<HTMLDivElement>(null);
+    const [{ y }, api] = Spring.useSpring(() => ({ y: heightRef.current }));
 
     const openDrawer = useCallback(() => {
         api.start({ y: 0, immediate: false });
@@ -28,31 +53,82 @@ export const DrawerContent = memo((props: DrawerProps) => {
 
     useEffect(() => {
         if (isOpen) {
+            heightRef.current = getSheetHeight();
+            closingRef.current = false;
+            // Старт всегда снизу — даже если прошлый раз шторку закрыли снаружи без анимации
+            api.set({ y: heightRef.current });
             openDrawer();
         }
-    }, [api, isOpen, openDrawer]);
+    }, [isOpen, openDrawer, api]);
 
-    const close = (velocity = 0) => {
+    const close = useCallback((velocity = 0) => {
+        // Повторный тап по скриму или ✕ во время анимации не должен вызвать onClose дважды
+        if (closingRef.current) return;
+        closingRef.current = true;
         api.start({
-            y: height,
+            y: heightRef.current,
             immediate: false,
             config: { ...Spring.config.stiff, velocity },
             onResolve: onClose,
         });
-    };
+    }, [api, Spring.config.stiff, onClose]);
 
+    useEffect(() => {
+        if (!isOpen) {
+            return undefined;
+        }
+
+        const id = Symbol('sheet');
+        openSheets.push(id);
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape' || hasOpenPopup()) return;
+            if (openSheets[openSheets.length - 1] === id) {
+                close();
+            }
+        };
+
+        window.addEventListener('keydown', onKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', onKeyDown);
+            openSheets.splice(openSheets.indexOf(id), 1);
+        };
+    }, [isOpen, close]);
+
+    // iOS не сжимает layout viewport под клавиатуру — поднимаем низ шторки сами,
+    // иначе кнопка «Сохранить» в футере остаётся под клавиатурой
+    useEffect(() => {
+        const viewport = window.visualViewport;
+        if (!isOpen || !viewport) {
+            return undefined;
+        }
+
+        const update = () => {
+            const offset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+            sheetRef.current?.style.setProperty(KEYBOARD_VAR, `${offset}px`);
+        };
+
+        update();
+        viewport.addEventListener('resize', update);
+        viewport.addEventListener('scroll', update);
+
+        return () => {
+            viewport.removeEventListener('resize', update);
+            viewport.removeEventListener('scroll', update);
+        };
+    }, [isOpen]);
+
+    // Тянется только ручка: контент шторки должен скроллиться
     const bind = Gesture.useDrag(
         ({
             last,
             velocity: [, vy],
             direction: [, dy],
             movement: [, my],
-            cancel,
         }) => {
-            if (my < -150) cancel();
-
             if (last) {
-                if (my > height * 0.5 || (vy > 2 && dy > 0)) {
+                if (my > heightRef.current * CLOSE_THRESHOLD || (vy > FLICK_VELOCITY && dy > 0)) {
                     close();
                 } else {
                     openDrawer();
@@ -73,33 +149,30 @@ export const DrawerContent = memo((props: DrawerProps) => {
         return null;
     }
 
-    const display = y.to((py) => (py < height ? 'block' : 'none'));
+    const handleOverlayClick = () => close();
 
     return (
         <Portal element={document.getElementById('app') ?? document.body}>
-            <div
-                className={classNames(cls.Drawer, {}, [
-                    className,
-                    'app_drawer',
-                    cls.drawerNew,
-                ])}
-            >
-                <Overlay onClick={close} />
+            <div className={classNames(cls.Drawer, [className])}>
+                <Overlay className={cls.scrim} onClick={handleOverlayClick} />
                 <Spring.a.div
+                    ref={sheetRef}
                     className={cls.sheet}
-                    style={{
-                        display,
-                        bottom: `calc(-100vh + ${height - 50}px)`,
-                        y,
-                    }}
-                    {...bind()}
+                    role="dialog"
+                    aria-modal="true"
+                    style={{ y }}
                 >
+                    <div className={cls.handleRow} {...bind()}>
+                        <span className={cls.handle} />
+                    </div>
                     {children}
                 </Spring.a.div>
             </div>
         </Portal>
     );
 });
+
+DrawerContent.displayName = 'DrawerContent';
 
 const DrawerAsync = (props: DrawerProps) => {
     const { isLoaded } = useAnimationLibs();

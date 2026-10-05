@@ -1,24 +1,26 @@
 import {
-    FC, useEffect, useMemo, useRef, useState,
+    CSSProperties, FC, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Input, InputRef, Segmented } from 'antd';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRight, Flame, Search } from 'lucide-react';
 import { DeckCard, useGetDecksQuery } from '@/entities/Deck';
 import { useGetCardsPageQuery } from '@/entities/Card';
 import {
-    useGetDueSummaryQuery, useGetMasteryQuery, useTodayAnswers,
+    useGetDueSummaryQuery, useGetMasteryQuery, useGetStudyOverviewQuery, useTodayAnswers,
 } from '@/entities/Statistics';
-import { useUserInfo } from '@/entities/User';
+import { UserAvatar, useUserInfo } from '@/entities/User';
 import { useDailyGoal } from '@/entities/UserSettings';
 import { DueHero } from '@/widgets/DueHero';
 import { NextSteps } from '@/widgets/NextSteps';
 import { StreakCard } from '@/widgets/StreakCard';
-import { Kicker } from '@/shared/ui/Kicker';
+import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import { SectionHeader, SectionHeaderSize } from '@/shared/ui/SectionHeader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { getStreakLevel } from '@/shared/lib/streak';
 import { FocusSearchLocationState } from '@/shared/const/const';
 import { GlobalSearchResults } from './GlobalSearchResults';
 import cls from './MainPage.module.scss';
@@ -30,6 +32,8 @@ const ARROW_SIZE = 14;
 const ICON_STROKE = 1.5;
 const SEARCH_ICON_SIZE = 16;
 const PERCENT = 100;
+const FLAME_SIZE = 18;
+const STREAK_LEVEL_CLASSES = [cls.streak0, cls.streak1, cls.streak2, cls.streak3, cls.streak4];
 
 const getGreetingKey = (hour: number): string => {
     if (hour >= 5 && hour < 12) return 'Доброе утро';
@@ -47,6 +51,7 @@ const MainPage: FC = () => {
     const location = useLocation();
     const userInfo = useUserInfo();
     const searchRef = useRef<InputRef>(null);
+    const { isMobile } = useMatchMedia();
 
     const tz = useMemo(
         () => userInfo?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
@@ -54,10 +59,13 @@ const MainPage: FC = () => {
     );
 
     const { data: decks } = useGetDecksQuery();
-    const { data: summary } = useGetDueSummaryQuery({ tz });
-    const { data: mastery } = useGetMasteryQuery();
+    // Долг и освоение по колодам нужны только сетке колод — на мобильной её нет
+    const { data: summary } = useGetDueSummaryQuery({ tz }, { skip: isMobile });
+    const { data: mastery } = useGetMasteryQuery(undefined, { skip: isMobile });
     const todayAnswers = useTodayAnswers(tz);
     const goal = useDailyGoal();
+    // Серия на мобильной — только чипом в шапке (StreakCard скрыт)
+    const { data: overview } = useGetStudyOverviewQuery(tz, { skip: !isMobile });
 
     const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
     const [filter, setFilter] = useState<DeckFilter>('recent');
@@ -80,6 +88,11 @@ const MainPage: FC = () => {
     const greeting = t(getGreetingKey(now.getHours()));
     const dateKicker = [
         new Intl.DateTimeFormat(i18n.language, { weekday: 'long', timeZone: tz }).format(now),
+        new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'long', timeZone: tz }).format(now),
+    ].join(' · ');
+    // Мобильная: «ПН · 5 ОКТЯБРЯ» — день недели кратко
+    const dateKickerShort = [
+        new Intl.DateTimeFormat(i18n.language, { weekday: 'short', timeZone: tz }).format(now),
         new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'long', timeZone: tz }).format(now),
     ].join(' · ');
 
@@ -110,6 +123,52 @@ const MainPage: FC = () => {
         () => new Map((mastery?.perDeck ?? []).map((deck) => [deck.deckKey, deck])),
         [mastery],
     );
+
+    // Мобильная главная (6.35): шапка с серией и аватаром, hero, цель дня, следующий шаг
+    if (isMobile) {
+        const streakDays = overview?.currentStreak ?? 0;
+        const goalStyle = {
+            '--progress': `${Math.min(PERCENT, toPercent(todayAnswers, goal))}%`,
+        } as CSSProperties;
+
+        return (
+            <div className={cls.MainPage}>
+                <header className={cls.header}>
+                    <div className={cls.greeting}>
+                        <Kicker size={KickerSize.SM}>{dateKickerShort}</Kicker>
+                        <h1 className={cls.title}>{greeting}</h1>
+                    </div>
+                    <div className={cls.headerActions}>
+                        <span className={cls.streakChip}>
+                            <Flame
+                                aria-hidden
+                                className={STREAK_LEVEL_CLASSES[getStreakLevel(streakDays).index]}
+                                size={FLAME_SIZE}
+                            />
+                            <span className={cls.streakDays}>{streakDays}</span>
+                        </span>
+                        <Link to={RoutePath.PROFILE()} aria-label={t('Аккаунт')} className={cls.avatarLink}>
+                            <UserAvatar user={userInfo} className={cls.avatar} />
+                        </Link>
+                    </div>
+                </header>
+
+                <DueHero tz={tz} />
+
+                <div className={cls.dailyGoal}>
+                    <div className={cls.dailyGoalHead}>
+                        <span>{t('Цель дня')}</span>
+                        <span className={cls.dailyGoalValue}>{`${todayAnswers} / ${goal}`}</span>
+                    </div>
+                    <div className={cls.dailyGoalTrack} style={goalStyle}>
+                        <div className={cls.dailyGoalFill} />
+                    </div>
+                </div>
+
+                <NextSteps tz={tz} />
+            </div>
+        );
+    }
 
     return (
         <div className={cls.MainPage}>

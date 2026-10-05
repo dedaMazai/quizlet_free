@@ -1,6 +1,8 @@
 import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Form, Input, Modal, Segmented } from 'antd';
+import {
+  Button, Form, Input, Modal, Segmented,
+} from 'antd';
 import {
   Card,
   CardType,
@@ -8,7 +10,11 @@ import {
   useCreateCardMutation,
   useUpdateCardMutation,
 } from '@/entities/Card';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import cls from './CardForm.module.scss';
 
 interface CardFormValues {
   term: string;
@@ -22,13 +28,18 @@ interface CardFormProps {
   onClose: () => void;
   deckUuid: string;
   card?: Card;
+  /** Удаление из шторки на мобильном, где у строки нет своей кнопки */
+  onDelete?: () => void;
 }
 
 export const CardForm: FC<CardFormProps> = (props) => {
-  const { open, onClose, deckUuid, card } = props;
+  const {
+    open, onClose, deckUuid, card, onDelete,
+  } = props;
   const { t } = useTranslation();
   const { message } = useAntdApp();
   const [form] = Form.useForm<CardFormValues>();
+  const { isMobile } = useMatchMedia();
 
   const [createCard, { isLoading: isCreating }] = useCreateCardMutation();
   const [updateCard, { isLoading: isUpdating }] = useUpdateCardMutation();
@@ -64,10 +75,78 @@ export const CardForm: FC<CardFormProps> = (props) => {
     }
   };
 
+  const title = isEdit ? t('Редактировать слово') : t('Добавить слово');
+  const formNode = (
+    <Form
+      form={form}
+      layout="vertical"
+      // Шторка монтирует форму позже эффекта — значения дублируем начальными
+      initialValues={{
+        term: card?.term ?? '',
+        translation: card?.translation ?? '',
+        example: card?.example ?? '',
+        card_type: card?.card_type ?? inferCardType(card?.term ?? ''),
+      }}
+      className={isMobile ? cls.sheetForm : undefined}
+    >
+      <Form.Item
+        name="term"
+        label={t('Слово')}
+        rules={[{ required: true, message: t('Введите слово') }]}
+      >
+        <Input autoFocus placeholder="apple" />
+      </Form.Item>
+      <Form.Item
+        name="translation"
+        label={t('Перевод')}
+        rules={[{ required: true, message: t('Введите перевод') }]}
+      >
+        <Input placeholder={t('яблоко')} />
+      </Form.Item>
+      <Form.Item name="example" label={t('Пример')}>
+        <Input.TextArea rows={2} placeholder={t('Необязательно')} />
+      </Form.Item>
+      <Form.Item name="card_type" label={t('Тип')}>
+        <Segmented
+          options={[
+            { label: t('Слово'), value: 'word' },
+            { label: t('Фраза'), value: 'phrase' },
+          ]}
+        />
+      </Form.Item>
+    </Form>
+  );
+
+  // Mobile: шторка вместо модалки
+  if (isMobile) {
+    return (
+      <ModalFrame
+        open={open}
+        width="100%"
+        title={title}
+        onClose={onClose}
+        actions={(
+          <>
+            {isEdit && onDelete && (
+              <Button danger onClick={onDelete}>{t('Удалить')}</Button>
+            )}
+            <Button onClick={onClose}>{t('Отмена')}</Button>
+            <Button type="primary" loading={isCreating || isUpdating} onClick={handleSubmit}>
+              <BlueprintMarks />
+              {t('Сохранить')}
+            </Button>
+          </>
+        )}
+      >
+        {formNode}
+      </ModalFrame>
+    );
+  }
+
   return (
     <Modal
       open={open}
-      title={isEdit ? t('Редактировать слово') : t('Добавить слово')}
+      title={title}
       okText={t('Сохранить')}
       cancelText={t('Отмена')}
       confirmLoading={isCreating || isUpdating}
@@ -75,33 +154,7 @@ export const CardForm: FC<CardFormProps> = (props) => {
       onCancel={onClose}
       destroyOnClose
     >
-      <Form form={form} layout="vertical">
-        <Form.Item
-          name="term"
-          label={t('Слово')}
-          rules={[{ required: true, message: t('Введите слово') }]}
-        >
-          <Input autoFocus placeholder="apple" />
-        </Form.Item>
-        <Form.Item
-          name="translation"
-          label={t('Перевод')}
-          rules={[{ required: true, message: t('Введите перевод') }]}
-        >
-          <Input placeholder={t('яблоко')} />
-        </Form.Item>
-        <Form.Item name="example" label={t('Пример')}>
-          <Input.TextArea rows={2} placeholder={t('Необязательно')} />
-        </Form.Item>
-        <Form.Item name="card_type" label={t('Тип')}>
-          <Segmented
-            options={[
-              { label: t('Слово'), value: 'word' },
-              { label: t('Фраза'), value: 'phrase' },
-            ]}
-          />
-        </Form.Item>
-      </Form>
+      {formNode}
     </Modal>
   );
 };

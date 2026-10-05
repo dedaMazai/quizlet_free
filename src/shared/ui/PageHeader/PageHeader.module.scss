@@ -27,3 +27,31 @@
     flex-wrap: wrap;
     gap: 8px;
 }
+
+// Mobile: H1 34px, действия — квадраты 44×44 справа
+@media (width <= 650px) {
+    .PageHeader {
+        gap: 16px;
+    }
+
+    .titleRow {
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .title {
+        font-size: 34px;
+        letter-spacing: 0;
+    }
+
+    .extra {
+        flex: none;
+        flex-wrap: nowrap;
+
+        // Иконочные кнопки AntD по умолчанию 38px — на мобильном цель касания 44
+        > button {
+            min-width: 44px;
+            min-height: 44px;
+        }
+    }
+}

@@ -2,3 +2,10 @@
   flex: 1;
   min-width: 0;
 }
+
+// В шторке тело без полей — отступы даёт форма
+@media (width <= 650px) {
+  .form {
+    padding: 4px 20px 12px;
+  }
+}

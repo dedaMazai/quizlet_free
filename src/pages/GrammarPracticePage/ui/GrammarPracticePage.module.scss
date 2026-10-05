@@ -283,17 +283,119 @@ $input-min-width: 120px;
     }
 }
 
+// Мобильная 6.53
+$settings-button-size: 44px;
+$mobile-action-height: 48px;
+
+.settingsButton {
+    width: $settings-button-size;
+    height: $settings-button-size;
+    padding: 0;
+}
+
+.settingsSheet {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.tip {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--color-accent-100);
+}
+
+.tipText {
+    font-size: 13px;
+    line-height: 1.45;
+}
+
 @media (width <= 650px) {
+    .GrammarPracticePage {
+        gap: 16px;
+    }
+
+    // Переводы — отдельной строкой под счётом: в макете их нет, но без них функция пропадает
     .summary {
         flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    // Пропуск в строке — цель касания 44px по высоте
+    .sentence .input {
+        height: 44px;
+        vertical-align: middle;
+    }
+
+    .translations {
+        flex-basis: 100%;
+        justify-content: flex-start;
+        height: 44px;
+        padding: 0;
+    }
+
+    .score {
+        font-size: 26px;
+    }
+
+    .summary .ticks {
+        gap: 2px;
+    }
+
+    // Строки — отдельные блоки с зазором 16px, как в макете
+    .tasks {
+        gap: 16px;
+        border-top: none;
     }
 
     .task {
-        grid-template-columns: $number-column minmax(0, 1fr);
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px;
+        align-items: baseline;
+        padding: 12px 0;
+        border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+        border-bottom: none;
+    }
+
+    .number {
+        font-size: 10px;
+        color: var(--color-neutral-600);
+    }
+
+    .body {
+        gap: 6px;
+    }
+
+    .sentence,
+    .input {
+        font-size: 15px;
+    }
+
+    .answer {
+        min-width: 0;
+        margin: 0;
+        padding: 1px 5px 2px;
+        font-size: 15px;
+        color: inherit;
+        background: var(--color-success-tint);
+    }
+
+    .answerWrong {
+        background: var(--color-error-tint);
+    }
+
+    .fix {
+        color: var(--color-success-text);
     }
 
     .tense {
-        grid-column: 2;
-        justify-self: start;
+        display: none;
+    }
+
+    .primaryAction,
+    .secondaryAction {
+        flex: 1;
+        height: $mobile-action-height;
     }
 }

@@ -2,6 +2,9 @@ $header-button: 38px;
 $learned-size: 80px;
 $learned-of-size: 36px;
 $in-review-size: 56px;
+$learned-size-mobile: 60px;
+$learned-of-size-mobile: 28px;
+$in-review-size-mobile: 44px;
 $structure-bar: 14px;
 $next-day-button: 32px;
 
@@ -256,9 +259,66 @@ $next-day-button: 32px;
   }
 }
 
+// Mobile 6.41: BackBar, кикер над H1 32px, герой 18px, кнопки в две колонки
 @media (width <= 650px) {
+  .CyclePage {
+    gap: 16px;
+  }
+
+  .mobileHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .titleBlock {
+    gap: 4px;
+  }
+
   .title {
-    font-size: 34px;
+    font-size: 32px;
+    letter-spacing: 0;
+  }
+
+  .today {
+    gap: 14px;
+    padding: 18px;
+    border-color: var(--color-accent-900);
+  }
+
+  .todayNumbers {
+    flex-wrap: nowrap;
+    gap: 28px;
+  }
+
+  .learned {
+    font-size: $learned-size-mobile;
+  }
+
+  .learnedOf {
+    font-size: $learned-of-size-mobile;
+  }
+
+  .inReview {
+    font-size: $in-review-size-mobile;
+  }
+
+  .todayLabel {
+    font-size: 12px;
+  }
+
+  .todayActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .studyButton,
+  .reviewButton {
+    justify-content: center;
+    height: 48px;
+    padding: 0 8px;
+    font-size: 15px;
   }
 
   .wordsHint {

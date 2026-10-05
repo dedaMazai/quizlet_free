@@ -3,6 +3,11 @@ $total-size: 26px;
 $track-height: 8px;
 $stage-header-min-height: 132px;
 $box-size: 20px;
+$done-size-mobile: 32px;
+$total-size-mobile: 20px;
+$track-height-mobile: 6px;
+$badge-size: 30px;
+$box-hit-inset: -13px;
 
 .RoadmapPage {
     display: flex;
@@ -203,12 +208,204 @@ $box-size: 20px;
     }
 }
 
+// Mobile 6.42: сводка без рамки и аккордеон этапов
 @media (width <= 650px) {
-    .summary {
-        grid-template-columns: minmax(0, 1fr);
+    .RoadmapPage {
+        gap: 16px;
     }
 
-    .stages {
-        grid-template-columns: minmax(0, 1fr);
+    .mobileSummary {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .summaryCount {
+        gap: 8px;
+    }
+
+    .done {
+        font-size: $done-size-mobile;
+    }
+
+    .total {
+        font-size: $total-size-mobile;
+    }
+
+    .goal {
+        font-size: 13px;
+    }
+
+    .track {
+        gap: 2px;
+    }
+
+    .trackStep {
+        height: $track-height-mobile;
+    }
+
+    .trackDone {
+        background: var(--color-accent-700);
+    }
+
+    .accordion {
+        display: flex;
+        flex-direction: column;
+    }
+
+    // Свёрнутый этап: бейдж · название/подпись · уровень
+    .stageRow {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        min-height: 60px;
+        padding: 0 4px;
+        border: none;
+        border-bottom: 1px solid var(--color-divider);
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .badge {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: $badge-size;
+        height: $badge-size;
+        border: 1px solid var(--color-neutral-400);
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--color-neutral-600);
+    }
+
+    .rowDone .badge {
+        border-color: var(--color-accent-700);
+        background: var(--color-accent-700);
+        color: var(--color-bg);
+    }
+
+    .rowCurrent .badge {
+        border-color: var(--color-accent-700);
+        color: var(--color-accent-700);
+    }
+
+    .rowLocked {
+        opacity: 0.6;
+    }
+
+    .stageRowText {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .stageRowTitle {
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 17px;
+    }
+
+    .stageRowMeta {
+        font-size: 12px;
+        color: var(--color-neutral-700);
+    }
+
+    // Раскрытый этап: карточка с шагами
+    .stageCard {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stageCardCurrent {
+        border-color: var(--color-accent-300);
+        background: var(--color-accent-100);
+    }
+
+    .stageCardHeader {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 100%;
+        padding: 14px 16px;
+        border: none;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .stageCardLevel {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        white-space: nowrap;
+        color: var(--color-accent-800);
+    }
+
+    .stageCardTitle {
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 20px;
+    }
+
+    .stageCardMeta {
+        font-size: 12px;
+        color: var(--color-neutral-700);
+    }
+
+    .stageCardCurrent .stageCardMeta {
+        color: var(--color-accent-800);
+    }
+
+    .step {
+        align-items: center;
+        min-height: 48px;
+        padding: 0 16px;
+        border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+        border-bottom: none;
+    }
+
+    .here {
+        background: none;
+    }
+
+    // Зона нажатия 44×44 вокруг квадрата 20×20
+    .box {
+        position: relative;
+        margin-top: 0;
+
+        &::after {
+            content: "";
+            position: absolute;
+            inset: $box-hit-inset;
+        }
+    }
+
+    .boxDone {
+        border-color: var(--color-accent-700);
+        background: var(--color-accent-700);
+    }
+
+    .stepText {
+        flex: 1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .stepTitle {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        min-width: 0;
+        min-height: 48px;
     }
 }

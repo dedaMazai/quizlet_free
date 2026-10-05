@@ -4,3 +4,10 @@
     gap: 22px;
     width: 100%;
 }
+
+// Mobile 6.38: шаг между блоками как у «Колод»
+@media (width <= 650px) {
+    .AllWordsPage {
+        gap: 16px;
+    }
+}

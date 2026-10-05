@@ -1,7 +1,7 @@
 import { FC, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Input, Modal, Select, Table,
+  Button, Input, Modal, Select, Table,
 } from 'antd';
 import type { TableColumnsType } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
@@ -11,6 +11,9 @@ import { CycleWord, useAddCycleWordsMutation } from '@/entities/LearningCycle';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { normalize } from '@/shared/lib/text';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
 import cls from './AddCycleWords.module.scss';
 
 /** Значение селекта источника для избранного (остальные значения — uuid колод). */
@@ -34,6 +37,7 @@ export const ImportCycleWordsModal: FC<ImportCycleWordsModalProps> = (props) => 
   } = props;
   const { t } = useTranslation();
   const { message } = useAntdApp();
+  const { isMobile } = useMatchMedia();
   const [source, setSource] = useState<string>(FAVORITES_SOURCE);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
@@ -98,6 +102,71 @@ export const ImportCycleWordsModal: FC<ImportCycleWordsModalProps> = (props) => 
     }
   };
 
+  const content = (
+    <VStack max gap="12" className={cls.importBody}>
+      <HStack max gap="8" wrap>
+        <Select
+          value={source}
+          onChange={handleSourceChange}
+          options={sourceOptions}
+          showSearch
+          optionFilterProp="label"
+          className={cls.field}
+        />
+        <Input
+          allowClear
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          prefix={<SearchOutlined />}
+          placeholder={t('Поиск')}
+          className={cls.field}
+        />
+      </HStack>
+      <Table<Card>
+        rowKey="uuid"
+        size="small"
+        className={cls.table}
+        scroll={TABLE_SCROLL}
+        loading={isFetching}
+        columns={columns}
+        dataSource={visibleCards}
+        pagination={{ pageSize: PAGE_SIZE, showSizeChanger: false, hideOnSinglePage: true }}
+        rowSelection={{
+          selectedRowKeys: selected,
+          // preserveSelectedRowKeys: выбор не теряется при поиске и смене страницы.
+          preserveSelectedRowKeys: true,
+          selections: [Table.SELECTION_ALL, Table.SELECTION_NONE],
+          onChange: (keys) => setSelected(keys.map(String)),
+          getCheckboxProps: (card) => ({ disabled: existingTerms.has(normalize(card.term)) }),
+        }}
+      />
+    </VStack>
+  );
+
+  // Mobile: шторка снизу; на десктопе — прежняя AntD-модалка
+  if (isMobile) {
+    return (
+      <ModalFrame
+        open={open}
+        width={MODAL_WIDTH}
+        title={t('Импорт слов в цикл')}
+        onClose={handleClose}
+        destroyOnHidden
+        actions={(
+          <>
+            <Button onClick={handleClose}>{t('Отмена')}</Button>
+            <Button type="primary" disabled={!selected.length} loading={isLoading} onClick={handleOk}>
+              <BlueprintMarks />
+              {t('Добавить ({{count}})', { count: selected.length })}
+            </Button>
+          </>
+        )}
+      >
+        {content}
+      </ModalFrame>
+    );
+  }
+
   return (
     <Modal
       open={open}
@@ -111,44 +180,7 @@ export const ImportCycleWordsModal: FC<ImportCycleWordsModalProps> = (props) => 
       width={MODAL_WIDTH}
       destroyOnHidden
     >
-      <VStack max gap="12">
-        <HStack max gap="8" wrap>
-          <Select
-            value={source}
-            onChange={handleSourceChange}
-            options={sourceOptions}
-            showSearch
-            optionFilterProp="label"
-            className={cls.field}
-          />
-          <Input
-            allowClear
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            prefix={<SearchOutlined />}
-            placeholder={t('Поиск')}
-            className={cls.field}
-          />
-        </HStack>
-        <Table<Card>
-          rowKey="uuid"
-          size="small"
-          className={cls.table}
-          scroll={TABLE_SCROLL}
-          loading={isFetching}
-          columns={columns}
-          dataSource={visibleCards}
-          pagination={{ pageSize: PAGE_SIZE, showSizeChanger: false, hideOnSinglePage: true }}
-          rowSelection={{
-            selectedRowKeys: selected,
-            // preserveSelectedRowKeys: выбор не теряется при поиске и смене страницы.
-            preserveSelectedRowKeys: true,
-            selections: [Table.SELECTION_ALL, Table.SELECTION_NONE],
-            onChange: (keys) => setSelected(keys.map(String)),
-            getCheckboxProps: (card) => ({ disabled: existingTerms.has(normalize(card.term)) }),
-          }}
-        />
-      </VStack>
+      {content}
     </Modal>
   );
 };

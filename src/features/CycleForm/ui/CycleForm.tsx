@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Form, Input, InputNumber, Modal, Select, Space,
+  Button, Form, Input, InputNumber, Modal, Select, Space,
 } from 'antd';
 import {
   CycleWord,
@@ -10,11 +10,16 @@ import {
   useUpdateCycleMutation,
 } from '@/entities/LearningCycle';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
 import cls from './CycleForm.module.scss';
 
 /** Размер порции по умолчанию — как в тетради: 10 слов в день. */
 const DEFAULT_DAILY_NEW_COUNT = 10;
 const MAX_DAILY_NEW_COUNT = 200;
+/** Ширина AntD Modal по умолчанию — для ModalFrame (на мобильном не используется) */
+const MODAL_WIDTH = 520;
 
 interface CycleFormValues {
   name: string;
@@ -38,6 +43,7 @@ export const CycleForm: FC<CycleFormProps> = (props) => {
   } = props;
   const { t } = useTranslation();
   const { message } = useAntdApp();
+  const { isMobile } = useMatchMedia();
   const [form] = Form.useForm<CycleFormValues>();
 
   const [createCycle, { isLoading: isCreating }] = useCreateCycleMutation();
@@ -90,10 +96,85 @@ export const CycleForm: FC<CycleFormProps> = (props) => {
     }
   };
 
+  const title = cycle ? t('Настройки цикла') : t('Создать цикл');
+
+  const content = (
+    <Form form={form} layout="vertical" className={cls.form}>
+      <Form.Item
+        name="name"
+        label={t('Название')}
+        rules={[{ required: true, message: t('Введите название') }]}
+      >
+        <Input autoFocus placeholder={t('Например: Тетрадь №1')} />
+      </Form.Item>
+      <Form.Item
+        name="daily_new_count"
+        label={t('Новых слов в день')}
+        rules={[{ required: true, message: t('Укажите число слов') }]}
+      >
+        <InputNumber min={1} max={MAX_DAILY_NEW_COUNT} precision={0} />
+      </Form.Item>
+      {cycle && words.length > 0 && (
+        <Form.Item
+          label={t('Начинать повтор с')}
+          extra={t('Слова до точки старта пропускаются, кроме важных и сегодняшних')}
+        >
+          <Space.Compact block>
+            <InputNumber
+              min={1}
+              max={words.length}
+              precision={0}
+              value={startNumber}
+              placeholder="№"
+              onChange={(value) => form.setFieldValue(
+                'start_word_uuid',
+                typeof value === 'number' ? words[value - 1]?.uuid ?? null : null,
+              )}
+            />
+            <Form.Item name="start_word_uuid" noStyle>
+              <Select
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                options={wordOptions}
+                placeholder={t('С начала списка')}
+                className={cls.wordSelect}
+              />
+            </Form.Item>
+          </Space.Compact>
+        </Form.Item>
+      )}
+    </Form>
+  );
+
+  // Mobile: шторка снизу; на десктопе — прежняя AntD-модалка
+  if (isMobile) {
+    return (
+      <ModalFrame
+        open={open}
+        width={MODAL_WIDTH}
+        title={title}
+        onClose={onClose}
+        destroyOnHidden
+        actions={(
+          <>
+            <Button onClick={onClose}>{t('Отмена')}</Button>
+            <Button type="primary" loading={isCreating || isUpdating} onClick={handleSubmit}>
+              <BlueprintMarks />
+              {t('Сохранить')}
+            </Button>
+          </>
+        )}
+      >
+        {content}
+      </ModalFrame>
+    );
+  }
+
   return (
     <Modal
       open={open}
-      title={cycle ? t('Настройки цикла') : t('Создать цикл')}
+      title={title}
       okText={t('Сохранить')}
       cancelText={t('Отмена')}
       confirmLoading={isCreating || isUpdating}
@@ -101,52 +182,7 @@ export const CycleForm: FC<CycleFormProps> = (props) => {
       onCancel={onClose}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical">
-        <Form.Item
-          name="name"
-          label={t('Название')}
-          rules={[{ required: true, message: t('Введите название') }]}
-        >
-          <Input autoFocus placeholder={t('Например: Тетрадь №1')} />
-        </Form.Item>
-        <Form.Item
-          name="daily_new_count"
-          label={t('Новых слов в день')}
-          rules={[{ required: true, message: t('Укажите число слов') }]}
-        >
-          <InputNumber min={1} max={MAX_DAILY_NEW_COUNT} precision={0} />
-        </Form.Item>
-        {cycle && words.length > 0 && (
-          <Form.Item
-            label={t('Начинать повтор с')}
-            extra={t('Слова до точки старта пропускаются, кроме важных и сегодняшних')}
-          >
-            <Space.Compact block>
-              <InputNumber
-                min={1}
-                max={words.length}
-                precision={0}
-                value={startNumber}
-                placeholder="№"
-                onChange={(value) => form.setFieldValue(
-                  'start_word_uuid',
-                  typeof value === 'number' ? words[value - 1]?.uuid ?? null : null,
-                )}
-              />
-              <Form.Item name="start_word_uuid" noStyle>
-                <Select
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                  options={wordOptions}
-                  placeholder={t('С начала списка')}
-                  className={cls.wordSelect}
-                />
-              </Form.Item>
-            </Space.Compact>
-          </Form.Item>
-        )}
-      </Form>
+      {content}
     </Modal>
   );
 };

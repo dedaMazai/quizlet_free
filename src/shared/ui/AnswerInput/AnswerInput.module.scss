@@ -19,7 +19,9 @@
     overflow: hidden;
 
     @media (width <= 650px) {
-        font-size: 22px;
+        height: 56px;
+        padding: 0 16px;
+        font-size: 24px;
     }
 }
 

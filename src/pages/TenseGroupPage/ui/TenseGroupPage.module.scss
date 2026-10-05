@@ -1,4 +1,7 @@
 $title-size: 52px;
+$title-size-mobile: 40px;
+$time-option-height: 44px;
+$practice-height-mobile: 56px;
 
 .TenseGroupPage {
     display: flex;
@@ -191,7 +194,108 @@ $title-size: 52px;
     }
 }
 
+// Мобильная 6.52: переключатель времени и одна карточка
+.mobileBody {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 4px;
+}
+
+.timeSwitch {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border: 1px solid var(--color-divider);
+}
+
+.timeOption {
+    display: grid;
+    place-items: center;
+    height: $time-option-height;
+    padding: 0;
+    border: none;
+    font: inherit;
+    font-size: 13px;
+    color: var(--color-text);
+    background: transparent;
+    cursor: pointer;
+
+    & + & {
+        border-left: 1px solid var(--color-divider);
+    }
+}
+
+.timeOptionActive {
+    color: var(--color-bg);
+    background: var(--color-accent);
+}
+
 @media (width <= 650px) {
+    .TenseGroupPage {
+        gap: 0;
+    }
+
+    .titleBlock {
+        gap: 4px;
+    }
+
+    .titleLine {
+        gap: 12px;
+    }
+
+    .title {
+        font-size: $title-size-mobile;
+        letter-spacing: normal;
+    }
+
+    .groupFormula {
+        font-size: 14px;
+    }
+
+    .tense {
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .tenseFormula {
+        font-size: 14px;
+    }
+
+    .field {
+        gap: 3px;
+    }
+
+    .text {
+        font-size: 14px;
+    }
+
+    .marker {
+        padding: 3px 8px;
+        font-size: 13px;
+    }
+
+    .example {
+        font-size: 14px;
+        color: inherit;
+    }
+
+    .mistake {
+        padding-top: 10px;
+        font-size: 14px;
+    }
+
+    .practice {
+        height: $practice-height-mobile;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    // Сравнения под CTA — отступ как между блоками тела
+    .comparison {
+        margin-top: 8px;
+    }
+
     .titleRow {
         flex-direction: column;
         align-items: flex-start;

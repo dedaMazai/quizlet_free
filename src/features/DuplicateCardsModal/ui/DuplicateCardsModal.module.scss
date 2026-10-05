@@ -24,3 +24,16 @@
 .example {
   white-space: normal;
 }
+
+// Mobile: содержимое шторки
+.sheetContent {
+  padding: 16px 20px 28px;
+}
+
+@media (width <= 650px) {
+  // Зона нажатия 44×44
+  .row :global(.ant-btn) {
+    width: 44px;
+    height: 44px;
+  }
+}

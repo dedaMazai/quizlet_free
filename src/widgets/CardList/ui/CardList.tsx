@@ -2,10 +2,7 @@ import {
   FC, MouseEvent, useMemo, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Button, Empty, Pagination, Tag,
-} from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Empty, Pagination } from 'antd';
 import { Pencil, Star, Trash2, Volume2 } from 'lucide-react';
 import {
   Card,
@@ -16,13 +13,10 @@ import {
   useDeleteCardMutation,
   useGetFavoritesQuery,
   useToggleFavoriteMutation,
-  FavoriteToggle,
 } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { CardForm } from '@/features/CardForm';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
@@ -32,6 +26,7 @@ import cls from './CardList.module.scss';
 /** Строк на странице, когда список пагинируется на клиенте. */
 const CLIENT_PAGE_SIZE = 50;
 const ICON_SIZE = 16;
+const MOBILE_STAR_SIZE = 18;
 const ICON_STROKE = 1.5;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -67,7 +62,13 @@ const daysUntil = (dueAt: string): number => {
   return Math.round((dueDay - todayDay) / DAY_MS);
 };
 
-const FavoriteStar: FC<{ cardUuid: string }> = ({ cardUuid }) => {
+interface FavoriteStarProps {
+  cardUuid: string;
+  /** Звезда мобильной строки: 18px, зона нажатия 44×44 */
+  mobile?: boolean;
+}
+
+const FavoriteStar: FC<FavoriteStarProps> = ({ cardUuid, mobile }) => {
   const { t } = useTranslation();
   const { data: favorites } = useGetFavoritesQuery();
   const [toggleFavorite] = useToggleFavoriteMutation();
@@ -85,10 +86,10 @@ const FavoriteStar: FC<{ cardUuid: string }> = ({ cardUuid }) => {
       aria-label={label}
       aria-pressed={isFavorite}
       title={label}
-      className={classNames(cls.iconButton, [], { [cls.starActive]: isFavorite })}
+      className={classNames(mobile ? cls.mobileStar : cls.iconButton, [], { [cls.starActive]: isFavorite })}
       onClick={handleClick}
     >
-      <Star aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />
+      <Star aria-hidden size={mobile ? MOBILE_STAR_SIZE : ICON_SIZE} strokeWidth={ICON_STROKE} />
     </button>
   );
 };
@@ -143,77 +144,13 @@ export const CardList: FC<CardListProps> = (props) => {
       deckUuid={editingCard?.deck_uuid ?? ''}
       card={editingCard}
       onClose={() => setEditingCard(undefined)}
+      // На мобильном у строки нет кнопки удаления — удаляем из шторки редактирования
+      onDelete={editingCard ? () => {
+        setEditingCard(undefined);
+        handleDelete(editingCard);
+      } : undefined}
     />
   );
-
-  if (isMobile) {
-    return (
-      <>
-        <VStack max gap="8">
-          {items.map(({ card }) => (
-            <div key={card.uuid} className={cls.cardItem}>
-              <HStack max justify="between" align="start" gap="8">
-                <VStack gap="2" align="start" className={cls.cardMain}>
-                  <HStack gap="4" align="center">
-                    <span className={cls.mobileTerm}>{card.term}</span>
-                    <SpeakButton text={card.term} />
-                    {card.card_type === 'phrase' && (
-                      <Tag bordered={false}>{t('Фраза')}</Tag>
-                    )}
-                  </HStack>
-                  <MyTypography.Base>{card.translation}</MyTypography.Base>
-                  {card.example && (
-                    <MyTypography.Small type="secondary" className={cls.mobileExample}>
-                      {card.example}
-                    </MyTypography.Small>
-                  )}
-                  {isLibrary && (
-                    <Tag className={cls.deckTag} bordered={false}>
-                      {deckNameByUuid[card.deck_uuid] ?? '—'}
-                    </Tag>
-                  )}
-                </VStack>
-                <HStack gap="2" align="center">
-                  <FavoriteToggle cardUuid={card.uuid} />
-                  {!readOnly && (
-                    <>
-                      <Button
-                        type="text"
-                        size="small"
-                        aria-label={t('Редактировать')}
-                        icon={<EditOutlined />}
-                        onClick={() => setEditingCard(card)}
-                      />
-                      <Button
-                        type="text"
-                        size="small"
-                        danger
-                        aria-label={t('Удалить')}
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleDelete(card)}
-                      />
-                    </>
-                  )}
-                </HStack>
-              </HStack>
-            </div>
-          ))}
-          {pagination && pagination.total > pagination.pageSize && (
-            <HStack max justify="center">
-              <Pagination
-                simple
-                current={pagination.current}
-                pageSize={pagination.pageSize}
-                total={pagination.total}
-                onChange={pagination.onChange}
-              />
-            </HStack>
-          )}
-        </VStack>
-        {editor}
-      </>
-    );
-  }
 
   // Без серверной пагинации длинный список режем на страницы на клиенте.
   const pager = pagination ?? (items.length > CLIENT_PAGE_SIZE
@@ -234,6 +171,44 @@ export const CardList: FC<CardListProps> = (props) => {
     new: t('Новое'),
     due: t('Повторить'),
   };
+
+  if (isMobile) {
+    // Mobile 6.36: маркер статуса · слово/перевод · звезда; тап — правка
+    return (
+      <>
+        <div className={cls.mobileList}>
+          {visibleItems.map(({ card, review }) => {
+            const status = isLibrary ? statusOf(review) : dueStatusOf(review, now);
+            return (
+              <div
+                key={card.uuid}
+                className={classNames(cls.mobileRow, [], { [cls.editable]: !readOnly })}
+                onClick={readOnly ? undefined : () => setEditingCard(card)}
+              >
+                <i className={classNames(cls.statusMark, [cls[status]])} />
+                <span className={cls.mobileText}>
+                  <span className={cls.mobileTerm}>{card.term}</span>
+                  <span className={cls.mobileTranslation}>{card.translation}</span>
+                </span>
+                <FavoriteStar cardUuid={card.uuid} mobile />
+              </div>
+            );
+          })}
+          {pager && pager.total > pager.pageSize && (
+            <Pagination
+              simple
+              className={cls.mobilePagination}
+              current={pager.current}
+              pageSize={pager.pageSize}
+              total={pager.total}
+              onChange={pager.onChange}
+            />
+          )}
+        </div>
+        {editor}
+      </>
+    );
+  }
 
   const renderNextShow = (dueAt: string | undefined) => {
     if (!dueAt) return <span className={cls.next}>—</span>;

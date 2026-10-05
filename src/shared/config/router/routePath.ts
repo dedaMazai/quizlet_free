@@ -47,6 +47,9 @@ export const SETTINGS_TAB_PARAM = 'activeTab';
 export const SETTINGS_USERS_TAB = 'Users';
 export const getSettingsUsersPath = () => RoutePath.SETTINGS(`?${SETTINGS_TAB_PARAM}=${SETTINGS_USERS_TAB}`);
 
+/** Какое время (present/past/future) открыть в группе времён на мобильном — карточка из матрицы */
+export const TENSE_TIME_PARAM = 'time';
+
 /** Якоря секций страницы «О сервисе»: бывшие страницы FEATURES и FAQ ведут сюда */
 export enum AboutAnchor {
   FEATURES = 'features',

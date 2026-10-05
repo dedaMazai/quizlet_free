@@ -28,3 +28,23 @@ $sort-width: 200px;
     width: $sort-width;
     height: $control-height;
 }
+
+// Mobile 6.38
+@media (width <= 650px) {
+    .DecksPage {
+        gap: 16px;
+    }
+
+    .search {
+        gap: 8px;
+        height: 44px;
+        padding: 0 12px;
+        border-color: var(--color-divider);
+        font-size: 14px;
+
+        :global(.ant-input-prefix) {
+            margin-inline-end: 0;
+            color: var(--color-neutral-600);
+        }
+    }
+}

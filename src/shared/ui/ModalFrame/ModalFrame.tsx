@@ -1,6 +1,8 @@
 import { memo, ReactNode } from 'react';
 import { Modal } from 'antd';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { Drawer } from '@/shared/ui/Drawer';
 import { ModalHeader } from './ModalHeader';
 import cls from './ModalFrame.module.scss';
 
@@ -19,11 +21,36 @@ interface ModalFrameProps {
     children: ReactNode;
 }
 
-/** Модалка редизайна: рамка с метками Blueprint, своя шапка и футер (Modals 6.27–6.30) */
+/**
+ * Модалка редизайна: рамка с метками Blueprint, своя шапка и футер (Modals 6.27–6.30).
+ * На мобильном — шторка снизу (Mobile 6.37).
+ */
 export const ModalFrame = memo((props: ModalFrameProps) => {
     const {
         open, onClose, width, kicker, title, quota, footerNote, actions, destroyOnHidden, children,
     } = props;
+    const { isMobile } = useMatchMedia();
+
+    if (isMobile) {
+        return (
+            <Drawer isOpen={open} onClose={onClose}>
+                <ModalHeader
+                    kicker={kicker}
+                    title={title}
+                    quota={quota}
+                    onClose={onClose}
+                    className={cls.sheetHeader}
+                />
+                <div className={cls.sheetBody}>{children}</div>
+                {(footerNote || actions) && (
+                    <div className={cls.sheetFooter}>
+                        {footerNote && <span className={cls.note}>{footerNote}</span>}
+                        <div className={cls.sheetActions}>{actions}</div>
+                    </div>
+                )}
+            </Drawer>
+        );
+    }
 
     return (
         <Modal

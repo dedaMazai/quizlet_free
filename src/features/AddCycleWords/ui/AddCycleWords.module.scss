@@ -10,3 +10,14 @@
 .table {
   width: 100%;
 }
+
+// В шторке тело без полей — отступы даёт содержимое; поля поиска — во всю ширину
+@media (width <= 650px) {
+  .importBody {
+    padding: 4px 20px 12px;
+  }
+
+  .importBody .field {
+    min-width: 100%;
+  }
+}

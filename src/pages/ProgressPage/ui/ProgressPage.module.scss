@@ -59,4 +59,19 @@
     padding: 8px 10px;
     font-size: 12px;
   }
+
+  // Ячейки компактные (как в макете), но область нажатия — 44px по высоте
+  .period {
+    overflow: visible;
+  }
+
+  .periodItem {
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -7px 0;
+    }
+  }
 }

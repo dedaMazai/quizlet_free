@@ -21,14 +21,6 @@
   margin-left: auto;
 }
 
-.importFull {
-  width: 100%;
-
-  :global(.ant-upload) {
-    display: block;
-  }
-}
-
 .table {
   display: flex;
   flex-direction: column;
@@ -116,7 +108,79 @@
   padding: 8px 0 4px;
 }
 
+// Mobile 6.37: карточка строки
 .cardRow {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--color-divider);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--color-divider);
+}
+
+.cardRowHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 15px;
+}
+
+@media (width <= 650px) {
+  // Чипы инструментов в одну прокручиваемую строку
+  .toolbar {
+    flex-wrap: nowrap;
+    padding: 12px 20px;
+    border-bottom: 0;
+    overflow-x: auto;
+  }
+
+  .toolButton {
+    flex: none;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--color-divider);
+    font-size: 13px;
+  }
+
+  .aiButton {
+    margin-left: 0;
+  }
+
+  .table {
+    gap: 10px;
+    padding: 0 20px;
+  }
+
+  .index {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--color-neutral-700);
+  }
+
+  .field {
+    height: 44px;
+  }
+
+  // Зона нажатия 44×44 вокруг иконки 14
+  // Строка индекса выше макета (32 вместо 15): иначе ✕ 44×44 налезает на поле «Слово»
+  // и тап по углу поля удаляет строку. Кнопка уходит в верхний паддинг карточки.
+  .cardRowHead {
+    align-items: flex-start;
+    height: 32px;
+  }
+
+  .cardRowHead .index {
+    line-height: 20px;
+  }
+
+  .remove {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    margin: -12px -15px 0 0;
+  }
+
+  .addRow {
+    padding: 0 0 12px;
+  }
 }

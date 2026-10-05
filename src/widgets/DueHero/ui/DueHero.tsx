@@ -11,6 +11,7 @@ import { RoutePath } from '@/shared/config/router/routePath';
 import { estimateReviewMinutes, ReviewLocationState } from '@/shared/const/const';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useKeyDown } from '@/shared/lib/hooks/useKeyDown';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './DueHero.module.scss';
 
 const ARROW_SIZE = 18;
@@ -28,6 +29,7 @@ export const DueHero = memo((props: DueHeroProps) => {
     const { tz, className } = props;
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
+    const { isMobile } = useMatchMedia();
 
     const { data: due } = useGetDueCountQuery(undefined);
     const { data: summary } = useGetDueSummaryQuery({ tz });
@@ -57,6 +59,12 @@ export const DueHero = memo((props: DueHeroProps) => {
         }));
     }, [summary, i18n.language]);
 
+    const reviewMinutes = estimateReviewMinutes(count);
+    // Мобильная (6.35): «≈ 8 мин»
+    const minutes = isMobile
+        ? t('≈ {{count}} мин', { count: reviewMinutes })
+        : t('≈ {{count}} минут', { count: reviewMinutes });
+
     const start = () => {
         if (hasDebt) {
             const state: ReviewLocationState = { autostart: true };
@@ -74,7 +82,9 @@ export const DueHero = memo((props: DueHeroProps) => {
         <AccentPanel className={classNames(cls.DueHero, [className])}>
             <div className={cls.top}>
                 <div className={cls.summary}>
-                    <Kicker tone={KickerTone.ON_DARK}>{t('К повторению сегодня')}</Kicker>
+                    <Kicker tone={KickerTone.ON_DARK} className={cls.kicker}>
+                        {t('К повторению сегодня')}
+                    </Kicker>
                     <div className={cls.countRow}>
                         {hasDebt ? (
                             <span className={cls.count}>{count}</span>
@@ -92,8 +102,7 @@ export const DueHero = memo((props: DueHeroProps) => {
                             </span>
                             {hasDebt && (
                                 <span className={cls.meta}>
-                                    {`${t('из {{count}} колод', { count: decksInDebt })} · ${
-                                        t('≈ {{count}} минут', { count: estimateReviewMinutes(count) })}`}
+                                    {`${t('из {{count}} колод', { count: decksInDebt })} · ${minutes}`}
                                 </span>
                             )}
                             {!hasDebt && tomorrowCount > 0 && (

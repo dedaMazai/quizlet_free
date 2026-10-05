@@ -61,7 +61,7 @@ export const OrderStage: FC<OrderStageProps> = (props) => {
   return (
     <>
       <div className={cls.prompt}>
-        <Kicker>{t('Соберите фразу')}</Kicker>
+        <Kicker className={cls.kicker}>{t('Соберите фразу')}</Kicker>
         <span className={cls.phrase}>{item.card.translation}</span>
       </div>
 
@@ -101,12 +101,18 @@ export const OrderStage: FC<OrderStageProps> = (props) => {
             <SessionButton
               variant={SessionButtonVariant.SECONDARY}
               size={SessionButtonSize.MD}
+              className={cls.action}
               disabled={answer.length === 0}
               onClick={resetAnswer}
             >
               {t('Сбросить')}
             </SessionButton>
-            <SessionButton size={SessionButtonSize.MD} disabled={!complete} onClick={onCheck}>
+            <SessionButton
+              size={SessionButtonSize.MD}
+              className={classNames(cls.action, [cls.check])}
+              disabled={!complete}
+              onClick={onCheck}
+            >
               {t('Проверить')}
             </SessionButton>
           </div>

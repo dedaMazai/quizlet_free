@@ -29,3 +29,36 @@
     padding: 0 6px;
     font-size: 15px;
 }
+
+// Мобильный: кнопки во всю ширину колонки, шрифт заголовков
+@media (width <= 650px) {
+    // Длинные подписи («Ещё 7 новых из «…»») переносятся, а не вылезают за кнопку
+    .SessionButton {
+        width: 100%;
+        height: auto;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        line-height: 1.2;
+        white-space: normal;
+    }
+
+    // height: auto выше снимает фиксированные высоты размеров — возвращаем их минимумом
+    .md {
+        min-height: 44px;
+    }
+
+    .lg {
+        min-height: 48px;
+    }
+
+    .primary {
+        min-height: 56px;
+        padding: 8px 20px;
+        font-size: 18px;
+    }
+
+    .ghost {
+        min-height: 44px;
+        font-size: 15px;
+    }
+}

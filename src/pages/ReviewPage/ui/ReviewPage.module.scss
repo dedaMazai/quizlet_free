@@ -4,3 +4,9 @@
   gap: 28px;
   width: 100%;
 }
+
+@media (width <= 650px) {
+  .ReviewPage {
+    gap: 18px;
+  }
+}

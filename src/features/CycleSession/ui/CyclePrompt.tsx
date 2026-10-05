@@ -72,7 +72,7 @@ export const CyclePrompt: FC<CyclePromptProps> = (props) => {
   return (
     <>
       <div className={cls.prompt}>
-        <Kicker>
+        <Kicker className={cls.kicker}>
           {direction === 'ru-en' ? t('Напишите по-английски') : t('Напишите по-русски')}
         </Kicker>
         <span className={cls.word}>{prompt}</span>
@@ -105,10 +105,10 @@ export const CyclePrompt: FC<CyclePromptProps> = (props) => {
 
       <div className={cls.actions}>
         {grade ? (
-          <SessionNextButton onNext={onNext} autoAdvance={grade === 'correct'} />
+          <SessionNextButton onNext={onNext} autoAdvance={grade === 'correct'} className={cls.cta} />
         ) : (
           <>
-            <SessionButton keyHint="ENTER" onClick={submit}>
+            <SessionButton keyHint="ENTER" className={cls.cta} onClick={submit}>
               {t('Проверить')}
             </SessionButton>
             <Tooltip title={t('Удерживайте, чтобы подсмотреть')}>

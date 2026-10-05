@@ -69,7 +69,7 @@ export const WritePrompt: FC<WritePromptProps> = (props) => {
   return (
     <>
       <div className={cls.prompt}>
-        <Kicker>
+        <Kicker className={cls.kicker}>
           {direction === 'ru-en' ? t('Напишите по-английски') : t('Напишите по-русски')}
         </Kicker>
         <div className={cls.wordRow}>
@@ -102,10 +102,10 @@ export const WritePrompt: FC<WritePromptProps> = (props) => {
 
       <div className={cls.actions}>
         {grade ? (
-          <SessionNextButton onNext={onNext} autoAdvance={grade === 'correct'} />
+          <SessionNextButton onNext={onNext} autoAdvance={grade === 'correct'} className={cls.cta} />
         ) : (
           <>
-            <SessionButton keyHint="ENTER" onClick={submit}>
+            <SessionButton keyHint="ENTER" className={cls.cta} onClick={submit}>
               {t('Проверить')}
             </SessionButton>
             <SessionButton variant={SessionButtonVariant.GHOST} onClick={skip}>

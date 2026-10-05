@@ -5,7 +5,7 @@
     padding: 56px 40px;
 
     @media (width <= 650px) {
-        padding: 32px 16px;
+        padding: 24px 20px 28px;
     }
 }
 
@@ -15,12 +15,26 @@
     gap: 32px;
     width: 100%;
     max-width: 960px;
+
+    @media (width <= 650px) {
+        gap: 18px;
+    }
 }
 
 .head {
     display: flex;
     flex-direction: column;
     gap: 10px;
+
+    @media (width <= 650px) {
+        gap: 6px;
+    }
+}
+
+.head .kicker {
+    @media (width <= 650px) {
+        font-size: 10px;
+    }
 }
 
 .title {
@@ -33,6 +47,7 @@
 
     @media (width <= 650px) {
         font-size: 40px;
+        letter-spacing: normal;
     }
 }
 
@@ -43,6 +58,10 @@
 
     @media (width <= 900px) {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    @media (width <= 650px) {
+        gap: 18px;
     }
 }
 
@@ -58,12 +77,21 @@
     flex-direction: column;
     gap: 20px;
     padding: 28px;
+
+    @media (width <= 650px) {
+        gap: 16px;
+        padding: 20px;
+    }
 }
 
 .streakRow {
     display: flex;
     align-items: center;
     gap: 16px;
+
+    @media (width <= 650px) {
+        gap: 12px;
+    }
 }
 
 .flame {
@@ -80,7 +108,7 @@
     white-space: nowrap;
 
     @media (width <= 650px) {
-        font-size: 72px;
+        font-size: 80px;
     }
 }
 
@@ -89,6 +117,10 @@
     flex-direction: column;
     gap: 4px;
     min-width: 0;
+
+    @media (width <= 650px) {
+        gap: 2px;
+    }
 }
 
 .streakUnit {
@@ -96,17 +128,29 @@
     font-weight: 500;
     font-size: 26px;
     line-height: 1;
+
+    @media (width <= 650px) {
+        font-size: 20px;
+    }
 }
 
 .streakMeta {
     font-size: 13px;
     color: var(--color-accent-300);
+
+    @media (width <= 650px) {
+        font-size: 12px;
+    }
 }
 
 .week {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 6px;
+
+    @media (width <= 650px) {
+        gap: 4px;
+    }
 }
 
 .day {
@@ -120,6 +164,10 @@
     width: 100%;
     height: 28px;
     border: 1px solid var(--color-accent-700);
+
+    @media (width <= 650px) {
+        height: 22px;
+    }
 }
 
 .dayActive {
@@ -136,6 +184,11 @@
     text-transform: uppercase;
     white-space: nowrap;
     color: var(--color-accent-300);
+
+    // В мобильном макете неделя — только ячейки
+    @media (width <= 650px) {
+        display: none;
+    }
 }
 
 .stats {
@@ -148,6 +201,11 @@
     flex-direction: column;
     gap: 6px;
     padding: 20px;
+
+    @media (width <= 650px) {
+        gap: 4px;
+        padding: 12px 16px;
+    }
 
     &:nth-child(odd of .stat) {
         border-right: 1px solid var(--color-divider);
@@ -165,6 +223,10 @@
     text-transform: uppercase;
     white-space: nowrap;
     color: var(--color-neutral-700);
+
+    @media (width <= 650px) {
+        font-size: 9px;
+    }
 }
 
 .statValue {
@@ -173,6 +235,10 @@
     font-size: 40px;
     line-height: 1;
     white-space: nowrap;
+
+    @media (width <= 650px) {
+        font-size: 30px;
+    }
 }
 
 .success {
@@ -215,4 +281,20 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 12px;
+
+    // Мобильный: CTA во всю ширину, прижаты к низу
+    @media (width <= 650px) {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 8px;
+        margin-top: auto;
+    }
+}
+
+.actions .primary {
+    @media (width <= 650px) {
+        gap: 8px;
+        font-size: 17px;
+    }
 }

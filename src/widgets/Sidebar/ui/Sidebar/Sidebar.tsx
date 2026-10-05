@@ -4,7 +4,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router';
 import { Button, Tooltip } from 'antd';
-import { BrowserView, isBrowser } from 'react-device-detect';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useGetDueCountQuery } from '@/entities/Card';
 import { classNames } from '@/shared/lib/classNames/classNames';
@@ -29,8 +28,7 @@ export const Sidebar = memo(() => {
 
     const sections = useMemo(() => getNavSections({ t }), [t]);
 
-    // Тело исполняется и на мобиле (BrowserView внутри return) — там запрос не нужен
-    const { data: due } = useGetDueCountQuery(undefined, { skip: !isBrowser });
+    const { data: due } = useGetDueCountQuery(undefined);
     const dueCount = due?.count ?? 0;
 
     const toggleCollapsed = useCallback(() => {
@@ -65,8 +63,7 @@ export const Sidebar = memo(() => {
     };
 
     return (
-        <BrowserView renderWithFragment>
-            <aside className={classNames(cls.Sidebar, [], { [cls.collapsed]: collapsed })}>
+        <aside className={classNames(cls.Sidebar, [], { [cls.collapsed]: collapsed })}>
                 <div className={cls.header}>
                     <Link to={RoutePath.MAIN()} className={cls.logo} aria-label={APP_NAME}>
                         <Logo className={cls.logoIcon} />
@@ -91,8 +88,7 @@ export const Sidebar = memo(() => {
                     {showReviewCard && <SidebarReviewCard count={dueCount} />}
                     <SidebarProfile collapsed={collapsed} />
                 </div>
-            </aside>
-        </BrowserView>
+        </aside>
     );
 });
 

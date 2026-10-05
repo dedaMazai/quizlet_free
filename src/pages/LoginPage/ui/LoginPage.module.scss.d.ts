@@ -22,6 +22,7 @@ export type Styles = {
   probing: string;
   probingText: string;
   slogan: string;
+  sloganKicker: string;
   sloganTitle: string;
   submit: string;
   subtitle: string;

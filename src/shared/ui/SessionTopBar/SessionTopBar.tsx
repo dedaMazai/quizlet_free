@@ -7,15 +7,18 @@ import {
 import { KeyHint } from '@/shared/ui/KeyHint';
 import { TickProgress, TickProgressSize, TickState } from '@/shared/ui/TickProgress';
 import { useKeyDown } from '@/shared/lib/hooks/useKeyDown';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './SessionTopBar.module.scss';
 
 const EXIT_ICON_SIZE = 16;
+const MOBILE_EXIT_ICON_SIZE = 22;
+const MOBILE_ACTION_ICON_SIZE = 20;
 const ACTION_ICON_SIZE = 18;
 const ICON_STROKE = 1.5;
 
 /** Esc не должен закрывать сессию, пока открыт попап или модалка — их закрывает сам Esc */
 const hasOpenOverlay = () => Boolean(document.querySelector(
-    '.ant-modal-wrap:not([style*="display: none"]), .ant-popover:not(.ant-popover-hidden)',
+    '.ant-modal-wrap:not([style*="display: none"]), .ant-popover:not(.ant-popover-hidden), [role="dialog"][aria-modal="true"]',
 ));
 
 interface SessionTopBarProps {
@@ -37,11 +40,58 @@ export const SessionTopBar = memo((props: SessionTopBarProps) => {
     } = props;
     const { t } = useTranslation();
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const { isMobile } = useMatchMedia();
 
     useKeyDown((e) => {
         if (e.key !== 'Escape' || settingsOpen || hasOpenOverlay()) return;
         onExit();
     }, { ignoreInputs: false });
+
+    // Mobile 6.43–6.50: ✕ · деления · счётчик; озвучка и настройки — только если они есть
+    if (isMobile) {
+        return (
+            <header className={cls.mobile}>
+                <Button
+                    type="text"
+                    className={cls.mobileBtn}
+                    aria-label={t('Выйти')}
+                    onClick={onExit}
+                    icon={<X size={MOBILE_EXIT_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                />
+                <TickProgress ticks={ticks} size={TickProgressSize.MD} className={cls.mobileTicks} />
+                <span className={cls.counter}>{counter}</span>
+                {/* Озвучки нет в макете, но без неё автопроизношение на мобильном не переключить */}
+                {onToggleAutoSpeak && (
+                    <Button
+                        type="text"
+                        className={cls.mobileBtn}
+                        aria-label={autoSpeak ? t('Выключить озвучку') : t('Включить озвучку')}
+                        aria-pressed={autoSpeak}
+                        onClick={onToggleAutoSpeak}
+                        icon={autoSpeak
+                            ? <Volume2 size={MOBILE_ACTION_ICON_SIZE} strokeWidth={ICON_STROKE} />
+                            : <VolumeX size={MOBILE_ACTION_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                    />
+                )}
+                {settings && (
+                    <Popover
+                        trigger="click"
+                        placement="bottomRight"
+                        open={settingsOpen}
+                        onOpenChange={setSettingsOpen}
+                        content={settings}
+                    >
+                        <Button
+                            type="text"
+                            className={cls.mobileBtn}
+                            aria-label={t('Настройки')}
+                            icon={<Settings size={MOBILE_ACTION_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                        />
+                    </Popover>
+                )}
+            </header>
+        );
+    }
 
     return (
         <header className={cls.SessionTopBar}>

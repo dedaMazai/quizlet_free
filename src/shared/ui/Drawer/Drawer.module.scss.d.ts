@@ -1,8 +1,8 @@
 export type Styles = {
-  content: string;
   Drawer: string;
-  drawerNew: string;
-  opened: string;
+  handle: string;
+  handleRow: string;
+  scrim: string;
   sheet: string;
 };
 

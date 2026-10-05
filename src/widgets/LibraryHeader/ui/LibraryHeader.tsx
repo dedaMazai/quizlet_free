@@ -14,9 +14,11 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { getNavSections, NavSectionKey } from '@/shared/const/menu';
 import { Accesses } from '@/shared/types/accesses';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './LibraryHeader.module.scss';
 
 const ICON_SIZE = 16;
+const MOBILE_ICON_SIZE = 20;
 const ICON_STROKE = 1.5;
 const PICKER_WIDTH = 520;
 
@@ -32,6 +34,7 @@ interface LibraryHeaderProps {
 export const LibraryHeader = memo(({ showCreateDeck }: LibraryHeaderProps) => {
   const { t, i18n } = useTranslation();
   const isAdmin = useUserAccesses().includes(Accesses.administration);
+  const { isMobile } = useMatchMedia();
 
   const { data: decks } = useGetDecksQuery();
   const { data: wordsCount } = useGetCardsCountQuery();
@@ -75,12 +78,22 @@ export const LibraryHeader = memo(({ showCreateDeck }: LibraryHeaderProps) => {
     setPickerFor(null);
   };
 
+  // Mobile 6.38: только «+» (создать колоду); импорт и дубли скрыты
+  const mobileExtra = showCreateDeck ? (
+    <Button
+      className={cls.mobileCreate}
+      aria-label={t('Создать колоду')}
+      icon={<Plus size={MOBILE_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+      onClick={() => setDeckFormOpen(true)}
+    />
+  ) : undefined;
+
   return (
     <>
       <PageHeader
         title={t('Библиотека')}
         tabs={tabs}
-        extra={(
+        extra={isMobile ? mobileExtra : (
           <>
             <Button className={cls.button} onClick={() => openPicker('import')}>
               {t('Импорт из Excel')}

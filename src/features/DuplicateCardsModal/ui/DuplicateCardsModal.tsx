@@ -16,6 +16,7 @@ import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './DuplicateCardsModal.module.scss';
@@ -111,15 +112,22 @@ export const DuplicateCardsModal: FC<DuplicateCardsModalProps> = (props) => {
 
   return (
     <>
-      <Modal
-        open={open}
-        title={t('Дубли слов')}
-        footer={null}
-        width={isMobile ? 'calc(100vw - 24px)' : 640}
-        onCancel={onClose}
-      >
-        {renderContent()}
-      </Modal>
+      {isMobile ? (
+        // Mobile: шторка вместо модалки
+        <ModalFrame open={open} width="100%" title={t('Дубли слов')} onClose={onClose}>
+          <div className={cls.sheetContent}>{renderContent()}</div>
+        </ModalFrame>
+      ) : (
+        <Modal
+          open={open}
+          title={t('Дубли слов')}
+          footer={null}
+          width={640}
+          onCancel={onClose}
+        >
+          {renderContent()}
+        </Modal>
+      )}
       <CardForm
         open={Boolean(editingCard)}
         deckUuid={deckUuid}

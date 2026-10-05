@@ -30,6 +30,7 @@ import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from '@/shared/types/accesses';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './DeckList.module.scss';
 
 const MENU_ICON_SIZE = 18;
@@ -60,6 +61,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
   const { modal, message } = useAntdApp();
   const userInfo = useUserInfo();
   const isAdmin = useUserAccesses().includes(Accesses.administration);
+  const { isMobile } = useMatchMedia();
 
   const tz = userInfo?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
@@ -224,6 +226,51 @@ export const DeckList: FC<DeckListProps> = (props) => {
           const due = dueByDeck.get(deck.uuid) ?? 0;
           const author = deck.is_owner ? undefined : deck.owner_name ?? deck.owner_email;
 
+          const menu = (
+            <Dropdown
+              trigger={['click']}
+              menu={{ items: deckMenuItems(deck) }}
+            >
+              <Button
+                type="text"
+                size="small"
+                className={isMobile ? cls.mobileMenuButton : cls.menuButton}
+                aria-label={t('Ещё')}
+                icon={<Ellipsis size={MENU_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                onClick={(e: MouseEvent) => e.stopPropagation()}
+              />
+            </Dropdown>
+          );
+
+          // Mobile 6.38: название + бейдж, полоса освоения + число слов.
+          // «…» сверх макета: иначе колоду на мобильном не изменить и не удалить
+          if (isMobile) {
+            return (
+              <Blueprint
+                key={deck.uuid}
+                className={cls.mobileCard}
+                onClick={() => navigate(RoutePath.DECK(deck.uuid))}
+              >
+                <span className={cls.mobileHead}>
+                  <span className={cls.mobileName}>{deck.name}</span>
+                  {due > 0 && <DueBadge count={due} />}
+                  {menu}
+                </span>
+                <span className={cls.mobileProgress}>
+                  <MasteryBar
+                    className={cls.mobileBar}
+                    mastered={mastered}
+                    learning={learning}
+                    size={MasteryBarSize.SM}
+                  />
+                  <span className={cls.mobileCount}>
+                    {t('{{count}} слов', { count: deck.cards_count })}
+                  </span>
+                </span>
+              </Blueprint>
+            );
+          }
+
           return (
             <Blueprint
               key={deck.uuid}
@@ -237,19 +284,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
                     <span className={cls.description}>{deck.description}</span>
                   )}
                 </div>
-                <Dropdown
-                  trigger={['click']}
-                  menu={{ items: deckMenuItems(deck) }}
-                >
-                  <Button
-                    type="text"
-                    size="small"
-                    className={cls.menuButton}
-                    aria-label={t('Ещё')}
-                    icon={<Ellipsis size={MENU_ICON_SIZE} strokeWidth={ICON_STROKE} />}
-                    onClick={(e: MouseEvent) => e.stopPropagation()}
-                  />
-                </Dropdown>
+                {menu}
               </div>
               {(due > 0 || author) && (
                 <div className={cls.tags}>

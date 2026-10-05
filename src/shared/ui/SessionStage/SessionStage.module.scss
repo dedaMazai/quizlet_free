@@ -6,23 +6,41 @@
     justify-content: center;
     padding: 40px;
 
+    // Мобильный: колонка во всю ширину, CTA прижимаются вниз через margin-top: auto
     @media (width <= 650px) {
-        padding: 24px 16px;
+        align-items: stretch;
+        padding: 12px 20px 28px;
     }
 }
 
 .sm {
     gap: 28px;
+
+    @media (width <= 650px) {
+        gap: 18px;
+    }
 }
 
 .md {
     gap: 32px;
+
+    @media (width <= 650px) {
+        gap: 16px;
+    }
 }
 
 .lg {
     gap: 36px;
+
+    @media (width <= 650px) {
+        gap: 18px;
+    }
 }
 
 .xl {
     gap: 40px;
+
+    @media (width <= 650px) {
+        gap: 24px;
+    }
 }

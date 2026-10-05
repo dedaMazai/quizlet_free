@@ -7,6 +7,7 @@ import { MyTypography } from '@/shared/ui/MyTypography';
 import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { useAutoSpeak } from '@/shared/lib/hooks/useAutoSpeak';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { useSpeech } from '@/shared/lib/hooks/useSpeech';
 import {
   buildSessionTicks,
@@ -16,6 +17,7 @@ import {
 } from '@/shared/lib/session';
 import { useOrderSession } from '../model/hooks/useOrderSession';
 import { OrderStage } from './OrderStage';
+import cls from './OrderSession.module.scss';
 
 interface OrderSessionProps {
   cards: Card[];
@@ -36,6 +38,11 @@ export const OrderSession: FC<OrderSessionProps> = (props) => {
     cards, deckKey, deckName, reviewsDeckUuid, title, onExit, renderResult,
   } = props;
   const { t } = useTranslation();
+  const { isMobile } = useMatchMedia();
+  // На мобильном — формулировка макета 6.45, как в заучивании
+  const wrongTitle = (term: string) => (isMobile
+    ? t('Правильно — «{{term}}»', { term })
+    : t('Неверно — правильно «{{term}}»', { term }));
   const { autoSpeak, toggleAutoSpeak } = useAutoSpeak();
   const { speak } = useSpeech();
 
@@ -97,7 +104,7 @@ export const OrderSession: FC<OrderSessionProps> = (props) => {
   return (
     <>
       {topBar}
-      <SessionStage gap={SessionStageGap.LG}>
+      <SessionStage gap={SessionStageGap.LG} className={cls.stage}>
         {session.current && (
           <OrderStage
             item={session.current}
@@ -114,8 +121,10 @@ export const OrderSession: FC<OrderSessionProps> = (props) => {
             tone={session.lastCorrect ? AnswerFeedbackTone.SUCCESS : AnswerFeedbackTone.ERROR}
             title={session.lastCorrect
               ? t('Верно')
-              : t('Неверно — правильно «{{term}}»', { term: session.current.card.term })}
-            subtitle={session.lastCorrect ? correctNote : t('Фраза вернётся в эту же сессию')}
+              : wrongTitle(session.current.card.term)}
+            subtitle={session.lastCorrect
+              ? correctNote
+              : isMobile ? t('Вернётся в этой сессии') : t('Фраза вернётся в эту же сессию')}
             onNext={session.next}
             autoAdvance={Boolean(session.lastCorrect)}
           />

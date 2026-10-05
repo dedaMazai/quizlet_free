@@ -1,36 +1,41 @@
+// Шторка Mobile 6.37: квадратная, от 90px сверху до низа экрана
 .Drawer {
     position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    z-index: 100;
-    display: flex;
-    align-items: flex-end;
+    inset: 0;
+    z-index: var(--modal-z-index);
 }
 
-.opened {
-    pointer-events: auto;
-    opacity: 1;
-    z-index: var(--modal-z-index);
-
-    .content {
-        transform: translateY(0%);
-    }
+.scrim {
+    background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
 }
 
 .sheet {
-    z-index: var(--modal-z-index);
     position: fixed;
-    height: calc(100vh + 100px);
-    width: 100vw;
-    border-radius: 12px 12px 0;
-    touch-action: none;
-    padding: 15px;
+    top: 90px;
+    right: 0;
+
+    // Над клавиатурой iOS: переменную выставляет Drawer по visualViewport
+    bottom: var(--sheet-keyboard-offset, 0);
+    left: 0;
+    z-index: var(--modal-z-index);
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+    color: var(--color-text);
+    box-shadow: var(--shadow-lg);
 }
 
-.drawerNew {
-    .sheet {
-        background: var(--bg-color);
-    }
+.handleRow {
+    display: flex;
+    flex: none;
+    justify-content: center;
+    padding: 8px 0 4px;
+    touch-action: none;
+    cursor: grab;
+}
+
+.handle {
+    width: 40px;
+    height: 4px;
+    background: var(--color-neutral-400);
 }

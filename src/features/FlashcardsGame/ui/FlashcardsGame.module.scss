@@ -16,8 +16,13 @@
     background: var(--color-accent-100);
   }
 
+  // Мобильный: карточка занимает свободную высоту
   @media (width <= 650px) {
-    height: 320px;
+    flex: 1;
+    gap: 12px;
+    max-width: none;
+    height: auto;
+    padding: 20px;
   }
 }
 
@@ -31,6 +36,12 @@
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--color-neutral-700);
+
+  @media (width <= 650px) {
+    top: 14px;
+    left: 16px;
+    letter-spacing: 0.12em;
+  }
 }
 
 .tools {
@@ -39,11 +50,23 @@
   right: 10px;
   display: flex;
   gap: 4px;
+
+  // Кнопки 44×44 под палец: иконки по центру своих зон
+  @media (width <= 650px) {
+    top: 0;
+    right: 2px;
+    gap: 0;
+  }
 }
 
 .tool {
   color: var(--color-neutral-600);
   font-size: 20px;
+
+  @media (width <= 650px) {
+    width: 44px;
+    height: 44px;
+  }
 }
 
 .word {
@@ -55,7 +78,8 @@
   overflow-wrap: anywhere;
 
   @media (width <= 650px) {
-    font-size: 44px;
+    font-size: 46px;
+    letter-spacing: normal;
   }
 }
 
@@ -63,6 +87,10 @@
   font-size: 15px;
   font-style: italic;
   color: var(--color-neutral-700);
+
+  @media (width <= 650px) {
+    font-size: 14px;
+  }
 }
 
 .flipHint {
@@ -74,12 +102,24 @@
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--color-neutral-600);
+
+  @media (width <= 650px) {
+    bottom: 14px;
+    letter-spacing: 0.12em;
+  }
 }
 
 .controls {
   display: flex;
   align-items: center;
   gap: 12px;
+
+  // Мобильный: ← | Перемешать | →, всё по 56px
+  @media (width <= 650px) {
+    display: grid;
+    grid-template-columns: 56px 1fr 56px;
+    gap: 10px;
+  }
 }
 
 .navBtn {
@@ -87,10 +127,31 @@
   padding: 0;
 }
 
+.controls .control {
+  @media (width <= 650px) {
+    gap: 8px;
+    height: 56px;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 15px;
+  }
+}
+
+.controls .navBtn {
+  @media (width <= 650px) {
+    width: 56px;
+  }
+}
+
 .note {
   font-size: 13px;
   text-align: center;
   color: var(--color-neutral-700);
+
+  // В макете под кнопками пусто, но подсказка несёт ссылку на заучивание — оставляем, мельче
+  @media (width <= 650px) {
+    font-size: 12px;
+  }
 }
 
 .learnLink {
@@ -101,4 +162,12 @@
 .filter {
   border: 1px solid var(--color-divider);
   font-size: 13px;
+
+  // Мобильный: разделители между сегментами
+  @media (width <= 650px) {
+    // Сегменты AntD — label внутри группы
+    label + label {
+      border-left: 1px solid var(--color-divider);
+    }
+  }
 }

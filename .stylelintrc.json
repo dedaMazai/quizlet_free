@@ -8,6 +8,12 @@
                 "ignoreAtRules": ["tailwind", "apply", "variants", "responsive", "screen"]
             }
         ],
+        "selector-pseudo-class-no-unknown": [
+            true,
+            {
+                "ignorePseudoClasses": ["global", "local"]
+            }
+        ],
         "declaration-block-no-redundant-longhand-properties": null,
         "no-descending-specificity": null,
         "color-function-notation": "legacy",

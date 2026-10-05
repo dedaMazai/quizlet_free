@@ -21,9 +21,11 @@ import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './CyclesPage.module.scss';
 
 const ICON_SIZE = 16;
+const MOBILE_ICON_SIZE = 20;
 const ICON_STROKE = 1.5;
 /** Ячеек в полосе карточки: доли слов «в повторе / сегодня / в очереди» */
 const CELLS_COUNT = 30;
@@ -57,6 +59,7 @@ interface CycleCardData {
 const CyclesPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isMobile } = useMatchMedia();
   const [formOpen, setFormOpen] = useState(false);
   const {
     data: cycles, isLoading, isError, refetch,
@@ -92,12 +95,24 @@ const CyclesPage = () => {
     </Button>
   );
 
+  // Mobile 6.40: квадрат 44×44 с «+» справа от H1
+  const createIconButton = (
+    <Button
+      className={cls.createIconButton}
+      aria-label={t('Создать цикл')}
+      icon={<Plus aria-hidden size={MOBILE_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+      onClick={() => setFormOpen(true)}
+    />
+  );
+
   return (
     <div className={cls.CyclesPage}>
-      <SectionPageHeader section={NavSectionKey.LEARN} extra={createButton} />
+      <SectionPageHeader section={NavSectionKey.LEARN} extra={isMobile ? createIconButton : createButton} />
 
       <p className={cls.lead}>
-        {t('Записывайте слова по порядку, как в тетради. Каждый день открывается N новых, а все предыдущие идут в повтор.')}
+        {isMobile
+          ? t('Слова по порядку, как в тетради: каждый день N новых, все прошлые — в повтор.')
+          : t('Записывайте слова по порядку, как в тетради. Каждый день открывается N новых, а все предыдущие идут в повтор.')}
       </p>
 
       {isLoading && <Loader />}

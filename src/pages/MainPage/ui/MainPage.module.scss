@@ -1,5 +1,6 @@
 $overview-side-width: 320px;
 $deck-min-width: 180px;
+$avatar-size: 44px;
 
 .MainPage {
   display: flex;
@@ -120,17 +121,96 @@ $deck-min-width: 180px;
   }
 }
 
+// Мобильная главная 6.35
 @media (width <= 650px) {
   .MainPage {
-    gap: 28px;
+    gap: 22px;
   }
 
-  .search {
-    max-width: none;
+  .header {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .greeting {
+    gap: 2px;
+    min-width: 0;
   }
 
   .title {
-    font-size: 32px;
-    white-space: normal;
+    overflow: hidden;
+    font-size: 30px;
+    letter-spacing: normal;
+    text-overflow: ellipsis;
+  }
+
+  .headerActions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .streakChip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--color-divider);
+  }
+
+  .streakDays {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .avatarLink {
+    display: flex;
+    flex: none;
+  }
+
+  .avatarLink .avatar {
+    width: $avatar-size;
+    height: $avatar-size;
+    font-size: 16px;
+  }
+
+  .dailyGoal {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .dailyGoalHead {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .dailyGoalValue {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .dailyGoalTrack {
+    height: 6px;
+    background: var(--color-neutral-200);
+  }
+
+  .dailyGoalFill {
+    width: var(--progress);
+    height: 100%;
+    background: var(--color-accent);
+  }
+}
+
+// Цвет огня — по уровню серии
+@for $i from 0 through 4 {
+  .streak#{$i} {
+    color: var(--streak-#{$i});
   }
 }

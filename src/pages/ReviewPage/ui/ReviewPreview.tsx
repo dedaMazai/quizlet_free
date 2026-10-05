@@ -10,6 +10,7 @@ import { MasteryBar } from '@/shared/ui/MasteryBar';
 import { SectionHeader } from '@/shared/ui/SectionHeader';
 import { estimateReviewMinutes } from '@/shared/const/const';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './ReviewPreview.module.scss';
 
 const ARROW_SIZE = 18;
@@ -47,6 +48,7 @@ export const ReviewPreview: FC<ReviewPreviewProps> = (props) => {
     dueCount, freshCount, forecast, decks, onToggleDeck, onStart,
   } = props;
   const { t } = useTranslation();
+  const { isMobile } = useMatchMedia();
   const sessionCount = dueCount + freshCount;
 
   const load = useMemo(() => {
@@ -67,6 +69,66 @@ export const ReviewPreview: FC<ReviewPreviewProps> = (props) => {
   }, [forecast]);
 
   const includedDecks = decks.filter((deck) => deck.included).length;
+
+  // Mobile 6.39: герой без подсказки, без графика нагрузки; строки колод — компактные
+  if (isMobile) {
+    return (
+      <>
+        <AccentPanel className={cls.session}>
+          <div className={cls.counts}>
+            <div className={cls.countCol}>
+              <span className={cls.dueCount}>{dueCount}</span>
+              <span className={cls.countLabel}>{t('к повторению')}</span>
+            </div>
+            {freshCount > 0 && (
+              <div className={cls.countCol}>
+                <span className={cls.freshCount}>{`+${freshCount}`}</span>
+                <span className={cls.countLabel}>{t('новых')}</span>
+              </div>
+            )}
+          </div>
+          <Blueprint
+            as="button"
+            type="button"
+            corners={BlueprintCorners.LIGHT}
+            className={cls.start}
+            disabled={!sessionCount}
+            onClick={onStart}
+          >
+            {t('Начать · ≈ {{count}} мин', { count: estimateReviewMinutes(sessionCount) })}
+            <ArrowRight aria-hidden size={ARROW_SIZE} />
+          </Blueprint>
+        </AccentPanel>
+
+        <div className={cls.decks}>
+          <div className={cls.decksHeader}>
+            <span className={cls.decksTitle}>{t('Что войдёт')}</span>
+            <span className={cls.decksSummary}>
+              {t('{{included}} из {{count}} колод', { included: includedDecks, count: decks.length })}
+            </span>
+          </div>
+          <div className={cls.deckList}>
+            {decks.map((deck) => (
+              // label передаёт клик по строке чекбоксу-кнопке
+              <label
+                key={deck.deckUuid}
+                className={classNames(cls.deckRow, [], { [cls.excluded]: !deck.included })}
+              >
+                <CheckSquare
+                  checked={deck.included}
+                  label={deck.deckName}
+                  className={cls.deckCheck}
+                  onChange={(checked) => onToggleDeck(deck.deckUuid, checked)}
+                />
+                <span className={cls.deckName}>{deck.deckName}</span>
+                <span className={cls.deckCounts}>{`${deck.dueCount} · +${deck.freshCount}`}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

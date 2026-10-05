@@ -1,6 +1,7 @@
 import { memo, MouseEvent, ReactNode } from 'react';
 import { Check, X } from 'lucide-react';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import cls from './AnswerOption.module.scss';
 
@@ -43,10 +44,13 @@ export const AnswerOption = memo((props: AnswerOptionProps) => {
         index, label, state = AnswerOptionState.IDLE, disabled, onClick, className,
     } = props;
 
+    const { isMobile } = useMatchMedia();
+
+    // На мобильном после проверки в квадрате остаётся номер — сигнал несёт заливка
     let mark: ReactNode = index;
-    if (state === AnswerOptionState.CORRECT) {
+    if (!isMobile && state === AnswerOptionState.CORRECT) {
         mark = <Check size={MARK_ICON_SIZE} strokeWidth={MARK_ICON_STROKE} aria-hidden />;
-    } else if (state === AnswerOptionState.WRONG) {
+    } else if (!isMobile && state === AnswerOptionState.WRONG) {
         mark = <X size={MARK_ICON_SIZE} strokeWidth={MARK_ICON_STROKE} aria-hidden />;
     }
 

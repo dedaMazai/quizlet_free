@@ -245,25 +245,64 @@ $icon-button: 24px;
     }
 }
 
-// Мобильная раскладка — до итерации 12 (адаптив)
-.cardItem {
+// Mobile 6.36: строки слов
+.mobileList {
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--color-divider);
 }
 
-.cardMain {
+.mobileRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+
+.mobileText {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 1px;
     min-width: 0;
 }
 
 .mobileTerm {
-    font-weight: 600;
+    font-weight: 500;
+    font-size: 15px;
 }
 
-.mobileExample {
-    white-space: normal;
+.mobileTranslation {
+    font-size: 13px;
+    color: var(--color-neutral-700);
 }
 
-.deckTag {
-    margin-top: 2px;
+// Иконка 18 у правого края, зона нажатия 44×44
+.mobileStar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-right: -13px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-neutral-400);
+    cursor: pointer;
+
+    &.starActive {
+        color: var(--color-accent-600);
+
+        svg {
+            fill: currentcolor;
+        }
+    }
+}
+
+.mobilePagination {
+    align-self: center;
+    padding: 14px 0;
 }

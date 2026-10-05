@@ -31,3 +31,29 @@
     padding: 1px 5px;
     background: var(--color-accent-100);
 }
+
+// Mobile 6.38–6.54: вкладки в строку со скроллом, вылет к правому краю
+@media (width <= 650px) {
+    .SectionTabs {
+        gap: 22px;
+
+        // Вкладки растянуты до 44px вверх — компенсируем, чтобы отступ от H1 остался прежним
+        margin-top: -10px;
+        margin-right: -20px;
+        padding-right: 20px;
+        overflow-x: auto;
+        font-size: 14px;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    .tab {
+        flex: none;
+        align-items: flex-end;
+        min-height: 44px;
+        padding: 0 0 10px;
+    }
+}

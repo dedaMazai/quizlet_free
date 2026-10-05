@@ -8,10 +8,11 @@ interface SessionNextButtonProps {
     onNext: () => void;
     /** Автопереход через 1,2 с — только после верного ответа */
     autoAdvance?: boolean;
+    className?: string;
 }
 
 /** «Дальше ENTER» под карточкой ответа: Enter и автопереход */
-export const SessionNextButton = memo(({ onNext, autoAdvance = false }: SessionNextButtonProps) => {
+export const SessionNextButton = memo(({ onNext, autoAdvance = false, className }: SessionNextButtonProps) => {
     const { t } = useTranslation();
 
     useAutoAdvance(autoAdvance, onNext);
@@ -20,7 +21,7 @@ export const SessionNextButton = memo(({ onNext, autoAdvance = false }: SessionN
     });
 
     return (
-        <SessionButton keyHint="ENTER" onClick={onNext}>
+        <SessionButton keyHint="ENTER" className={className} onClick={onNext}>
             {t('Дальше')}
         </SessionButton>
     );

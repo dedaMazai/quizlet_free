@@ -243,3 +243,97 @@ $submit-height: 48px;
 .probingText {
     color: var(--color-neutral-700);
 }
+
+// Мобильная 6.57: тёмная шапка со слоганом, форма на всю высоту, соглашение внизу
+@media (width <= 650px) {
+    .LoginPage {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .panel {
+        gap: 18px;
+        padding: 28px 20px 24px;
+    }
+
+    .logo {
+        gap: 8px;
+    }
+
+    .logoIcon {
+        width: 18px;
+        height: 24px;
+    }
+
+    .logoText {
+        font-size: 20px;
+    }
+
+    .slogan {
+        margin-top: 0;
+    }
+
+    .sloganTitle {
+        font-size: 38px;
+        line-height: 1;
+        letter-spacing: normal;
+    }
+
+    .sloganKicker,
+    .pillars,
+    .subtitle,
+    .about {
+        display: none;
+    }
+
+    .formSide {
+        flex: 1;
+        align-items: stretch;
+        padding: 24px 20px 28px;
+    }
+
+    .formBox {
+        gap: 16px;
+        max-width: none;
+    }
+
+    .title {
+        font-size: 28px;
+    }
+
+    .form,
+    .fields {
+        gap: 16px;
+    }
+
+    .input {
+        height: 48px;
+    }
+
+    .toggle {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    .submit {
+        height: 56px;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    .links {
+        justify-content: center;
+    }
+
+    .switch {
+        height: 44px;
+    }
+
+    .terms {
+        margin-top: auto;
+        font-size: 11px;
+        text-align: center;
+    }
+}

@@ -11,7 +11,6 @@ import Icon, {
     CloseOutlined,
 } from '@ant-design/icons';
 import { Bell } from 'lucide-react';
-import { BrowserView, isMobile, MobileView } from 'react-device-detect';
 import { useNavigate } from 'react-router-dom';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
@@ -22,7 +21,6 @@ import {
 } from '../model/api/notificationsApi';
 import { formatDateTime } from '@/shared/lib/formatters';
 import { useDebounce } from '@/shared/lib/hooks/useDebounce';
-import { Drawer } from '@/shared/ui/Drawer';
 import { useUserInfo } from '@/entities/User';
 import { getNotificationLink } from '../model/lib/getNotificationLink';
 import cls from './UserNotification.module.scss';
@@ -165,7 +163,7 @@ export const UserNotificationDefault = memo(() => {
                 fullHeight
                 gap="12"
                 style={{
-                    padding: isMobile ? '0 12px' : 12,
+                    padding: 12,
                 }}
             >
                 <Tabs
@@ -217,7 +215,7 @@ export const UserNotificationDefault = memo(() => {
                     max
                     className={cls.list}
                     style={{
-                        height: isMobile ? 'calc(100vh - 240px)' : '282px',
+                        height: '282px',
                     }}
                 >
                     {
@@ -258,7 +256,6 @@ export const UserNotificationDefault = memo(() => {
 
     return (
         <div>
-            <BrowserView>
                 <Popover
                     open={open}
                     onOpenChange={(value: boolean) => setOpen(value)}
@@ -322,26 +319,6 @@ export const UserNotificationDefault = memo(() => {
                         </div>
                     </Tooltip>
                 </Popover>
-            </BrowserView>
-            <MobileView>
-                <div style={{
-                    position: 'relative'
-                }}>
-                    <Button onClick={() => setOpen(true)} className={cls.triggerBtn} aria-label={t('Уведомления')} icon={<Bell size={18} strokeWidth={1.5} />} />
-                    {!!notificationIds.notRead.length && (
-                        <div
-                            className={cls.badge}
-                        >
-                            <MyTypography.Small strong style={{ margin: 0 }}>
-                                {notificationIds.notRead.length}
-                            </MyTypography.Small>
-                        </div>
-                    )}
-                </div>
-                <Drawer isOpen={open} onClose={onClose}>
-                    {content}
-                </Drawer>
-            </MobileView>
         </div>
     );
 });

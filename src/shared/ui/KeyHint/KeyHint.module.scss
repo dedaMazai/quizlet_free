@@ -2,6 +2,11 @@
     font-family: var(--font-mono);
     font-weight: 400;
     white-space: nowrap;
+
+    // На тач-экране клавиш нет
+    @media (width <= 650px) {
+        display: none;
+    }
 }
 
 .muted {

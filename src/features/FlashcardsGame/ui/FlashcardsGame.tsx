@@ -13,7 +13,9 @@ import { SessionButton, SessionButtonVariant } from '@/shared/ui/SessionButton';
 import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import { useKeyDown } from '@/shared/lib/hooks/useKeyDown';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { buildPositionTicks, buildSessionTicks } from '@/shared/lib/session';
 import { shuffle } from '@/shared/lib/utils';
 import cls from './FlashcardsGame.module.scss';
@@ -22,6 +24,10 @@ type FavoriteFilter = 'all' | 'favorite' | 'notFavorite';
 
 const NAV_ICON_SIZE = 20;
 const SHUFFLE_ICON_SIZE = 16;
+const MOBILE_NAV_ICON_SIZE = 22;
+const MOBILE_SHUFFLE_ICON_SIZE = 18;
+// Мобильный сегмент — 40px
+const MOBILE_FILTER_HEIGHT = 40;
 const ICON_STROKE = 1.5;
 
 interface FlashcardsGameProps {
@@ -39,6 +45,9 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
     cards, withFavoriteFilter = true, title, onExit, learnPath,
   } = props;
   const { t } = useTranslation();
+  const { isMobile } = useMatchMedia();
+  const navIconSize = isMobile ? MOBILE_NAV_ICON_SIZE : NAV_ICON_SIZE;
+  const shuffleIconSize = isMobile ? MOBILE_SHUFFLE_ICON_SIZE : SHUFFLE_ICON_SIZE;
 
   const { token } = theme.useToken();
   // Сегмент по макету: без подложки и отступов трека, выбранный — accent с текстом цвета фона
@@ -50,9 +59,10 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
         itemSelectedBg: token.colorPrimary,
         itemSelectedColor: token.colorBgLayout,
         itemHoverBg: token.colorPrimaryBg,
+        ...(isMobile ? { controlHeight: MOBILE_FILTER_HEIGHT } : {}),
       },
     },
-  }), [token.colorPrimary, token.colorBgLayout, token.colorPrimaryBg]);
+  }), [token.colorPrimary, token.colorBgLayout, token.colorPrimaryBg, isMobile]);
 
   const [filter, setFilter] = useState<FavoriteFilter>('all');
   const { data: favorites } = useGetFavoritesQuery(undefined, { skip: !withFavoriteFilter });
@@ -127,12 +137,13 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
     <ConfigProvider theme={segmentedTheme}>
       <Segmented<FavoriteFilter>
         className={cls.filter}
+        block={isMobile}
         value={filter}
         onChange={setFilter}
         options={[
           { label: t('Все'), value: 'all' },
           { label: t('Избранные'), value: 'favorite' },
-          { label: t('Неизбранные'), value: 'notFavorite' },
+          { label: isMobile ? t('Остальные') : t('Неизбранные'), value: 'notFavorite' },
         ]}
       />
     </ConfigProvider>
@@ -164,27 +175,33 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
               {!flipped && current.example && (
                 <span className={cls.example}>“{current.example}”</span>
               )}
-              <span className={cls.flipHint}>{t('Нажмите или пробел — перевернуть')}</span>
+              <span className={cls.flipHint}>
+                {isMobile ? t('Коснитесь — перевернуть') : t('Нажмите или пробел — перевернуть')}
+              </span>
             </Blueprint>
 
             <div className={cls.controls}>
               <SessionButton
                 variant={SessionButtonVariant.SECONDARY}
-                className={cls.navBtn}
+                className={classNames(cls.control, [cls.navBtn])}
                 onClick={goPrev}
               >
-                <ChevronLeft size={NAV_ICON_SIZE} strokeWidth={ICON_STROKE} aria-label={t('Назад')} />
+                <ChevronLeft size={navIconSize} strokeWidth={ICON_STROKE} aria-label={t('Назад')} />
               </SessionButton>
-              <SessionButton variant={SessionButtonVariant.SECONDARY} onClick={handleShuffle}>
-                <Repeat size={SHUFFLE_ICON_SIZE} strokeWidth={ICON_STROKE} />
+              <SessionButton
+                variant={SessionButtonVariant.SECONDARY}
+                className={cls.control}
+                onClick={handleShuffle}
+              >
+                <Repeat size={shuffleIconSize} strokeWidth={ICON_STROKE} />
                 {t('Перемешать')}
               </SessionButton>
               <SessionButton
                 variant={SessionButtonVariant.SECONDARY}
-                className={cls.navBtn}
+                className={classNames(cls.control, [cls.navBtn])}
                 onClick={goNext}
               >
-                <ChevronRight size={NAV_ICON_SIZE} strokeWidth={ICON_STROKE} aria-label={t('Далее')} />
+                <ChevronRight size={navIconSize} strokeWidth={ICON_STROKE} aria-label={t('Далее')} />
               </SessionButton>
             </div>
           </>

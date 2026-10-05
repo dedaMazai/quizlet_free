@@ -11,6 +11,12 @@
     cursor: pointer;
     transition: background var(--motion-fast) var(--ease-standard);
 
+    @media (width <= 650px) {
+        gap: 14px;
+        min-height: 60px;
+        padding: 0 16px;
+    }
+
     &:hover:not(.locked) {
         background: var(--color-accent-100);
     }
@@ -30,6 +36,12 @@
     font-family: var(--font-mono);
     font-size: 13px;
     color: var(--color-neutral-700);
+
+    @media (width <= 650px) {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+    }
 }
 
 .label {
@@ -37,6 +49,10 @@
     font-weight: 500;
     font-size: 24px;
     overflow-wrap: anywhere;
+
+    @media (width <= 650px) {
+        font-size: 21px;
+    }
 }
 
 .active {

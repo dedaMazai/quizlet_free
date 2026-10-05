@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { Button } from 'antd';
@@ -8,7 +9,8 @@ import {
 import { SectionPageHeader } from '@/widgets/SectionPage';
 import { NavSectionKey } from '@/shared/const/menu';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { RoutePath } from '@/shared/config/router/routePath';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { RoutePath, TENSE_TIME_PARAM } from '@/shared/config/router/routePath';
 import {
     ASPECT_GROUP_ORDER, ASPECT_GROUPS, TENSES, TENSE_TIME_ORDER, AspectGroupId, TenseTime,
 } from '@/shared/const/grammar';
@@ -20,6 +22,8 @@ import { TickProgress, TickProgressSize, TickState } from '@/shared/ui/TickProgr
 import cls from './GrammarTensesPage.module.scss';
 
 const ARROW_SIZE = 16;
+const MOBILE_ARROW_SIZE = 18;
+const PERCENT = 100;
 
 type PlanStatus = 'done' | 'now' | 'next';
 
@@ -37,6 +41,20 @@ const PLAN_TITLES: Record<AspectGroupId, string> = {
     'perfect-continuous': 'Perfect Cont.',
 };
 
+/** Мобильный переключатель аспектов: 4 колонки по ~87px */
+const MOBILE_ASPECT_LABELS: Record<AspectGroupId, string> = {
+    simple: 'Simple',
+    continuous: 'Cont.',
+    perfect: 'Perfect',
+    'perfect-continuous': 'Perf. Cont.',
+};
+
+const PLAN_TICK_STATE: Record<PlanStatus, TickState> = {
+    done: TickState.DONE,
+    now: TickState.CURRENT,
+    next: TickState.TODO,
+};
+
 const toTicks = (score: number): TickState[] => Array.from(
     { length: TENSE_MASTERY_TICKS },
     (_, i) => {
@@ -49,6 +67,9 @@ const GrammarTensesPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { data: mastery = {} } = useGetTenseMasteryQuery();
+    const { isMobile } = useMatchMedia();
+    // Выбранный на мобильном аспект; по умолчанию — текущая группа плана
+    const [selectedAspect, setSelectedAspect] = useState<AspectGroupId | null>(null);
 
     const timeLabels: Record<TenseTime, string> = {
         present: t('Наст.'),
@@ -84,6 +105,79 @@ const GrammarTensesPage = () => {
         { question: t('Важен результат, а не когда?'), answer: 'Perfect' },
         { question: t('Важно, как долго длится?'), answer: 'Perf. Cont.' },
     ];
+
+    if (isMobile) {
+        const aspect = selectedAspect ?? currentGroup ?? ASPECT_GROUP_ORDER[0];
+        const doneCount = plan.filter((step) => step.status === 'done').length;
+        const nowIndex = plan.findIndex((step) => step.status === 'now');
+
+        return (
+            <div className={cls.GrammarTensesPage}>
+                <SectionPageHeader section={NavSectionKey.GRAMMAR} />
+
+                <div className={cls.aspectSwitch}>
+                    {ASPECT_GROUP_ORDER.map((groupId) => (
+                        <button
+                            key={groupId}
+                            type="button"
+                            aria-pressed={groupId === aspect}
+                            className={classNames(cls.aspectOption, [], { [cls.aspectOptionActive]: groupId === aspect })}
+                            onClick={() => setSelectedAspect(groupId)}
+                        >
+                            {MOBILE_ASPECT_LABELS[groupId]}
+                        </button>
+                    ))}
+                </div>
+
+                <div className={cls.aspectHeader}>
+                    <span className={cls.aspectHeading}>{ASPECT_GROUPS[aspect].name}</span>
+                    <span className={cls.aspectFocus}>{t(ASPECT_GROUPS[aspect].focus)}</span>
+                </div>
+
+                <div className={cls.tenseCards}>
+                    {TENSES.filter((tense) => tense.group === aspect).map((tense) => (
+                        <Link
+                            key={tense.id}
+                            to={`${RoutePath.GRAMMAR_TENSE_GROUP(aspect)}?${TENSE_TIME_PARAM}=${tense.time}`}
+                            aria-label={tense.name}
+                            className={cls.tenseCard}
+                        >
+                            <BlueprintMarks />
+                            <span className={cls.tenseTime}>{timeLabels[tense.time]}</span>
+                            <span className={cls.formula}>{tense.shortFormula}</span>
+                            <span className={cls.example}>{tense.shortExample}</span>
+                        </Link>
+                    ))}
+                </div>
+
+                <div className={cls.planMobile}>
+                    <div className={cls.planMobileRow}>
+                        <span>
+                            {t('План: итерация {{current}} из {{total}}', {
+                                current: nowIndex + 1,
+                                total: plan.length,
+                            })}
+                        </span>
+                        <span className={cls.planPercent}>{`${Math.round((doneCount / plan.length) * PERCENT)}%`}</span>
+                    </div>
+                    <TickProgress
+                        size={TickProgressSize.SM}
+                        ticks={plan.map((step) => PLAN_TICK_STATE[step.status])}
+                    />
+                </div>
+
+                <Button
+                    type="primary"
+                    className={cls.practiceMobile}
+                    onClick={() => navigate(`${RoutePath.GRAMMAR_PRACTICE()}?group=${aspect}`)}
+                >
+                    <BlueprintMarks />
+                    {t('Практика {{group}}', { group: ASPECT_GROUPS[aspect].name })}
+                    <ArrowRight aria-hidden size={MOBILE_ARROW_SIZE} strokeWidth={1.5} />
+                </Button>
+            </div>
+        );
+    }
 
     return (
         <div className={cls.GrammarTensesPage}>

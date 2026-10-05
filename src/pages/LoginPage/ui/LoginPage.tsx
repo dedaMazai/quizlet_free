@@ -118,7 +118,9 @@ const LoginPage = () => {
                     <span className={cls.logoText}>{APP_NAME}</span>
                 </div>
                 <div className={cls.slogan}>
-                    <Kicker tone={KickerTone.ON_DARK}>{t('Английский по карточкам')}</Kicker>
+                    <Kicker tone={KickerTone.ON_DARK} className={cls.sloganKicker}>
+                        {t('Английский по карточкам')}
+                    </Kicker>
                     <span className={cls.sloganTitle}>{t('Учите фразами. Не забывайте через месяц.')}</span>
                 </div>
                 <div className={cls.pillars}>

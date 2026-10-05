@@ -156,18 +156,53 @@ $bars-height: 64px;
     white-space: nowrap;
 }
 
+// Мобильная главная 6.35: без прогноза и «Выбрать колоды», CTA во всю ширину
 @media (width <= 650px) {
     .DueHero {
-        gap: 24px;
-        padding: 24px 20px 20px;
+        gap: 18px;
+        padding: 22px 20px 20px;
+    }
+
+    .summary {
+        gap: 18px;
+    }
+
+    .DueHero .kicker {
+        font-size: 10px;
+    }
+
+    .countRow {
+        gap: 14px;
     }
 
     .count {
         font-size: 96px;
     }
 
-    .forecast {
-        align-items: flex-start;
+    .countText {
+        gap: 2px;
+        padding-bottom: 0;
+    }
+
+    .unit {
+        font-size: 22px;
+    }
+
+    .meta {
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .forecast,
+    .secondary {
+        display: none;
+    }
+
+    .primary {
+        justify-content: center;
+        width: 100%;
+        height: 52px;
+        padding: 0 22px;
     }
 
     // На телефоне клавиатурной подсказки нет

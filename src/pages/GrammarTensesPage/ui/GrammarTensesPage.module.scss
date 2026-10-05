@@ -264,3 +264,128 @@ $plan-number-size: 30px;
         row-gap: 16px;
     }
 }
+
+// Мобильная 6.51: переключатель аспектов вместо матрицы
+$aspect-option-height: 44px;
+$tense-time-column: 52px;
+$cta-mobile-height: 52px;
+
+.aspectSwitch {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid var(--color-divider);
+}
+
+.aspectOption {
+    display: grid;
+    place-items: center;
+    height: $aspect-option-height;
+    padding: 0 2px;
+    border: none;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.1;
+    text-align: center;
+    color: var(--color-text);
+    background: transparent;
+    cursor: pointer;
+
+    & + & {
+        border-left: 1px solid var(--color-divider);
+    }
+}
+
+.aspectOptionActive {
+    color: var(--color-bg);
+    background: var(--color-accent);
+}
+
+.aspectHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.aspectHeading {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 24px;
+}
+
+.aspectFocus {
+    font-size: 13px;
+    white-space: nowrap;
+    text-transform: lowercase;
+    color: var(--color-neutral-700);
+}
+
+.tenseCards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tenseCard {
+    position: relative;
+    display: grid;
+    grid-template-columns: $tense-time-column minmax(0, 1fr);
+    gap: 4px 12px;
+    align-items: center;
+    padding: 12px 14px;
+    border: 1px solid var(--color-divider);
+    color: inherit;
+
+    &:hover,
+    &:active {
+        color: inherit;
+        background: var(--color-accent-100);
+    }
+
+    .formula {
+        font-size: 13px;
+    }
+}
+
+.tenseTime {
+    grid-row: span 2;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-neutral-700);
+}
+
+.planMobile {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.planMobileRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.planPercent {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.practiceMobile {
+    height: $cta-mobile-height;
+    gap: 10px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 18px;
+}
+
+@media (width <= 650px) {
+    .GrammarTensesPage {
+        gap: 16px;
+    }
+}

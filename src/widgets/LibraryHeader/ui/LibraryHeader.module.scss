@@ -23,3 +23,10 @@ $button-height: 38px;
 .pickerSelect {
     width: 100%;
 }
+
+// Mobile 6.38: квадрат 44×44 с рамкой
+.mobileCreate {
+    width: 44px;
+    height: 44px;
+    border-color: var(--color-divider);
+}

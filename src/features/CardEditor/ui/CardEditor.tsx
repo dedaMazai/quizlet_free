@@ -22,7 +22,7 @@ import { classNames } from '@/shared/lib/classNames/classNames';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { VStack } from '@/shared/ui/Stack';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { useAutoTranslate } from '../model/useAutoTranslate';
@@ -43,6 +43,7 @@ const chunk = <T, >(items: T[], size: number): T[][] => {
 const MODAL_WIDTH = 920;
 const TOOL_ICON_SIZE = 14;
 const ROW_ICON_SIZE = 16;
+const MOBILE_REMOVE_ICON_SIZE = 14;
 const ICON_STROKE = 1.5;
 
 const EXCEL_ACCEPT = '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -300,14 +301,15 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   return (
     <ModalFrame
       open={open}
-      width={isMobile ? 'calc(100vw - 24px)' : MODAL_WIDTH}
+      width={MODAL_WIDTH}
       kicker={deck?.name}
       title={t('Добавить слова')}
-      footerNote={t('Перевод подставляется автоматически')}
+      // На мобильном — только CTA, без подписи и «Отмены» (закрытие — крестик)
+      footerNote={isMobile ? undefined : t('Перевод подставляется автоматически')}
       onClose={onClose}
       actions={(
         <>
-          <Button onClick={onClose}>{t('Отмена')}</Button>
+          {!isMobile && <Button onClick={onClose}>{t('Отмена')}</Button>}
           <Button type="primary" loading={isLoading} onClick={handleSubmit}>
             <BlueprintMarks />
             {t('Сохранить {{count}} слов', { count: readyCount })}
@@ -320,20 +322,21 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
           accept={EXCEL_ACCEPT}
           showUploadList={false}
           beforeUpload={handleBeforeUpload}
-          className={isMobile ? cls.importFull : undefined}
         >
-          <Button className={cls.toolButton} loading={isImporting} block={isMobile}>
+          <Button className={cls.toolButton} loading={isImporting}>
             {t('Импорт из Excel')}
           </Button>
         </Upload>
-        <Button
-          type="link"
-          className={classNames(cls.toolButton, [cls.ghost])}
-          onClick={handleDownloadTemplate}
-          block={isMobile}
-        >
-          {t('Скачать шаблон')}
-        </Button>
+        {/* Шаблона нет в мобильном макете 6.37 */}
+        {!isMobile && (
+          <Button
+            type="link"
+            className={classNames(cls.toolButton, [cls.ghost])}
+            onClick={handleDownloadTemplate}
+          >
+            {t('Скачать шаблон')}
+          </Button>
+        )}
         {canAiCheck && (
           <Tooltip title={t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}>
             <Button
@@ -342,9 +345,8 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
               loading={isChecking}
               disabled={noCredits}
               onClick={handleAiCheck}
-              block={isMobile}
             >
-              {t('Проверить переводы ИИ')}
+              {isMobile ? t('Проверить ИИ') : t('Проверить переводы ИИ')}
             </Button>
           </Tooltip>
         )}
@@ -459,26 +461,23 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
               type="text"
               className={classNames(cls.iconButton, [cls.remove])}
               aria-label={t('Удалить строку')}
-              icon={<X aria-hidden size={ROW_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+              icon={<X aria-hidden size={isMobile ? MOBILE_REMOVE_ICON_SIZE : ROW_ICON_SIZE} strokeWidth={ICON_STROKE} />}
               onClick={() => removeRow(row.id)}
             />
           );
           const number = String(index + 1).padStart(2, '0');
 
+          // Mobile 6.37: номер и ×, слово и перевод (без примера и озвучки)
           if (isMobile) {
             return (
-              <VStack key={row.id} max gap="8" align="start" className={cls.cardRow}>
-                <HStack max justify="between" align="center">
+              <div key={row.id} className={cls.cardRow}>
+                <div className={cls.cardRowHead}>
                   <span className={cls.index}>{number}</span>
-                  <HStack gap="4" align="center">
-                    {speakButton}
-                    {deleteButton}
-                  </HStack>
-                </HStack>
+                  {deleteButton}
+                </div>
                 {termInput}
                 {translationInput}
-                {exampleInput}
-              </VStack>
+              </div>
             );
           }
 

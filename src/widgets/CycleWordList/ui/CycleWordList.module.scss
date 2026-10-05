@@ -169,3 +169,59 @@ $icon-cell: 24px;
     color: var(--color-neutral-400);
   }
 }
+
+// Mobile 6.41: строки 56px с волосяной линией сверху, без ручки и действий
+@media (width <= 650px) {
+  .mobileList {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .mobileRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  }
+
+  .mobileIndex {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    white-space: nowrap;
+    color: var(--color-neutral-600);
+  }
+
+  .mobileText {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+
+    // Вложенность перебивает цвет и размер .ant-typography
+    .mobileTerm {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .mobileTranslation {
+      font-size: 13px;
+      color: var(--color-neutral-700);
+    }
+  }
+
+  .mobileTag {
+    font-size: 9px;
+    letter-spacing: 0;
+  }
+
+  // «…» 44×44, отрицательный отступ — чтобы иконка стояла у края, как статус в макете
+  .mobileMenuButton {
+    flex: none;
+    min-width: 44px;
+    height: 44px;
+    margin-right: -12px;
+    color: var(--color-neutral-700);
+  }
+}

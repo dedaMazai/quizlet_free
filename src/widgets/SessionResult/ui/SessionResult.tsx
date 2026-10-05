@@ -20,12 +20,14 @@ import { SessionButton, SessionButtonVariant } from '@/shared/ui/SessionButton';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { LOCAL_STORAGE_SESSION_BEST_ACCURACY_KEY } from '@/shared/const/localstorage';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { SessionRouteState, SessionSummary } from '@/shared/lib/session';
 import { getStreakLevel, STREAK_LEVEL_NAMES } from '@/shared/lib/streak';
 import { formatDuration } from '../model/sessionResult';
 import cls from './SessionResult.module.scss';
 
 const FLAME_SIZE = 48;
+const MOBILE_FLAME_SIZE = 36;
 const FLAME_STROKE = 1.25;
 const ARROW_SIZE = 16;
 const ICON_STROKE = 1.5;
@@ -75,6 +77,7 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isMobile } = useMatchMedia();
   const user = useUserInfo();
   const tz = useMemo(
     () => user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
@@ -151,7 +154,8 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
 
   const streakMeta = [
     dayAdded ? '+1' : null,
-    t('уровень «{{level}}»', { level: t(STREAK_LEVEL_NAMES[level.index]) }),
+    // Мобильный макет: «+1 · до рекорда N» — уровень и так виден по цвету огня
+    isMobile ? null : t('уровень «{{level}}»', { level: t(STREAK_LEVEL_NAMES[level.index]) }),
     longest > streak ? t('до рекорда {{count}}', { count: longest }) : null,
   ].filter(Boolean).join(' · ');
 
@@ -172,7 +176,7 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
     <div className={classNames(cls.SessionResult, [className])}>
       <div className={cls.content}>
         <div className={cls.head}>
-          <Kicker tone={KickerTone.ACCENT}>{t('Сессия завершена')}</Kicker>
+          <Kicker tone={KickerTone.ACCENT} className={cls.kicker}>{t('Сессия завершена')}</Kicker>
           <h1 className={cls.title}>
             {due?.count === 0 ? t('Долг закрыт. День засчитан.') : t('День засчитан.')}
           </h1>
@@ -181,7 +185,12 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
         <div className={cls.grid}>
           <AccentPanel className={classNames(cls.streak, [LEVEL_CLASSES[level.index]])}>
             <div className={cls.streakRow}>
-              <Flame className={cls.flame} size={FLAME_SIZE} strokeWidth={FLAME_STROKE} aria-hidden />
+              <Flame
+                className={cls.flame}
+                size={isMobile ? MOBILE_FLAME_SIZE : FLAME_SIZE}
+                strokeWidth={FLAME_STROKE}
+                aria-hidden
+              />
               <span className={cls.streakDays}>{streak}</span>
               <div className={cls.streakText}>
                 <span className={cls.streakUnit}>
@@ -218,7 +227,7 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
           </Blueprint>
         </div>
 
-        {hardWords.length > 0 && (
+        {hardWords.length > 0 && !isMobile && (
           <div className={cls.hard}>
             <SectionHeader title={t('Трудные слова этой сессии')} size={SectionHeaderSize.SM} />
             <div className={cls.chips}>
@@ -231,6 +240,7 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
 
         <div className={cls.actions}>
           <SessionButton
+            className={cls.primary}
             onClick={primary.onClick}
             icon={primary.withArrow
               ? <ArrowRight size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
@@ -240,12 +250,17 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
           </SessionButton>
           {hardWords.length > 0 && (
             <SessionButton variant={SessionButtonVariant.SECONDARY} onClick={repeatHard}>
-              {t('Повторить трудные')}
+              {isMobile
+                ? t('Повторить трудные · {{count}}', { count: hardWords.length })
+                : t('Повторить трудные')}
             </SessionButton>
           )}
-          <SessionButton variant={SessionButtonVariant.GHOST} onClick={() => navigate(RoutePath.MAIN())}>
-            {t('На главную')}
-          </SessionButton>
+          {/* На мобильном выход — ✕ в топбаре */}
+          {!isMobile && (
+            <SessionButton variant={SessionButtonVariant.GHOST} onClick={() => navigate(RoutePath.MAIN())}>
+              {t('На главную')}
+            </SessionButton>
+          )}
         </div>
       </div>
     </div>

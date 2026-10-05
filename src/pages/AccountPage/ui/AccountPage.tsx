@@ -9,11 +9,13 @@ import {
     SETTINGS_TAB_PARAM,
     SETTINGS_USERS_TAB,
 } from '@/shared/config/router/routePath';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { Accesses } from '@/shared/types/accesses';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { SectionTabItem } from '@/shared/ui/SectionTabs';
 import { VStack } from '@/shared/ui/Stack';
 import { AccountTab } from '../model/accountTab';
+import { MobileAccount } from './MobileAccount/MobileAccount';
 import { ProfileTab } from './ProfileTab/ProfileTab';
 import { SettingsTab } from './SettingsTab/SettingsTab';
 import cls from './AccountPage.module.scss';
@@ -27,6 +29,7 @@ const AccountPage = ({ tab }: AccountPageProps) => {
     const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const userAccesses = useUserAccesses();
+    const { isMobile } = useMatchMedia();
 
     const canReadUsers = useMemo(
         () => checkRequireAccesses({ accesses: [Accesses.users_can_read], userAccesses }),
@@ -59,6 +62,11 @@ const AccountPage = ({ tab }: AccountPageProps) => {
             active: activeTab === AccountTab.USERS,
         }] : []),
     ], [t, activeTab, canReadUsers]);
+
+    // Мобильная (6.56): один экран без вкладок, «Пользователи» скрыты
+    if (isMobile) {
+        return <MobileAccount />;
+    }
 
     return (
         <VStack max gap="24">

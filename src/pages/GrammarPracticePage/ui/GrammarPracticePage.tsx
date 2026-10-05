@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import { Button, Input } from 'antd';
-import { Sparkles } from 'lucide-react';
+import { SlidersHorizontal, Sparkles } from 'lucide-react';
 import { useGetAiUsageQuery } from '@/entities/Card';
 import {
     AiCheckResultItem,
@@ -17,8 +17,10 @@ import {
 } from '@/shared/const/grammar';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { TickProgress, TickState } from '@/shared/ui/TickProgress';
 import {
     SessionTask, buildTemplateTasks, checkTemplateAnswers, tenseNamesForGroups,
@@ -31,6 +33,7 @@ type Phase = 'answering' | 'checked';
 
 const SOURCE_ICON_SIZE = 14;
 const ADVICE_ICON_SIZE = 18;
+const SETTINGS_ICON_SIZE = 20;
 const ANSWER_MAX_LENGTH = 80;
 
 /** Подписи групп в настройках: Perfect Continuous не помещается в половину колонки */
@@ -54,6 +57,9 @@ const GrammarPracticePage = () => {
     const { t, i18n } = useTranslation();
     const { message } = useAntdApp();
     const [searchParams] = useSearchParams();
+    const { isMobile } = useMatchMedia();
+    // Мобильная 6.53: настройки набора — в шторке по кнопке в шапке
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const presetGroup = searchParams.get('group');
     const [groups, setGroups] = useState<AspectGroupId[]>(
@@ -92,15 +98,16 @@ const GrammarPracticePage = () => {
         setPhase('answering');
     };
 
-    const startSession = async () => {
+    /** true — набор показан; шторка настроек на мобильном закрывается только тогда */
+    const startSession = async (): Promise<boolean> => {
         if (groups.length === 0) {
             message.warning(t('Выберите хотя бы одну группу времён'));
-            return;
+            return false;
         }
 
         if (mode === 'templates') {
             showTasks(buildTemplateTasks(groups, PRACTICE_TASKS_COUNT));
-            return;
+            return true;
         }
 
         try {
@@ -110,14 +117,16 @@ const GrammarPracticePage = () => {
             }).unwrap();
             if (exercises.length === 0) {
                 message.error(t('Не удалось получить задания от ИИ'));
-                return;
+                return false;
             }
             showTasks(exercises);
+            return true;
         } catch (error) {
             const code = (error as { error?: string })?.error ?? '';
             message.error(code.includes('AI_LIMIT_EXCEEDED')
                 ? t('Лимит запросов к ИИ исчерпан')
                 : t('Не удалось получить задания от ИИ'));
+            return false;
         }
     };
 
@@ -174,79 +183,126 @@ const GrammarPracticePage = () => {
     const groupsList = new Intl.ListFormat(i18n.language, { type: 'conjunction' })
         .format(groups.map((groupId) => ASPECT_GROUPS[groupId].name));
 
+    const settingsFields = (
+        <>
+            <div className={cls.setting}>
+                <Kicker size={KickerSize.SM}>{t('Группы времён')}</Kicker>
+                <div className={cls.groups}>
+                    {ASPECT_GROUP_ORDER.map((groupId) => (
+                        <button
+                            key={groupId}
+                            type="button"
+                            aria-pressed={groups.includes(groupId)}
+                            title={`${t(ASPECT_GROUPS[groupId].idea)} (${ASPECT_GROUPS[groupId].formulaHint})`}
+                            className={classNames(cls.group, [], {
+                                [cls.groupActive]: groups.includes(groupId),
+                            })}
+                            onClick={() => toggleGroup(groupId)}
+                        >
+                            {GROUP_LABELS[groupId]}
+                        </button>
+                    ))}
+                </div>
+                <span className={cls.hint}>
+                    {groups.length === 0
+                        ? t('Выберите хотя бы одну группу, чтобы начать.')
+                        : t('В тренировку войдут {{count}} времён: {{groups}} × настоящее, прошедшее, будущее.', {
+                            count: tensesCount,
+                            groups: groupsList,
+                        })}
+                </span>
+            </div>
+
+            <div className={cls.setting}>
+                <Kicker size={KickerSize.SM}>{t('Источник заданий')}</Kicker>
+                <div className={cls.sources}>
+                    <button
+                        type="button"
+                        aria-pressed={mode === 'templates'}
+                        className={classNames(cls.source, [], { [cls.sourceActive]: mode === 'templates' })}
+                        onClick={() => setMode('templates')}
+                    >
+                        {t('Шаблоны')}
+                    </button>
+                    <button
+                        type="button"
+                        aria-pressed={mode === 'ai'}
+                        className={classNames(cls.source, [], { [cls.sourceActive]: mode === 'ai' })}
+                        onClick={() => setMode('ai')}
+                    >
+                        <Sparkles aria-hidden size={SOURCE_ICON_SIZE} strokeWidth={1.5} />
+                        {t('ИИ')}
+                    </button>
+                </div>
+                <span className={cls.hint}>
+                    {mode === 'templates'
+                        ? t('Готовые задания, проверка мгновенная и без расходования лимита ИИ.')
+                        : t('Новые предложения и разбор ответов. 2 запроса · осталось {{count}}.', {
+                            count: aiRemaining ?? 0,
+                        })}
+                </span>
+            </div>
+        </>
+    );
+
+    const startFromSheet = async () => {
+        // При ошибке ИИ шторка остаётся открытой — можно сменить источник и повторить
+        if (await startSession()) {
+            setIsSettingsOpen(false);
+        }
+    };
+
     return (
         <div className={cls.GrammarPracticePage}>
-            <SectionPageHeader section={NavSectionKey.GRAMMAR} />
+            <SectionPageHeader
+                section={NavSectionKey.GRAMMAR}
+                extra={isMobile && (
+                    <Button
+                        type="text"
+                        className={cls.settingsButton}
+                        aria-label={t('Настройки практики')}
+                        icon={<SlidersHorizontal aria-hidden size={SETTINGS_ICON_SIZE} strokeWidth={1.5} />}
+                        onClick={() => setIsSettingsOpen(true)}
+                    />
+                )}
+            />
+
+            {isMobile && (
+                <ModalFrame
+                    open={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    width="100%"
+                    title={t('Настройки практики')}
+                    actions={(
+                        <Button
+                            type="primary"
+                            loading={isGenerating}
+                            disabled={groups.length === 0}
+                            onClick={startFromSheet}
+                        >
+                            {t('Новый набор')}
+                        </Button>
+                    )}
+                >
+                    <div className={cls.settingsSheet}>{settingsFields}</div>
+                </ModalFrame>
+            )}
 
             <div className={cls.layout}>
-                <Blueprint className={cls.settings}>
-                    <div className={cls.setting}>
-                        <Kicker size={KickerSize.SM}>{t('Группы времён')}</Kicker>
-                        <div className={cls.groups}>
-                            {ASPECT_GROUP_ORDER.map((groupId) => (
-                                <button
-                                    key={groupId}
-                                    type="button"
-                                    aria-pressed={groups.includes(groupId)}
-                                    title={`${t(ASPECT_GROUPS[groupId].idea)} (${ASPECT_GROUPS[groupId].formulaHint})`}
-                                    className={classNames(cls.group, [], {
-                                        [cls.groupActive]: groups.includes(groupId),
-                                    })}
-                                    onClick={() => toggleGroup(groupId)}
-                                >
-                                    {GROUP_LABELS[groupId]}
-                                </button>
-                            ))}
-                        </div>
-                        <span className={cls.hint}>
-                            {groups.length === 0
-                                ? t('Выберите хотя бы одну группу, чтобы начать.')
-                                : t('В тренировку войдут {{count}} времён: {{groups}} × настоящее, прошедшее, будущее.', {
-                                    count: tensesCount,
-                                    groups: groupsList,
-                                })}
-                        </span>
-                    </div>
+                {!isMobile && (
+                    <Blueprint className={cls.settings}>
+                        {settingsFields}
 
-                    <div className={cls.setting}>
-                        <Kicker size={KickerSize.SM}>{t('Источник заданий')}</Kicker>
-                        <div className={cls.sources}>
-                            <button
-                                type="button"
-                                aria-pressed={mode === 'templates'}
-                                className={classNames(cls.source, [], { [cls.sourceActive]: mode === 'templates' })}
-                                onClick={() => setMode('templates')}
-                            >
-                                {t('Шаблоны')}
-                            </button>
-                            <button
-                                type="button"
-                                aria-pressed={mode === 'ai'}
-                                className={classNames(cls.source, [], { [cls.sourceActive]: mode === 'ai' })}
-                                onClick={() => setMode('ai')}
-                            >
-                                <Sparkles aria-hidden size={SOURCE_ICON_SIZE} strokeWidth={1.5} />
-                                {t('ИИ')}
-                            </button>
-                        </div>
-                        <span className={cls.hint}>
-                            {mode === 'templates'
-                                ? t('Готовые задания, проверка мгновенная и без расходования лимита ИИ.')
-                                : t('Новые предложения и разбор ответов. 2 запроса · осталось {{count}}.', {
-                                    count: aiRemaining ?? 0,
-                                })}
-                        </span>
-                    </div>
-
-                    <Button
-                        className={cls.newSet}
-                        loading={isGenerating}
-                        disabled={groups.length === 0}
-                        onClick={startSession}
-                    >
-                        {t('Новый набор')}
-                    </Button>
-                </Blueprint>
+                        <Button
+                            className={cls.newSet}
+                            loading={isGenerating}
+                            disabled={groups.length === 0}
+                            onClick={startSession}
+                        >
+                            {t('Новый набор')}
+                        </Button>
+                    </Blueprint>
+                )}
 
                 <div className={cls.session}>
                     <div className={cls.summary}>
@@ -310,7 +366,14 @@ const GrammarPracticePage = () => {
                         })}
                     </div>
 
-                    {isChecked && advice && (
+                    {isChecked && advice && isMobile && (
+                        <div className={cls.tip}>
+                            <Sparkles aria-hidden size={ADVICE_ICON_SIZE} strokeWidth={1.5} className={cls.adviceIcon} />
+                            <span className={cls.tipText}>{advice}</span>
+                        </div>
+                    )}
+
+                    {isChecked && advice && !isMobile && (
                         <Blueprint className={cls.advice}>
                             <Sparkles aria-hidden size={ADVICE_ICON_SIZE} strokeWidth={1.5} className={cls.adviceIcon} />
                             <div className={cls.adviceBody}>

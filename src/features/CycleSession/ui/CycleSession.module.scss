@@ -5,6 +5,18 @@
   gap: 12px;
   max-width: 100%;
   text-align: center;
+
+  // Мобильный — как экран «Письмо»
+  @media (width <= 650px) {
+    gap: 10px;
+    padding: 28px 0 8px;
+  }
+}
+
+.prompt .kicker {
+  @media (width <= 650px) {
+    font-size: 10px;
+  }
 }
 
 .word {
@@ -16,7 +28,9 @@
   overflow-wrap: anywhere;
 
   @media (width <= 650px) {
-    font-size: 40px;
+    font-size: 38px;
+    line-height: 1.05;
+    letter-spacing: normal;
   }
 }
 
@@ -26,12 +40,29 @@
   gap: 14px;
   width: 100%;
   max-width: 680px;
+
+  @media (width <= 650px) {
+    gap: 16px;
+  }
 }
 
 .actions {
   display: flex;
   align-items: center;
   gap: 16px;
+
+  // Мобильный: CTA на всю ширину, прижаты к низу
+  @media (width <= 650px) {
+    margin-top: auto;
+  }
+}
+
+.actions .cta {
+  @media (width <= 650px) {
+    flex: 1;
+    width: auto;
+    font-size: 19px;
+  }
 }
 
 // Место под подсмотренный ответ резервируется, чтобы форма не прыгала.
@@ -57,4 +88,10 @@
   user-select: none;
   touch-action: none;
   -webkit-touch-callout: none;
+
+  // В ряд с CTA 56px
+  @media (width <= 650px) {
+    width: 56px;
+    height: 56px;
+  }
 }

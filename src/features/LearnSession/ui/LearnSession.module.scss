@@ -5,6 +5,30 @@
   gap: 14px;
   max-width: 100%;
   text-align: center;
+
+  @media (width <= 650px) {
+    gap: 10px;
+  }
+}
+
+// Мобильный: блок вопроса занимает свободное место и центрирует слово
+.choicePrompt {
+  @media (width <= 650px) {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.writePrompt {
+  @media (width <= 650px) {
+    padding: 28px 0 8px;
+  }
+}
+
+.prompt .kicker {
+  @media (width <= 650px) {
+    font-size: 10px;
+  }
 }
 
 .wordRow {
@@ -27,7 +51,8 @@
   font-size: 72px;
 
   @media (width <= 650px) {
-    font-size: 44px;
+    font-size: 48px;
+    letter-spacing: normal;
   }
 }
 
@@ -35,13 +60,19 @@
   font-size: 64px;
 
   @media (width <= 650px) {
-    font-size: 40px;
+    font-size: 38px;
+    line-height: 1.05;
+    letter-spacing: normal;
   }
 }
 
 .gloss {
   font-size: 15px;
   color: var(--color-neutral-700);
+
+  @media (width <= 650px) {
+    font-size: 14px;
+  }
 }
 
 .favorite {
@@ -58,6 +89,7 @@
 
   @media (width <= 650px) {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
 
@@ -78,12 +110,30 @@
   gap: 14px;
   width: 100%;
   max-width: 680px;
+
+  @media (width <= 650px) {
+    gap: 16px;
+  }
 }
 
 .actions {
   display: flex;
   align-items: center;
   gap: 16px;
+
+  // Мобильный: CTA во всю ширину, прижаты к низу
+  @media (width <= 650px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin-top: auto;
+  }
+}
+
+.actions .cta {
+  @media (width <= 650px) {
+    font-size: 19px;
+  }
 }
 
 .settings {

@@ -89,3 +89,66 @@ $card-min-height: 150px;
     white-space: nowrap;
     color: var(--color-neutral-700);
 }
+
+// Mobile 6.38: список карточек колод
+@media (width <= 650px) {
+    .grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+.mobileCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.mobileHead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+// 44×44 цель касания, отрицательные поля — чтобы строка не стала выше
+.mobileMenuButton {
+    flex: none;
+    min-width: 44px;
+    height: 44px;
+    margin: -12px -10px -12px 0;
+    color: var(--color-neutral-700);
+}
+
+.mobileName {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 18px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.mobileProgress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobileBar {
+    flex: 1;
+}
+
+.mobileCount {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-neutral-700);
+}

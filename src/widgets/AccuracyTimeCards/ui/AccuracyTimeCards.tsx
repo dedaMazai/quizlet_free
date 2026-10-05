@@ -13,6 +13,7 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 import { StatCell, StatCellTone } from '@/shared/ui/StatCell';
 import { getStreakLevel, STREAK_LEVEL_NAMES } from '@/shared/lib/streak';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './AccuracyTimeCards.module.scss';
 
 const PERCENT = 100;
@@ -66,6 +67,7 @@ const formatDelta = (diff: number, compare: string): Delta => {
 /** KPI-полоса прогресса: точность, ответы, время, серия (6.23) */
 export const AccuracyTimeCards: FC<AccuracyTimeCardsProps> = ({ className, tz, period }) => {
   const { t, i18n } = useTranslation();
+  const { isMobile } = useMatchMedia();
   // currentData — пока грузится новый период, не показываем цифры прошлого
   const { currentData: summary, isError, refetch } = useGetProgressSummaryQuery({ tz, period });
   const {
@@ -147,7 +149,8 @@ export const AccuracyTimeCards: FC<AccuracyTimeCardsProps> = ({ className, tz, p
     },
     {
       key: 'streak',
-      label: `${t('Серия')} · ${t(STREAK_LEVEL_NAMES[level.index])}`,
+      // Мобильная 6.55 — без уровня серии
+      label: isMobile ? t('Серия') : `${t('Серия')} · ${t(STREAK_LEVEL_NAMES[level.index])}`,
       value: streak,
       unit: t('дн'),
       delta: streakHint,

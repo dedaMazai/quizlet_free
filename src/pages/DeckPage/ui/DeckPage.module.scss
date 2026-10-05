@@ -276,3 +276,158 @@ $mode-icon: 20px;
     font-size: 14px;
     white-space: nowrap;
 }
+
+// Mobile 6.36
+$play-size: 52px;
+$mobile-bar: 8px;
+
+.mobileBody {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-top: 4px;
+}
+
+.mobileTitleBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.mobileTitle {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 1;
+}
+
+.mastery .mobileBar {
+    height: $mobile-bar;
+}
+
+.mobileLegend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--color-neutral-800);
+}
+
+.mobileRecommended {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.mobileRecommendedText {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.mobileRecommendedKicker {
+    font-size: 9px;
+}
+
+.mobileRecommendedName {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.1;
+}
+
+.mobileRecommendedMeta {
+    font-size: 12px;
+    color: var(--color-accent-300);
+}
+
+.play {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: $play-size;
+    height: $play-size;
+    background: var(--color-bg);
+    color: var(--color-accent-900);
+}
+
+.mobileModes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.mobileMode {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 12px;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    color: var(--color-text);
+    cursor: pointer;
+
+    &:disabled {
+        opacity: var(--btn-disabled-opacity);
+        cursor: not-allowed;
+    }
+
+    .modeIcon {
+        height: auto;
+    }
+}
+
+.mobileModeName {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+.mobileWords {
+    display: flex;
+    flex-direction: column;
+}
+
+.mobileWordsHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.mobileWordsTitle {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 20px;
+}
+
+// В раскладке 44×36 по макету, зона нажатия — 44×44
+.mobileSearchButton {
+    // min-width: ширину иконочной кнопки AntD задаёт более специфичный селектор
+    min-width: 44px;
+    height: 44px;
+    margin-block: -4px;
+}
+
+.mobileSearch {
+    height: 44px;
+    margin-top: 10px;
+}
+
+@media (width <= 650px) {
+    .DeckPage {
+        gap: 0;
+    }
+}

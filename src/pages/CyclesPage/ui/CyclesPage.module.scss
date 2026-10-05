@@ -2,6 +2,8 @@ $header-button: 38px;
 $lead-width: 760px;
 $cell-height: 10px;
 $cells-in-row: 10;
+$cells-count: 30;
+$cell-height-mobile: 8px;
 
 .CyclesPage {
   display: flex;
@@ -115,12 +117,50 @@ $cells-in-row: 10;
   }
 }
 
+// Mobile 6.40: карточки в колонку, полоса — 30 ячеек в одну строку
 @media (width <= 650px) {
+  .CyclesPage {
+    gap: 16px;
+  }
+
+  .createIconButton {
+    width: 44px;
+    height: 44px;
+  }
+
   .grid {
     grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
   }
 
   .lead {
-    font-size: 20px;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--color-neutral-800);
+  }
+
+  .card {
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .todo {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  .name {
+    font-size: 21px;
+  }
+
+  .cells {
+    grid-template-columns: repeat($cells-count, 1fr);
+    gap: 1px;
+  }
+
+  .cell {
+    height: $cell-height-mobile;
   }
 }

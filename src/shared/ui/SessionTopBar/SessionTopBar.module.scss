@@ -82,3 +82,26 @@
     height: 36px;
     padding: 0;
 }
+
+// Mobile 6.43–6.50: 56px, ✕ 44×44, деления на всю ширину, счётчик справа
+.mobile {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+    padding: 0 12px 0 8px;
+}
+
+.mobileBtn {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    color: var(--color-text);
+}
+
+.mobileTicks {
+    flex: 1;
+    gap: 2px;
+}

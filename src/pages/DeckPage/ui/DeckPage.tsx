@@ -14,6 +14,7 @@ import {
   Layers,
   Lightbulb,
   PenLine,
+  Play,
   Plus,
   Search,
   Sparkles,
@@ -45,6 +46,7 @@ import { GenerateChunksModal } from '@/features/GenerateChunksAI';
 import { useDeckExport, ExportFormat } from '@/features/ExportDeck';
 import { ROUND_SIZE } from '@/features/LearnSession';
 import { AccentPanel } from '@/shared/ui/AccentPanel';
+import { BackBar } from '@/shared/ui/BackBar';
 import { BackLink } from '@/shared/ui/BackLink';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
@@ -56,6 +58,7 @@ import { Accesses } from '@/shared/types/accesses';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { recommendMode, StudyMode, STUDY_MODES } from '../model/recommendMode';
 import cls from './DeckPage.module.scss';
 
@@ -66,6 +69,13 @@ const SMALL_ICON_SIZE = 14;
 const SEARCH_ICON_SIZE = 15;
 const MORE_ICON_SIZE = 18;
 const PERCENT = 100;
+// Mobile 6.36
+const MOBILE_BAR_ICON_SIZE = 20;
+const MOBILE_MODE_ICON_SIZE = 18;
+const MOBILE_SEARCH_ICON_SIZE = 18;
+const PLAY_ICON_SIZE = 20;
+
+type MenuClick = NonNullable<MenuProps['onClick']>;
 
 const toPercent = (part: number, total: number): number => (
   total > 0 ? Math.round((part / total) * PERCENT) : 0
@@ -91,6 +101,8 @@ const DeckPage = () => {
   const [dupOpen, setDupOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [chunksOpen, setChunksOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const { isMobile } = useMatchMedia();
 
   const { data: deck, isLoading } = useGetDeckQuery(deckId!, { skip: !deckId });
   const [duplicateDeck, { isLoading: isDuplicating }] = useDuplicateDeckMutation();
@@ -137,8 +149,11 @@ const DeckPage = () => {
   }, [items]);
 
   const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
-  const [typeFilter, setTypeFilter] = useState<CardType | 'all'>('all');
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [typeFilterState, setTypeFilter] = useState<CardType | 'all'>('all');
+  const [onlyFavoritesState, setOnlyFavorites] = useState(false);
+  // На мобильном переключателей фильтров нет — выбранные на широком экране не действуют
+  const typeFilter = isMobile ? 'all' : typeFilterState;
+  const onlyFavorites = !isMobile && onlyFavoritesState;
   const filtered = useMemo(() => {
     const query = debouncedSearch.trim().toLowerCase();
     const favSet = new Set(favorites ?? []);
@@ -231,7 +246,7 @@ const DeckPage = () => {
       : null,
   ].filter(Boolean);
 
-  const handleMoreClick: MenuProps['onClick'] = ({ key }) => {
+  const handleMoreClick: MenuClick = ({ key }) => {
     if (key.startsWith('export:')) {
       exportDeck(key.split(':')[1] as ExportFormat);
       return;
@@ -247,7 +262,7 @@ const DeckPage = () => {
     { key: 'ai-chunks', label: t('Подобрать фразы') },
   ];
 
-  const handleAiClick: MenuProps['onClick'] = ({ key }) => {
+  const handleAiClick: MenuClick = ({ key }) => {
     if (key === 'ai-check') setAiOpen(true);
     if (key === 'ai-chunks') setChunksOpen(true);
   };
@@ -258,23 +273,24 @@ const DeckPage = () => {
     examplesCount: stats.examples,
   });
 
+  const modeIconSize = isMobile ? MOBILE_MODE_ICON_SIZE : MODE_ICON_SIZE;
   const modes: Record<StudyMode, ModeInfo> = {
     [StudyMode.LEARN]: {
-      icon: <Lightbulb size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      icon: <Lightbulb size={modeIconSize} strokeWidth={ICON_STROKE} />,
       name: t('Заучивание'),
       desc: t('Выбор, затем ввод'),
       meta: t('Раунды по {{count}}', { count: ROUND_SIZE }),
       path: RoutePath.LEARN(deckId),
     },
     [StudyMode.WRITE]: {
-      icon: <PenLine size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      icon: <PenLine size={modeIconSize} strokeWidth={ICON_STROKE} />,
       name: t('Письмо'),
       desc: t('Ввод перевода в обе стороны'),
       meta: t('RU → EN · EN → RU'),
       path: RoutePath.WRITE(deckId),
     },
     [StudyMode.CLOZE]: {
-      icon: <Sparkles size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      icon: <Sparkles size={modeIconSize} strokeWidth={ICON_STROKE} />,
       name: t('Пропуски'),
       desc: t('Слово скрыто в своём примере'),
       meta: t('{{count}} примеров', { count: stats.examples }),
@@ -283,7 +299,7 @@ const DeckPage = () => {
       disabled: stats.examples === 0,
     },
     [StudyMode.ORDER]: {
-      icon: <Layers size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      icon: <Layers size={modeIconSize} strokeWidth={ICON_STROKE} />,
       name: t('Собери фразу'),
       desc: t('Порядок слов на чанках'),
       meta: t('{{count}} фраз', { count: stats.phrases }),
@@ -292,7 +308,7 @@ const DeckPage = () => {
       disabled: stats.phrases === 0,
     },
     [StudyMode.CARDS]: {
-      icon: <LayoutGrid size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      icon: <LayoutGrid size={modeIconSize} strokeWidth={ICON_STROKE} />,
       name: t('Карточки'),
       desc: t('Знакомство, без записи прогресса'),
       meta: t('Просмотр'),
@@ -308,6 +324,194 @@ const DeckPage = () => {
       count: stats.due, size: ROUND_SIZE,
     });
   const recommendedMode = modes[recommended];
+
+  const cardList = (
+    <CardList
+      deckUuid={deckId}
+      readOnly={!canEditCards}
+      items={filtered}
+      emptyText={hasSearch || onlyFavorites || typeFilter !== 'all' ? t('Ничего не найдено') : undefined}
+    />
+  );
+
+  const modals = (
+    <>
+      {canEditCards && (
+        <>
+          <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
+          <DuplicateCardsModal open={dupOpen} deckUuid={deckId} onClose={() => setDupOpen(false)} />
+          <CheckTranslationsModal open={aiOpen} deckUuid={deckId} onClose={() => setAiOpen(false)} />
+          <GenerateChunksModal
+            open={chunksOpen}
+            deckUuid={deckId}
+            onClose={() => setChunksOpen(false)}
+          />
+        </>
+      )}
+      {isOwner && (
+        <ShareDeckModal open={shareOpen} deckUuid={deckId} onClose={() => setShareOpen(false)} />
+      )}
+    </>
+  );
+
+  if (isMobile) {
+    // В «…» на мобильном — всё, чего нет в макете: «Поделиться», ИИ и меню «Ещё»
+    const mobileMenuItems: MenuProps['items'] = [
+      isOwner
+        ? {
+          key: 'share',
+          icon: <Users size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+          label: t('Поделиться'),
+        }
+        : null,
+      ...(canEditCards
+        ? [{
+          key: 'ai',
+          icon: <Sparkles size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+          label: t('ИИ: проверить и подобрать фразы'),
+          children: aiItems,
+        }]
+        : []),
+      ...(moreItems ?? []),
+    ].filter(Boolean);
+
+    const handleMobileMenuClick: MenuClick = (info) => {
+      if (info.key === 'share') setShareOpen(true);
+      handleAiClick(info);
+      handleMoreClick(info);
+    };
+
+    const toggleSearch = () => {
+      if (searchOpen) setSearchDebounced('');
+      setSearchOpen((prev) => !prev);
+    };
+
+    const recommendedMeta = recommended === StudyMode.LEARN
+      ? `${stats.fresh > 0
+        ? t('{{count}} новых', { count: stats.fresh })
+        : t('{{count}} к повторению', { count: stats.due })} · ${recommendedMode.meta}`
+      : recommendedMode.meta;
+
+    return (
+      <div className={cls.DeckPage}>
+        <BackBar
+          to={RoutePath.DECKS()}
+          label={t('Библиотека')}
+          actions={(
+            <>
+              {canEditCards && (
+                <Button
+                  type="text"
+                  aria-label={t('Добавить слова')}
+                  icon={<Plus size={MOBILE_BAR_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                  onClick={() => setFormOpen(true)}
+                />
+              )}
+              <Dropdown
+                trigger={['click']}
+                placement="bottomRight"
+                menu={{ items: mobileMenuItems, onClick: handleMobileMenuClick }}
+              >
+                <Button
+                  type="text"
+                  aria-label={t('Ещё')}
+                  icon={<Ellipsis size={MOBILE_BAR_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                  loading={exporting || isDuplicating || isLeaving}
+                />
+              </Dropdown>
+            </>
+          )}
+        />
+        <div className={cls.mobileBody}>
+          <div className={cls.mobileTitleBlock}>
+            <Kicker size={KickerSize.SM}>
+              {`${t('{{count}} слов', { count: stats.total })} · ${
+                t('{{count}} фраз', { count: stats.phrases })}`}
+            </Kicker>
+            <h1 className={cls.mobileTitle}>{deck.name}</h1>
+          </div>
+
+          <div className={cls.mastery}>
+            <MasteryBar
+              size={MasteryBarSize.LG}
+              className={cls.mobileBar}
+              mastered={toPercent(stats.mastered, stats.total)}
+              learning={toPercent(stats.learning, stats.total)}
+            />
+            <div className={cls.mobileLegend}>
+              <span>{t('Усвоено {{count}}', { count: stats.mastered })}</span>
+              <span>{t('Изучаю {{count}}', { count: stats.learning })}</span>
+              <span>{t('Новые {{count}}', { count: stats.fresh })}</span>
+            </div>
+          </div>
+
+          <AccentPanel
+            as="button"
+            type="button"
+            className={cls.mobileRecommended}
+            onClick={() => navigate(recommendedMode.path)}
+          >
+            <span className={cls.mobileRecommendedText}>
+              <Kicker size={KickerSize.SM} tone={KickerTone.ON_DARK} className={cls.mobileRecommendedKicker}>
+                {t('Рекомендуем')}
+              </Kicker>
+              <span className={cls.mobileRecommendedName}>{recommendedMode.name}</span>
+              <span className={cls.mobileRecommendedMeta}>{recommendedMeta}</span>
+            </span>
+            <span className={cls.play}>
+              <Play aria-hidden size={PLAY_ICON_SIZE} strokeWidth={ICON_STROKE} />
+            </span>
+          </AccentPanel>
+
+          <div className={cls.mobileModes}>
+            {STUDY_MODES.filter((mode) => mode !== recommended).map((mode) => {
+              const info = modes[mode];
+              return (
+                <Blueprint
+                  key={mode}
+                  as="button"
+                  type="button"
+                  className={cls.mobileMode}
+                  disabled={info.disabled}
+                  onClick={() => navigate(info.path)}
+                >
+                  <span className={cls.modeIcon}>{info.icon}</span>
+                  <span className={cls.mobileModeName}>{info.name}</span>
+                </Blueprint>
+              );
+            })}
+          </div>
+
+          <section className={cls.mobileWords}>
+            <div className={cls.mobileWordsHead}>
+              <h2 className={cls.mobileWordsTitle}>{t('Слова')}</h2>
+              <Button
+                type="text"
+                className={cls.mobileSearchButton}
+                aria-label={t('Поиск в колоде')}
+                aria-pressed={searchOpen}
+                icon={<Search size={MOBILE_SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                onClick={toggleSearch}
+              />
+            </div>
+            {searchOpen && (
+              <Input
+                autoFocus
+                className={cls.mobileSearch}
+                prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                allowClear
+                value={search}
+                placeholder={t('Поиск в колоде')}
+                onChange={(e) => setSearchDebounced(e.target.value)}
+              />
+            )}
+            {cardList}
+          </section>
+        </div>
+        {modals}
+      </div>
+    );
+  }
 
   return (
     <div className={cls.DeckPage}>
@@ -481,29 +685,10 @@ const DeckPage = () => {
           )}
         </div>
 
-        <CardList
-          deckUuid={deckId}
-          readOnly={!canEditCards}
-          items={filtered}
-          emptyText={hasSearch || onlyFavorites || typeFilter !== 'all' ? t('Ничего не найдено') : undefined}
-        />
+        {cardList}
       </section>
 
-      {canEditCards && (
-        <>
-          <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
-          <DuplicateCardsModal open={dupOpen} deckUuid={deckId} onClose={() => setDupOpen(false)} />
-          <CheckTranslationsModal open={aiOpen} deckUuid={deckId} onClose={() => setAiOpen(false)} />
-          <GenerateChunksModal
-            open={chunksOpen}
-            deckUuid={deckId}
-            onClose={() => setChunksOpen(false)}
-          />
-        </>
-      )}
-      {isOwner && (
-        <ShareDeckModal open={shareOpen} deckUuid={deckId} onClose={() => setShareOpen(false)} />
-      )}
+      {modals}
     </div>
   );
 };

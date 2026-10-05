@@ -1,11 +1,14 @@
 import { memo, ReactNode } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './SectionTabs.module.scss';
 
 export interface SectionTabItem {
     to: string;
     label: ReactNode;
+    /** Короткая подпись для мобильного (Mobile 6.39–6.54) */
+    shortLabel?: ReactNode;
     count?: ReactNode;
     /** Счётчик на плашке accent-100 (вкладка «К повторению») */
     countHighlighted?: boolean;
@@ -21,15 +24,16 @@ interface SectionTabsProps {
 /** Вкладки раздела — маршруты; активная подчёркнута accent */
 export const SectionTabs = memo((props: SectionTabsProps) => {
     const { items, className } = props;
+    const { isMobile } = useMatchMedia();
 
     return (
         <nav className={classNames(cls.SectionTabs, [className])}>
             {items.map(({
-                to, label, count, countHighlighted, active,
+                to, label, shortLabel, count, countHighlighted, active,
             }) => {
                 const content = (
                     <>
-                        {label}
+                        {isMobile && shortLabel ? shortLabel : label}
                         {count !== undefined && (
                             <span className={classNames(cls.count, [], { [cls.highlighted]: countHighlighted })}>
                                 {count}

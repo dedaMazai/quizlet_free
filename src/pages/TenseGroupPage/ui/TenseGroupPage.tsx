@@ -1,12 +1,17 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import {
+    Navigate, useNavigate, useParams, useSearchParams,
+} from 'react-router';
 import { Button } from 'antd';
 import { ArrowRight } from 'lucide-react';
+import { BackBar } from '@/shared/ui/BackBar';
 import { BackLink } from '@/shared/ui/BackLink';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { RoutePath } from '@/shared/config/router/routePath';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { RoutePath, TENSE_TIME_PARAM } from '@/shared/config/router/routePath';
 import {
-    ASPECT_GROUP_ORDER, ASPECT_GROUPS, TENSES, TENSE_COMPARISONS, AspectGroupId,
+    ASPECT_GROUP_ORDER, ASPECT_GROUPS, TENSES, TENSE_COMPARISONS, TENSE_TIME_ORDER, AspectGroupId, TenseTime,
 } from '@/shared/const/grammar';
 import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
@@ -15,6 +20,13 @@ import { SectionHeader } from '@/shared/ui/SectionHeader';
 import cls from './TenseGroupPage.module.scss';
 
 const ARROW_SIZE = 16;
+
+/** Подписи переключателя времени на мобильном — не переводятся */
+const TIME_LABELS: Record<TenseTime, string> = {
+    present: 'Present',
+    past: 'Past',
+    future: 'Future',
+};
 
 const isAspectGroupId = (value: string | undefined): value is AspectGroupId => (
     ASPECT_GROUP_ORDER.includes(value as AspectGroupId)
@@ -29,6 +41,13 @@ const TenseGroupPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { group } = useParams<{ group: string }>();
+    const { isMobile } = useMatchMedia();
+    const [searchParams] = useSearchParams();
+    // Карточка «Past» в матрице открывает группу сразу на Past
+    const timeParam = searchParams.get(TENSE_TIME_PARAM);
+    const [time, setTime] = useState<TenseTime>(
+        TENSE_TIME_ORDER.find((item) => item === timeParam) ?? TENSE_TIME_ORDER[0],
+    );
 
     if (!isAspectGroupId(group)) {
         return <Navigate to={RoutePath.GRAMMAR_TENSES()} replace />;
@@ -37,6 +56,120 @@ const TenseGroupPage = () => {
     const groupInfo = ASPECT_GROUPS[group];
     const tenses = TENSES.filter((tense) => tense.group === group);
     const comparisons = TENSE_COMPARISONS.filter((comparison) => comparison.groups.includes(group));
+
+    const comparisonBlocks = comparisons.map((comparison) => {
+        // Подсвечивается сторона, относящаяся к текущей группе
+        const [leftGroup] = comparison.groups;
+
+        return (
+            <div key={comparison.id} className={cls.comparison}>
+                <SectionHeader
+                    title={t('Сравнение: {{left}} ↔ {{right}}', {
+                        left: comparison.leftLabel,
+                        right: comparison.rightLabel,
+                    })}
+                />
+                <div className={cls.compareGrid}>
+                    <div className={classNames(cls.side, [], { [cls.sideCurrent]: leftGroup === group })}>
+                        <span className={cls.sideTitle}>{t(comparison.leftTitle)}</span>
+                        <span className={cls.sideNote}>{t(comparison.leftNote)}</span>
+                        {comparison.rows.map((row) => (
+                            <span key={row.left.en} className={cls.sideExample}>{row.left.en}</span>
+                        ))}
+                    </div>
+                    <div className={classNames(cls.side, [], { [cls.sideCurrent]: leftGroup !== group })}>
+                        <span className={cls.sideTitle}>{t(comparison.rightTitle)}</span>
+                        <span className={cls.sideNote}>{t(comparison.rightNote)}</span>
+                        {comparison.rows.map((row) => (
+                            <span key={row.right.en} className={cls.sideExample}>{row.right.en}</span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    });
+
+    if (isMobile) {
+        const tense = tenses.find((item) => item.time === time);
+        const mistake = tense?.mistakes[0];
+
+        return (
+            <div className={cls.TenseGroupPage}>
+                <BackBar to={RoutePath.GRAMMAR_TENSES()} label={t('Времена')} />
+                <div className={cls.mobileBody}>
+                    <div className={cls.titleBlock}>
+                        <Kicker size={KickerSize.SM}>
+                            {t('Группа {{index}} из {{total}} · {{focus}}', {
+                                index: ASPECT_GROUP_ORDER.indexOf(group) + 1,
+                                total: ASPECT_GROUP_ORDER.length,
+                                focus: t(groupInfo.shortIdea),
+                            })}
+                        </Kicker>
+                        <div className={cls.titleLine}>
+                            <h1 className={cls.title}>{groupInfo.name}</h1>
+                            <span className={cls.groupFormula}>{groupInfo.formulaHint}</span>
+                        </div>
+                    </div>
+
+                    <div className={cls.timeSwitch}>
+                        {TENSE_TIME_ORDER.map((item) => (
+                            <button
+                                key={item}
+                                type="button"
+                                aria-pressed={item === time}
+                                className={classNames(cls.timeOption, [], { [cls.timeOptionActive]: item === time })}
+                                onClick={() => setTime(item)}
+                            >
+                                {TIME_LABELS[item]}
+                            </button>
+                        ))}
+                    </div>
+
+                    {tense && (
+                        <Blueprint className={cls.tense}>
+                            <span className={cls.tenseFormula}>{tense.shortFormula}</span>
+                            <div className={cls.field}>
+                                <Kicker size={KickerSize.SM}>{t('Когда')}</Kicker>
+                                <span className={cls.text}>{joinUsage(tense.usage.map((item) => t(item)))}</span>
+                            </div>
+                            <div className={cls.markersField}>
+                                <Kicker size={KickerSize.SM}>{t('Маркеры')}</Kicker>
+                                <div className={cls.markers}>
+                                    {tense.markers.map((marker) => (
+                                        <span key={marker} className={cls.marker}>{marker}</span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className={cls.field}>
+                                <Kicker size={KickerSize.SM}>{t('Примеры')}</Kicker>
+                                {tense.examples.map((example) => (
+                                    <span key={example.en} className={cls.example}>{example.en}</span>
+                                ))}
+                            </div>
+                            {mistake && (
+                                <div className={cls.mistake}>
+                                    <Kicker size={KickerSize.SM}>{t('Типичная ошибка')}</Kicker>
+                                    <span className={cls.wrong}>{mistake.wrong}</span>
+                                    <span className={cls.right}>{mistake.right}</span>
+                                </div>
+                            )}
+                        </Blueprint>
+                    )}
+
+                    <Button
+                        type="primary"
+                        className={cls.practice}
+                        onClick={() => navigate(`${RoutePath.GRAMMAR_PRACTICE()}?group=${group}`)}
+                    >
+                        <BlueprintMarks />
+                        {t('Практиковаться')}
+                    </Button>
+
+                    {comparisonBlocks}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={cls.TenseGroupPage}>
@@ -113,37 +246,7 @@ const TenseGroupPage = () => {
                 })}
             </div>
 
-            {comparisons.map((comparison) => {
-                // Подсвечивается сторона, относящаяся к текущей группе
-                const [leftGroup] = comparison.groups;
-
-                return (
-                    <div key={comparison.id} className={cls.comparison}>
-                        <SectionHeader
-                            title={t('Сравнение: {{left}} ↔ {{right}}', {
-                                left: comparison.leftLabel,
-                                right: comparison.rightLabel,
-                            })}
-                        />
-                        <div className={cls.compareGrid}>
-                            <div className={classNames(cls.side, [], { [cls.sideCurrent]: leftGroup === group })}>
-                                <span className={cls.sideTitle}>{t(comparison.leftTitle)}</span>
-                                <span className={cls.sideNote}>{t(comparison.leftNote)}</span>
-                                {comparison.rows.map((row) => (
-                                    <span key={row.left.en} className={cls.sideExample}>{row.left.en}</span>
-                                ))}
-                            </div>
-                            <div className={classNames(cls.side, [], { [cls.sideCurrent]: leftGroup !== group })}>
-                                <span className={cls.sideTitle}>{t(comparison.rightTitle)}</span>
-                                <span className={cls.sideNote}>{t(comparison.rightNote)}</span>
-                                {comparison.rows.map((row) => (
-                                    <span key={row.right.en} className={cls.sideExample}>{row.right.en}</span>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                );
-            })}
+            {comparisonBlocks}
         </div>
     );
 };

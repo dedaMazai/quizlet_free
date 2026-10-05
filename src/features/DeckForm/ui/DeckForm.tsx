@@ -1,12 +1,18 @@
 import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Form, Input, Modal } from 'antd';
+import {
+  Button, Form, Input, Modal,
+} from 'antd';
 import {
   Deck,
   useCreateDeckMutation,
   useUpdateDeckMutation,
 } from '@/entities/Deck';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import cls from './DeckForm.module.scss';
 
 interface DeckFormValues {
   name: string;
@@ -24,6 +30,7 @@ export const DeckForm: FC<DeckFormProps> = (props) => {
   const { t } = useTranslation();
   const { message } = useAntdApp();
   const [form] = Form.useForm<DeckFormValues>();
+  const { isMobile } = useMatchMedia();
 
   const [createDeck, { isLoading: isCreating }] = useCreateDeckMutation();
   const [updateDeck, { isLoading: isUpdating }] = useUpdateDeckMutation();
@@ -54,10 +61,55 @@ export const DeckForm: FC<DeckFormProps> = (props) => {
     }
   };
 
+  const title = isEdit ? t('Редактировать колоду') : t('Создать колоду');
+  const formNode = (
+    <Form
+      form={form}
+      layout="vertical"
+      // Шторка монтирует форму позже эффекта — значения дублируем начальными
+      initialValues={{ name: deck?.name ?? '', description: deck?.description ?? '' }}
+      className={isMobile ? cls.sheetForm : undefined}
+    >
+      <Form.Item
+        name="name"
+        label={t('Название')}
+        rules={[{ required: true, message: t('Введите название') }]}
+      >
+        <Input autoFocus placeholder={t('Например: Путешествия')} />
+      </Form.Item>
+      <Form.Item name="description" label={t('Описание')}>
+        <Input.TextArea rows={2} placeholder={t('Необязательно')} />
+      </Form.Item>
+    </Form>
+  );
+
+  // Mobile: шторка вместо модалки
+  if (isMobile) {
+    return (
+      <ModalFrame
+        open={open}
+        width="100%"
+        title={title}
+        onClose={onClose}
+        actions={(
+          <>
+            <Button onClick={onClose}>{t('Отмена')}</Button>
+            <Button type="primary" loading={isCreating || isUpdating} onClick={handleSubmit}>
+              <BlueprintMarks />
+              {t('Сохранить')}
+            </Button>
+          </>
+        )}
+      >
+        {formNode}
+      </ModalFrame>
+    );
+  }
+
   return (
     <Modal
       open={open}
-      title={isEdit ? t('Редактировать колоду') : t('Создать колоду')}
+      title={title}
       okText={t('Сохранить')}
       cancelText={t('Отмена')}
       confirmLoading={isCreating || isUpdating}
@@ -65,18 +117,7 @@ export const DeckForm: FC<DeckFormProps> = (props) => {
       onCancel={onClose}
       destroyOnClose
     >
-      <Form form={form} layout="vertical">
-        <Form.Item
-          name="name"
-          label={t('Название')}
-          rules={[{ required: true, message: t('Введите название') }]}
-        >
-          <Input autoFocus placeholder={t('Например: Путешествия')} />
-        </Form.Item>
-        <Form.Item name="description" label={t('Описание')}>
-          <Input.TextArea rows={2} placeholder={t('Необязательно')} />
-        </Form.Item>
-      </Form>
+      {formNode}
     </Modal>
   );
 };

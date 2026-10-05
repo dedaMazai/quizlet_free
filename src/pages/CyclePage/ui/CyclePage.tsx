@@ -1,9 +1,11 @@
 import { CSSProperties, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty } from 'antd';
 import {
-  ArrowRight, Plus, Settings, Trash2,
+  Button, Dropdown, Empty, MenuProps,
+} from 'antd';
+import {
+  ArrowRight, Ellipsis, Plus, Settings, SunMedium, Trash2,
 } from 'lucide-react';
 import {
   buildNewWords,
@@ -22,17 +24,20 @@ import { CycleForm } from '@/features/CycleForm';
 import { AddCycleWords } from '@/features/AddCycleWords';
 import { clearCycleSessions } from '@/features/CycleSession';
 import { AccentPanel } from '@/shared/ui/AccentPanel';
+import { BackBar } from '@/shared/ui/BackBar';
 import { BackLink } from '@/shared/ui/BackLink';
 import { Blueprint } from '@/shared/ui/Blueprint';
-import { Kicker, KickerTone } from '@/shared/ui/Kicker';
+import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import { SectionHeader } from '@/shared/ui/SectionHeader';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './CyclePage.module.scss';
 
 const ICON_SIZE = 16;
 const ICON_STROKE = 1.5;
+const MORE_ICON_SIZE = 20;
 const PERCENT = 100;
 
 const CyclePage = () => {
@@ -40,6 +45,7 @@ const CyclePage = () => {
   const navigate = useNavigate();
   const { modal, message } = useAntdApp();
   const { cycleId } = useParams();
+  const { isMobile } = useMatchMedia();
   const [formOpen, setFormOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -112,60 +118,116 @@ const CyclePage = () => {
     });
   };
 
+  // Mobile 6.41: действия шапки и «Новый день» — в меню «…»
+  const moreItems: MenuProps['items'] = [
+    {
+      key: 'settings',
+      label: t('Настройки'),
+      icon: <Settings aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      onClick: () => setFormOpen(true),
+    },
+    {
+      key: 'words',
+      label: t('Добавить слова'),
+      icon: <Plus aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      onClick: () => setAddOpen((open) => !open),
+    },
+    {
+      key: 'newDay',
+      label: t('Новый день'),
+      icon: <SunMedium aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      disabled: !plan.locked || isOpeningDay,
+      onClick: handleNewDay,
+    },
+    { type: 'divider' },
+    {
+      key: 'delete',
+      label: t('Удалить'),
+      danger: true,
+      icon: <Trash2 aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      onClick: handleDelete,
+    },
+  ];
+
   return (
     <div className={cls.CyclePage}>
-      <div className={cls.header}>
-        <BackLink
-          items={[
-            { label: t('Учить'), to: RoutePath.REVIEW() },
-            { label: t('Циклы заучивания'), to: RoutePath.CYCLES() },
-          ]}
-        />
-        <div className={cls.titleRow}>
+      {isMobile ? (
+        <div className={cls.mobileHeader}>
+          <BackBar
+            to={RoutePath.CYCLES()}
+            label={t('Циклы')}
+            actions={(
+              <Dropdown trigger={['click']} placement="bottomRight" menu={{ items: moreItems }}>
+                <Button
+                  type="text"
+                  aria-label={t('Ещё')}
+                  icon={<Ellipsis aria-hidden size={MORE_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                />
+              </Dropdown>
+            )}
+          />
           <div className={cls.titleBlock}>
-            <Kicker>
-              {`${t('Цикл')} · ${t('День {{day}}', { day: plan.day })} · ${
+            <Kicker size={KickerSize.SM}>
+              {`${t('День {{day}}', { day: plan.day })} · ${
                 t('{{count}} новых в день', { count: cycle.daily_new_count })}`}
             </Kicker>
             <h1 className={cls.title}>{cycle.name}</h1>
           </div>
-          <div className={cls.actions}>
-            <Button
-              className={cls.headerButton}
-              icon={<Settings aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
-              onClick={() => setFormOpen(true)}
-            >
-              {t('Настройки')}
-            </Button>
-            <Button
-              className={cls.headerButton}
-              icon={<Plus aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
-              aria-expanded={addOpen}
-              onClick={() => setAddOpen((open) => !open)}
-            >
-              {t('Слова')}
-            </Button>
-            <Button
-              danger
-              className={cls.iconButton}
-              icon={<Trash2 aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
-              aria-label={t('Удалить')}
-              onClick={handleDelete}
-            />
+        </div>
+      ) : (
+        <div className={cls.header}>
+          <BackLink
+            items={[
+              { label: t('Учить'), to: RoutePath.REVIEW() },
+              { label: t('Циклы заучивания'), to: RoutePath.CYCLES() },
+            ]}
+          />
+          <div className={cls.titleRow}>
+            <div className={cls.titleBlock}>
+              <Kicker>
+                {`${t('Цикл')} · ${t('День {{day}}', { day: plan.day })} · ${
+                  t('{{count}} новых в день', { count: cycle.daily_new_count })}`}
+              </Kicker>
+              <h1 className={cls.title}>{cycle.name}</h1>
+            </div>
+            <div className={cls.actions}>
+              <Button
+                className={cls.headerButton}
+                icon={<Settings aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                onClick={() => setFormOpen(true)}
+              >
+                {t('Настройки')}
+              </Button>
+              <Button
+                className={cls.headerButton}
+                icon={<Plus aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                aria-expanded={addOpen}
+                onClick={() => setAddOpen((open) => !open)}
+              >
+                {t('Слова')}
+              </Button>
+              <Button
+                danger
+                className={cls.iconButton}
+                icon={<Trash2 aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                aria-label={t('Удалить')}
+                onClick={handleDelete}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className={cls.overview}>
         <AccentPanel className={cls.today}>
-          <Kicker tone={KickerTone.ON_DARK}>{t('Сегодня')}</Kicker>
+          {!isMobile && <Kicker tone={KickerTone.ON_DARK}>{t('Сегодня')}</Kicker>}
           <div className={cls.todayNumbers}>
             <div className={cls.todayStat}>
               <span className={cls.learned}>
                 {learnedCount}
                 <span className={cls.learnedOf}>{`/${newWords.length}`}</span>
               </span>
-              <span className={cls.todayLabel}>{t('новых выучено')}</span>
+              <span className={cls.todayLabel}>{isMobile ? t('новых сегодня') : t('новых выучено')}</span>
             </div>
             <div className={cls.todayStat}>
               <span className={cls.inReview}>{plan.review}</span>
@@ -180,7 +242,7 @@ const CyclePage = () => {
               onClick={() => navigate(RoutePath.CYCLE_STUDY(cycle.uuid, 'new'))}
             >
               {t('Учить новые · {{count}}', { count: restCount || newWords.length })}
-              <ArrowRight aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />
+              {!isMobile && <ArrowRight aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
             </button>
             <button
               type="button"
@@ -193,49 +255,54 @@ const CyclePage = () => {
           </div>
         </AccentPanel>
 
-        <Blueprint className={cls.structure}>
-          <span className={cls.structureTitle}>{t('Структура цикла')}</span>
-          <div className={cls.structureBar} style={structureVars}>
-            <div className={cls.barReview} />
-            <div className={cls.barToday} />
-            <div className={cls.barLocked} />
-          </div>
-          <div className={cls.structureStats}>
-            <div className={cls.structureStat}>
-              <span className={cls.structureLabel}>{t('В повторе')}</span>
-              <span className={cls.structureValue}>{plan.review}</span>
+        {/* Структуры цикла в мобильном макете нет; «Новый день» — в меню «…» */}
+        {!isMobile && (
+          <Blueprint className={cls.structure}>
+            <span className={cls.structureTitle}>{t('Структура цикла')}</span>
+            <div className={cls.structureBar} style={structureVars}>
+              <div className={cls.barReview} />
+              <div className={cls.barToday} />
+              <div className={cls.barLocked} />
             </div>
-            <div className={cls.structureStat}>
-              <span className={cls.structureLabel}>{t('Сегодня')}</span>
-              <span className={cls.structureValue}>{plan.today}</span>
+            <div className={cls.structureStats}>
+              <div className={cls.structureStat}>
+                <span className={cls.structureLabel}>{t('В повторе')}</span>
+                <span className={cls.structureValue}>{plan.review}</span>
+              </div>
+              <div className={cls.structureStat}>
+                <span className={cls.structureLabel}>{t('Сегодня')}</span>
+                <span className={cls.structureValue}>{plan.today}</span>
+              </div>
+              <div className={cls.structureStat}>
+                <span className={cls.structureLabel}>{t('В очереди')}</span>
+                <span className={cls.structureValue}>{plan.locked}</span>
+              </div>
             </div>
-            <div className={cls.structureStat}>
-              <span className={cls.structureLabel}>{t('В очереди')}</span>
-              <span className={cls.structureValue}>{plan.locked}</span>
+            <div className={cls.nextDay}>
+              <span>{t('Готовы к следующей порции?')}</span>
+              <Button
+                type="link"
+                className={cls.nextDayButton}
+                disabled={!plan.locked}
+                loading={isOpeningDay}
+                onClick={handleNewDay}
+              >
+                {t('Новый день →')}
+              </Button>
             </div>
-          </div>
-          <div className={cls.nextDay}>
-            <span>{t('Готовы к следующей порции?')}</span>
-            <Button
-              type="link"
-              className={cls.nextDayButton}
-              disabled={!plan.locked}
-              loading={isOpeningDay}
-              onClick={handleNewDay}
-            >
-              {t('Новый день →')}
-            </Button>
-          </div>
-        </Blueprint>
+          </Blueprint>
+        )}
       </div>
 
       <div className={cls.words}>
-        <SectionHeader
-          title={t('Слова')}
-          extra={total > 1 && (
-            <span className={cls.wordsHint}>{t('перетаскивайте, чтобы менять порядок')}</span>
-          )}
-        />
+        {!isMobile && (
+          <SectionHeader
+            title={t('Слова')}
+            extra={total > 1 && (
+              <span className={cls.wordsHint}>{t('перетаскивайте, чтобы менять порядок')}</span>
+            )}
+          />
+        )}
         {(addOpen || total === 0) && <AddCycleWords cycleUuid={cycle.uuid} words={words ?? []} />}
         {total > 0 ? (
           <CycleWordList cycle={cycle} words={words ?? []} />

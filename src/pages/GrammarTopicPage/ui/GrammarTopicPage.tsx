@@ -2,12 +2,14 @@ import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams } from 'react-router';
 import { Button } from 'antd';
 import { ArrowRight, Check, ChevronLeft } from 'lucide-react';
+import { BackBar } from '@/shared/ui/BackBar';
 import { BackLink } from '@/shared/ui/BackLink';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { GRAMMAR_TOPIC_ORDER, GRAMMAR_TOPICS, GrammarTopicId } from '@/shared/const/grammar';
 import { LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY } from '@/shared/const/localstorage';
 import { ROADMAP_STAGES, ROADMAP_STEPS_TOTAL } from '@/shared/const/roadmap';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
+import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker } from '@/shared/ui/Kicker';
 import { SectionHeader } from '@/shared/ui/SectionHeader';
@@ -27,6 +29,7 @@ const isGrammarTopicId = (value: string | undefined): value is GrammarTopicId =>
 const GrammarTopicPage = () => {
     const { t } = useTranslation();
     const { topic } = useParams<{ topic: string }>();
+    const { isMobile } = useMatchMedia();
     const [doneSteps, setDoneSteps] = useLocalStorage<string[]>(LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY, NO_STEPS);
 
     if (!isGrammarTopicId(topic)) {
@@ -52,13 +55,16 @@ const GrammarTopicPage = () => {
     return (
         <div className={cls.GrammarTopicPage}>
             <div className={cls.header}>
-                <BackLink
-                    items={[
-                        { label: t('Учить'), to: RoutePath.REVIEW() },
-                        { label: t('Дорожная карта'), to: RoutePath.ROADMAP() },
-                        ...(stageIndex >= 0 ? [{ label: t('Этап {{number}}', { number: stageIndex + 1 }) }] : []),
-                    ]}
-                />
+                {/* Мобильная: полоса «‹ Дорожная карта» вместо хлебных крошек */}
+                {isMobile ? <BackBar to={RoutePath.ROADMAP()} label={t('Дорожная карта')} /> : (
+                    <BackLink
+                        items={[
+                            { label: t('Учить'), to: RoutePath.REVIEW() },
+                            { label: t('Дорожная карта'), to: RoutePath.ROADMAP() },
+                            ...(stageIndex >= 0 ? [{ label: t('Этап {{number}}', { number: stageIndex + 1 }) }] : []),
+                        ]}
+                    />
+                )}
                 <div className={cls.titleRow}>
                     <div className={cls.titleBlock}>
                         <Kicker>

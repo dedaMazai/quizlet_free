@@ -4,6 +4,11 @@
     gap: 12px;
     width: 100%;
     padding: 20px 22px;
+
+    @media (width <= 650px) {
+        gap: 10px;
+        padding: 16px;
+    }
 }
 
 .head {
@@ -11,6 +16,10 @@
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+
+    @media (width <= 650px) {
+        flex-wrap: wrap;
+    }
 }
 
 .label {
@@ -19,6 +28,10 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     white-space: nowrap;
+
+    @media (width <= 650px) {
+        font-size: 10px;
+    }
 }
 
 .correct .label {
@@ -42,6 +55,10 @@
     display: flex;
     align-items: center;
     gap: 12px;
+
+    @media (width <= 650px) {
+        gap: 10px;
+    }
 }
 
 .answer {
@@ -49,6 +66,10 @@
     font-weight: 600;
     font-size: 30px;
     overflow-wrap: anywhere;
+
+    @media (width <= 650px) {
+        font-size: 26px;
+    }
 }
 
 .diff {
@@ -60,12 +81,22 @@
 
 .speak {
     color: var(--color-neutral-600);
+
+    // Палец: зона касания 44×44
+    @media (width <= 650px) {
+        width: 44px;
+        height: 44px;
+    }
 }
 
 .example {
     font-size: 15px;
     font-style: italic;
     color: var(--color-neutral-800);
+
+    @media (width <= 650px) {
+        font-size: 14px;
+    }
 }
 
 .term {

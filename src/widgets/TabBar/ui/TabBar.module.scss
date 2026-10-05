@@ -1,0 +1,42 @@
+// Mobile 6.35: 5 колонок, отступ снизу под домашний индикатор
+.TabBar {
+    display: grid;
+    flex: none;
+    grid-template-columns: repeat(5, 1fr);
+    padding: 6px 4px 24px;
+    border-top: 1px solid var(--color-divider);
+    background: var(--color-bg);
+}
+
+.item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 50px;
+    color: var(--color-neutral-700);
+    text-decoration: none;
+}
+
+.active {
+    color: var(--color-accent-700);
+}
+
+.label {
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.badge {
+    position: absolute;
+    top: 2px;
+    left: calc(50% + 6px);
+    padding: 2px 4px;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1;
+}
