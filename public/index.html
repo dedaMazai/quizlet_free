@@ -8,6 +8,23 @@
     <title>Zubrika</title>
 
 
+    <script>
+        // Тёмная тема до загрузки бандла — без белой вспышки (BACKLOG §6).
+        // Ключи и значения — как в ThemeProvider (LOCAL_STORAGE_THEME_*), фон — --color-bg тёмной темы
+        (function () {
+            try {
+                var dark = localStorage.getItem('theme_follow_system') === 'true'
+                    ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                    : localStorage.getItem('theme') === '"app_dark_theme"';
+                if (dark) {
+                    document.documentElement.style.background = '#141b23';
+                    document.documentElement.style.colorScheme = 'dark';
+                }
+            } catch (e) {
+                // localStorage недоступен — останется светлая тема по умолчанию
+            }
+        })();
+    </script>
 </head>
 <body>
     <div id="root"></div>

@@ -134,7 +134,8 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--color-accent-100': 'rgba(116, 157, 196, 0.12)',
     '--color-accent-200': 'rgba(116, 157, 196, 0.24)',
     '--color-accent-300': '#b5d9fd',
-    '--color-accent-400': '#94bce3',
+    // 400 темнее отражения: «изучаю» должно отличаться от «усвоено» (700)
+    '--color-accent-400': '#597ea3',
     '--color-accent-500': '#749dc4',
     '--color-accent-600': '#94bce3',
     '--color-accent-700': '#b5d9fd',
@@ -468,6 +469,10 @@ function setGlobalCssVariables(currentTheme: Theme) {
   Object.entries(variables).forEach(([key, value]) => {
     document.documentElement.style.setProperty(key, value);
   });
+
+  // Нативные контролы и скроллбары в цвет темы; фон <html> заменяет выставленный в index.html до загрузки
+  document.documentElement.style.colorScheme = currentTheme === Theme.DARK ? 'dark' : 'light';
+  document.documentElement.style.background = 'var(--color-bg)';
 }
 
 /**

@@ -162,11 +162,11 @@ $deck-mastery: 200px;
 .bar {
   width: 100%;
   height: calc(#{$bar-max-height} * var(--ratio));
-  background: var(--color-accent-300);
+  background: var(--color-heat-1);
 }
 
 .barToday {
-  background: var(--color-accent-700);
+  background: var(--color-heat-3);
 }
 
 .axis {
