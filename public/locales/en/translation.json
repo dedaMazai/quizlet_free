@@ -2448,12 +2448,14 @@
   "Не удалось сохранить занятие": "Failed to save the session",
   "Не удалось сохранить настройки": "Failed to save settings",
   "Пользователь не найден": "User not found",
-  "Муж": "Male",
-  "Жен": "Female",
   "Выбрано {{fixes}} и {{examples}}": "Selected {{fixes}} and {{examples}}",
   "{{count}} правок_one": "{{count}} fix",
   "{{count}} правок_other": "{{count}} fixes",
   "По «{{query}}» нет колод": "No decks for “{{query}}”",
   "Нет колод по этим фильтрам": "No decks match these filters",
-  "Я ответил верно": "I was right"
+  "Я ответил верно": "I was right",
+  "Пользователь ещё не занимался": "No study activity yet",
+  "Серия, точность и освоение колод появятся после первых ответов.": "Streak, accuracy and deck mastery will appear after the first answers.",
+  "К пользователям": "To users",
+  "Открыть статистику": "Open statistics"
 }

@@ -99,8 +99,8 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
     [user?.timezone],
   );
 
-  const { data: overview, isFetching: isOverviewFetching } = useGetStudyOverviewQuery(tz);
-  const { data: heatmap, isFetching: isHeatmapFetching } = useGetStudyHeatmapQuery(tz);
+  const { data: overview, isFetching: isOverviewFetching } = useGetStudyOverviewQuery({ tz });
+  const { data: heatmap, isFetching: isHeatmapFetching } = useGetStudyHeatmapQuery({ tz });
   const { data: due } = useGetDueCountQuery(undefined);
   const { data: deckCards } = useGetCardsQuery(deckId, { skip: !deckId });
   const { data: deckReviews } = useGetCardReviewsQuery(deckId, { skip: !deckId });

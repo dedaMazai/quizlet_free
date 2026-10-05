@@ -29,7 +29,7 @@ const ProgressPage = () => {
         [user?.timezone],
     );
 
-    const { data: overview, isLoading } = useGetStudyOverviewQuery(tz);
+    const { data: overview, isLoading } = useGetStudyOverviewQuery({ tz });
     // Пока сводка грузится, виджеты показывают скелетоны — пустое состояние не мелькает
     const showStats = isLoading || (overview?.totalAnswers ?? 0) > 0;
     // «Начать заучивание» — колода с наибольшим числом новых слов

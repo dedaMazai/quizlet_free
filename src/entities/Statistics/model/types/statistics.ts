@@ -51,6 +51,8 @@ export interface MasteryBucket {
 
 export interface DeckMastery extends MasteryBucket {
   deckKey: string;
+  /** Имя колоды — для чужой статистики, где колоды пользователя клиенту не видны */
+  deckName: string | null;
 }
 
 export interface MasteryStats {
@@ -108,8 +110,13 @@ export interface PeriodStats {
   sessions: number;
 }
 
-export interface ProgressSummaryArgs {
+/** Чья статистика: без userId — текущего пользователя, с ним — другого (только админ) */
+export interface StatsScope {
   tz: string;
+  userId?: string;
+}
+
+export interface ProgressSummaryArgs extends StatsScope {
   period: StatsPeriod;
 }
 

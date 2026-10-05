@@ -62,7 +62,7 @@ const MainPage: FC = () => {
     const todayAnswers = useTodayAnswers(tz);
     const goal = useDailyGoal();
     // Серия на мобильной — только чипом в шапке (StreakCard скрыт)
-    const { data: overview } = useGetStudyOverviewQuery(tz, { skip: !isMobile });
+    const { data: overview } = useGetStudyOverviewQuery({ tz }, { skip: !isMobile });
 
     const [filter, setFilter] = useState<DeckFilter>('recent');
     // Пустая главная: «Создать колоду» / «Импорт из Excel» (DeckForm → CardEditor новой колоды)

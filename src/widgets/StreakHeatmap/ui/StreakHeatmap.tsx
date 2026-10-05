@@ -11,6 +11,8 @@ import cls from './StreakHeatmap.module.scss';
 interface StreakHeatmapProps {
   className?: string;
   tz: string;
+  /** Статистика другого пользователя (админ, /users/:id); без него — своя */
+  userId?: string;
 }
 
 const WEEKS = 52;
@@ -32,9 +34,9 @@ interface HeatDay {
 
 const levelOf = (count: number): number => LEVEL_THRESHOLDS.filter((min) => count >= min).length;
 
-export const StreakHeatmap: FC<StreakHeatmapProps> = ({ className, tz }) => {
+export const StreakHeatmap: FC<StreakHeatmapProps> = ({ className, tz, userId }) => {
   const { t } = useTranslation();
-  const { data: heatmap, isLoading } = useGetStudyHeatmapQuery(tz);
+  const { data: heatmap, isLoading } = useGetStudyHeatmapQuery({ tz, userId });
   const { isMobile } = useMatchMedia();
   const weeksCount = isMobile ? WEEKS_MOBILE : WEEKS;
   // Сетка сдвигается с наступлением нового дня, даже если страницу не перезагружали

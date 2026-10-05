@@ -12,6 +12,8 @@ const PERCENT = 100;
 
 interface MasteryChartProps {
   className?: string;
+  /** Статистика другого пользователя (админ, /users/:id); без него — своя */
+  userId?: string;
 }
 
 interface Segment {
@@ -22,9 +24,9 @@ interface Segment {
 }
 
 /** Освоение слов: полоса из 3 сегментов и легенда с числами (6.23) */
-export const MasteryChart: FC<MasteryChartProps> = ({ className }) => {
+export const MasteryChart: FC<MasteryChartProps> = ({ className, userId }) => {
   const { t, i18n } = useTranslation();
-  const { data, isLoading } = useGetMasteryQuery();
+  const { data, isLoading } = useGetMasteryQuery(userId);
   const { isMobile } = useMatchMedia();
 
   const { segments, total, masteredPct, learningPct } = useMemo(() => {

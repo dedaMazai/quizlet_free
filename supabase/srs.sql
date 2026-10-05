@@ -173,36 +173,8 @@ $$;
 -- ============================================================================
 -- 5. get_mastery на card_reviews
 -- ============================================================================
--- Переехала сюда из statistics.sql (там функция удалена, чтобы повторный прогон
--- того скрипта не откатил эту версию).
--- Костыль «исключить __*» больше не нужен: двойного учёта нет по построению.
-create or replace function public.get_mastery()
-returns jsonb
-language sql
-stable
-as $$
-  with per_deck as (
-    select c.deck_id::text as deck_key,
-           count(*) filter (where cr.level = 0) as new,
-           count(*) filter (where cr.level = 1) as learning,
-           count(*) filter (where cr.level = 2) as mastered
-    from public.card_reviews cr
-    join public.cards c on c.id = cr.card_id
-    where cr.user_id = auth.uid()
-    group by c.deck_id
-  )
-  select jsonb_build_object(
-    'overall', jsonb_build_object(
-      'new',      coalesce(sum(new), 0),
-      'learning', coalesce(sum(learning), 0),
-      'mastered', coalesce(sum(mastered), 0)
-    ),
-    'per_deck', coalesce(jsonb_agg(jsonb_build_object(
-        'deck_key', deck_key, 'new', new, 'learning', learning, 'mastered', mastered
-      )), '[]'::jsonb)
-  )
-  from per_deck;
-$$;
+-- ПЕРЕЕХАЛА в user_progress.sql (необязательный p_user_id для экрана /users/:id).
+-- Определение удалено отсюда, иначе повторный прогон создал бы вторую перегрузку.
 
 
 -- ============================================================================
@@ -248,5 +220,4 @@ $$;
 
 grant execute on function public.get_due_cards(uuid, int, int) to authenticated;
 grant execute on function public.get_due_count(uuid) to authenticated;
-grant execute on function public.get_mastery() to authenticated;
 grant execute on function public.leave_shared_deck(uuid) to authenticated;

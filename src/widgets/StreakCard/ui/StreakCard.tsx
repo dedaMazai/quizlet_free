@@ -40,8 +40,8 @@ export const StreakCard = memo((props: StreakCardProps) => {
     const { tz, className } = props;
     const { t, i18n } = useTranslation();
 
-    const { data: overview, isLoading: isOverviewLoading } = useGetStudyOverviewQuery(tz);
-    const { data: heatmap, isLoading: isHeatmapLoading } = useGetStudyHeatmapQuery(tz);
+    const { data: overview, isLoading: isOverviewLoading } = useGetStudyOverviewQuery({ tz });
+    const { data: heatmap, isLoading: isHeatmapLoading } = useGetStudyHeatmapQuery({ tz });
     const isLoading = isOverviewLoading || isHeatmapLoading;
     const todayAnswers = useTodayAnswers(tz);
     const goal = useDailyGoal();

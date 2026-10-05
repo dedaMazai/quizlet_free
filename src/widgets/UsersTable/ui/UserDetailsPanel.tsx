@@ -1,7 +1,8 @@
 import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { Button, InputNumber } from 'antd';
-import { ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import {
     RoleSelect,
     UserAccessValidator,
@@ -25,6 +26,7 @@ import { getUserFullName } from '../lib/getUserFullName';
 import cls from './UsersTable.module.scss';
 
 const CHEVRON_SIZE = 14;
+const STATS_ARROW_SIZE = 16;
 const ICON_STROKE = 1.5;
 const DEFAULT_AI_LIMIT = 5;
 
@@ -145,6 +147,10 @@ export const UserDetailsPanel: FC<UserDetailsPanelProps> = (props) => {
                     </div>
                 ))}
             </div>
+            <Link to={RoutePath.USER(user.uuid)} className={cls.statsLink}>
+                {t('Открыть статистику')}
+                <ArrowRight aria-hidden size={STATS_ARROW_SIZE} strokeWidth={ICON_STROKE} />
+            </Link>
 
             <div className={cls.field}>
                 <span className={cls.fieldLabel}>{t('Роль')}</span>

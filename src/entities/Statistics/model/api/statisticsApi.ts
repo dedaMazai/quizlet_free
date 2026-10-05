@@ -12,6 +12,7 @@ import {
   ProgressSummary,
   ProgressSummaryArgs,
   StatsPeriod,
+  StatsScope,
   StudyOverview,
 } from '../types/statistics';
 
@@ -41,7 +42,9 @@ interface DeckProgressRow {
 
 interface MasteryRow {
   overall: { new: number; learning: number; mastered: number };
-  per_deck: { deck_key: string; new: number; learning: number; mastered: number }[];
+  per_deck: {
+    deck_key: string; deck_name: string | null; new: number; learning: number; mastered: number;
+  }[];
 }
 
 interface DueSummaryRow {
@@ -99,9 +102,12 @@ const statisticsApi = rtkApi.injectEndpoints({
       },
       invalidatesTags: [ApiTag.StudyStats],
     }),
-    getStudyOverview: build.query<StudyOverview, string>({
-      queryFn: async (tz) => {
-        const { data, error } = await supabase.rpc('get_study_overview', { p_tz: tz });
+    getStudyOverview: build.query<StudyOverview, StatsScope>({
+      queryFn: async ({ tz, userId }) => {
+        const { data, error } = await supabase.rpc('get_study_overview', {
+          p_tz: tz,
+          p_user_id: userId ?? null,
+        });
         if (error) return supabaseError(error.message);
         const row = data as OverviewRow;
         return {
@@ -118,10 +124,11 @@ const statisticsApi = rtkApi.injectEndpoints({
       providesTags: [ApiTag.StudyStats],
     }),
     getProgressSummary: build.query<ProgressSummary, ProgressSummaryArgs>({
-      queryFn: async ({ tz, period }) => {
+      queryFn: async ({ tz, period, userId }) => {
         const { data, error } = await supabase.rpc('get_progress_summary', {
           p_tz: tz,
           p_days: PERIOD_DAYS[period],
+          p_user_id: userId ?? null,
         });
         if (error) return supabaseError(error.message);
         const row = data as ProgressSummaryRow;
@@ -134,17 +141,23 @@ const statisticsApi = rtkApi.injectEndpoints({
       },
       providesTags: [ApiTag.StudyStats],
     }),
-    getStudyHeatmap: build.query<HeatmapDay[], string>({
-      queryFn: async (tz) => {
-        const { data, error } = await supabase.rpc('get_study_heatmap', { p_tz: tz });
+    getStudyHeatmap: build.query<HeatmapDay[], StatsScope>({
+      queryFn: async ({ tz, userId }) => {
+        const { data, error } = await supabase.rpc('get_study_heatmap', {
+          p_tz: tz,
+          p_user_id: userId ?? null,
+        });
         if (error) return supabaseError(error.message);
         return { data: (data as HeatmapDay[]) ?? [] };
       },
       providesTags: [ApiTag.StudyStats],
     }),
-    getDeckProgress: build.query<DeckAccuracy[], string>({
-      queryFn: async (tz) => {
-        const { data, error } = await supabase.rpc('get_deck_progress', { p_tz: tz });
+    getDeckProgress: build.query<DeckAccuracy[], StatsScope>({
+      queryFn: async ({ tz, userId }) => {
+        const { data, error } = await supabase.rpc('get_deck_progress', {
+          p_tz: tz,
+          p_user_id: userId ?? null,
+        });
         if (error) return supabaseError(error.message);
         return {
           data: ((data as DeckProgressRow[]) ?? []).map((r) => ({
@@ -158,9 +171,10 @@ const statisticsApi = rtkApi.injectEndpoints({
       },
       providesTags: [ApiTag.StudyStats],
     }),
-    getMastery: build.query<MasteryStats, void>({
-      queryFn: async () => {
-        const { data, error } = await supabase.rpc('get_mastery');
+    /** Аргумент — id другого пользователя (только админ); без него — своя освоенность */
+    getMastery: build.query<MasteryStats, string | void>({
+      queryFn: async (userId) => {
+        const { data, error } = await supabase.rpc('get_mastery', { p_user_id: userId ?? null });
         if (error) return supabaseError(error.message);
         const row = data as MasteryRow;
         return {
@@ -168,6 +182,7 @@ const statisticsApi = rtkApi.injectEndpoints({
             overall: row.overall,
             perDeck: row.per_deck.map((d) => ({
               deckKey: d.deck_key,
+              deckName: d.deck_name,
               new: d.new,
               learning: d.learning,
               mastered: d.mastered,

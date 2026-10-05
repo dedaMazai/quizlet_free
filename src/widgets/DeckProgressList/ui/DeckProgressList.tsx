@@ -18,6 +18,8 @@ const SKELETON_ROWS = Array.from({ length: VISIBLE_DECKS }, (_, i) => i);
 interface DeckProgressListProps {
   className?: string;
   tz: string;
+  /** Статистика другого пользователя (админ, /users/:id); без него — своя */
+  userId?: string;
 }
 
 interface DeckRow {
@@ -31,14 +33,18 @@ const percentOf = (part: number, total: number): number => (
 );
 
 /** Освоенность колод: 5 лучших, от 80% — сигналом «результат» (6.23) */
-export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) => {
+export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz, userId }) => {
   const { t } = useTranslation();
-  const { data: mastery, isLoading: masteryLoading } = useGetMasteryQuery();
-  const { data: progress, isLoading: progressLoading } = useGetDeckProgressQuery(tz);
-  const { data: decks, isLoading: decksLoading } = useGetDecksQuery();
+  const { data: mastery, isLoading: masteryLoading } = useGetMasteryQuery(userId);
+  const { data: progress, isLoading: progressLoading } = useGetDeckProgressQuery({ tz, userId });
+  // Чужие колоды клиенту не видны: имена берём из get_mastery, а ссылку «Все N» не показываем
+  const { data: ownDecks, isLoading: decksLoading } = useGetDecksQuery(undefined, { skip: Boolean(userId) });
   const loading = masteryLoading || progressLoading || decksLoading;
 
   const rows = useMemo<DeckRow[]>(() => {
+    const decks = userId
+      ? mastery?.perDeck.flatMap((d) => (d.deckName ? [{ uuid: d.deckKey, name: d.deckName }] : []))
+      : ownDecks;
     // Пока колоды не загружены, строки не строим — иначе всё отфильтруется и блок мигнёт.
     if (!decks) return [];
     const liveNames = new Map(decks.map((d) => [d.uuid, d.name]));
@@ -71,7 +77,7 @@ export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) =
     return Array.from(byKey.values())
       .sort((a, b) => b.percent - a.percent)
       .slice(0, VISIBLE_DECKS);
-  }, [mastery, progress, decks, t]);
+  }, [mastery, progress, ownDecks, userId, t]);
 
   if (loading) {
     return (
@@ -96,9 +102,11 @@ export const DeckProgressList: FC<DeckProgressListProps> = ({ className, tz }) =
     <Blueprint className={classNames(cls.DeckProgressList, [className])}>
       <div className={cls.header}>
         <span className={cls.title}>{t('По колодам')}</span>
-        <Link to={RoutePath.DECKS()} className={cls.all}>
-          {t('Все {{value}}', { value: decks?.length ?? 0 })}
-        </Link>
+        {!userId && (
+          <Link to={RoutePath.DECKS()} className={cls.all}>
+            {t('Все {{value}}', { value: ownDecks?.length ?? 0 })}
+          </Link>
+        )}
       </div>
       {rows.map((r) => (
         <div key={r.key} className={cls.row}>

@@ -15,6 +15,7 @@ export type {
   PeriodStats,
   ProgressSummary,
   ProgressSummaryArgs,
+  StatsScope,
 } from './model/types/statistics';
 export { StatsPeriod } from './model/types/statistics';
 export {

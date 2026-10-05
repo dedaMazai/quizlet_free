@@ -1,0 +1,35 @@
+.UserPage {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+@media (width <= 900px) {
+  .chartsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// Как мобильный «Прогресс» 6.55
+@media (width <= 650px) {
+  .UserPage {
+    gap: 18px;
+  }
+
+  .header h1 {
+    font-size: 34px;
+  }
+}

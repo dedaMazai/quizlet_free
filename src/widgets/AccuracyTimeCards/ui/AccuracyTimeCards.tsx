@@ -37,6 +37,8 @@ interface AccuracyTimeCardsProps {
   className?: string;
   tz: string;
   period: StatsPeriod;
+  /** Статистика другого пользователя (админ, /users/:id); без него — своя */
+  userId?: string;
 }
 
 interface KpiItem {
@@ -65,16 +67,18 @@ const formatDelta = (diff: number, compare: string): Delta => {
 };
 
 /** KPI-полоса прогресса: точность, ответы, время, серия (6.23) */
-export const AccuracyTimeCards: FC<AccuracyTimeCardsProps> = ({ className, tz, period }) => {
+export const AccuracyTimeCards: FC<AccuracyTimeCardsProps> = ({
+  className, tz, period, userId,
+}) => {
   const { t, i18n } = useTranslation();
   const { isMobile } = useMatchMedia();
   // currentData — пока грузится новый период, не показываем цифры прошлого
-  const { currentData: summary, isError, refetch } = useGetProgressSummaryQuery({ tz, period });
+  const { currentData: summary, isError, refetch } = useGetProgressSummaryQuery({ tz, period, userId });
   const {
     data: overview,
     isLoading: overviewLoading,
     refetch: refetchOverview,
-  } = useGetStudyOverviewQuery(tz);
+  } = useGetStudyOverviewQuery({ tz, userId });
 
   // С новым днём сдвигаются границы периодов, а пропущенный день обнуляет серию
   const today = useTodayKey(tz);
