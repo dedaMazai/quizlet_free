@@ -1,7 +1,9 @@
 import { useMemo, ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { useGetDecksQuery } from '@/entities/Deck';
-import { useUserInfo, useUserAccesses, checkRequireAccesses, RoleName } from '@/entities/User';
+import {
+  useUserInfo, useUserAccesses, useUserLoggedOut, checkRequireAccesses, RoleName,
+} from '@/entities/User';
 import { useGetUserPreferencesQuery } from '@/entities/UserSettings';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from '@/shared/types/accesses';
@@ -15,6 +17,7 @@ interface RequireAuthProps {
 export function RequireAuth({ children, accesses, forbiddenRoles }: RequireAuthProps) {
   const location = useLocation();
   const userInfo = useUserInfo();
+  const loggedOut = useUserLoggedOut();
   const userAccesses = useUserAccesses();
   // Первый вход: онбординг, пока его не прошли/пропустили и колод нет.
   // Пока данные грузятся или запрос упал — страницу не блокируем.
@@ -28,6 +31,12 @@ export function RequireAuth({ children, accesses, forbiddenRoles }: RequireAuthP
   ), [forbiddenRoles, userInfo?.role?.name]);
 
   if (!userInfo) {
+    // Гость на главной и только что вышедший пользователь видят лендинг;
+    // остальные защищённые ссылки ведут на вход с возвратом обратно
+    if (location.pathname === RoutePath.MAIN() || loggedOut) {
+      return <Navigate to={RoutePath.ABOUT()} replace />;
+    }
+
     return (
       <Navigate
         to={RoutePath.LOGIN()}
