@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card } from 'antd';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import {
+    AimOutlined,
     BgColorsOutlined,
     GlobalOutlined,
     SoundOutlined,
@@ -12,6 +13,9 @@ import { MyTypography } from '@/shared/ui/MyTypography';
 import { ThemeSwitcher } from '@/features/ThemeSwitcher';
 import { LangSwitcher } from '@/features/LangSwitcher';
 import { VoiceSwitcher } from '@/features/VoiceSwitcher';
+import { DailyGoalSwitcher } from '@/features/DailyGoalSwitcher';
+import { useDailyGoal } from '@/entities/UserSettings';
+import { estimateReviewMinutes } from '@/shared/const/const';
 import cls from './SettingsTab.module.scss';
 
 interface SettingRowProps {
@@ -44,6 +48,7 @@ const SettingRow: FC<SettingRowProps> = (props) => {
 
 export const SettingsTab = memo(() => {
     const { t } = useTranslation();
+    const goal = useDailyGoal();
 
     return (
         <VStack max gap="24">
@@ -62,6 +67,19 @@ export const SettingsTab = memo(() => {
                         label={t('Язык')}
                         description={t('Язык интерфейса')}
                         control={<LangSwitcher />}
+                    />
+                </VStack>
+            </Card>
+
+            <Card className={cls.card} variant="borderless">
+                <VStack max>
+                    <div className={cls.sectionTitle}>{t('Занятия')}</div>
+                    <SettingRow
+                        icon={<AimOutlined />}
+                        label={t('Цель дня')}
+                        description={t('Карточек в день · ≈ {{count}} минут', { count: estimateReviewMinutes(goal) })}
+                        control={<DailyGoalSwitcher />}
+                        stackOnMobile
                     />
                 </VStack>
             </Card>

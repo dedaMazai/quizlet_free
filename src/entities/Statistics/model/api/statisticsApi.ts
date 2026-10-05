@@ -2,6 +2,8 @@ import { ApiTag, rtkApi } from '@/shared/api/rtkApi';
 import { supabase, supabaseError, getCurrentUserId } from '@/shared/api/supabaseClient';
 import {
   DeckAccuracy,
+  DeckClozeStats,
+  DueSummary,
   HeatmapDay,
   LogStudyEventsDto,
   MasteryStats,
@@ -28,6 +30,17 @@ interface DeckProgressRow {
 interface MasteryRow {
   overall: { new: number; learning: number; mastered: number };
   per_deck: { deck_key: string; new: number; learning: number; mastered: number }[];
+}
+
+interface DueSummaryRow {
+  forecast: { date: string; count: number }[];
+  per_deck: { deck_id: string; due: number; new: number }[];
+}
+
+interface ClozeStatsRow {
+  deck_id: string;
+  examples_count: number;
+  last_cloze_at: string | null;
 }
 
 const statisticsApi = rtkApi.injectEndpoints({
@@ -114,6 +127,34 @@ const statisticsApi = rtkApi.injectEndpoints({
       },
       providesTags: [ApiTag.StudyStats, ApiTag.CardReviews],
     }),
+    getDueSummary: build.query<DueSummary, string>({
+      queryFn: async (tz) => {
+        const { data, error } = await supabase.rpc('get_due_summary', { p_tz: tz });
+        if (error) return supabaseError(error.message);
+        const row = data as DueSummaryRow;
+        return {
+          data: {
+            forecast: row.forecast,
+            perDeck: row.per_deck.map((d) => ({ deckUuid: d.deck_id, due: d.due, new: d.new })),
+          },
+        };
+      },
+      providesTags: [ApiTag.CardReviews, ApiTag.Cards],
+    }),
+    getClozeStats: build.query<DeckClozeStats[], void>({
+      queryFn: async () => {
+        const { data, error } = await supabase.rpc('get_cloze_stats');
+        if (error) return supabaseError(error.message);
+        return {
+          data: ((data as ClozeStatsRow[]) ?? []).map((r) => ({
+            deckUuid: r.deck_id,
+            examplesCount: r.examples_count,
+            lastClozeAt: r.last_cloze_at,
+          })),
+        };
+      },
+      providesTags: [ApiTag.StudyStats, ApiTag.Cards],
+    }),
   }),
 });
 
@@ -123,4 +164,6 @@ export const {
   useGetStudyHeatmapQuery,
   useGetDeckProgressQuery,
   useGetMasteryQuery,
+  useGetDueSummaryQuery,
+  useGetClozeStatsQuery,
 } = statisticsApi;

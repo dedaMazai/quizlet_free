@@ -1,0 +1,196 @@
+$days-size: 64px;
+$goal-height: 8px;
+$scale-height: 4px;
+
+.StreakCard {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+}
+
+// Цвет текущего уровня серии — для плашки, числа и ячеек недели
+@for $i from 0 through 4 {
+    .level#{$i} {
+        --level-color: var(--streak-#{$i});
+    }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.levelTag {
+    padding: 2px 6px;
+    background: var(--level-color);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.levelTagLight {
+    color: var(--color-bg);
+}
+
+.record {
+    font-size: 12px;
+    color: var(--color-neutral-700);
+    white-space: nowrap;
+}
+
+.streakRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.days {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: $days-size;
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+    color: var(--color-text);
+}
+
+.daysColored {
+    color: var(--level-color);
+}
+
+.daysUnit {
+    // По слову на строку: «дней / подряд»
+    width: min-content;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.05;
+}
+
+.week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.dayCell {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 1;
+    border: 1px solid var(--color-divider);
+    color: var(--color-bg);
+}
+
+.dayDone {
+    border-color: var(--level-color);
+    background: var(--level-color);
+}
+
+.dayToday {
+    border: 1px dashed var(--level-color);
+}
+
+.dayLabel {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-neutral-700);
+    white-space: nowrap;
+}
+
+.levels {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.scale {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+}
+
+.scaleStep {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.scaleBar {
+    height: $scale-height;
+    background: var(--color-neutral-200);
+}
+
+@for $i from 0 through 4 {
+    .scale#{$i} {
+        background: var(--streak-#{$i});
+    }
+}
+
+.scaleLabel {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-neutral-600);
+    white-space: nowrap;
+}
+
+.scaleLabelCurrent {
+    color: var(--color-text);
+}
+
+.nextHint {
+    font-size: 12px;
+    color: var(--color-neutral-800);
+}
+
+.goal {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.goalHead {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.goalValue {
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.goalTrack {
+    height: $goal-height;
+    background: var(--color-neutral-200);
+}
+
+.goalFill {
+    width: var(--progress);
+    height: 100%;
+    background: var(--color-accent);
+}
+
+.goalNote {
+    font-size: 12px;
+    color: var(--color-neutral-700);
+}

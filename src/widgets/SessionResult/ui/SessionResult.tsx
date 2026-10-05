@@ -7,7 +7,9 @@ import { ArrowRight, Flame } from 'lucide-react';
 import {
   useGetCardReviewsQuery, useGetCardsQuery, useGetDueCountQuery,
 } from '@/entities/Card';
-import { useGetStudyHeatmapQuery, useGetStudyOverviewQuery } from '@/entities/Statistics';
+import {
+  formatDayInTz, lastWeekDates, useGetStudyHeatmapQuery, useGetStudyOverviewQuery,
+} from '@/entities/Statistics';
 import { useUserInfo } from '@/entities/User';
 import { ROUND_SIZE } from '@/features/LearnSession';
 import { AccentPanel } from '@/shared/ui/AccentPanel';
@@ -19,10 +21,8 @@ import { RoutePath } from '@/shared/config/router/routePath';
 import { LOCAL_STORAGE_SESSION_BEST_ACCURACY_KEY } from '@/shared/const/localstorage';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { SessionRouteState, SessionSummary } from '@/shared/lib/session';
-import { getStreakLevel } from '@/shared/lib/streak';
-import {
-  formatDayInTz, formatDuration, lastWeekDates, STREAK_LEVEL_NAMES,
-} from '../model/sessionResult';
+import { getStreakLevel, STREAK_LEVEL_NAMES } from '@/shared/lib/streak';
+import { formatDuration } from '../model/sessionResult';
 import cls from './SessionResult.module.scss';
 
 const FLAME_SIZE = 48;

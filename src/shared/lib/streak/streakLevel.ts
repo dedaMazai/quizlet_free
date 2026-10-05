@@ -1,6 +1,9 @@
 /** Пороги уровней серии в днях: Искра, Огонёк, Пламя, Жар, Пожар (README §1, Home.dc.html — массив `L`). */
 export const STREAK_LEVEL_THRESHOLDS = [0, 3, 7, 14, 30] as const;
 
+/** Названия уровней серии по индексу getStreakLevel — ключи i18n */
+export const STREAK_LEVEL_NAMES = ['Искра', 'Огонёк', 'Пламя', 'Жар', 'Пожар'] as const;
+
 export interface StreakLevelInfo {
     /** Индекс уровня 0…4 */
     index: number;

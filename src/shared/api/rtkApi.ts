@@ -30,6 +30,7 @@ export enum ApiTag {
     LearningCycle = 'LearningCycle',
     LearningCycles = 'LearningCycles',
     LearningCycleWords = 'LearningCycleWords',
+    UserPreferences = 'UserPreferences',
 }
 
 const mutex = new Mutex();

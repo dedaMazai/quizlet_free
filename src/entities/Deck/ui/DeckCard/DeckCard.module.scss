@@ -1,0 +1,55 @@
+.DeckCard {
+    display: flex;
+    color: var(--color-text);
+
+    &:hover {
+        color: var(--color-text);
+    }
+}
+
+.card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    transition: background var(--motion-fast) var(--ease-standard);
+
+    .DeckCard:hover & {
+        background: var(--color-accent-100);
+    }
+}
+
+.head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.name {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 19px;
+    line-height: 1.1;
+}
+
+.badge {
+    align-self: flex-start;
+}
+
+.progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-neutral-700);
+    white-space: nowrap;
+}

@@ -55,3 +55,30 @@ export interface MasteryStats {
   overall: MasteryBucket;
   perDeck: DeckMastery[];
 }
+
+/** Сколько карточек придёт к повторению в день прогноза (день 0 включает просроченные). */
+export interface ForecastDay {
+  date: string;
+  count: number;
+}
+
+/** Долг и новые слова колоды. */
+export interface DeckDue {
+  deckUuid: string;
+  /** Просрочено сейчас — как get_due_count. */
+  due: number;
+  /** Карточки без строки в card_reviews. */
+  new: number;
+}
+
+export interface DueSummary {
+  forecast: ForecastDay[];
+  perDeck: DeckDue[];
+}
+
+/** Колода с примерами и дата последней сессии «Пропуски». */
+export interface DeckClozeStats {
+  deckUuid: string;
+  examplesCount: number;
+  lastClozeAt: string | null;
+}

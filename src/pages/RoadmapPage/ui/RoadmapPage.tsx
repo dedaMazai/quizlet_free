@@ -16,7 +16,10 @@ import { classNames } from '@/shared/lib/classNames/classNames';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { HStack, VStack } from '@/shared/ui/Stack';
-import { ROADMAP_STAGES, ROADMAP_STEPS_TOTAL, RoadmapStageId, RoadmapStep } from '../model/roadmap';
+import {
+    ROADMAP_STAGES, ROADMAP_STEPS_TOTAL, RoadmapStageId, RoadmapStep,
+} from '@/shared/const/roadmap';
+import { LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY } from '@/shared/const/localstorage';
 
 import cls from './RoadmapPage.module.scss';
 
@@ -67,7 +70,7 @@ const getStageStatuses = (doneSteps: string[]): Record<RoadmapStageId, StageStat
 const RoadmapPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [doneSteps, setDoneSteps] = useLocalStorage<string[]>('RoadmapDoneSteps', []);
+    const [doneSteps, setDoneSteps] = useLocalStorage<string[]>(LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY, []);
     const [expandedOverrides, setExpandedOverrides] = useState<Partial<Record<RoadmapStageId, boolean>>>({});
 
     const statuses = getStageStatuses(doneSteps);

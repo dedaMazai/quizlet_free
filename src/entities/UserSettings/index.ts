@@ -14,4 +14,6 @@ export type {
 export {
     useUserSettingsTheme,
     useUserSettingsData,
+    useDailyGoal,
 } from './model/hooks';
+export { useUpdateUserPreferencesMutation } from './model/api/userPreferencesApi';

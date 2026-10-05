@@ -1,0 +1,177 @@
+$count-size: 132px;
+$bar-width: 18px;
+$bar-max-height: 50px;
+$bars-height: 64px;
+
+.DueHero {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: 32px 32px 24px;
+}
+
+.top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.summary {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.countRow {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+}
+
+.count {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: $count-size;
+    line-height: 0.78;
+    letter-spacing: -0.04em;
+}
+
+.check {
+    flex: none;
+}
+
+.countText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 4px;
+}
+
+.unit {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.meta {
+    font-size: 14px;
+    color: var(--color-accent-300);
+}
+
+.forecast {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: $bars-height;
+}
+
+.barCol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.bar {
+    width: $bar-width;
+    height: calc(#{$bar-max-height} * var(--ratio));
+    background: var(--color-accent-700);
+}
+
+.barToday {
+    background: var(--color-accent-300);
+}
+
+.barLabel {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-accent-300);
+    white-space: nowrap;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border: 1px solid var(--color-bg);
+    background: var(--color-bg);
+    color: var(--color-accent-900);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 18px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard);
+
+    &:hover {
+        background: var(--color-accent-100);
+    }
+}
+
+.secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border: 1px solid var(--color-accent-700);
+    background: transparent;
+    color: var(--color-bg);
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 16px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color var(--motion-fast) var(--ease-standard);
+
+    &:hover {
+        border-color: var(--color-accent-400);
+    }
+}
+
+.hint {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-accent-300);
+    white-space: nowrap;
+}
+
+@media (width <= 650px) {
+    .DueHero {
+        gap: 24px;
+        padding: 24px 20px 20px;
+    }
+
+    .count {
+        font-size: 96px;
+    }
+
+    .forecast {
+        align-items: flex-start;
+    }
+
+    // На телефоне клавиатурной подсказки нет
+    .hint {
+        display: none;
+    }
+}

@@ -1,12 +1,136 @@
-.greeting {
-  margin-bottom: 0;
-}
+$overview-side-width: 320px;
+$deck-min-width: 180px;
 
-.subtitle {
-  margin-bottom: 0;
+.MainPage {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
 }
 
 .search {
-  max-width: 640px;
-  border-radius: 14px;
+  max-width: 420px;
+  height: 40px;
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
+  background: transparent;
+  font-size: 14px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 44px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.goal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.goalLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+}
+
+.goalValue {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--color-text);
+}
+
+.overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, $overview-side-width);
+  gap: 24px;
+}
+
+.decks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.decksHeader {
+  flex-wrap: wrap;
+}
+
+.filter {
+  padding: 0;
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
+}
+
+.filterItem {
+  border-radius: 0;
+
+  & + & {
+    border-left: 1px solid var(--color-divider);
+  }
+}
+
+.filterLabel {
+  min-height: auto;
+  padding: 6px 12px;
+  font-size: 13px;
+  line-height: normal;
+}
+
+.allDecks {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.deckGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax($deck-min-width, 1fr));
+  gap: 24px;
+}
+
+@media (width <= 1199px) {
+  .overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (width <= 650px) {
+  .MainPage {
+    gap: 28px;
+  }
+
+  .search {
+    max-width: none;
+  }
+
+  .title {
+    font-size: 32px;
+    white-space: normal;
+  }
 }

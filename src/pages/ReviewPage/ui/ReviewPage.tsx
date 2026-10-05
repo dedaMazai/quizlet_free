@@ -1,11 +1,14 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {
+  useEffect, useMemo, useRef, useState,
+} from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Result } from 'antd';
 import dayjs from 'dayjs';
 import {
   Card,
   CardReview,
+  DueCard,
   REVIEW_EVENTS_KEY,
   useGetDueCardsQuery,
   useGetDueCountQuery,
@@ -18,6 +21,7 @@ import { VStack } from '@/shared/ui/Stack';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { NavSectionKey } from '@/shared/const/menu';
+import { ReviewLocationState } from '@/shared/const/const';
 import { useSetFocusMode } from '@/shared/lib/focusMode';
 import { ReviewPreview } from './ReviewPreview';
 
@@ -28,9 +32,16 @@ interface SessionSnapshot {
   reviews: CardReview[];
 }
 
+const toSnapshot = (items: DueCard[]): SessionSnapshot => ({
+  id: Date.now(),
+  cards: items.map((item) => item.card),
+  reviews: items.flatMap((item) => (item.review ? [item.review] : [])),
+});
+
 const ReviewPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { data: dueCards, isLoading } = useGetDueCardsQuery(undefined);
   const { data: dueCount } = useGetDueCountQuery(undefined);
@@ -67,12 +78,19 @@ const ReviewPage = () => {
   }, [dueCards, decks, t]);
 
   const handleStart = () => {
-    setSnapshot({
-      id: Date.now(),
-      cards: (dueCards ?? []).map((item) => item.card),
-      reviews: (dueCards ?? []).flatMap((item) => (item.review ? [item.review] : [])),
-    });
+    setSnapshot(toSnapshot(dueCards ?? []));
   };
+
+  // С главной («Начать повторение» / Enter) — сразу в сессию, без предпросмотра.
+  // State сбрасываем, чтобы выход из сессии вернул на предпросмотр, а не в новый старт.
+  const autostart = (location.state as ReviewLocationState | null)?.autostart;
+  const autostartedRef = useRef(false);
+  useEffect(() => {
+    if (!autostart || !dueCards || autostartedRef.current) return;
+    autostartedRef.current = true;
+    navigate(location.pathname, { replace: true, state: null });
+    if (dueCards.length > 0) setSnapshot(toSnapshot(dueCards));
+  }, [autostart, dueCards, navigate, location.pathname]);
 
   const handleRepeatHard = (cardUuids: string[]) => {
     if (!snapshot) return;

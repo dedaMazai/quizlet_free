@@ -1,0 +1,91 @@
+$card-min-width: 240px;
+
+.NextSteps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax($card-min-width, 1fr));
+    gap: 24px;
+}
+
+.link {
+    display: flex;
+    color: var(--color-text);
+
+    &:hover {
+        color: var(--color-text);
+    }
+}
+
+.card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    transition: background var(--motion-fast) var(--ease-standard);
+
+    .link:hover & {
+        background: var(--color-accent-100);
+    }
+}
+
+.cardHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.icon {
+    display: inline-flex;
+    color: var(--color-accent-600);
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.1;
+}
+
+.body {
+    font-size: 13px;
+    color: var(--color-neutral-700);
+    text-wrap: pretty;
+}
+
+.ticks {
+    margin-top: auto;
+}
+
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--color-neutral-700);
+}
+
+.meta {
+    white-space: nowrap;
+}
+
+.cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-accent-700);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 14px;
+}

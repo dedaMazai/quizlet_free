@@ -172,7 +172,18 @@ export const estimateReviewMinutes = (count: number): number => (
     Math.ceil((count * REVIEW_SECONDS_PER_CARD) / 60)
 );
 
+/** Цель дня по умолчанию (карточек), пока пользователь не задал свою */
+export const DEFAULT_DAILY_GOAL = 20;
+
+/** Варианты цели дня в настройках и онбординге (BACKLOG §5) */
+export const DAILY_GOAL_OPTIONS = [10, 20, 30, 50] as const;
+
 /** location.state для перехода на главную с фокусом в поиске (кнопка «⌘K» до палитры) */
 export interface FocusSearchLocationState {
     focusSearch?: boolean;
+}
+
+/** location.state для /review: сразу начать сессию без предпросмотра (кнопка «Начать повторение» на главной) */
+export interface ReviewLocationState {
+    autostart?: boolean;
 }

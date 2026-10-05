@@ -14,3 +14,4 @@ export {
   useGetDeckSharesQuery,
   useRemoveDeckShareMutation,
 } from './model/api/deckApi';
+export { DeckCard } from './ui/DeckCard/DeckCard';

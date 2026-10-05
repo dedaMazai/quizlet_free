@@ -13,6 +13,8 @@ export enum SectionHeaderSize {
 
 interface SectionHeaderProps {
     title: ReactNode;
+    /** Сразу за заголовком, до линии: переключатель фильтра */
+    titleExtra?: ReactNode;
     /** Справа от линии: подпись или ссылка */
     extra?: ReactNode;
     size?: SectionHeaderSize;
@@ -23,6 +25,7 @@ interface SectionHeaderProps {
 export const SectionHeader = memo((props: SectionHeaderProps) => {
     const {
         title,
+        titleExtra,
         extra,
         size = SectionHeaderSize.MD,
         className,
@@ -31,6 +34,7 @@ export const SectionHeader = memo((props: SectionHeaderProps) => {
     return (
         <div className={classNames(cls.SectionHeader, [className])}>
             <h2 className={classNames(cls.title, [cls[size]])}>{title}</h2>
+            {titleExtra}
             <div className={cls.line} />
             {extra}
         </div>

@@ -1,33 +1,35 @@
 import {
     FC, useEffect, useMemo, useRef, useState,
 } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Input, InputRef, Segmented } from 'antd';
+import { ArrowRight, Search } from 'lucide-react';
+import { DeckCard, useGetDecksQuery } from '@/entities/Deck';
+import { useGetCardsPageQuery } from '@/entities/Card';
 import {
-    Input, InputRef, Segmented, Typography,
-} from 'antd';
-import { SearchOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import { useGetDecksQuery } from '@/entities/Deck';
-import {
-    useGetCardsPageQuery,
-    useGetCardsCountQuery,
-    useGetRecentCardsQuery,
-    useGetFavoritesQuery,
-} from '@/entities/Card';
+    useGetDueSummaryQuery, useGetMasteryQuery, useTodayAnswers,
+} from '@/entities/Statistics';
 import { useUserInfo } from '@/entities/User';
-import { DeckList } from '@/widgets/DeckList';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { useDailyGoal } from '@/entities/UserSettings';
+import { DueHero } from '@/widgets/DueHero';
+import { NextSteps } from '@/widgets/NextSteps';
+import { StreakCard } from '@/widgets/StreakCard';
+import { Kicker } from '@/shared/ui/Kicker';
+import { SectionHeader, SectionHeaderSize } from '@/shared/ui/SectionHeader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
 import { FocusSearchLocationState } from '@/shared/const/const';
-import { StatsStrip } from './StatsStrip';
-import { QuickActions } from './QuickActions';
-import { RecentWords } from './RecentWords';
 import { GlobalSearchResults } from './GlobalSearchResults';
 import cls from './MainPage.module.scss';
 
-type DeckFilter = 'all' | 'own' | 'shared';
+type DeckFilter = 'recent' | 'own' | 'shared';
+
+const DECKS_LIMIT = 4;
+const ARROW_SIZE = 14;
+const ICON_STROKE = 1.5;
+const SEARCH_ICON_SIZE = 16;
+const PERCENT = 100;
 
 const getGreetingKey = (hour: number): string => {
     if (hour >= 5 && hour < 12) return 'Доброе утро';
@@ -36,20 +38,29 @@ const getGreetingKey = (hour: number): string => {
     return 'Доброй ночи';
 };
 
+const toPercent = (part: number, total: number): number => (
+    total > 0 ? Math.round((part / total) * PERCENT) : 0
+);
+
 const MainPage: FC = () => {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
     const location = useLocation();
     const userInfo = useUserInfo();
     const searchRef = useRef<InputRef>(null);
 
+    const tz = useMemo(
+        () => userInfo?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+        [userInfo?.timezone],
+    );
+
     const { data: decks } = useGetDecksQuery();
-    const { data: wordsCount } = useGetCardsCountQuery();
-    const { data: recentCards } = useGetRecentCardsQuery(6);
-    const { data: favorites } = useGetFavoritesQuery();
+    const { data: summary } = useGetDueSummaryQuery(tz);
+    const { data: mastery } = useGetMasteryQuery();
+    const todayAnswers = useTodayAnswers(tz);
+    const goal = useDailyGoal();
 
     const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
-    const [filter, setFilter] = useState<DeckFilter>('all');
+    const [filter, setFilter] = useState<DeckFilter>('recent');
 
     // Кнопка поиска в Topbar ведёт сюда с фокусом в поле (до палитры ⌘K)
     useEffect(() => {
@@ -65,7 +76,12 @@ const MainPage: FC = () => {
     );
 
     const name = userInfo?.name ?? '';
-    const greeting = t(getGreetingKey(new Date().getHours()));
+    const now = new Date();
+    const greeting = t(getGreetingKey(now.getHours()));
+    const dateKicker = [
+        new Intl.DateTimeFormat(i18n.language, { weekday: 'long', timeZone: tz }).format(now),
+        new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'long', timeZone: tz }).format(now),
+    ].join(' · ');
 
     const deckList = useMemo(() => decks ?? [], [decks]);
 
@@ -77,35 +93,35 @@ const MainPage: FC = () => {
         return map;
     }, [deckList]);
 
-    const sharedCount = useMemo(
-        () => deckList.filter((deck) => !deck.is_owner).length,
-        [deckList],
+    const visibleDecks = useMemo(() => {
+        let list = deckList;
+        if (filter === 'own') list = list.filter((deck) => deck.is_owner);
+        if (filter === 'shared') list = list.filter((deck) => !deck.is_owner);
+        return [...list]
+            .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+            .slice(0, DECKS_LIMIT);
+    }, [deckList, filter]);
+
+    const dueByDeck = useMemo(
+        () => new Map((summary?.perDeck ?? []).map((deck) => [deck.deckUuid, deck.due])),
+        [summary],
+    );
+    const masteryByDeck = useMemo(
+        () => new Map((mastery?.perDeck ?? []).map((deck) => [deck.deckKey, deck])),
+        [mastery],
     );
 
     return (
-        <VStack max gap="24">
-            <VStack max gap="16">
-                <VStack max gap="4">
-                    <Typography.Title level={2} className={cls.greeting}>
-                        {name
-                            ? t('{{greeting}}, {{name}}! 👋', { greeting, name })
-                            : t('{{greeting}}! 👋', { greeting })}
-                    </Typography.Title>
-                    <Typography.Paragraph type="secondary" className={cls.subtitle}>
-                        {t('Создавайте колоды слов и заучивайте их в режимах «Карточки» и «Заучивание».')}
-                    </Typography.Paragraph>
-                </VStack>
-                <Input
-                    ref={searchRef}
-                    className={cls.search}
-                    size="large"
-                    allowClear
-                    prefix={<SearchOutlined />}
-                    value={search}
-                    placeholder={t('Найти колоды и слова')}
-                    onChange={(e) => setSearchDebounced(e.target.value)}
-                />
-            </VStack>
+        <div className={cls.MainPage}>
+            <Input
+                ref={searchRef}
+                className={cls.search}
+                allowClear
+                prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                value={search}
+                placeholder={t('Найти колоды и слова')}
+                onChange={(e) => setSearchDebounced(e.target.value)}
+            />
 
             {hasSearch ? (
                 <GlobalSearchResults
@@ -116,50 +132,71 @@ const MainPage: FC = () => {
                 />
             ) : (
                 <>
-                    <StatsStrip
-                        decksCount={deckList.length}
-                        wordsCount={wordsCount ?? 0}
-                        favoritesCount={favorites?.length ?? 0}
-                        sharedCount={sharedCount}
-                    />
+                    <header className={cls.header}>
+                        <div className={cls.greeting}>
+                            <Kicker>{dateKicker}</Kicker>
+                            <h1 className={cls.title}>
+                                {name
+                                    ? t('{{greeting}}, {{name}}', { greeting, name })
+                                    : greeting}
+                            </h1>
+                        </div>
+                        <div className={cls.goal}>
+                            <span className={cls.goalLabel}>{t('Цель дня')}</span>
+                            <span className={cls.goalValue}>{`${todayAnswers} / ${goal}`}</span>
+                        </div>
+                    </header>
 
-                    <QuickActions />
+                    <div className={cls.overview}>
+                        <DueHero tz={tz} />
+                        <StreakCard tz={tz} />
+                    </div>
 
-                    <VStack max gap="16">
-                        <HStack max justify="between" align="center" gap="16" wrap>
-                            <MyTypography.Large strong>{t('Недавние колоды')}</MyTypography.Large>
-                            <HStack gap="12" align="center" wrap>
+                    <NextSteps tz={tz} />
+
+                    <section className={cls.decks}>
+                        <SectionHeader
+                            className={cls.decksHeader}
+                            size={SectionHeaderSize.LG}
+                            title={t('Колоды')}
+                            titleExtra={(
                                 <Segmented<DeckFilter>
+                                    className={cls.filter}
+                                    classNames={{ item: cls.filterItem, label: cls.filterLabel }}
                                     value={filter}
                                     onChange={setFilter}
                                     options={[
-                                        { label: t('Все'), value: 'all' },
+                                        { label: t('Недавние'), value: 'recent' },
                                         { label: t('Мои'), value: 'own' },
-                                        { label: t('Доступные мне'), value: 'shared' },
+                                        { label: t('Общие'), value: 'shared' },
                                     ]}
                                 />
-                                <Typography.Link onClick={() => navigate(RoutePath.DECKS())}>
-                                    {t('Все колоды')} <ArrowRightOutlined />
-                                </Typography.Link>
-                            </HStack>
-                        </HStack>
-                        <DeckList
-                            limit={6}
-                            sort="recent"
-                            filter={filter}
-                            showFavorites={false}
+                            )}
+                            extra={(
+                                <Link to={RoutePath.DECKS()} className={cls.allDecks}>
+                                    {t('Все {{count}} колод', { count: deckList.length })}
+                                    <ArrowRight aria-hidden size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
+                                </Link>
+                            )}
                         />
-                    </VStack>
-
-                    <VStack max gap="16">
-                        <MyTypography.Large strong>
-                            {t('Недавно добавленные слова')}
-                        </MyTypography.Large>
-                        <RecentWords cards={recentCards ?? []} deckNameByUuid={deckNameByUuid} />
-                    </VStack>
+                        <div className={cls.deckGrid}>
+                            {visibleDecks.map((deck) => {
+                                const deckMastery = masteryByDeck.get(deck.uuid);
+                                return (
+                                    <DeckCard
+                                        key={deck.uuid}
+                                        deck={deck}
+                                        dueCount={dueByDeck.get(deck.uuid) ?? 0}
+                                        mastered={toPercent(deckMastery?.mastered ?? 0, deck.cards_count)}
+                                        learning={toPercent(deckMastery?.learning ?? 0, deck.cards_count)}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </section>
                 </>
             )}
-        </VStack>
+        </div>
     );
 };
 
