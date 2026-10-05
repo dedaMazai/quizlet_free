@@ -1,85 +1,46 @@
 import {
-    ChangeEvent, FC, useMemo, useState,
+    ChangeEvent, useMemo, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-    Avatar, Button, Input, InputNumber, Select, Table,
-} from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import {
-    DeleteOutlined,
-    LockOutlined,
-    SearchOutlined,
-    UnlockOutlined,
-    UserOutlined,
-} from '@ant-design/icons';
+import { Input, Select } from 'antd';
+import { ChevronDown, Search } from 'lucide-react';
 import {
     RoleSelect,
-    UserAccessValidator,
+    UserAvatar,
     useUserInfo,
     useGetUsersQuery,
-    useUpdateUserRoleMutation,
-    useDeleteUserMutation,
-    useSetUserBlockedMutation,
-    useSetUserAiLimitMutation,
+    useGetUsersAiUsageQuery,
 } from '@/entities/User';
 import type { UserInfo, RoleName } from '@/entities/User';
-import { Accesses } from '@/shared/types/accesses';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import { EmptyState } from '@/shared/ui/EmptyState';
-import { StatusTag } from '@/shared/ui/StatusTag';
-import { buildName } from '@/shared/lib/helpers/buildName';
-import { getAvatarSrc } from '@/shared/const/avatars';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { Skeleton } from '@/shared/ui/Skeleton';
 import { useDebounce } from '@/shared/lib/hooks/useDebounce';
+import { getUserFullName } from '../lib/getUserFullName';
+import { UserDetailsPanel } from './UserDetailsPanel';
+import cls from './UsersTable.module.scss';
 
 type BlockStatusFilter = 'all' | 'active' | 'blocked';
 
-interface AiLimitCellProps {
-    value: number;
-    onCommit: (value: number) => void;
-}
+const ICON_SIZE = 15;
+const CHEVRON_SIZE = 14;
+const ICON_STROKE = 1.5;
+const DEFAULT_AI_LIMIT = 5;
+const SKELETON_ROWS = 7;
 
-// Inline-редактирование лимита ИИ: коммитим только при потере фокуса/Enter, чтобы не дёргать мутацию.
-const AiLimitCell: FC<AiLimitCellProps> = ({ value, onCommit }) => {
-    const [local, setLocal] = useState<number | null>(value);
-
-    const commit = () => {
-        if (local === null || local === value) {
-            return;
-        }
-        onCommit(local);
-    };
-
-    return (
-        <InputNumber
-            min={0}
-            max={25}
-            value={local}
-            onChange={setLocal}
-            onBlur={commit}
-            onPressEnter={commit}
-            style={{ width: '100%' }}
-        />
-    );
-};
-
+/** Пользователи 6.26: поиск, таблица и панель выбранного пользователя */
 export const UsersTable = () => {
     const { t } = useTranslation();
-    const { message, modal } = useAntdApp();
     const currentUser = useUserInfo();
 
     const { data: users, isLoading } = useGetUsersQuery();
-    const [updateUserRole] = useUpdateUserRoleMutation();
-    const [deleteUser] = useDeleteUserMutation();
-    const [setUserBlocked] = useSetUserBlockedMutation();
-    const [setUserAiLimit] = useSetUserAiLimitMutation();
+    const { data: aiUsage } = useGetUsersAiUsageQuery();
 
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState<RoleName | undefined>();
     const [statusFilter, setStatusFilter] = useState<BlockStatusFilter>('all');
+    const [selectedId, setSelectedId] = useState<string>();
 
     const applyDebouncedSearch = useDebounce(setDebouncedSearch, 300);
     const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -107,223 +68,109 @@ export const UsersTable = () => {
                 return false;
             }
             if (query) {
-                const fio = buildName({
-                    surname: user.surname,
-                    name: user.name,
-                    middle_name: user.middle_name,
-                    language: currentUser?.language,
-                }).toLowerCase();
+                const fio = [user.surname, user.name, user.middle_name].filter(Boolean).join(' ').toLowerCase();
                 if (!fio.includes(query) && !user.email.toLowerCase().includes(query)) {
                     return false;
                 }
             }
             return true;
         });
-    }, [users, roleFilter, statusFilter, debouncedSearch, currentUser?.language]);
+    }, [users, roleFilter, statusFilter, debouncedSearch]);
 
-    const handleRoleChange = async (user: UserInfo, role: RoleName) => {
-        try {
-            await updateUserRole({ user_uuid: user.uuid, role }).unwrap();
-            message.success(t('Роль обновлена'));
-        } catch {
-            message.error(t('Не удалось изменить роль'));
-        }
-    };
+    // Без явного выбора — первый в списке
+    const selectedUser = filteredUsers.find((u) => u.uuid === selectedId) ?? filteredUsers[0];
 
-    const handleAiLimitChange = async (user: UserInfo, ai_limit: number) => {
-        try {
-            await setUserAiLimit({ user_uuid: user.uuid, ai_limit }).unwrap();
-            message.success(t('Лимит обновлён'));
-        } catch {
-            message.error(t('Не удалось изменить лимит'));
-        }
-    };
-
-    const handleToggleBlock = (user: UserInfo) => {
-        const blocking = !user.blocked;
-        modal.confirm({
-            title: blocking ? t('Заблокировать пользователя') : t('Разблокировать пользователя'),
-            content: blocking
-                ? t('Пользователь {{name}} не сможет войти в систему.', { name: user.email })
-                : t('Пользователь {{name}} снова сможет войти в систему.', { name: user.email }),
-            okText: blocking ? t('Заблокировать') : t('Разблокировать'),
-            okButtonProps: { danger: blocking },
-            cancelText: t('Отмена'),
-            onOk: async () => {
-                try {
-                    await setUserBlocked({ user_uuid: user.uuid, blocked: blocking }).unwrap();
-                    message.success(blocking
-                        ? t('Пользователь заблокирован')
-                        : t('Пользователь разблокирован'));
-                } catch {
-                    message.error(t('Не удалось изменить статус блокировки'));
-                }
-            },
-        });
-    };
-
-    const handleDelete = (user: UserInfo) => {
-        modal.confirm({
-            title: t('Удалить пользователя'),
-            content: t('Пользователь {{name}} и все его данные будут удалены безвозвратно.', {
-                name: user.email,
-            }),
-            okText: t('Удалить'),
-            okButtonProps: { danger: true },
-            cancelText: t('Отмена'),
-            onOk: async () => {
-                try {
-                    await deleteUser(user.uuid).unwrap();
-                    message.success(t('Пользователь удалён'));
-                } catch {
-                    message.error(t('Не удалось удалить пользователя'));
-                }
-            },
-        });
-    };
-
-    const columns = useMemo<ColumnsType<UserInfo>>(() => [
-        {
-            title: t('Пользователь'),
-            key: 'name',
-            render: (_, user) => (
-                <HStack gap="12" align="center">
-                    <Avatar src={getAvatarSrc(user.avatar)} icon={<UserOutlined />} />
-                    <MyTypography.Base>
-                        {buildName({
-                            surname: user.surname,
-                            name: user.name,
-                            middle_name: user.middle_name,
-                            language: currentUser?.language,
-                        }) || user.email}
-                    </MyTypography.Base>
-                </HStack>
-            ),
-        },
-        {
-            title: t('E-mail'),
-            dataIndex: 'email',
-            key: 'email',
-        },
-        {
-            title: t('Роль'),
-            key: 'role',
-            width: 200,
-            render: (_, user) => {
-                const isSelf = user.uuid === currentUser?.uuid;
-                return (
-                    <UserAccessValidator accesses={[Accesses.users_can_update]} skip={isSelf}>
-                        <RoleSelect
-                            value={user.role?.name}
-                            disabled={isSelf}
-                            style={{ width: '100%' }}
-                            onChange={(role) => handleRoleChange(user, role)}
-                        />
-                    </UserAccessValidator>
-                );
-            },
-        },
-        {
-            title: t('Лимит ИИ'),
-            key: 'ai_limit',
-            width: 140,
-            render: (_, user) => {
-                if (user.role?.name === 'admin') {
-                    return <MyTypography.Base type="secondary">{t('Без лимита')}</MyTypography.Base>;
-                }
-                return (
-                    <UserAccessValidator accesses={[Accesses.users_can_update]}>
-                        <AiLimitCell
-                            value={user.ai_limit ?? 5}
-                            onCommit={(value) => handleAiLimitChange(user, value)}
-                        />
-                    </UserAccessValidator>
-                );
-            },
-        },
-        {
-            title: t('Статус'),
-            key: 'status',
-            width: 140,
-            render: (_, user) => (user.blocked
-                ? <StatusTag variant="warning">{t('Заблокирован')}</StatusTag>
-                : <StatusTag variant="success">{t('Активен')}</StatusTag>),
-        },
-        {
-            title: t('Действия'),
-            key: 'actions',
-            width: 120,
-            align: 'center',
-            render: (_, user) => {
-                if (user.uuid === currentUser?.uuid) {
-                    return null;
-                }
-                return (
-                    <HStack gap="4" justify="center">
-                        <UserAccessValidator accesses={[Accesses.users_can_update]}>
-                            <Button
-                                type="text"
-                                title={user.blocked ? t('Разблокировать') : t('Заблокировать')}
-                                icon={user.blocked ? <UnlockOutlined /> : <LockOutlined />}
-                                onClick={() => handleToggleBlock(user)}
-                            />
-                        </UserAccessValidator>
-                        <UserAccessValidator accesses={[Accesses.users_can_delete]}>
-                            <Button
-                                danger
-                                type="text"
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleDelete(user)}
-                            />
-                        </UserAccessValidator>
-                    </HStack>
-                );
-            },
-        },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    ], [t, currentUser]);
+    const getAiLabel = (user: UserInfo) => (user.role?.name === 'admin'
+        ? '∞'
+        : `${aiUsage?.[user.uuid] ?? 0}/${user.ai_limit ?? DEFAULT_AI_LIMIT}`);
 
     if (!isLoading && !users?.length) {
         return <EmptyState type="recent" title={t('Пользователи не найдены')} />;
     }
 
     return (
-        <VStack max gap="16">
-            <HStack max gap="8" wrap align="start">
-                <Input
-                    placeholder={t('Поиск по ФИО или e-mail')}
-                    prefix={<SearchOutlined />}
-                    value={search}
-                    onChange={handleSearchChange}
-                    allowClear
-                    style={{ width: 280 }}
-                />
-                <RoleSelect
-                    placeholder={t('Все роли')}
-                    value={roleFilter}
-                    onChange={setRoleFilter}
-                    allowClear
-                    style={{ width: 180 }}
-                />
-                <Select<BlockStatusFilter>
-                    value={statusFilter}
-                    onChange={setStatusFilter}
-                    options={statusOptions}
-                    style={{ width: 180 }}
-                />
-            </HStack>
+        <div className={cls.UsersTable}>
+            <div className={cls.main}>
+                <div className={cls.toolbar}>
+                    <Input
+                        className={cls.search}
+                        placeholder={t('Имя или почта')}
+                        prefix={<Search aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                        value={search}
+                        onChange={handleSearchChange}
+                        allowClear
+                    />
+                    {/* Нет в макете: фильтры роли и статуса сохранены */}
+                    <RoleSelect
+                        className={cls.filter}
+                        placeholder={t('Все роли')}
+                        value={roleFilter}
+                        onChange={setRoleFilter}
+                        allowClear
+                        suffixIcon={<ChevronDown aria-hidden size={CHEVRON_SIZE} strokeWidth={ICON_STROKE} />}
+                    />
+                    <Select<BlockStatusFilter>
+                        className={cls.filter}
+                        value={statusFilter}
+                        onChange={setStatusFilter}
+                        options={statusOptions}
+                        suffixIcon={<ChevronDown aria-hidden size={CHEVRON_SIZE} strokeWidth={ICON_STROKE} />}
+                    />
+                </div>
 
-            <Table<UserInfo>
-                style={{ width: '100%' }}
-                rowKey="uuid"
-                loading={isLoading}
-                columns={columns}
-                dataSource={filteredUsers}
-                pagination={false}
-                locale={{
-                    emptyText: <EmptyState type="search" title={t('Пользователи не найдены')} />,
-                }}
-            />
-        </VStack>
+                <div className={cls.table} role="table">
+                    <div className={classNames(cls.row, [cls.head])} role="row">
+                        <span role="columnheader">{t('Пользователь')}</span>
+                        <span role="columnheader">{t('Роль')}</span>
+                        <span role="columnheader">{t('Статус')}</span>
+                        <span role="columnheader">{t('ИИ')}</span>
+                    </div>
+
+                    {isLoading && Array.from({ length: SKELETON_ROWS }, (_, i) => (
+                        <Skeleton key={i} className={cls.skeletonRow} />
+                    ))}
+
+                    {filteredUsers.map((user) => (
+                        <button
+                            key={user.uuid}
+                            type="button"
+                            role="row"
+                            aria-selected={user.uuid === selectedUser?.uuid}
+                            className={classNames(cls.row, { [cls.selected]: user.uuid === selectedUser?.uuid })}
+                            onClick={() => setSelectedId(user.uuid)}
+                        >
+                            <span className={cls.person} role="cell">
+                                <UserAvatar user={user} />
+                                <span className={cls.personText}>
+                                    <span className={cls.name}>{getUserFullName(user)}</span>
+                                    <span className={cls.email}>{user.email}</span>
+                                </span>
+                            </span>
+                            <span className={cls.role} role="cell">
+                                {user.role?.name === 'admin' ? t('Админ') : t('Пользователь')}
+                            </span>
+                            <span className={cls.status} role="cell">
+                                <i className={classNames(cls.statusDot, { [cls.blocked]: user.blocked })} />
+                                {user.blocked ? t('Заблокирован') : t('Активен')}
+                            </span>
+                            <span className={cls.ai} role="cell">{getAiLabel(user)}</span>
+                        </button>
+                    ))}
+
+                    {!isLoading && !filteredUsers.length && (
+                        <EmptyState type="search" title={t('Пользователи не найдены')} />
+                    )}
+                </div>
+            </div>
+
+            {selectedUser && (
+                <UserDetailsPanel
+                    key={selectedUser.uuid}
+                    user={selectedUser}
+                    aiUsed={aiUsage?.[selectedUser.uuid] ?? 0}
+                    isSelf={selectedUser.uuid === currentUser?.uuid}
+                />
+            )}
+        </div>
     );
 };

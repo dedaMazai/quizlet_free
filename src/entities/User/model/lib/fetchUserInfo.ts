@@ -30,6 +30,8 @@ export const fetchUserInfo = async (user: User): Promise<UserInfo> => {
     description: data.description ?? undefined,
     avatar: data.avatar ?? undefined,
     blocked: data.blocked ?? false,
+    ai_limit: data.ai_limit ?? 5,
+    timezone: data.timezone ?? undefined,
     role: {
       uuid: `role-${role}`,
       name: role,

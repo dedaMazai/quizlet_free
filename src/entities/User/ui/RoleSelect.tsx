@@ -1,6 +1,6 @@
 import { Select } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { memo, useMemo } from 'react';
+import { memo, ReactNode, useMemo } from 'react';
 import { Accesses } from '@/shared/types/accesses';
 import { UserAccessValidator } from './UserAccessValidator';
 import { ROLE_NAMES, RoleName } from '../model/types/user';
@@ -11,6 +11,8 @@ interface RoleSelectProps {
     disabled?: boolean;
     onChange?: (value: RoleName) => void;
     style?: React.CSSProperties;
+    className?: string;
+    suffixIcon?: ReactNode;
     allowClear?: boolean;
 }
 
@@ -28,6 +30,8 @@ export const RoleSelectDefault = memo((props: RoleSelectProps) => {
         value,
         onChange,
         style,
+        className,
+        suffixIcon,
         placeholder,
         disabled,
         allowClear,
@@ -47,6 +51,8 @@ export const RoleSelectDefault = memo((props: RoleSelectProps) => {
             value={value}
             onChange={onChange}
             style={style}
+            className={className}
+            suffixIcon={suffixIcon}
             placeholder={placeholder || t('Роль')}
             disabled={disabled}
             allowClear={allowClear}

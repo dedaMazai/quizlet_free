@@ -1,50 +1,50 @@
-.headerCard {
+.ProfileTab {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
   width: 100%;
-  border-radius: 16px;
-  box-shadow: var(--shadow-sm);
 }
 
-.header {
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 20px;
+}
+
+.infoRow {
   display: flex;
   align-items: center;
-  gap: 24px;
-}
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  font-size: 14px;
 
-.avatar {
-  flex-shrink: 0;
-  width: 96px;
-  height: 96px;
-  border-radius: 16px;
-  object-fit: cover;
-}
-
-.headerInfo {
-  min-width: 0;
-}
-
-.name {
-  margin: 0;
-}
-
-.roleTag {
-  margin: 0;
-  text-transform: capitalize;
-}
-
-.contactIcon {
-  display: inline-flex;
-  font-size: 16px;
-  color: var(--color-accent);
-}
-
-@media (width <= 560px) {
-  .header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  & + & {
+    border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
   }
+}
 
-  .headerInfo {
-    align-items: center;
+.infoLabel {
+  color: var(--color-neutral-700);
+}
+
+.logout {
+  height: auto;
+  padding: 0;
+  color: var(--color-accent-700);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (width <= 900px) {
+  .ProfileTab {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

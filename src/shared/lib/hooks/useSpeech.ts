@@ -43,7 +43,7 @@ const getSavedVoiceUri = (): string => {
  * 2) иначе женский по имени,
  * 3) иначе первый подходящий по языку.
  */
-const pickVoice = (lang: SpeechLang): SpeechSynthesisVoice | undefined => {
+export const pickVoice = (lang: SpeechLang): SpeechSynthesisVoice | undefined => {
   const voices = cachedVoices.length ? cachedVoices : window.speechSynthesis.getVoices();
   const langPrefix = lang.split('-')[0];
 

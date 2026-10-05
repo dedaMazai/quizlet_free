@@ -1,15 +1,19 @@
 import { useCallback, useContext } from 'react';
-import { Theme } from '@/shared/const/theme';
+import { Theme, ThemeMode } from '@/shared/const/theme';
 import { ThemeContext } from '../context/ThemeContext';
 
 interface UseThemeResult {
     toggleTheme: (saveAction?: () => void) => void;
     theme: Theme;
+    mode: ThemeMode;
+    setMode: (mode: ThemeMode) => void;
     isLoading: boolean;
 }
 
 export function useTheme(): UseThemeResult {
-    const { theme, setTheme, isLoading } = useContext(ThemeContext);
+    const {
+        theme, setTheme, mode, setMode, isLoading,
+    } = useContext(ThemeContext);
 
     const toggleTheme = useCallback((saveAction?: () => void) => {
         let newTheme: Theme;
@@ -31,6 +35,8 @@ export function useTheme(): UseThemeResult {
     return {
         theme: theme || Theme.LIGHT,
         toggleTheme,
+        mode: mode ?? ThemeMode.LIGHT,
+        setMode: setMode ?? (() => undefined),
         isLoading: isLoading ?? false,
     };
 }

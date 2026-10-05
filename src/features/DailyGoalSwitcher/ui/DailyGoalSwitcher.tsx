@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import { Segmented } from 'antd';
 import { useDailyGoal, useUpdateUserPreferencesMutation } from '@/entities/UserSettings';
 import { DAILY_GOAL_OPTIONS } from '@/shared/const/const';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { BoxSegmented } from '@/shared/ui/BoxSegmented';
 import { useTranslation } from 'react-i18next';
 
 /** Выбор цели дня: сколько карточек повторять в день */
@@ -21,7 +21,7 @@ export const DailyGoalSwitcher = memo(() => {
     };
 
     return (
-        <Segmented<number>
+        <BoxSegmented<number>
             value={goal}
             onChange={handleChange}
             options={DAILY_GOAL_OPTIONS.map((value) => ({ label: String(value), value }))}

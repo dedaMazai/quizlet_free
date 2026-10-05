@@ -2,6 +2,8 @@ export { UserSelect } from './ui/UserSelect';
 
 export { RoleSelect } from './ui/RoleSelect';
 
+export { UserAvatar, UserAvatarSize, getUserInitials } from './ui/UserAvatar/UserAvatar';
+
 export { UserAccessValidator } from './ui/UserAccessValidator';
 
 export { useUserActions } from './model/slice/userSlice';
@@ -35,6 +37,7 @@ export type {
   UserFilters,
   UserFiltersSearch,
   UpdateMeInfo,
+  AdminUserStats,
 } from './model/api/userApi';
 
 export {
@@ -57,4 +60,8 @@ export {
   useGetUsersSearchQuery,
   useSetUserBlockedMutation,
   useSetUserAiLimitMutation,
+  useChangePasswordMutation,
+  useGetUsersAiUsageQuery,
+  useGetAdminUserStatsQuery,
+  useImpersonateUserMutation,
 } from './model/api/userApi';

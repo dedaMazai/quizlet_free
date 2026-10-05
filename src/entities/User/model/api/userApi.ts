@@ -31,6 +31,13 @@ interface ResAuth extends UserInfo {
   refresh_token: string
 }
 
+/** Сводка по пользователю для админа (admin_user_stats). */
+export interface AdminUserStats {
+  decks: number
+  words: number
+  streak: number
+}
+
 export type OrderUsers = 'created_at' | 'updated_at' | 'name' | 'email';
 
 export interface UserFilters {
@@ -255,6 +262,7 @@ const userApi = rtkApi.injectEndpoints({
             tel: body.tel ?? null,
             description: body.description ?? null,
             avatar: body.avatar ?? null,
+            timezone: body.timezone ?? null,
           })
           .eq('id', authUser.id);
         if (error) return supabaseError(error.message);
@@ -441,6 +449,65 @@ const userApi = rtkApi.injectEndpoints({
         ApiTag.Users,
       ],
     }),
+    changePassword: build.mutation<void, string>({
+      // Смена пароля текущего пользователя (сессия уже есть — старый пароль Supabase не требует).
+      queryFn: async (password) => {
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
+    }),
+    getUsersAiUsage: build.query<Record<string, number>, void>({
+      // Израсходовано запросов к ИИ сегодня: { [user_id]: used } (только админ).
+      queryFn: async () => {
+        const { data, error } = await supabase.rpc('admin_get_ai_usage');
+        if (error) return supabaseError(error.message);
+        const rows = (data as { user_id: string; used: number }[] | null) ?? [];
+        return { data: Object.fromEntries(rows.map((row) => [row.user_id, row.used])) };
+      },
+      providesTags: [ApiTag.Users, ApiTag.AiUsage],
+    }),
+    getAdminUserStats: build.query<AdminUserStats, string>({
+      queryFn: async (uuid) => {
+        const { data, error } = await supabase.rpc('admin_user_stats', { p_user_id: uuid });
+        if (error) return supabaseError(error.message);
+        return { data: data as AdminUserStats };
+      },
+      providesTags: (_res, _error, uuid) => [{
+        type: ApiTag.User,
+        id: uuid,
+      }],
+    }),
+    impersonateUser: build.mutation<void, string>({
+      // Edge Function выпускает одноразовый токен, verifyOtp заменяет сессию админа сессией пользователя.
+      queryFn: async (uuid) => {
+        const { data, error } = await supabase.functions.invoke('impersonate-user', {
+          body: { user_id: uuid },
+        });
+        if (error) {
+          // Достаём код ошибки из тела ответа функции (например, CANNOT_IMPERSONATE_ADMIN).
+          let code = error.message;
+          const ctx = (error as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            try {
+              const body = await ctx.json();
+              if (body?.error) code = body.error;
+            } catch {
+              // Тело не JSON — оставляем исходное сообщение.
+            }
+          }
+          return supabaseError(code);
+        }
+        const tokenHash = (data as { token_hash?: string } | null)?.token_hash;
+        if (!tokenHash) return supabaseError('LINK_FAILED');
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'magiclink',
+        });
+        if (verifyError) return supabaseError(verifyError.message);
+        return { data: undefined };
+      },
+    }),
     deleteUser: build.mutation<void, string>({
       queryFn: async (uuid) => {
         const { error } = await supabase.rpc('delete_user', { p_user_id: uuid });
@@ -472,4 +539,8 @@ export const {
   useGetUsersSearchQuery,
   useSetUserBlockedMutation,
   useSetUserAiLimitMutation,
+  useChangePasswordMutation,
+  useGetUsersAiUsageQuery,
+  useGetAdminUserStatsQuery,
+  useImpersonateUserMutation,
 } = userApi;
