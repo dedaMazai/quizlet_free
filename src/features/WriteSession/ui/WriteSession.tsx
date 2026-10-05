@@ -109,6 +109,7 @@ export const WriteSession: FC<WriteSessionProps> = (props) => {
             onAnswer={session.answer}
             onSkip={session.skip}
             onNext={session.next}
+            onAcceptCorrect={session.acceptAsCorrect}
           />
         )}
       </SessionStage>

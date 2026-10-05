@@ -24,11 +24,13 @@ interface WritePromptProps {
   onAnswer: (value: string) => void;
   onSkip: () => void;
   onNext: () => void;
+  /** «Я ответил верно» — засчитать неверный/почти верный ответ как верный */
+  onAcceptCorrect: () => void;
 }
 
 export const WritePrompt: FC<WritePromptProps> = (props) => {
   const {
-    card, prompt, expected, direction, grade, userInput, correctNote, onAnswer, onSkip, onNext,
+    card, prompt, expected, direction, grade, userInput, correctNote, onAnswer, onSkip, onNext, onAcceptCorrect,
   } = props;
   const { t } = useTranslation();
   const [value, setValue] = useState('');
@@ -102,7 +104,14 @@ export const WritePrompt: FC<WritePromptProps> = (props) => {
 
       <div className={cls.actions}>
         {grade ? (
-          <SessionNextButton onNext={onNext} autoAdvance={grade === 'correct'} className={cls.cta} />
+          <>
+            <SessionNextButton onNext={onNext} autoAdvance={grade === 'correct'} className={cls.cta} />
+            {grade !== 'correct' && (
+              <SessionButton variant={SessionButtonVariant.GHOST} onClick={onAcceptCorrect}>
+                {t('Я ответил верно')}
+              </SessionButton>
+            )}
+          </>
         ) : (
           <>
             <SessionButton keyHint="ENTER" className={cls.cta} onClick={submit}>

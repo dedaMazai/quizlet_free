@@ -2454,5 +2454,6 @@
   "{{count}} правок_one": "{{count}} fix",
   "{{count}} правок_other": "{{count}} fixes",
   "По «{{query}}» нет колод": "No decks for “{{query}}”",
-  "Нет колод по этим фильтрам": "No decks match these filters"
+  "Нет колод по этим фильтрам": "No decks match these filters",
+  "Я ответил верно": "I was right"
 }

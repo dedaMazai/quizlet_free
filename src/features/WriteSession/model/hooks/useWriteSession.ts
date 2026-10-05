@@ -40,6 +40,7 @@ type Action =
   | { type: 'ANSWER'; grade: AnswerGrade; input: string }
   | { type: 'SKIP' }
   | { type: 'NEXT' }
+  | { type: 'ACCEPT' }
   | { type: 'RESET' };
 
 const initialState: WriteState = {
@@ -89,6 +90,23 @@ const reducer = (state: WriteState, action: Action): WriteState => {
         lastInput: '',
       };
     }
+    case 'ACCEPT': {
+      // «Я ответил верно»: неверный/почти верный ответ засчитывается как верный, карточка уходит
+      if (state.phase !== 'feedback' || state.lastGrade === null || state.lastGrade === 'correct') return state;
+      const counters = {
+        almost: state.counters.almost - (state.lastGrade === 'almost' ? 1 : 0),
+        wrong: state.counters.wrong - (state.lastGrade === 'wrong' ? 1 : 0),
+      };
+      const queue = state.queue.slice(1);
+      return {
+        ...state,
+        queue,
+        counters,
+        phase: queue.length === 0 ? 'finished' : 'question',
+        lastGrade: null,
+        lastInput: '',
+      };
+    }
     case 'RESET':
       // Возврат на экран настроек с сохранением выбранных настроек.
       return { ...initialState, settings: state.settings };
@@ -125,6 +143,8 @@ export const useWriteSession = (
   const eventsRef = useRef<StudyEventDraft[]>([]);
   const reviewsRef = useRef<CardReview[]>([]);
   const questionStartRef = useRef(0);
+  // Состояние повторения до последнего ответа — для переоценки «Я ответил верно»
+  const lastBeforeRef = useRef<CardReview | null>(null);
   // Сессия для статистики — сколько раз садились заниматься
   const sessionIdRef = useRef(crypto.randomUUID());
 
@@ -187,6 +207,7 @@ export const useWriteSession = (
     const uuid = currentCard.uuid;
     const grade = checkAnswer(expected, input, state.settings.typoTolerance);
     const before = reviewsByUuid.current.get(uuid) ?? null;
+    lastBeforeRef.current = before;
     const review = applyReview(before, uuid, gradeFromAnswer(grade));
     reviewsByUuid.current.set(uuid, review);
 
@@ -200,7 +221,6 @@ export const useWriteSession = (
       session_id: sessionIdRef.current,
     });
     reviewsRef.current.push(review);
-    if (eventsRef.current.length >= FLUSH_EVERY) flushEvents();
     setAnswers((prev) => [...prev, {
       cardUuid: uuid,
       correct: grade !== 'wrong',
@@ -213,7 +233,42 @@ export const useWriteSession = (
   };
 
   const skip = () => dispatch({ type: 'SKIP' });
-  const next = () => dispatch({ type: 'NEXT' });
+  // Пачку отправляем при переходе дальше, а не при ответе: до этого ответ ещё можно переоценить
+  const flushIfFull = () => {
+    if (eventsRef.current.length >= FLUSH_EVERY) flushEvents();
+  };
+  const next = () => {
+    flushIfFull();
+    dispatch({ type: 'NEXT' });
+  };
+
+  /** «Я ответил верно»: заменяет последний ответ (ещё в буфере) на верный и идёт дальше */
+  const acceptAsCorrect = () => {
+    if (!currentCard || state.phase !== 'feedback' || state.lastGrade === 'correct') return;
+    const uuid = currentCard.uuid;
+    const review = applyReview(lastBeforeRef.current, uuid, gradeFromAnswer('correct'));
+    reviewsByUuid.current.set(uuid, review);
+
+    const lastEvent = eventsRef.current[eventsRef.current.length - 1];
+    if (lastEvent?.card_id === uuid) {
+      eventsRef.current[eventsRef.current.length - 1] = {
+        ...lastEvent, is_correct: true, level_after: review.level,
+      };
+    }
+    if (reviewsRef.current[reviewsRef.current.length - 1]?.card_uuid === uuid) {
+      reviewsRef.current[reviewsRef.current.length - 1] = review;
+    }
+    setAnswers((prev) => [...prev.slice(0, -1), {
+      cardUuid: uuid,
+      correct: true,
+      almost: false,
+      mastered: review.level >= MASTERED_LEVEL,
+    }]);
+    setLastReview(review);
+
+    flushIfFull();
+    dispatch({ type: 'ACCEPT' });
+  };
   const reset = () => {
     clearLog();
     dispatch({ type: 'RESET' });
@@ -237,6 +292,7 @@ export const useWriteSession = (
     answer,
     skip,
     next,
+    acceptAsCorrect,
     reset,
   };
 };
