@@ -15,6 +15,7 @@ import { Kicker } from '@/shared/ui/Kicker';
 import { FadeIn, Skeleton } from '@/shared/ui/Skeleton';
 import { StreakFlame } from '@/shared/ui/StreakFlame';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { useOncePerDay } from '@/shared/lib/hooks/useOncePerDay';
 import { getStreakLevel, STREAK_LEVEL_NAMES, STREAK_LEVEL_THRESHOLDS } from '@/shared/lib/streak';
 import cls from './StreakCard.module.scss';
 
@@ -44,6 +45,8 @@ export const StreakCard = memo((props: StreakCardProps) => {
     const isLoading = isOverviewLoading || isHeatmapLoading;
     const todayAnswers = useTodayAnswers(tz);
     const goal = useDailyGoal();
+    // Заливка недели — «праздник», раз в день
+    const celebrate = useOncePerDay('streak-week');
 
     const days = overview?.currentStreak ?? 0;
     const record = overview?.longestStreak ?? 0;
@@ -124,7 +127,7 @@ export const StreakCard = memo((props: StreakCardProps) => {
                     <span className={cls.daysUnit}>{t('дней подряд', { count: days })}</span>
                 </div>
 
-                <div className={cls.week}>
+                <div className={classNames(cls.week, [], { [cls.celebrate]: celebrate })}>
                     {week.map((day, i) => (
                         <div key={day.key} className={cls.day}>
                             <div
@@ -132,6 +135,7 @@ export const StreakCard = memo((props: StreakCardProps) => {
                                     [cls.dayDone]: day.done,
                                     [cls.dayToday]: !day.done && i === week.length - 1,
                                 })}
+                                style={{ '--i': i } as CSSProperties}
                             >
                                 {day.done && (
                                     <Check aria-hidden size={CHECK_SIZE} strokeWidth={CHECK_STROKE} />

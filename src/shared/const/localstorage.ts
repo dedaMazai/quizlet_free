@@ -8,3 +8,5 @@ export const LOCAL_STORAGE_SESSION_BEST_ACCURACY_KEY = 'session_best_accuracy';
 export const LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY = 'RoadmapDoneSteps';
 export const LOCAL_STORAGE_REVIEW_EXCLUDED_DECKS_KEY = 'ReviewExcludedDecks';
 export const LOCAL_STORAGE_RECENT_DECKS_KEY = 'RecentDecks';
+/** Префикс дат «праздничных» анимаций: `motion-day:<key>` → YYYY-MM-DD последнего показа */
+export const LOCAL_STORAGE_MOTION_DAY_PREFIX = 'motion-day:';

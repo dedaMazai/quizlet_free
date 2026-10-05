@@ -5,6 +5,7 @@ import { DownloadOutlined, EyeOutlined } from '@ant-design/icons';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { getFileViewer } from '@/shared/lib/fileViewers/fileViewerFactory';
 import { downloadImageFromSrc } from '@/shared/lib/utils';
+import { MODAL_MOTION } from '@/shared/const/motion';
 import { MyTypography } from '../MyTypography';
 
 export interface FileViewerModalProps {
@@ -65,6 +66,7 @@ export const FileViewerModal: FC<FileViewerModalProps> = (props) => {
 
   return (
     <Modal
+      {...MODAL_MOTION}
       open={isOpen}
       onCancel={onClose}
       title={

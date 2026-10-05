@@ -14,6 +14,7 @@ import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { MODAL_MOTION } from '@/shared/const/motion';
 import cls from './CardForm.module.scss';
 
 interface CardFormValues {
@@ -145,6 +146,7 @@ export const CardForm: FC<CardFormProps> = (props) => {
 
   return (
     <Modal
+      {...MODAL_MOTION}
       open={open}
       title={title}
       okText={t('Сохранить')}

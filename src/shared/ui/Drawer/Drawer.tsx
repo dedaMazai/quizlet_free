@@ -1,7 +1,9 @@
 import {
     memo, ReactNode, useCallback, useEffect, useRef,
 } from 'react';
+import { MOTION_MS } from '@/shared/const/motion';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { useReducedMotion } from '@/shared/lib/hooks/useReducedMotion';
 import {
     AnimationProvider,
     useAnimationLibs,
@@ -46,10 +48,17 @@ export const DrawerContent = memo((props: DrawerProps) => {
     const closingRef = useRef(false);
     const sheetRef = useRef<HTMLDivElement>(null);
     const [{ y }, api] = Spring.useSpring(() => ({ y: heightRef.current }));
+    // Reduced motion: шторка не едет, а проявляется opacity за motion-instant
+    const reduced = useReducedMotion();
+    const [{ opacity }, fadeApi] = Spring.useSpring(() => ({ opacity: 1 }));
+    // Скрим проявляется вместе с выездом шторки
+    const scrimOpacity = Spring.to([y, opacity], (value: number, alpha: number) => (
+        (1 - value / heightRef.current) * alpha
+    ));
 
     const openDrawer = useCallback(() => {
-        api.start({ y: 0, immediate: false });
-    }, [api]);
+        api.start({ y: 0, immediate: reduced });
+    }, [api, reduced]);
 
     useEffect(() => {
         if (isOpen) {
@@ -57,21 +66,30 @@ export const DrawerContent = memo((props: DrawerProps) => {
             closingRef.current = false;
             // Старт всегда снизу — даже если прошлый раз шторку закрыли снаружи без анимации
             api.set({ y: heightRef.current });
+            if (reduced) {
+                fadeApi.set({ opacity: 0 });
+                fadeApi.start({ opacity: 1, config: { duration: MOTION_MS.instant } });
+            }
             openDrawer();
         }
-    }, [isOpen, openDrawer, api]);
+    }, [isOpen, openDrawer, api, fadeApi, reduced]);
 
     const close = useCallback((velocity = 0) => {
         // Повторный тап по скриму или ✕ во время анимации не должен вызвать onClose дважды
         if (closingRef.current) return;
         closingRef.current = true;
+        if (reduced) {
+            fadeApi.start({ opacity: 0, config: { duration: MOTION_MS.instant }, onResolve: onClose });
+
+            return;
+        }
         api.start({
             y: heightRef.current,
             immediate: false,
             config: { ...Spring.config.stiff, velocity },
             onResolve: onClose,
         });
-    }, [api, Spring.config.stiff, onClose]);
+    }, [api, fadeApi, reduced, Spring.config.stiff, onClose]);
 
     useEffect(() => {
         if (!isOpen) {
@@ -154,13 +172,15 @@ export const DrawerContent = memo((props: DrawerProps) => {
     return (
         <Portal element={document.getElementById('app') ?? document.body}>
             <div className={classNames(cls.Drawer, [className])}>
-                <Overlay className={cls.scrim} onClick={handleOverlayClick} />
+                <Spring.a.div style={{ opacity: scrimOpacity }}>
+                    <Overlay className={cls.scrim} onClick={handleOverlayClick} />
+                </Spring.a.div>
                 <Spring.a.div
                     ref={sheetRef}
                     className={cls.sheet}
                     role="dialog"
                     aria-modal="true"
-                    style={{ y }}
+                    style={{ y, opacity }}
                 >
                     <div className={cls.handleRow} {...bind()}>
                         <span className={cls.handle} />

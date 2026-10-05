@@ -142,6 +142,43 @@ $goal-block-height: 63px;
     border: 1px dashed var(--level-color);
 }
 
+// Загрузка главной (раз в день): заливка слева направо, «сегодня» один раз «вдыхает»
+.celebrate {
+    .dayDone {
+        animation: day-fill var(--motion-base) var(--ease-enter) calc(var(--i) * var(--motion-stagger)) backwards;
+    }
+
+    .dayToday {
+        animation: day-breathe var(--motion-deliberate) var(--ease-standard) calc(var(--i) * var(--motion-stagger));
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dayDone,
+        .dayToday {
+            animation: day-fade var(--motion-instant) linear;
+        }
+    }
+}
+
+@keyframes day-fill {
+    from {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+}
+
+@keyframes day-breathe {
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+@keyframes day-fade {
+    from {
+        opacity: 0;
+    }
+}
+
 .dayLabel {
     font-family: var(--font-mono);
     font-size: 10px;

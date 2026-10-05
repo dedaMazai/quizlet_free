@@ -3,6 +3,7 @@ import { Modal, Typography, Space } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { formatRelativeTime } from '@/shared/lib/formatters';
+import { MODAL_MOTION } from '@/shared/const/motion';
 
 interface LocalDraftRecoveryModalProps {
     open: boolean;
@@ -20,6 +21,7 @@ export const LocalDraftRecoveryModal: FC<LocalDraftRecoveryModalProps> = memo((p
 
     return (
         <Modal
+            {...MODAL_MOTION}
             open={open}
             title={
                 <Space>

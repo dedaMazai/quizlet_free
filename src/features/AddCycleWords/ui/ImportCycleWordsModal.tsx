@@ -14,6 +14,7 @@ import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
+import { MODAL_MOTION } from '@/shared/const/motion';
 import cls from './AddCycleWords.module.scss';
 
 /** Значение селекта источника для избранного (остальные значения — uuid колод). */
@@ -169,6 +170,7 @@ export const ImportCycleWordsModal: FC<ImportCycleWordsModalProps> = (props) => 
 
   return (
     <Modal
+      {...MODAL_MOTION}
       open={open}
       title={t('Импорт слов в цикл')}
       okText={t('Добавить ({{count}})', { count: selected.length })}

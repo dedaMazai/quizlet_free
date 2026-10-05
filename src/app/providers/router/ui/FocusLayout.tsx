@@ -12,7 +12,10 @@ export const FocusLayout = () => {
         <main className={cls.FocusLayout}>
             <NetworkBanner />
             <Suspense key={pathname} fallback={<PageLoader />}>
-                <Outlet />
+                {/* Анимируется только контент: оболочка неподвижна */}
+                <div className={cls.page}>
+                    <Outlet />
+                </div>
             </Suspense>
         </main>
     );

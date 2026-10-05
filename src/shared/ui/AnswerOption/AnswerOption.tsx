@@ -25,6 +25,14 @@ const STATE_CLASSES: Record<AnswerOptionState, string | undefined> = {
     [AnswerOptionState.DIM]: cls.dim,
 };
 
+// Точка клика — центр заливки «верно»; с клавиатуры заливка идёт из центра
+const handleMouseDown = (e: MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--ox', `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty('--oy', `${e.clientY - rect.top}px`);
+};
+
 const MARK_ICON_SIZE = 16;
 const MARK_ICON_STROKE = 2;
 
@@ -59,11 +67,12 @@ export const AnswerOption = memo((props: AnswerOptionProps) => {
             as="button"
             // Клавиатура обслуживается хоткеями сессии: фокус на варианте давал бы двойной Enter
             tabIndex={-1}
-            onMouseDown={(e: MouseEvent) => e.preventDefault()}
+            onMouseDown={handleMouseDown}
             aria-disabled={disabled}
             className={classNames(cls.AnswerOption, { [cls.locked]: disabled }, [className, STATE_CLASSES[state]])}
             onClick={disabled ? undefined : onClick}
         >
+            <span className={cls.fill} aria-hidden />
             <span className={cls.mark}>{mark}</span>
             <span className={cls.label}>{label}</span>
         </Blueprint>

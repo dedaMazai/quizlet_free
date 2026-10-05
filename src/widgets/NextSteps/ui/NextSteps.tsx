@@ -1,4 +1,6 @@
-import { memo, ReactNode, useMemo } from 'react';
+import {
+    CSSProperties, memo, ReactNode, useMemo,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
@@ -22,6 +24,11 @@ import {
     NEXT_STEP_TICKS, NextStep, NextStepKind, selectNextSteps,
 } from '../model/selectNextSteps';
 import cls from './NextSteps.module.scss';
+
+/** Появление по очереди: задержка растёт только у первых 6 карточек */
+const STAGGER_MAX_INDEX = 5;
+
+const staggerStyle = (index: number) => ({ '--i': Math.min(index, STAGGER_MAX_INDEX) } as CSSProperties);
 
 const ICON_SIZE = 18;
 const ICON_SIZE_MOBILE = 20;
@@ -136,12 +143,12 @@ export const NextSteps = memo((props: NextStepsProps) => {
                 size={isMobile ? SectionHeaderSize.SM : SectionHeaderSize.LG}
             />
             <div className={cls.grid}>
-                {steps.map((step) => {
+                {steps.map((step, stepIndex) => {
                     const view = toView(step);
                     // Мобильная (6.35): строка «иконка · кикер / заголовок / мета · шеврон»
                     if (isMobile) {
                         return (
-                            <Link key={step.key} to={step.path} className={cls.link}>
+                            <Link key={step.key} to={step.path} className={cls.link} style={staggerStyle(stepIndex)}>
                                 <Blueprint className={cls.row}>
                                     <span className={cls.rowIcon}>{view.icon}</span>
                                     <span className={cls.rowText}>
@@ -165,7 +172,7 @@ export const NextSteps = memo((props: NextStepsProps) => {
                         (_, i) => (i < step.filled ? TickState.DONE : TickState.TODO),
                     );
                     return (
-                        <Link key={step.key} to={step.path} className={cls.link}>
+                        <Link key={step.key} to={step.path} className={cls.link} style={staggerStyle(stepIndex)}>
                             <Blueprint className={cls.card}>
                                 <div className={cls.cardHead}>
                                     <Kicker size={KickerSize.SM} tone={KickerTone.ACCENT}>

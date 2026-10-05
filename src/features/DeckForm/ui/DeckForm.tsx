@@ -12,6 +12,7 @@ import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { MODAL_MOTION } from '@/shared/const/motion';
 import cls from './DeckForm.module.scss';
 
 interface DeckFormValues {
@@ -113,6 +114,7 @@ export const DeckForm: FC<DeckFormProps> = (props) => {
 
   return (
     <Modal
+      {...MODAL_MOTION}
       open={open}
       title={title}
       okText={t('Сохранить')}

@@ -1,5 +1,7 @@
-import { CSSProperties, memo } from 'react';
+import { CSSProperties, memo, useRef } from 'react';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { useInViewport } from '@/shared/lib/hooks/useInViewport';
+import { useOncePerDay } from '@/shared/lib/hooks/useOncePerDay';
 import cls from './MasteryBar.module.scss';
 
 /** С этого процента «усвоено» сегмент окрашивается сигналом «результат» */
@@ -33,6 +35,10 @@ export const MasteryBar = memo((props: MasteryBarProps) => {
         size = MasteryBarSize.MD,
         className,
     } = props;
+    const ref = useRef<HTMLDivElement>(null);
+    // Заливка — «праздник»: раз в день, при первом появлении в viewport
+    const celebrate = useOncePerDay('mastery');
+    const seen = useInViewport(ref, celebrate);
 
     // Ширины — данные, а не оформление: передаём через CSS-переменные
     const vars = {
@@ -41,7 +47,14 @@ export const MasteryBar = memo((props: MasteryBarProps) => {
     } as CSSProperties;
 
     return (
-        <div className={classNames(cls.MasteryBar, [className, cls[size]])} style={vars}>
+        <div
+            ref={ref}
+            className={classNames(cls.MasteryBar, [className, cls[size]], {
+                [cls.pending]: celebrate && !seen,
+                [cls.play]: celebrate && seen,
+            })}
+            style={vars}
+        >
             <div
                 className={classNames(cls.mastered, [], {
                     [cls.success]: mastered >= MASTERY_SUCCESS_THRESHOLD,

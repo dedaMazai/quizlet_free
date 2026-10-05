@@ -4,9 +4,16 @@ import { DarkTheme } from './dark/index';
 import { LightTheme } from './light/index';
 import { Theme } from '@/shared/const/theme';
 
+// Шкала AntD (дропдауны, тултипы) совпадает с `--motion-fast/base/slow`
+const motionTokens: ThemeConfig['token'] = {
+  motionDurationFast: '0.14s',
+  motionDurationMid: '0.22s',
+  motionDurationSlow: '0.36s',
+};
+
 const themeTokens: Record<Theme, ThemeConfig['token']> = {
-  [Theme.LIGHT]: LightTheme,
-  [Theme.DARK]: DarkTheme,
+  [Theme.LIGHT]: { ...LightTheme, ...motionTokens },
+  [Theme.DARK]: { ...DarkTheme, ...motionTokens },
 };
 
 /**
@@ -196,6 +203,8 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--motion-slow': '360ms',
     '--motion-deliberate': '600ms',
     '--motion-auto-advance': '1200ms',
+    '--motion-stagger': '40ms',
+    '--motion-stagger-tight': '30ms',
     '--ease-standard': 'cubic-bezier(0.2, 0, 0, 1)',
     '--ease-enter': 'cubic-bezier(0, 0, 0, 1)',
     '--ease-exit': 'cubic-bezier(0.3, 0, 1, 1)',
@@ -380,6 +389,8 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--motion-slow': '360ms',
     '--motion-deliberate': '600ms',
     '--motion-auto-advance': '1200ms',
+    '--motion-stagger': '40ms',
+    '--motion-stagger-tight': '30ms',
     '--ease-standard': 'cubic-bezier(0.2, 0, 0, 1)',
     '--ease-enter': 'cubic-bezier(0, 0, 0, 1)',
     '--ease-exit': 'cubic-bezier(0.3, 0, 1, 1)',

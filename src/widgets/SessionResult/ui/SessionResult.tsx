@@ -4,6 +4,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, Flame } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   useGetCardReviewsQuery, useGetCardsQuery, useGetDueCountQuery,
 } from '@/entities/Card';
@@ -19,8 +20,10 @@ import { SectionHeader, SectionHeaderSize } from '@/shared/ui/SectionHeader';
 import { SessionButton, SessionButtonVariant } from '@/shared/ui/SessionButton';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { LOCAL_STORAGE_SESSION_BEST_ACCURACY_KEY } from '@/shared/const/localstorage';
+import { EASE, MOTION_MS } from '@/shared/const/motion';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { useReducedMotion } from '@/shared/lib/hooks/useReducedMotion';
 import { SessionRouteState, SessionSummary } from '@/shared/lib/session';
 import { getStreakLevel, STREAK_LEVEL_NAMES } from '@/shared/lib/streak';
 import { formatDuration } from '../model/sessionResult';
@@ -32,6 +35,15 @@ const FLAME_STROKE = 1.25;
 const ARROW_SIZE = 16;
 const ICON_STROKE = 1.5;
 const LEVEL_CLASSES = [cls.level0, cls.level1, cls.level2, cls.level3, cls.level4];
+
+// Последовательность итога (BACKLOG §8): серия N-1 → N перелистыванием, огонь «вспыхивает», статистика по очереди
+const SECONDS = 1000;
+const DELIBERATE = { duration: MOTION_MS.deliberate / SECONDS, ease: EASE.enter };
+const FADE = { duration: MOTION_MS.instant / SECONDS, ease: 'linear' } as const;
+const FLAME_PULSE = 1.08;
+/** Новый уровень серии — огонь вспыхивает сильнее */
+const FLAME_LEVEL_UP_PULSE = 1.15;
+const STAT_SHIFT = 12;
 
 interface SessionWord {
   uuid: string;
@@ -80,14 +92,15 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isMobile } = useMatchMedia();
+  const reducedMotion = useReducedMotion();
   const user = useUserInfo();
   const tz = useMemo(
     () => user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
     [user?.timezone],
   );
 
-  const { data: overview } = useGetStudyOverviewQuery(tz);
-  const { data: heatmap } = useGetStudyHeatmapQuery(tz);
+  const { data: overview, isFetching: isOverviewFetching } = useGetStudyOverviewQuery(tz);
+  const { data: heatmap, isFetching: isHeatmapFetching } = useGetStudyHeatmapQuery(tz);
   const { data: due } = useGetDueCountQuery(undefined);
   const { data: deckCards } = useGetCardsQuery(deckId, { skip: !deckId });
   const { data: deckReviews } = useGetCardReviewsQuery(deckId, { skip: !deckId });
@@ -106,7 +119,6 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
 
   const streak = overview?.currentStreak ?? 0;
   const longest = overview?.longestStreak ?? 0;
-  const level = getStreakLevel(streak);
 
   const week = useMemo(() => {
     const counts = new Map((heatmap ?? []).map((day) => [day.date, day.count]));
@@ -121,6 +133,19 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
   // День открыт этой сессией, если все сегодняшние ответы — её
   const todayCount = heatmap?.find((day) => day.date === formatDayInTz(new Date(), tz))?.count ?? 0;
   const dayAdded = summary.answers > 0 && todayCount <= summary.answers;
+
+  // Перелистывание серии — по событию: день открыт этой сессией и статистика уже свежая
+  const statsReady = Boolean(overview && heatmap) && !isOverviewFetching && !isHeatmapFetching;
+  const celebrateStreak = statsReady && dayAdded && streak > 0 && !reducedMotion;
+  const [streakShown, setStreakShown] = useState(false);
+  useEffect(() => {
+    if (!celebrateStreak) return undefined;
+    const timer = setTimeout(() => setStreakShown(true), MOTION_MS.deliberate);
+    return () => clearTimeout(timer);
+  }, [celebrateStreak]);
+  const shownStreak = celebrateStreak && !streakShown ? streak - 1 : streak;
+  const level = getStreakLevel(shownStreak);
+  const levelUp = celebrateStreak && getStreakLevel(streak - 1).index < getStreakLevel(streak).index;
 
   const newCount = useMemo(() => {
     if (!deckCards || !deckReviews) return 0;
@@ -190,13 +215,31 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
         <div className={cls.grid}>
           <AccentPanel className={classNames(cls.streak, [LEVEL_CLASSES[level.index]])}>
             <div className={cls.streakRow}>
-              <Flame
+              <motion.span
                 className={cls.flame}
-                size={isMobile ? MOBILE_FLAME_SIZE : FLAME_SIZE}
-                strokeWidth={FLAME_STROKE}
-                aria-hidden
-              />
-              <span className={cls.streakDays}>{streak}</span>
+                animate={{ scale: streakShown ? [1, levelUp ? FLAME_LEVEL_UP_PULSE : FLAME_PULSE, 1] : 1 }}
+                transition={DELIBERATE}
+              >
+                <Flame
+                  size={isMobile ? MOBILE_FLAME_SIZE : FLAME_SIZE}
+                  strokeWidth={FLAME_STROKE}
+                  aria-hidden
+                />
+              </motion.span>
+              <span className={cls.streakDays} aria-label={String(streak)}>
+                <AnimatePresence initial={false} mode="popLayout">
+                  <motion.span
+                    key={shownStreak}
+                    aria-hidden
+                    initial={{ y: '100%', opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: '-100%', opacity: 0 }}
+                    transition={DELIBERATE}
+                  >
+                    {shownStreak}
+                  </motion.span>
+                </AnimatePresence>
+              </span>
               <div className={cls.streakText}>
                 <span className={cls.streakUnit}>
                   {t('дней подряд', { count: streak })}
@@ -220,14 +263,20 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
           </AccentPanel>
 
           <Blueprint className={cls.stats}>
-            {stats.map((stat) => (
-              <div key={stat.label} className={cls.stat}>
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                className={cls.stat}
+                initial={{ opacity: 0, y: reducedMotion ? 0 : STAT_SHIFT }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={reducedMotion ? FADE : { ...DELIBERATE, delay: (i * MOTION_MS.stagger) / SECONDS }}
+              >
                 <span className={cls.statLabel}>{stat.label}</span>
                 <span className={classNames(cls.statValue, { [cls.success]: stat.success })}>
                   {stat.value}
                 </span>
                 {stat.tag && <span className={cls.tag}>{stat.tag}</span>}
-              </div>
+              </motion.div>
             ))}
           </Blueprint>
         </div>

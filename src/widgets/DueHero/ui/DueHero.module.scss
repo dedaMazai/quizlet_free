@@ -120,6 +120,28 @@ $bars-width: 168px;
     background: var(--color-field-line);
 }
 
+// Первый показ за день: столбики растут снизу по очереди (stagger 30 мс)
+.celebrate .bar {
+    transform-origin: bottom;
+    animation: bar-grow var(--motion-deliberate) var(--ease-enter) calc(var(--i) * var(--motion-stagger-tight)) backwards;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: bar-fade var(--motion-instant) linear;
+    }
+}
+
+@keyframes bar-grow {
+    from {
+        transform: scaleY(0);
+    }
+}
+
+@keyframes bar-fade {
+    from {
+        opacity: 0;
+    }
+}
+
 .barToday {
     background: var(--color-accent-300);
 }

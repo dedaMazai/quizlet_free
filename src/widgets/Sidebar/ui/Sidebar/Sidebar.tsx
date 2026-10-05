@@ -52,8 +52,9 @@ export const Sidebar = memo(() => {
                     {section.icon}
                     {collapsed && hasBadge && <span className={cls.dot} />}
                 </span>
-                {!collapsed && <span className={cls.label}>{section.label}</span>}
-                {!collapsed && hasBadge && <span className={cls.badge}>{dueCount}</span>}
+                {/* Подписи не размонтируются: при сворачивании гаснут за первые 40% перехода */}
+                <span className={cls.label} aria-hidden={collapsed}>{section.label}</span>
+                {hasBadge && <span className={cls.badge} aria-hidden={collapsed}>{dueCount}</span>}
             </Link>
         );
 
@@ -67,7 +68,7 @@ export const Sidebar = memo(() => {
                 <div className={cls.header}>
                     <Link to={RoutePath.MAIN()} className={cls.logo} aria-label={APP_NAME}>
                         <Logo className={cls.logoIcon} />
-                        {!collapsed && <span className={cls.logoText}>{APP_NAME}</span>}
+                        <span className={cls.logoText} aria-hidden={collapsed}>{APP_NAME}</span>
                     </Link>
                     <Button
                         type="text"

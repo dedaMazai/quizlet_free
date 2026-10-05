@@ -1,4 +1,5 @@
 .SectionTabs {
+    position: relative;
     display: flex;
     gap: 28px;
     border-bottom: 1px solid var(--color-divider);
@@ -17,8 +18,32 @@
 }
 
 .active {
-    border-bottom-color: var(--color-accent);
     color: var(--color-accent-800);
+}
+
+// Подчёркивание активной вкладки: одна полоса 1px, растянутая scaleX до ширины вкладки
+.indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    height: 2px;
+    background: var(--color-accent);
+    transform: translateX(var(--x, 0)) scaleX(var(--w, 0));
+    transform-origin: left;
+    pointer-events: none;
+}
+
+.indicatorMoving {
+    transition: transform var(--motion-fast) var(--ease-standard);
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.indicatorHidden {
+    opacity: 0;
 }
 
 .count {

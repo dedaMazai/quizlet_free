@@ -1,0 +1,73 @@
+// Модалки AntD (transitionName из MODAL_MOTION): окно scale .98→1 + opacity, фон opacity.
+// Классы rc-motion: анимация стоит на паузе, пока не появится -active.
+
+.zbr-modal-enter,
+.zbr-modal-appear {
+    animation: zbr-modal-in var(--motion-base) var(--ease-enter) both paused;
+}
+
+.zbr-modal-leave {
+    animation: zbr-modal-out calc(var(--motion-base) * 0.7) var(--ease-exit) both paused;
+}
+
+.zbr-fade-enter,
+.zbr-fade-appear {
+    animation: zbr-fade-in var(--motion-base) var(--ease-enter) both paused;
+}
+
+.zbr-fade-leave {
+    animation: zbr-fade-out calc(var(--motion-base) * 0.7) var(--ease-exit) both paused;
+}
+
+.zbr-modal-enter-active,
+.zbr-modal-appear-active,
+.zbr-modal-leave-active,
+.zbr-fade-enter-active,
+.zbr-fade-appear-active,
+.zbr-fade-leave-active {
+    animation-play-state: running;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .zbr-modal-enter,
+    .zbr-modal-appear,
+    .zbr-fade-enter,
+    .zbr-fade-appear {
+        animation-name: zbr-fade-in;
+        animation-duration: var(--motion-instant);
+        animation-timing-function: linear;
+    }
+
+    .zbr-modal-leave,
+    .zbr-fade-leave {
+        animation-name: zbr-fade-out;
+        animation-duration: var(--motion-instant);
+        animation-timing-function: linear;
+    }
+}
+
+@keyframes zbr-modal-in {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+}
+
+@keyframes zbr-modal-out {
+    to {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+}
+
+@keyframes zbr-fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes zbr-fade-out {
+    to {
+        opacity: 0;
+    }
+}

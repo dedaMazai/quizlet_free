@@ -16,6 +16,13 @@ $card-min-width: 240px;
     display: flex;
     color: var(--color-text);
 
+    // Появление: opacity + translateY 12→0, stagger 40 мс
+    animation: step-enter var(--motion-base) var(--ease-enter) calc(var(--i, 0) * var(--motion-stagger)) backwards;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: step-fade var(--motion-instant) linear;
+    }
+
     &:hover {
         color: var(--color-text);
     }
@@ -157,5 +164,18 @@ $card-min-width: 240px;
     .chevron {
         flex: none;
         color: var(--color-neutral-600);
+    }
+}
+
+@keyframes step-enter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+@keyframes step-fade {
+    from {
+        opacity: 0;
     }
 }

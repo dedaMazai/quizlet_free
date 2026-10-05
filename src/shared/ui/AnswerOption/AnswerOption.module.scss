@@ -1,4 +1,5 @@
 .AnswerOption {
+    isolation: isolate;
     display: flex;
     align-items: center;
     gap: 16px;
@@ -23,6 +24,87 @@
 
     &.locked {
         cursor: default;
+    }
+}
+
+// Заливка «верно» из точки клика: круг scale 0→1 (BACKLOG §8).
+// Под содержимым и угловыми метками Blueprint: z-index -1 внутри isolation
+.fill {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: var(--oy, 50%);
+        left: var(--ox, 50%);
+
+        // Радиус больше ширины варианта — круг накрывает его из любой точки
+        width: 250%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: var(--color-success-tint);
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+}
+
+.correct .fill::before {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    transition: transform var(--motion-base) var(--ease-enter);
+
+    @media (prefers-reduced-motion: reduce) {
+        transform: translate(-50%, -50%) scale(1);
+        transition: opacity var(--motion-instant) linear;
+    }
+}
+
+// Галочка рисуется штрихом; длина пути lucide Check ≈ 23
+$check-path-length: 24;
+
+.correct .mark svg {
+    stroke-dasharray: $check-path-length;
+    animation: check-draw var(--motion-base) var(--ease-enter) var(--motion-fast) backwards;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}
+
+.wrong {
+    animation: option-shake var(--motion-base) var(--ease-standard);
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}
+
+@keyframes check-draw {
+    from {
+        stroke-dashoffset: $check-path-length;
+    }
+}
+
+// Неверно: сдвиг ±6px дважды
+@keyframes option-shake {
+    20% {
+        transform: translateX(-6px);
+    }
+
+    40% {
+        transform: translateX(6px);
+    }
+
+    60% {
+        transform: translateX(-6px);
+    }
+
+    80% {
+        transform: translateX(6px);
     }
 }
 
@@ -69,7 +151,7 @@
 .correct,
 .correct:hover:not(.locked) {
     border-color: var(--color-success);
-    background: var(--color-success-tint);
+    background: transparent;
 
     .mark {
         border-color: var(--color-success);

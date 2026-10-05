@@ -20,6 +20,7 @@ import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useToast, useUndoableDelete } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { MODAL_MOTION } from '@/shared/const/motion';
 import cls from './DuplicateCardsModal.module.scss';
 
 interface DuplicateCardsModalProps {
@@ -127,6 +128,7 @@ export const DuplicateCardsModal: FC<DuplicateCardsModalProps> = (props) => {
         </ModalFrame>
       ) : (
         <Modal
+          {...MODAL_MOTION}
           open={open}
           title={t('Дубли слов')}
           footer={null}

@@ -7,6 +7,7 @@ import {
   ConfigProvider, Empty, Segmented, theme,
 } from 'antd';
 import { ChevronLeft, ChevronRight, Repeat } from 'lucide-react';
+import { motion } from 'motion/react';
 import { Card, FavoriteToggle, useGetFavoritesQuery } from '@/entities/Card';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import { SessionButton, SessionButtonVariant } from '@/shared/ui/SessionButton';
@@ -16,6 +17,8 @@ import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useKeyDown } from '@/shared/lib/hooks/useKeyDown';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { useReducedMotion } from '@/shared/lib/hooks/useReducedMotion';
+import { EASE, MOTION_MS } from '@/shared/const/motion';
 import { buildPositionTicks, buildSessionTicks } from '@/shared/lib/session';
 import { shuffle } from '@/shared/lib/utils';
 import cls from './FlashcardsGame.module.scss';
@@ -29,6 +32,8 @@ const MOBILE_SHUFFLE_ICON_SIZE = 18;
 // Мобильный сегмент — 40px
 const MOBILE_FILTER_HEIGHT = 40;
 const ICON_STROKE = 1.5;
+const FLIPPED_ANGLE = 180;
+const FLIP_TRANSITION = { duration: MOTION_MS.slow / 1000, ease: EASE.standard };
 
 interface FlashcardsGameProps {
   cards: Card[];
@@ -50,6 +55,7 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
   } = props;
   const { t } = useTranslation();
   const { isMobile } = useMatchMedia();
+  const reducedMotion = useReducedMotion();
   const navIconSize = isMobile ? MOBILE_NAV_ICON_SIZE : NAV_ICON_SIZE;
   const shuffleIconSize = isMobile ? MOBILE_SHUFFLE_ICON_SIZE : SHUFFLE_ICON_SIZE;
 
@@ -142,6 +148,8 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
     );
   }
 
+  const flipHint = isMobile ? t('Коснитесь — перевернуть') : t('Нажмите или пробел — перевернуть');
+
   const filterControl = withFavoriteFilter && (
     <ConfigProvider theme={segmentedTheme}>
       <Segmented<FavoriteFilter>
@@ -166,28 +174,51 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
 
         {current ? (
           <>
-            <Blueprint
+            {/* Переворот: rotateY 180° с перспективой; при reduced motion — смена сторон через opacity */}
+            <div
               role="button"
               tabIndex={0}
               aria-pressed={flipped}
-              className={cls.card}
+              className={classNames(cls.scene, [], { [cls.reduced]: reducedMotion })}
               onClick={() => setFlipped((f) => !f)}
             >
-              <span className={cls.side}>
-                {flipped ? t('RU · Перевод') : t('EN · Слово')}
-              </span>
-              <span className={cls.tools}>
-                <SpeakButton text={current.term} className={cls.tool} />
-                <FavoriteToggle cardUuid={current.uuid} className={cls.tool} />
-              </span>
-              <span className={cls.word}>{flipped ? current.translation : current.term}</span>
-              {!flipped && current.example && (
-                <span className={cls.example}>“{current.example}”</span>
-              )}
-              <span className={cls.flipHint}>
-                {isMobile ? t('Коснитесь — перевернуть') : t('Нажмите или пробел — перевернуть')}
-              </span>
-            </Blueprint>
+              <motion.div
+                // Новая карточка появляется лицом, без обратного переворота
+                key={current.uuid}
+                className={cls.flipper}
+                initial={false}
+                animate={{ rotateY: flipped && !reducedMotion ? FLIPPED_ANGLE : 0 }}
+                transition={FLIP_TRANSITION}
+              >
+                <Blueprint
+                  className={classNames(cls.card, [cls.front], { [cls.hidden]: flipped })}
+                  inert={flipped}
+                >
+                  <span className={cls.side}>{t('EN · Слово')}</span>
+                  <span className={cls.tools}>
+                    <SpeakButton text={current.term} className={cls.tool} />
+                    <FavoriteToggle cardUuid={current.uuid} className={cls.tool} />
+                  </span>
+                  <span className={cls.word}>{current.term}</span>
+                  {current.example && (
+                    <span className={cls.example}>“{current.example}”</span>
+                  )}
+                  <span className={cls.flipHint}>{flipHint}</span>
+                </Blueprint>
+                <Blueprint
+                  className={classNames(cls.card, [cls.back], { [cls.hidden]: !flipped })}
+                  inert={!flipped}
+                >
+                  <span className={cls.side}>{t('RU · Перевод')}</span>
+                  <span className={cls.tools}>
+                    <SpeakButton text={current.term} className={cls.tool} />
+                    <FavoriteToggle cardUuid={current.uuid} className={cls.tool} />
+                  </span>
+                  <span className={cls.word}>{current.translation}</span>
+                  <span className={cls.flipHint}>{flipHint}</span>
+                </Blueprint>
+              </motion.div>
+            </div>
 
             <div className={cls.controls}>
               <SessionButton

@@ -83,6 +83,11 @@
   }
 }
 
+// Обёртка слова для FLIP-перелёта между банком и строкой ответа
+.slot {
+  display: flex;
+}
+
 .chip {
   padding: 10px 18px;
   background: transparent;

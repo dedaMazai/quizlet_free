@@ -12,12 +12,30 @@ import { RoutePath } from '@/shared/config/router/routePath';
 import { estimateReviewMinutes, ReviewLocationState } from '@/shared/const/const';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useKeyDown } from '@/shared/lib/hooks/useKeyDown';
+import { useCountUp } from '@/shared/lib/hooks/useCountUp';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { useOncePerDay } from '@/shared/lib/hooks/useOncePerDay';
 import cls from './DueHero.module.scss';
 
 const ARROW_SIZE = 18;
 const CHECK_SIZE = 96;
 const CHECK_STROKE = 1.5;
+
+interface DueCountProps {
+    value: number;
+    celebrate: boolean;
+}
+
+/** Число долга: в первый показ за день — count-up 0→N; монтируется уже с данными */
+const DueCount = ({ value, celebrate }: DueCountProps) => {
+    const shown = useCountUp(value, { enabled: celebrate });
+
+    return (
+        <span className={cls.count} aria-label={String(value)}>
+            <span aria-hidden>{shown}</span>
+        </span>
+    );
+};
 
 interface DueHeroProps {
     /** Часовой пояс пользователя — для дней прогноза */
@@ -31,6 +49,8 @@ export const DueHero = memo((props: DueHeroProps) => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { isMobile } = useMatchMedia();
+    // Count-up и рост столбиков — «праздник», раз в день
+    const celebrate = useOncePerDay('due-hero');
 
     const { data: due, isLoading: isDueLoading } = useGetDueCountQuery(undefined);
     const { data: summary, isLoading: isSummaryLoading } = useGetDueSummaryQuery({ tz });
@@ -114,7 +134,7 @@ export const DueHero = memo((props: DueHeroProps) => {
                     </Kicker>
                     <div className={cls.countRow}>
                         {hasDebt ? (
-                            <span className={cls.count}>{count}</span>
+                            <DueCount value={count} celebrate={celebrate} />
                         ) : (
                             <Check
                                 aria-hidden
@@ -144,12 +164,12 @@ export const DueHero = memo((props: DueHeroProps) => {
                     <Kicker size={KickerSize.SM} tone={KickerTone.ON_DARK}>
                         {t('Прогноз на неделю')}
                     </Kicker>
-                    <div className={cls.bars}>
+                    <div className={classNames(cls.bars, [], { [cls.celebrate]: celebrate })}>
                         {bars.map((bar, i) => (
                             <div key={bar.date} className={cls.barCol}>
                                 <div
                                     className={classNames(cls.bar, [], { [cls.barToday]: i === 0 })}
-                                    style={bar.style}
+                                    style={{ ...bar.style, '--i': i } as CSSProperties}
                                 />
                                 <span className={cls.barLabel}>{bar.label}</span>
                             </div>

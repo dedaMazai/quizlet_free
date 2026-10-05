@@ -33,7 +33,10 @@ const AuthLayoutContent = ({ withSidebar = true }: AuthLayoutProps) => {
                 <NetworkBanner />
                 <main className={classNames(cls.main, { [cls.focus]: focus })}>
                     <Suspense key={stableKey} fallback={<PageLoader />}>
-                        <Outlet />
+                        {/* Анимируется только контент: оболочка неподвижна */}
+                        <div className={cls.page}>
+                            <Outlet />
+                        </div>
                     </Suspense>
                 </main>
                 {withSidebar && !focus && isMobile && <TabBar />}

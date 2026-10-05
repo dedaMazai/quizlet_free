@@ -1,28 +1,70 @@
+// Сцена переворота: перспектива 1200, размеры карточки
+.scene {
+  width: 100%;
+  max-width: 720px;
+  height: 380px;
+  cursor: pointer;
+  perspective: 1200px;
+
+  // Мобильный: карточка занимает свободную высоту
+  @media (width <= 650px) {
+    flex: 1;
+    max-width: none;
+    height: auto;
+  }
+}
+
+.flipper {
+  position: relative;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
 .card {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 14px;
-  width: 100%;
-  max-width: 720px;
-  height: 380px;
   padding: 48px 32px;
   text-align: center;
-  cursor: pointer;
+  backface-visibility: hidden;
   transition: background var(--motion-fast) var(--ease-standard);
 
-  &:hover {
+  .scene:hover & {
     background: var(--color-accent-100);
   }
 
-  // Мобильный: карточка занимает свободную высоту
   @media (width <= 650px) {
-    flex: 1;
     gap: 12px;
-    max-width: none;
-    height: auto;
     padding: 20px;
+  }
+}
+
+// Подложка под карточками — фон, иначе при повороте просвечивает сцена
+.front,
+.back {
+  background: var(--color-bg);
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+// Reduced motion: без поворота, стороны сменяются opacity за motion-instant
+.reduced {
+  .back {
+    transform: none;
+  }
+
+  .card {
+    transition: opacity var(--motion-instant) linear;
+  }
+
+  .hidden {
+    opacity: 0;
   }
 }
 

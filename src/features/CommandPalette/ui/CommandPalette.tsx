@@ -8,6 +8,7 @@ import { KeyHint } from '@/shared/ui/KeyHint';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
+import { MODAL_MOTION } from '@/shared/const/motion';
 import { CommandGroup, CommandItem } from '../model/types';
 import { useCommandItems } from '../model/useCommandItems';
 import cls from './CommandPalette.module.scss';
@@ -79,6 +80,7 @@ export const CommandPalette = memo((props: CommandPaletteProps) => {
 
     return (
         <Modal
+            {...MODAL_MOTION}
             open={open}
             width={PALETTE_WIDTH}
             title={null}

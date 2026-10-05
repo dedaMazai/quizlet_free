@@ -13,6 +13,7 @@ import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
+import { MODAL_MOTION } from '@/shared/const/motion';
 import cls from './CycleForm.module.scss';
 
 /** Размер порции по умолчанию — как в тетради: 10 слов в день. */
@@ -173,6 +174,7 @@ export const CycleForm: FC<CycleFormProps> = (props) => {
 
   return (
     <Modal
+      {...MODAL_MOTION}
       open={open}
       title={title}
       okText={t('Сохранить')}

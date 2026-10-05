@@ -95,11 +95,18 @@
 }
 
 .flame {
+    display: flex;
     flex: none;
     color: var(--level-color);
+
+    // Новый уровень: цвет огня перетекает в цвет следующего уровня
+    transition: color var(--motion-deliberate) var(--ease-enter);
 }
 
+// Цифры серии перелистываются: старая уходит вверх, новая приходит снизу (без обрезки — line-height 0.8)
 .streakDays {
+    position: relative;
+    display: inline-flex;
     font-family: var(--font-heading);
     font-weight: 600;
     font-size: 112px;
@@ -172,6 +179,7 @@
 
 .dayActive {
     background: var(--level-color);
+    transition: background-color var(--motion-deliberate) var(--ease-enter);
 }
 
 .dayToday.dayActive {

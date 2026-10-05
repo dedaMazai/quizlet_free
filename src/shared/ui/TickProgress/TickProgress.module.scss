@@ -3,10 +3,6 @@
     gap: 3px;
 }
 
-.tick {
-    flex: 1;
-}
-
 .xs .tick {
     height: 3px;
 }
@@ -19,22 +15,70 @@
     height: 8px;
 }
 
-.done {
+// Деление: фон — «впереди»; ::before — подсветка текущего (opacity), ::after — результат (scaleX от левого края).
+// Переходы только на входе в состояние: сброс блока из 14 делений — мгновенный
+.tick {
+    position: relative;
+    flex: 1;
+    background: var(--color-neutral-300);
+
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+    }
+
+    &::before {
+        background: var(--color-accent-400);
+        opacity: 0;
+    }
+
+    &::after {
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &::after {
+            opacity: 0;
+            transform: none;
+        }
+    }
+}
+
+.current::before {
+    opacity: 1;
+    transition: opacity var(--motion-base) var(--ease-standard);
+}
+
+.done,
+.correct,
+.wrong {
+    &::after {
+        transform: scaleX(1);
+        transition: transform var(--motion-base) var(--ease-standard);
+
+        @media (prefers-reduced-motion: reduce) {
+            opacity: 1;
+            transition: opacity var(--motion-instant) linear;
+        }
+    }
+}
+
+.done::after {
     background: var(--color-accent-700);
 }
 
-.correct {
+.correct::after {
     background: var(--color-success);
 }
 
-.wrong {
+.wrong::after {
     background: var(--pattern-error-hatch);
 }
 
-.current {
-    background: var(--color-accent-400);
-}
-
+// «Впереди» — только фон деления
 .todo {
     background: var(--color-neutral-300);
 }

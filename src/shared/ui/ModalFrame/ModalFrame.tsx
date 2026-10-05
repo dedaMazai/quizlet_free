@@ -3,6 +3,7 @@ import { Modal } from 'antd';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Drawer } from '@/shared/ui/Drawer';
+import { MODAL_MOTION } from '@/shared/const/motion';
 import { ModalHeader } from './ModalHeader';
 import cls from './ModalFrame.module.scss';
 
@@ -54,6 +55,7 @@ export const ModalFrame = memo((props: ModalFrameProps) => {
 
     return (
         <Modal
+            {...MODAL_MOTION}
             open={open}
             width={width}
             title={null}
