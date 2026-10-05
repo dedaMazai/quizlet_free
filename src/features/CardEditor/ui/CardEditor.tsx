@@ -98,7 +98,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   const [isImporting, setIsImporting] = useState(false);
   const [createCards, { isLoading }] = useCreateCardsMutation();
   const [checkTranslations, { isLoading: isChecking }] = useCheckTranslationsMutation();
-  const { remaining, isExhausted: noCredits } = useAiQuota({ skip: !open });
+  const { remaining, isExhausted: noCredits, isUnlimited } = useAiQuota({ skip: !open });
   const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
 
   const termRefs = useRef<Map<string, InputRef>>(new Map());
@@ -358,7 +358,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
           <Tooltip
             title={noCredits
               ? t('Лимит обновится завтра')
-              : t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}
+              : !isUnlimited && t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}
           >
             <Button
               className={classNames(cls.toolButton, [cls.aiButton])}

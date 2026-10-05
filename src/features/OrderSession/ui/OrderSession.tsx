@@ -1,9 +1,8 @@
 import { FC, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Empty } from 'antd';
+import { Inbox } from 'lucide-react';
 import { Card, useGetCardReviewsQuery } from '@/entities/Card';
 import { AnswerFeedback, AnswerFeedbackTone } from '@/shared/ui/AnswerFeedback';
-import { MyTypography } from '@/shared/ui/MyTypography';
 import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { useAutoSpeak } from '@/shared/lib/hooks/useAutoSpeak';
@@ -15,6 +14,7 @@ import {
   summarizeSession,
   useIntervalNote,
 } from '@/shared/lib/session';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
 import { useOrderSession } from '../model/hooks/useOrderSession';
 import { OrderStage } from './OrderStage';
 import cls from './OrderSession.module.scss';
@@ -80,11 +80,7 @@ export const OrderSession: FC<OrderSessionProps> = (props) => {
       <>
         {topBar}
         <SessionStage>
-          <Empty description={t('В колоде нет фраз для сборки')}>
-            <MyTypography.Small type="secondary">
-              {t('Отметьте слова как фразы или подберите их через ИИ')}
-            </MyTypography.Small>
-          </Empty>
+          <EmptyState icon={Inbox} kicker={t('Собери фразу')} title={t('В колоде нет фраз для сборки')} description={t('Отметьте слова как фразы или подберите их через ИИ')} align={EmptyStateAlign.CENTER} />
         </SessionStage>
       </>
     );

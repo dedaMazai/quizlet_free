@@ -1,12 +1,16 @@
 import { FC, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Input, InputRef } from 'antd';
-import { ImportOutlined, PlusOutlined } from '@ant-design/icons';
+import { Import, Plus } from 'lucide-react';
 import { CycleWord, useAddCycleWordsMutation } from '@/entities/LearningCycle';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { HStack } from '@/shared/ui/Stack';
 import { useToast } from '@/shared/lib/toast';
 import { ImportCycleWordsModal } from './ImportCycleWordsModal';
 import cls from './AddCycleWords.module.scss';
+
+const ICON_SIZE = 16;
+const ICON_STROKE = 1.5;
 
 interface AddCycleWordsProps {
   cycleUuid: string;
@@ -71,10 +75,18 @@ export const AddCycleWords: FC<AddCycleWordsProps> = (props) => {
         autoComplete="off"
         className={cls.field}
       />
-      <Button type="primary" icon={<PlusOutlined />} onClick={submit}>
+      <Button
+        type="primary"
+        icon={<Plus aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+        onClick={submit}
+      >
+        <BlueprintMarks />
         {t('Добавить')}
       </Button>
-      <Button icon={<ImportOutlined />} onClick={() => setImportOpen(true)}>
+      <Button
+        icon={<Import aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+        onClick={() => setImportOpen(true)}
+      >
         {t('Импорт из колод')}
       </Button>
       <ImportCycleWordsModal

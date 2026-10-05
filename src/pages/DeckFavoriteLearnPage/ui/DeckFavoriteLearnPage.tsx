@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Empty } from 'antd';
+import { Inbox } from 'lucide-react';
 import { useGetDeckQuery } from '@/entities/Deck';
 import {
   useGetCardsQuery,
@@ -15,6 +15,7 @@ import { SessionStage } from '@/shared/ui/SessionStage';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { buildSessionTicks, useSessionCardFilter } from '@/shared/lib/session';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
 
 const DeckFavoriteLearnPage = () => {
   const { t } = useTranslation();
@@ -44,7 +45,7 @@ const DeckFavoriteLearnPage = () => {
           onExit={() => navigate(RoutePath.DECKS())}
         />
         <SessionStage>
-          <Empty description={t('Колода не найдена')} />
+          <EmptyState icon={Inbox} kicker={t('Избранное')} title={t('Колода не найдена')} align={EmptyStateAlign.CENTER} />
         </SessionStage>
       </>
     );

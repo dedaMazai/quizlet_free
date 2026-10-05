@@ -1,8 +1,9 @@
 import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Empty, Switch } from 'antd';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { Inbox } from 'lucide-react';
+import { Switch } from 'antd';
 import { SessionButton } from '@/shared/ui/SessionButton';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
 import cls from './ClozeSession.module.scss';
 
 interface ClozeSetupProps {
@@ -23,11 +24,7 @@ export const ClozeSetup: FC<ClozeSetupProps> = (props) => {
   // Режим строится на поле «Пример»: без него пропуск делать не из чего.
   if (fitting === 0) {
     return (
-      <Empty description={t('Ни у одного слова нет примера с этим словом')}>
-        <MyTypography.Small type="secondary">
-          {t('Добавьте примеры к словам — их умеет подбирать проверка через ИИ')}
-        </MyTypography.Small>
-      </Empty>
+      <EmptyState icon={Inbox} kicker={t('Пропуски')} title={t('Ни у одного слова нет примера с этим словом')} description={t('Добавьте примеры к словам — их умеет подбирать проверка через ИИ')} align={EmptyStateAlign.CENTER} />
     );
   }
 

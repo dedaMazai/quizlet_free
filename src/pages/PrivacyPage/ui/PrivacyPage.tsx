@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Card, Typography, Divider, Space, Collapse } from 'antd';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { Typography, Space, Collapse } from 'antd';
+import cls from './PrivacyPage.module.scss';
 
 const { Title, Paragraph, Text } = Typography;
 const { Panel } = Collapse;
@@ -9,22 +9,15 @@ const PrivacyPage = () => {
     const { t } = useTranslation();
 
     return (
-        <HStack style={{ padding: 24 }} max justify="center">
-            <Card
-                style={{
-                    maxWidth: 1200, width: '100%',
-                    backgroundColor: 'var(--card-bg)',
-                    border: 'none',
-                }}
-            >
-                <VStack gap="16" max align='center'>
-                    <Title level={2} style={{ textAlign: 'center', marginBottom: 0 }}>
-                        {t('Пользовательское соглашение и Политика конфиденциальности')}
-                    </Title>
+        <div className={cls.PrivacyPage}>
+            <div className={cls.content}>
+                <h1 className={cls.title}>
+                    {t('Пользовательское соглашение и Политика конфиденциальности')}
+                </h1>
 
-                    <Collapse defaultActiveKey={['1', '2']} style={{ width: '100%' }}>
+                <Collapse defaultActiveKey={['1', '2']} className={cls.collapse}>
                         <Panel header={t('1. ТЕРМИНЫ И ОПРЕДЕЛЕНИЯ')} key="1">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Paragraph>
                                     <Text strong>{t('Авторизация')}</Text> — {t('ввод Пользователем логина и пароля от Личного кабинета для целей пользования услугами Сайта.')}
                                 </Paragraph>
@@ -68,7 +61,7 @@ const PrivacyPage = () => {
                         </Panel>
 
                         <Panel header={t('2. ОБЩИЕ ПОЛОЖЕНИЯ')} key="2">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Paragraph>
                                     <Text strong>2.1.</Text> {t('Настоящее Пользовательское соглашение является юридически обязательным соглашением между Пользователем Личного кабинета (далее – Пользователь) и Владельцем Cайта, в дальнейшем по настоящему Пользовательскому соглашению именуемые «Стороны», предметом которого выступают условия использования Личного кабинета, а также права и обязанности его Пользователей и Владельца Сайта.')}
                                 </Paragraph>
@@ -78,7 +71,7 @@ const PrivacyPage = () => {
                                 <Paragraph>
                                     <Text strong>2.3.</Text> {t('Настоящее Пользовательское соглашение действует с момента совершения Пользователем конклюдентных действий, выражающих полное и безоговорочное согласие Пользователя заключить настоящее Пользовательское соглашение. Безусловным принятием (акцептом) условий настоящего Пользовательского соглашения (оферты) считается совершение одного или нескольких из следующих действий:')}
                                 </Paragraph>
-                                <ul style={{ paddingLeft: 24 }}>
+                                <ul className={cls.list}>
                                     <li>{t('регистрация или авторизация Пользователя в Личном кабинете;')}</li>
                                     <li>{t('совершение Пользователем любых действий с использованием Личного кабинета.')}</li>
                                 </ul>
@@ -95,7 +88,7 @@ const PrivacyPage = () => {
                         </Panel>
 
                         <Panel header={t('3. ПРЕДМЕТ ДОГОВОРА')} key="3">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Paragraph>
                                     <Text strong>3.1.</Text> {t('В рамках Личного кабинета Владелец Сайта обязуется предоставить Пользователю возможность регистрации и использования функционала Личного кабинета.')}
                                 </Paragraph>
@@ -106,7 +99,7 @@ const PrivacyPage = () => {
                         </Panel>
 
                         <Panel header={t('4. ПРАВА И ОБЯЗАННОСТИ СТОРОН')} key="4">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Title level={5}>{t('4.1. Владелец Сайта обязуется:')}</Title>
                                 <Paragraph>
                                     <Text strong>4.1.1.</Text> {t('Обеспечить Пользователю доступ в Личный кабинет.')}
@@ -195,7 +188,7 @@ const PrivacyPage = () => {
                         </Panel>
 
                         <Panel header={t('5. РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЯ В ЛИЧНОМ КАБИНЕТЕ')} key="5">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Paragraph>
                                     <Text strong>5.1.</Text> {t('Для использования Личного кабинета Пользователю необходимо пройти процедуру регистрации, в результате которой ему будет предоставлен персональный доступ в Личный кабинет.')}
                                 </Paragraph>
@@ -215,7 +208,7 @@ const PrivacyPage = () => {
                         </Panel>
 
                         <Panel header={t('6. ИСПОЛЬЗОВАНИЕ ЛИЧНОГО КАБИНЕТА')} key="6">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Paragraph>
                                     <Text strong>6.1.</Text> {t('Информация в Личном кабинете предназначена для пользователей старше 18 лет.')}
                                 </Paragraph>
@@ -241,7 +234,7 @@ const PrivacyPage = () => {
                         </Panel>
 
                         <Panel header={t('7. УСЛОВИЯ ОБРАБОТКИ ПЕРСОНАЛЬНЫХ ДАННЫХ')} key="7">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Paragraph>
                                     <Text strong>7.1.</Text> {t('Регистрируясь в Личном кабинете, Пользователь тем самым свободно, своей волей и в своем интересе предоставляет свои персональные данные Владельцу Сайта для их обработки.')}
                                 </Paragraph>
@@ -254,7 +247,7 @@ const PrivacyPage = () => {
                                 <Paragraph>
                                     <Text strong>7.8.</Text> {t('Обработка персональных данных Пользователя осуществляется в соответствии с настоящим Пользовательским соглашением и законодательством Российской Федерации. Владелец Сайта обрабатывает персональные данные Пользователя с целью:')}
                                 </Paragraph>
-                                <ul style={{ paddingLeft: 24 }}>
+                                <ul className={cls.list}>
                                     <li>{t('идентификацию Пользователя как стороны по настоящему Пользовательскому соглашению;')}</li>
                                     <li>{t('предоставления Пользователю доступа к использованию функционала Личного кабинета;')}</li>
                                     <li>{t('персонализацию предоставляемых сервисов и услуг;')}</li>
@@ -264,7 +257,7 @@ const PrivacyPage = () => {
                                 <Paragraph>
                                     <Text strong>7.11.</Text> {t('Обработка персональных данных Владельцем Сайта основана на следующих принципах:')}
                                 </Paragraph>
-                                <ul style={{ paddingLeft: 24 }}>
+                                <ul className={cls.list}>
                                     <li>{t('законность целей и способов обработки персональных данных и добросовестность;')}</li>
                                     <li>{t('соответствие целей обработки персональных данных целям, заранее определенным и заявленным при сборе персональных данных;')}</li>
                                     <li>{t('соответствие объема и характера обрабатываемых персональных данных способов обработки персональных данных целям обработки персональных данных;')}</li>
@@ -277,7 +270,7 @@ const PrivacyPage = () => {
                                 <Paragraph>
                                     <Text strong>7.16.</Text> {t('В Личном кабинете запрещается обработка персональных данных:')}
                                 </Paragraph>
-                                <ul style={{ paddingLeft: 24 }}>
+                                <ul className={cls.list}>
                                     <li>{t('касающихся расовой, национальной принадлежности, политических взглядов, религиозных или философских убеждений, состояния здоровья, интимной жизни;')}</li>
                                     <li>{t('в целях политической агитации.')}</li>
                                 </ul>
@@ -291,7 +284,7 @@ const PrivacyPage = () => {
                         </Panel>
 
                         <Panel header={t('8. УДАЛЕНИЕ ЛИЧНОГО КАБИНЕТА')} key="8">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Paragraph>
                                     <Text strong>8.1.</Text> {t('Пользователь вправе в любой момент самостоятельно удалить Личный кабинет. Для удаления своей учетной записи Пользователь может направить требование Владельцу Сайта по электронному адресу gainad_official@mail.ru.')}
                                 </Paragraph>
@@ -302,7 +295,7 @@ const PrivacyPage = () => {
                         </Panel>
 
                         <Panel header={t('9. ОТВЕТСТВЕННОСТЬ')} key="9">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Paragraph>
                                     <Text strong>9.1.</Text> {t('Стороны несут ответственность за неисполнение или ненадлежащие исполнение своих обязательств в соответствии с условиями настоящего Пользовательского соглашения и законодательством Российской Федерации.')}
                                 </Paragraph>
@@ -331,11 +324,11 @@ const PrivacyPage = () => {
                         </Panel>
 
                         <Panel header={t('10. ПРОЧИЕ УСЛОВИЯ')} key="10">
-                            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                            <Space orientation="vertical" size="small" className={cls.section}>
                                 <Paragraph>
                                     <Text strong>10.1.</Text> {t('Уполномоченными адресами электронной почты признаются:')}
                                 </Paragraph>
-                                <ul style={{ paddingLeft: 24 }}>
+                                <ul className={cls.list}>
                                     <li>{t('для Владельца Сайта gainad_official@mail.ru')}</li>
                                     <li>{t('для Пользователя: адрес электронной почты, указанный Пользователем в Личном кабинете.')}</li>
                                 </ul>
@@ -353,27 +346,9 @@ const PrivacyPage = () => {
                                 </Paragraph>
                             </Space>
                         </Panel>
-                    </Collapse>
-
-                    <Divider />
-
-                    {/* <HStack max justify="center">
-                        <Button
-                            type="primary"
-                            size="large"
-                            icon={<DownloadOutlined />}
-                            onClick={handleDownloadPdf}
-                        >
-                            {t('Скачать полную версию (PDF)')}
-                        </Button>
-                    </HStack> */}
-
-                    <Paragraph style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: 16 }}>
-                        {t('Для ознакомления с полным текстом Пользовательского соглашения и Политики конфиденциальности скачайте PDF-документ')}
-                    </Paragraph>
-                </VStack>
-            </Card>
-        </HStack>
+                </Collapse>
+            </div>
+        </div>
     );
 };
 

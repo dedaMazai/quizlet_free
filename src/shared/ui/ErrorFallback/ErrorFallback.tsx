@@ -1,13 +1,13 @@
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
-import { VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { RotateCw } from 'lucide-react';
+import cls from './ErrorFallback.module.scss';
 
-interface ErrorFallbackProps {}
+const ICON_SIZE = 16;
+const ICON_STROKE = 1.5;
 
-export const ErrorFallback: FC<ErrorFallbackProps> = () => {
+export const ErrorFallback: FC = () => {
     const { t } = useTranslation();
 
     const handleReloadPage = () => {
@@ -15,16 +15,14 @@ export const ErrorFallback: FC<ErrorFallbackProps> = () => {
     };
 
     return (
-        <VStack gap="12" align="center" justify="center">
-            <MyTypography.Base strong style={{ textAlign: 'center', maxWidth: '600px' }}>
-                {t('Обновлен компонент! Необходимо обновить страницу')}
-            </MyTypography.Base>
+        <div className={cls.ErrorFallback}>
+            <p className={cls.text}>{t('Обновлен компонент! Необходимо обновить страницу')}</p>
             <Button
-                icon={<ReloadOutlined />}
+                icon={<RotateCw aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
                 onClick={handleReloadPage}
             >
                 {t('Обновить страницу')}
             </Button>
-        </VStack>
+        </div>
     );
 };

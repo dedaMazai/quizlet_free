@@ -170,11 +170,15 @@
 }
 
 .controls .control {
+  // «Перемешать» в макете — Fira Sans 400, а не Condensed 600 как прочие кнопки
+  padding: 0 18px;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+
   @media (width <= 650px) {
     gap: 8px;
     height: 56px;
-    font-family: var(--font-body);
-    font-weight: 400;
     font-size: 15px;
   }
 }

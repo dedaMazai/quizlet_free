@@ -1,0 +1,16 @@
+$text-width: 600px;
+
+.ErrorFallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.text {
+    max-width: $text-width;
+    margin: 0;
+    font-weight: 600;
+    text-align: center;
+}

@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Empty } from 'antd';
+import { Inbox } from 'lucide-react';
 import { Card, useGetCardReviewsQuery } from '@/entities/Card';
 import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
@@ -12,6 +12,7 @@ import {
   summarizeSession,
   useIntervalNote,
 } from '@/shared/lib/session';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
 import { useWriteSession } from '../model/hooks/useWriteSession';
 import { WriteSetup } from './WriteSetup';
 import { WritePrompt } from './WritePrompt';
@@ -74,7 +75,7 @@ export const WriteSession: FC<WriteSessionProps> = (props) => {
       <>
         {topBar}
         <SessionStage>
-          <Empty description={t('Нет слов для письма')} />
+          <EmptyState icon={Inbox} kicker={t('Письмо')} title={t('Нет слов для письма')} align={EmptyStateAlign.CENTER} />
         </SessionStage>
       </>
     );

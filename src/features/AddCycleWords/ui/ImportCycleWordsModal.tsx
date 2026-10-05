@@ -4,7 +4,7 @@ import {
   Button, Input, Modal, Select, Table,
 } from 'antd';
 import type { TableColumnsType } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Search } from 'lucide-react';
 import { Card, useGetCardsQuery, useGetFavoritesQuery } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { CycleWord, useAddCycleWordsMutation } from '@/entities/LearningCycle';
@@ -21,6 +21,8 @@ import cls from './AddCycleWords.module.scss';
 const FAVORITES_SOURCE = '__favorites__';
 const PAGE_SIZE = 50;
 const MODAL_WIDTH = 720;
+const SEARCH_ICON_SIZE = 15;
+const ICON_STROKE = 1.5;
 /** Таблица прокручивается внутри модалки, чтобы кнопки подтверждения оставались на экране. */
 const TABLE_SCROLL = { y: '50vh' };
 
@@ -118,7 +120,7 @@ export const ImportCycleWordsModal: FC<ImportCycleWordsModalProps> = (props) => 
           allowClear
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          prefix={<SearchOutlined />}
+          prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
           aria-label={t('Поиск')}
           placeholder={t('Поиск')}
           className={cls.field}

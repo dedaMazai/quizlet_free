@@ -92,7 +92,7 @@ export const Toast = memo(({ toast, onRemove }: ToastProps) => {
             <Icon aria-hidden className={cls.icon} size={ICON_SIZE} strokeWidth={ICON_STROKE} />
             <span className={cls.content}>{content}</span>
             {action && (
-                <Button type="link" className={cls.action} onClick={handleAction}>
+                <Button type="text" className={cls.action} onClick={handleAction}>
                     {action.label}
                 </Button>
             )}

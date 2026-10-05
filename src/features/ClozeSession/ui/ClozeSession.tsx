@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Empty } from 'antd';
+import { Inbox } from 'lucide-react';
 import { Card, useGetCardReviewsQuery } from '@/entities/Card';
 import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
@@ -12,6 +12,7 @@ import {
   summarizeSession,
   useIntervalNote,
 } from '@/shared/lib/session';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
 import { useClozeSession } from '../model/hooks/useClozeSession';
 import { ClozeSetup } from './ClozeSetup';
 import { ClozePrompt } from './ClozePrompt';
@@ -71,7 +72,7 @@ export const ClozeSession: FC<ClozeSessionProps> = (props) => {
       <>
         {topBar}
         <SessionStage>
-          <Empty description={t('Нет слов для заучивания')} />
+          <EmptyState icon={Inbox} kicker={t('Пропуски')} title={t('Нет слов для заучивания')} align={EmptyStateAlign.CENTER} />
         </SessionStage>
       </>
     );

@@ -141,3 +141,20 @@
         transform: scaleX(1);
     }
 }
+
+// Reduced motion: без движения — полоса проявляется прозрачностью за то же время
+@keyframes fill-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .timerFill {
+        animation-name: fill-fade;
+    }
+}

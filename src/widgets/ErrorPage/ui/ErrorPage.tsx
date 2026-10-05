@@ -1,11 +1,17 @@
 import { FC, ErrorInfo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Typography, Alert } from 'antd';
-import { ReloadOutlined, BugOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
+import {
+    Bug, CloudOff, LucideIcon, RotateCw,
+} from 'lucide-react';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import cls from './ErrorPage.module.scss';
+
+const ICON_SIZE = 32;
+const ICON_STROKE = 1.25;
+const BUTTON_ICON_SIZE = 16;
+const BUTTON_ICON_STROKE = 1.5;
 
 interface ErrorPageProps {
     className?: string;
@@ -17,6 +23,13 @@ interface ErrorPageProps {
     onReload?: () => void;
 }
 
+interface ErrorContent {
+    icon: LucideIcon;
+    title: string;
+    description: string;
+}
+
+/** Экран падения приложения — в стиле ErrorScreen (6.33), без роутера и стора: они могли и упасть */
 export const ErrorPage: FC<ErrorPageProps> = (props) => {
     const {
         className,
@@ -30,136 +43,91 @@ export const ErrorPage: FC<ErrorPageProps> = (props) => {
 
     const { t } = useTranslation();
 
-    const defaultReloadPage = () => {
-         
-        location.reload();
-    };
+    const handleReload = onReload || (() => window.location.reload());
 
-    const handleReload = onReload || defaultReloadPage;
-
-    /**
-     * Get error-specific messages and icons
-     */
-    const getErrorContent = () => {
+    const getErrorContent = (): ErrorContent => {
         switch (category) {
             case 'chunk':
                 return {
-                    icon: <ReloadOutlined style={{ fontSize: '48px', color: 'var(--color-warning)' }} />,
+                    icon: RotateCw,
                     title: t('Компонент временно недоступен'),
                     description: t('Произошла ошибка при загрузке компонента. Это может быть связано с обновлением приложения.'),
-                    severity: 'warning' as const,
                 };
             case 'network':
                 return {
-                    icon: <InfoCircleOutlined style={{ fontSize: '48px', color: 'var(--color-accent-blue)' }} />,
+                    icon: CloudOff,
                     title: t('Проблема с подключением'),
                     description: t('Не удается установить соединение с сервером. Проверьте подключение к интернету.'),
-                    severity: 'info' as const,
                 };
             case 'runtime':
                 return {
-                    icon: <BugOutlined style={{ fontSize: '48px', color: 'var(--color-error)' }} />,
+                    icon: Bug,
                     title: t('Критическая ошибка приложения'),
                     description: t('Произошла критическая ошибка в работе приложения.'),
-                    severity: 'error' as const,
                 };
             default:
                 return {
-                    icon: <BugOutlined style={{ fontSize: '48px', color: 'var(--color-link)' }} />,
+                    icon: Bug,
                     title: t('Произошла непредвиденная ошибка'),
                     description: t('Приложение столкнулось с неожиданной проблемой.'),
-                    severity: 'error' as const,
                 };
         }
     };
 
-    const { icon, title, description, severity: _severity } = getErrorContent();
+    const { icon: Icon, title, description } = getErrorContent();
 
     return (
         <div className={classNames(cls.ErrorPage, {}, [className])}>
-            <VStack gap="24" align="center" max>
-                {/* Error Icon */}
-                {icon}
+            <Blueprint className={cls.iconBox}>
+                <Icon aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />
+            </Blueprint>
+            <h1 className={cls.title}>{title}</h1>
+            <p className={cls.description}>{description}</p>
 
-                {/* Error Title */}
-                <Typography.Title level={2} style={{ textAlign: 'center', marginBottom: 0 }}>
-                    {title}
-                </Typography.Title>
+            {errorId && (
+                <span className={cls.errorId}>
+                    {t('ID ошибки')}
+                    {': '}
+                    <code>{errorId}</code>
+                </span>
+            )}
 
-                {/* Error Description */}
-                <MyTypography.Base style={{ textAlign: 'center', maxWidth: '600px' }}>
-                    {description}
-                </MyTypography.Base>
+            {__IS_DEV__ && error && (
+                <div className={cls.devDetails}>
+                    <span className={cls.devTitle}>{t('Детали ошибки (только для разработки)')}</span>
+                    <span>
+                        <strong>{t('Сообщение')}:</strong>
+                        {' '}
+                        {error.message}
+                    </span>
+                    {error.stack && (
+                        <details className={cls.stackDetails}>
+                            <summary>{t('Трассировка стека')}</summary>
+                            <pre className={cls.stackTrace}>{error.stack}</pre>
+                        </details>
+                    )}
+                    {errorInfo?.componentStack && (
+                        <details className={cls.stackDetails}>
+                            <summary>{t('Стек компонентов')}</summary>
+                            <pre className={cls.stackTrace}>{errorInfo.componentStack}</pre>
+                        </details>
+                    )}
+                </div>
+            )}
 
-                {/* Error ID for tracking */}
-                {errorId && (
-                    <Alert
-                        type="info"
-                        showIcon={false}
-                        className={cls.errorIdAlert}
-                        message={
-                            <MyTypography.Small>
-                                {t('ID ошибки')}: <code>{errorId}</code>
-                            </MyTypography.Small>
-                        }
-                    />
-                )}
+            <Button
+                type={recoverable ? 'default' : 'primary'}
+                className={cls.button}
+                icon={<RotateCw aria-hidden size={BUTTON_ICON_SIZE} strokeWidth={BUTTON_ICON_STROKE} />}
+                onClick={handleReload}
+            >
+                {!recoverable && <BlueprintMarks />}
+                {t('Обновить страницу')}
+            </Button>
 
-                {/* Development Error Details */}
-                {__IS_DEV__ && error && (
-                    <Alert
-                        type="warning"
-                        showIcon
-                        className={cls.devAlert}
-                        title={<span className={cls.alertTitle}>{t('Детали ошибки (только для разработки)')}</span>}
-                        description={
-                            <VStack gap="8">
-                                <MyTypography.Small>
-                                    <strong>{t('Сообщение')}:</strong> {error.message}
-                                </MyTypography.Small>
-                                {error.stack && (
-                                    <details className={cls.stackDetails}>
-                                        <summary>
-                                            <MyTypography.Small>
-                                                {t('Трассировка стека')}
-                                            </MyTypography.Small>
-                                        </summary>
-                                        <pre className={cls.stackTrace}>
-                                            {error.stack}
-                                        </pre>
-                                    </details>
-                                )}
-                                {errorInfo?.componentStack && (
-                                    <details className={cls.stackDetails}>
-                                        <summary>
-                                            <MyTypography.Small>
-                                                {t('Стек компонентов')}
-                                            </MyTypography.Small>
-                                        </summary>
-                                        <pre className={cls.stackTrace}>
-                                            {errorInfo.componentStack}
-                                        </pre>
-                                    </details>
-                                )}
-                            </VStack>
-                        }
-                    />
-                )}
-
-                <Button
-                    type={recoverable ? 'default' : 'primary'}
-                    size="large"
-                    icon={<ReloadOutlined />}
-                    onClick={handleReload}
-                >
-                    {t('Обновить страницу')}
-                </Button>
-
-                {/* User Guidance */}
-                <MyTypography.Small style={{ textAlign: 'center', color: 'var(--text-secondary)', maxWidth: '500px' }}>
-                    {t('Если проблема повторяется, попробуйте очистить кэш браузера или обратитесь к системному администратору.')}
-                </MyTypography.Small>
-            </VStack>
+            <p className={cls.hint}>
+                {t('Если проблема повторяется, попробуйте очистить кэш браузера или обратитесь к системному администратору.')}
+            </p>
         </div>
     );
 };

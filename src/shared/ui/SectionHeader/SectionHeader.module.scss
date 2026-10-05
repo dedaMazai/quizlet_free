@@ -9,6 +9,12 @@
     font-family: var(--font-heading);
     font-weight: 600;
     white-space: nowrap;
+
+    // Длинный заголовок («Сравнение: Past Simple ↔ Present Perfect») на телефоне переносится,
+    // иначе страница уезжает вбок
+    @media (width <= 650px) {
+        white-space: normal;
+    }
 }
 
 .sm {

@@ -55,7 +55,7 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
   const [selectedKeys, setSelectedKeys] = useState<Key[]>([]);
 
   const { data: cards } = useGetCardsQuery(deckUuid, { skip: !open });
-  const { remaining, isExhausted: noCredits } = useAiQuota({ skip: !open });
+  const { remaining, isExhausted: noCredits, isUnlimited } = useAiQuota({ skip: !open });
   const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
   const [generateChunks, { isLoading: isGenerating }] = useGenerateChunksMutation();
   const [createCards, { isLoading: isSaving }] = useCreateCardsMutation();
@@ -178,7 +178,7 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
       width={MODAL_WIDTH}
       kicker={deck?.name}
       title={t('Подобрать фразы')}
-      quota={t('Осталось {{count}}', { count: remaining ?? 0 })}
+      quota={isUnlimited ? t('без лимита') : t('Осталось {{count}}', { count: remaining ?? 0 })}
       footerNote={t('Фразы свяжутся с исходным словом')}
       onClose={onClose}
       destroyOnHidden

@@ -1,9 +1,9 @@
 import { FC, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from 'antd';
 import {
-  Button, Divider, Empty, Modal, Tag,
-} from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+  CopyCheck, Pencil, Trash2, Volume2,
+} from 'lucide-react';
 import {
   Card,
   useGetCardsQuery,
@@ -13,15 +13,17 @@ import {
 } from '@/entities/Card';
 import { CardForm } from '@/features/CardForm';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
+import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import { Loader } from '@/shared/ui/Loader';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useToast, useUndoableDelete } from '@/shared/lib/toast';
-import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
-import { MODAL_MOTION } from '@/shared/const/motion';
 import cls from './DuplicateCardsModal.module.scss';
+
+const MODAL_WIDTH = 640;
+const ICON_SIZE = 16;
+const ICON_STROKE = 1.5;
 
 interface DuplicateCardsModalProps {
   open: boolean;
@@ -34,7 +36,6 @@ export const DuplicateCardsModal: FC<DuplicateCardsModalProps> = (props) => {
   const { t } = useTranslation();
   const { modal } = useAntdApp();
   const toast = useToast();
-  const { isMobile } = useMatchMedia();
 
   const { data: cards, isLoading } = useGetCardsQuery(deckUuid, { skip: !open });
   const [deleteCard] = useDeleteCardMutation();
@@ -68,76 +69,64 @@ export const DuplicateCardsModal: FC<DuplicateCardsModalProps> = (props) => {
     }
 
     if (!groups.length) {
-      return <Empty description={t('Дубли не найдены')} />;
+      return (
+        <EmptyState
+          icon={CopyCheck}
+          kicker={t('Дубли слов')}
+          title={t('Дубли не найдены')}
+          align={EmptyStateAlign.CENTER}
+        />
+      );
     }
 
-    return (
-      <VStack max gap="8">
-        {groups.map((group, index) => (
-          <div key={group[0].uuid} className={cls.group}>
-            {index > 0 && <Divider className={cls.divider} />}
-            <VStack max gap="8">
-              <Tag bordered={false}>{t('{{count}} совпадения', { count: group.length })}</Tag>
-              {group.map((card) => (
-                <HStack key={card.uuid} max justify="between" align="start" gap="8" className={cls.row}>
-                  <VStack gap="2" align="start" className={cls.main}>
-                    <HStack gap="4" align="center">
-                      <span className={cls.term}>{card.term}</span>
-                      <SpeakButton text={card.term} />
-                    </HStack>
-                    <MyTypography.Base>{card.translation}</MyTypography.Base>
-                    {card.example && (
-                      <MyTypography.Small type="secondary" className={cls.example}>
-                        {card.example}
-                      </MyTypography.Small>
-                    )}
-                  </VStack>
-                  <HStack gap="2" align="center">
-                    <FavoriteToggle cardUuid={card.uuid} />
-                    <Button
-                      type="text"
-                      size="small"
-                      aria-label={t('Редактировать')}
-                      icon={<EditOutlined />}
-                      onClick={() => setEditingCard(card)}
-                    />
-                    <Button
-                      type="text"
-                      size="small"
-                      danger
-                      aria-label={t('Удалить')}
-                      icon={<DeleteOutlined />}
-                      onClick={() => handleDelete(card)}
-                    />
-                  </HStack>
-                </HStack>
-              ))}
-            </VStack>
+    return groups.map((group) => (
+      <div key={group[0].uuid} className={cls.group}>
+        <Kicker size={KickerSize.SM}>{t('{{count}} совпадения', { count: group.length })}</Kicker>
+        {group.map((card) => (
+          <div key={card.uuid} className={cls.row}>
+            <div className={cls.main}>
+              <span className={cls.termRow}>
+                <span className={cls.term}>{card.term}</span>
+                <SpeakButton
+                  text={card.term}
+                  icon={<Volume2 aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                />
+              </span>
+              <span className={cls.translation}>{card.translation}</span>
+              {card.example && <span className={cls.example}>{card.example}</span>}
+            </div>
+            <div className={cls.actions}>
+              <FavoriteToggle cardUuid={card.uuid} />
+              <Button
+                type="text"
+                aria-label={t('Редактировать')}
+                icon={<Pencil aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                onClick={() => setEditingCard(card)}
+              />
+              <Button
+                type="text"
+                aria-label={t('Удалить')}
+                icon={<Trash2 aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                onClick={() => handleDelete(card)}
+              />
+            </div>
           </div>
         ))}
-      </VStack>
-    );
+      </div>
+    ));
   };
 
   return (
     <>
-      {isMobile ? (
-        // Mobile: шторка вместо модалки
-        <ModalFrame open={open} width="100%" title={t('Дубли слов')} onClose={onClose}>
-          <div className={cls.sheetContent}>{renderContent()}</div>
-        </ModalFrame>
-      ) : (
-        <Modal
-          {...MODAL_MOTION}
-          open={open}
-          title={t('Дубли слов')}
-          footer={null}
-          width={640}
-          onCancel={onClose}
-        >
-          {renderContent()}
-        </Modal>
-      )}
+      <ModalFrame
+        open={open}
+        width={MODAL_WIDTH}
+        title={t('Дубли слов')}
+        onClose={onClose}
+        actions={<Button onClick={onClose}>{t('Закрыть')}</Button>}
+      >
+        <div className={cls.content}>{renderContent()}</div>
+      </ModalFrame>
       <CardForm
         open={Boolean(editingCard)}
         deckUuid={deckUuid}

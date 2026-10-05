@@ -83,8 +83,14 @@ $enter-shift: 8px;
 .action {
     flex: none;
     height: auto;
-    padding: 0;
+    padding: 2px 6px;
     line-height: 1.4;
+    color: var(--color-accent);
+
+    // Ghost-кнопка (BACKLOG §3): фон только при наведении
+    &:hover {
+        background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    }
 }
 
 @keyframes toast-enter {

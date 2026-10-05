@@ -4,11 +4,9 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
-  ConfigProvider, Empty, Segmented, theme,
+  ConfigProvider, Segmented, theme,
 } from 'antd';
-import {
-  ChevronLeft, ChevronRight, Repeat, Volume2,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Inbox, Repeat, Volume2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Card, FavoriteToggle, useGetFavoritesQuery } from '@/entities/Card';
 import { Blueprint } from '@/shared/ui/Blueprint';
@@ -23,6 +21,7 @@ import { useReducedMotion } from '@/shared/lib/hooks/useReducedMotion';
 import { EASE, MOTION_MS } from '@/shared/const/motion';
 import { buildPositionTicks, buildSessionTicks } from '@/shared/lib/session';
 import { shuffle } from '@/shared/lib/utils';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
 import cls from './FlashcardsGame.module.scss';
 
 type FavoriteFilter = 'all' | 'favorite' | 'notFavorite';
@@ -145,7 +144,7 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
       <>
         {topBar}
         <SessionStage>
-          <Empty description={t('В колоде нет слов')} />
+          <EmptyState icon={Inbox} kicker={t('Карточки')} title={t('В колоде нет слов')} align={EmptyStateAlign.CENTER} />
         </SessionStage>
       </>
     );
@@ -257,7 +256,7 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
             </div>
           </>
         ) : (
-          <Empty description={t('Нет карточек по выбранному фильтру')} />
+          <EmptyState icon={Inbox} kicker={t('Карточки')} title={t('Нет карточек по выбранному фильтру')} align={EmptyStateAlign.CENTER} />
         )}
 
         {!onFinish && (

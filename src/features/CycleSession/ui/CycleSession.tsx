@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Empty } from 'antd';
+import { Inbox } from 'lucide-react';
 import { CycleWord } from '@/entities/LearningCycle';
 import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
@@ -9,6 +9,7 @@ import {
   SessionResultRenderer,
   summarizeSession,
 } from '@/shared/lib/session';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
 import { useCycleSession } from '../model/hooks/useCycleSession';
 import { CyclePrompt } from './CyclePrompt';
 
@@ -65,7 +66,7 @@ export const CycleSession: FC<CycleSessionProps> = (props) => {
       <>
         {topBar}
         <SessionStage>
-          <Empty description={t('Нет слов для заучивания')} />
+          <EmptyState icon={Inbox} kicker={t('Цикл')} title={t('Нет слов для заучивания')} align={EmptyStateAlign.CENTER} />
         </SessionStage>
       </>
     );

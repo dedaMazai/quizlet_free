@@ -162,6 +162,7 @@ const MainPage: FC = () => {
                                 aria-hidden
                                 className={STREAK_LEVEL_CLASSES[getStreakLevel(streakDays).index]}
                                 size={FLAME_SIZE}
+                                strokeWidth={ICON_STROKE}
                             />
                             <span className={cls.streakDays}>{streakDays}</span>
                         </span>

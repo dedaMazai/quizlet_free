@@ -50,7 +50,7 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
   const [selectedKeys, setSelectedKeys] = useState<Key[]>([]);
 
   const { data: cards } = useGetCardsQuery(deckUuid, { skip: !open });
-  const { remaining, isExhausted: noCredits } = useAiQuota({ skip: !open });
+  const { remaining, isExhausted: noCredits, isUnlimited } = useAiQuota({ skip: !open });
   const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
   const [checkTranslations, { isLoading: isChecking }] = useCheckTranslationsMutation();
   const [updateCardsBulk, { isLoading: isApplying }] = useUpdateCardsBulkMutation();
@@ -153,7 +153,7 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
       width={MODAL_WIDTH}
       kicker={deck?.name}
       title={t('Проверка переводов')}
-      quota={t('Осталось {{count}}', { count: remaining ?? 0 })}
+      quota={isUnlimited ? t('без лимита') : t('Осталось {{count}}', { count: remaining ?? 0 })}
       footerNote={results
         ? t('Выбрано {{fixes}} и {{examples}}', {
           fixes: t('{{count}} правок', { count: selectedFixCount }),

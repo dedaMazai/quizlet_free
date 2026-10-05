@@ -2,7 +2,8 @@ import {
   FC, useEffect, useMemo, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty } from 'antd';
+import { Inbox } from 'lucide-react';
+import { Button } from 'antd';
 import {
   Card,
   CardReview,
@@ -25,6 +26,7 @@ import {
   summarizeSession,
   useIntervalNote,
 } from '@/shared/lib/session';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
 import { useLearnSession } from '../model/hooks/useLearnSession';
 import { LearnQuestion } from '../model/lib/learnEngine';
 import { ChoiceQuestion } from './ChoiceQuestion';
@@ -277,7 +279,7 @@ export const LearnSession: FC<LearnSessionProps> = (props) => {
           onExit={onExit}
         />
         <SessionStage>
-          {isLoading ? <Loader /> : <Empty description={t('Нет слов для заучивания')} />}
+          {isLoading ? <Loader /> : <EmptyState icon={Inbox} kicker={t('Заучивание')} title={t('Нет слов для заучивания')} align={EmptyStateAlign.CENTER} />}
         </SessionStage>
       </>
     );

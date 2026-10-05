@@ -738,7 +738,6 @@
   "Дирекция": "Directorate",
   "Для достижения целей, определенных в настоящем Пользовательском соглашении, Владелец Сайта может осуществлять передачу персональных данных Пользователя третьим лицам.": "To achieve the purposes defined in this User Agreement, the Site Owner may transfer the User's personal data to third parties.",
   "Для использования Личного кабинета Пользователю необходимо пройти процедуру регистрации, в результате которой ему будет предоставлен персональный доступ в Личный кабинет.": "To use the Personal Account, the User must complete the registration procedure, as a result of which they will be granted personal access to the Personal Account.",
-  "Для ознакомления с полным текстом Пользовательского соглашения и Политики конфиденциальности скачайте PDF-документ": "To read the full text of the User Agreement and Privacy Policy, download the PDF document",
   "Добавить": "Add",
   "Добавить группу": "Add group",
   "Добавить группу в отдел": "Add group to department",
@@ -2457,5 +2456,6 @@
   "Пользователь ещё не занимался": "No study activity yet",
   "Серия, точность и освоение колод появятся после первых ответов.": "Streak, accuracy and deck mastery will appear after the first answers.",
   "К пользователям": "To users",
-  "Открыть статистику": "Open statistics"
+  "Открыть статистику": "Open statistics",
+  "копия": "copy"
 }

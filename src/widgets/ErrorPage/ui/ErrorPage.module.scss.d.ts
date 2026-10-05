@@ -1,10 +1,15 @@
 export type Styles = {
-  alertTitle: string;
-  devAlert: string;
-  errorIdAlert: string;
+  button: string;
+  description: string;
+  devDetails: string;
+  devTitle: string;
+  errorId: string;
   ErrorPage: string;
+  hint: string;
+  iconBox: string;
   stackDetails: string;
   stackTrace: string;
+  title: string;
 };
 
 export type ClassNames = keyof Styles;

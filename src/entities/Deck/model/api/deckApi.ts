@@ -1,3 +1,4 @@
+import i18n from '@/shared/config/i18n/i18n';
 import { ApiTag, rtkApi } from '@/shared/api/rtkApi';
 import { supabase, supabaseError, getCurrentUserId } from '@/shared/api/supabaseClient';
 import {
@@ -133,7 +134,7 @@ const deckApi = rtkApi.injectEndpoints({
         const { data: newDeck, error: deckError } = await supabase
           .from('decks')
           .insert({
-            name: `${source.name} (копия)`,
+            name: `${source.name} (${i18n.t('копия')})`,
             description: source.description ?? null,
             allow_shared_edit: true,
           })
