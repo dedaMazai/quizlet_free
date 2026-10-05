@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useGetCardsQuery } from '@/entities/Card';
+import { useGetCardsQuery, useLibraryFilterCards } from '@/entities/Card';
 import { FlashcardsGame } from '@/features/FlashcardsGame';
 import { PageLoader } from '@/widgets/PageLoader';
 import { RoutePath } from '@/shared/config/router/routePath';
@@ -8,17 +8,20 @@ import { RoutePath } from '@/shared/config/router/routePath';
 const AllWordsFlashcardsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const { data: cards, isLoading } = useGetCardsQuery();
+  const { data: allCards, isLoading } = useGetCardsQuery();
+  // Карточки по выборке «Всех слов» из query-параметров
+  const { cards, isLoading: isSelectionLoading } = useLibraryFilterCards(allCards);
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading || isSelectionLoading) return <PageLoader />;
 
   return (
     <FlashcardsGame
       cards={cards ?? []}
       title={`${t('Все слова')} · ${t('Карточки')}`}
       onExit={() => navigate(RoutePath.ALL_WORDS())}
-      learnPath={RoutePath.ALL_WORDS_LEARN()}
+      learnPath={`${RoutePath.ALL_WORDS_LEARN()}${location.search}`}
     />
   );
 };

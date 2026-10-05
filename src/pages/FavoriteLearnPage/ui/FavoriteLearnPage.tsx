@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   useGetCardsQuery,
   useGetFavoritesQuery,
+  useLibraryFilterCards,
   FAVORITES_PROGRESS_KEY,
 } from '@/entities/Card';
 import { LearnSession } from '@/features/LearnSession';
@@ -23,14 +24,19 @@ const FavoriteLearnPage = () => {
     () => (cards ?? []).filter((card) => favorites?.includes(card.uuid)),
     [cards, favorites],
   );
-  const { cards: sessionCards, sessionKey } = useSessionCardFilter(favCards);
+  // Фильтр выборки «Избранного» из query-параметров
+  const { cards: selection, isLoading: isSelectionLoading } = useLibraryFilterCards(favCards, {
+    uuids: favorites,
+    skip: !favorites,
+  });
+  const { cards: sessionCards, sessionKey } = useSessionCardFilter(selection);
 
-  if (isLoading || !cards) return <PageLoader />;
+  if (isLoading || isSelectionLoading || !cards || !selection) return <PageLoader />;
 
   return (
     <LearnSession
       key={sessionKey}
-      cards={sessionCards ?? favCards}
+      cards={sessionCards ?? selection}
       deckKey={FAVORITES_PROGRESS_KEY}
       deckName={FAVORITES_PROGRESS_KEY}
       title={`${t('Избранное')} · ${t('Заучивание')}`}
@@ -38,7 +44,7 @@ const FavoriteLearnPage = () => {
       renderResult={(summary, restart) => (
         <SessionResult
           summary={summary}
-          words={sessionCards ?? favCards}
+          words={sessionCards ?? selection}
           onRestart={restart}
         />
       )}

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useGetCardsQuery, ALL_WORDS_PROGRESS_KEY } from '@/entities/Card';
+import { useGetCardsQuery, useLibraryFilterCards, ALL_WORDS_PROGRESS_KEY } from '@/entities/Card';
 import { LearnSession } from '@/features/LearnSession';
 import { PageLoader } from '@/widgets/PageLoader';
 import { SessionResult } from '@/widgets/SessionResult';
@@ -12,10 +12,12 @@ const AllWordsLearnPage = () => {
   const navigate = useNavigate();
 
   const { data: allCards, isLoading } = useGetCardsQuery();
+  // «Заучивать выборку» передаёт фильтр «Всех слов» в query-параметрах
+  const { cards: selection, isLoading: isSelectionLoading } = useLibraryFilterCards(allCards);
   // «Повторить трудные» запускает сессию по части карточек
-  const { cards, sessionKey } = useSessionCardFilter(allCards);
+  const { cards, sessionKey } = useSessionCardFilter(selection);
 
-  if (isLoading || !cards) return <PageLoader />;
+  if (isLoading || isSelectionLoading || !cards) return <PageLoader />;
 
   return (
     <LearnSession

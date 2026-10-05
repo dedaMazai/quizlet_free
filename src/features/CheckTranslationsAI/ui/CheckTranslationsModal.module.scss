@@ -1,0 +1,70 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 22px 0;
+}
+
+.summary {
+  padding-bottom: 10px;
+  font-size: 14px;
+  color: var(--color-neutral-800);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.head {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-divider);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+  white-space: nowrap;
+}
+
+.list {
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+.row {
+  padding: 11px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  font-size: 14px;
+}
+
+.term {
+  font-weight: 500;
+}
+
+.replaced {
+  color: var(--color-neutral-600);
+  text-decoration: line-through;
+}
+
+// Поле без рамки выглядит как текст ячейки, но остаётся редактируемым
+.cell {
+  padding: 0;
+  font-size: 14px;
+
+  &::placeholder {
+    color: var(--color-neutral-600);
+  }
+}
+
+.suggested {
+  font-weight: 600;
+  color: var(--color-accent-800);
+}
+
+.example {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--color-neutral-800);
+}

@@ -3,12 +3,12 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AutoComplete, Button, Input, Modal, Spin, Tooltip, Upload,
+  AutoComplete, Button, Input, Spin, Tooltip, Upload,
 } from 'antd';
 import type { InputRef, UploadProps } from 'antd';
 import {
-  DeleteOutlined, DownloadOutlined, PlusOutlined, RobotOutlined, UnorderedListOutlined, UploadOutlined,
-} from '@ant-design/icons';
+  Plus, Sparkles, Volume2, X,
+} from 'lucide-react';
 import {
   AiCheckInput,
   CardCreateDto,
@@ -16,8 +16,11 @@ import {
   useCreateCardsMutation,
   useGetAiUsageQuery,
 } from '@/entities/Card';
+import { useGetDeckQuery } from '@/entities/Deck';
 import { TranslationResult } from '@/shared/lib/translate';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
@@ -36,6 +39,11 @@ const chunk = <T, >(items: T[], size: number): T[][] => {
   }
   return result;
 };
+
+const MODAL_WIDTH = 920;
+const TOOL_ICON_SIZE = 14;
+const ROW_ICON_SIZE = 16;
+const ICON_STROKE = 1.5;
 
 const EXCEL_ACCEPT = '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -83,6 +91,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   const [createCards, { isLoading }] = useCreateCardsMutation();
   const [checkTranslations, { isLoading: isChecking }] = useCheckTranslationsMutation();
   const { data: remaining } = useGetAiUsageQuery(undefined, { skip: !open });
+  const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
 
   const termRefs = useRef<Map<string, InputRef>>(new Map());
   const focusIdRef = useRef<string | null>(null);
@@ -283,59 +292,75 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   }, [handleImport]);
 
   const filledCount = rows.filter((row) => row.term.trim()).length;
+  const readyCount = rows.filter((row) => row.term.trim() && row.translation.trim()).length;
   // ИИ-проверка доступна, когда добавлено больше 3 слов.
   const canAiCheck = filledCount > 3;
   const noCredits = remaining !== undefined && remaining <= 0;
 
   return (
-    <Modal
+    <ModalFrame
       open={open}
-      width={isMobile ? 'calc(100vw - 24px)' : 760}
+      width={isMobile ? 'calc(100vw - 24px)' : MODAL_WIDTH}
+      kicker={deck?.name}
       title={t('Добавить слова')}
-      okText={t('Сохранить все')}
-      cancelText={t('Отмена')}
-      confirmLoading={isLoading}
-      onOk={handleSubmit}
-      onCancel={onClose}
-    >
-      <VStack max gap={isMobile ? '12' : '8'}>
-        <HStack max gap="8" className={cls.toolbar}>
-          <Button
-            icon={<DownloadOutlined />}
-            onClick={handleDownloadTemplate}
-            block={isMobile}
-          >
-            {t('Скачать шаблон')}
+      footerNote={t('Перевод подставляется автоматически')}
+      onClose={onClose}
+      actions={(
+        <>
+          <Button onClick={onClose}>{t('Отмена')}</Button>
+          <Button type="primary" loading={isLoading} onClick={handleSubmit}>
+            <BlueprintMarks />
+            {t('Сохранить {{count}} слов', { count: readyCount })}
           </Button>
-          <Upload
-            accept={EXCEL_ACCEPT}
-            showUploadList={false}
-            beforeUpload={handleBeforeUpload}
-            className={isMobile ? cls.importFull : undefined}
-          >
+        </>
+      )}
+    >
+      <div className={cls.toolbar}>
+        <Upload
+          accept={EXCEL_ACCEPT}
+          showUploadList={false}
+          beforeUpload={handleBeforeUpload}
+          className={isMobile ? cls.importFull : undefined}
+        >
+          <Button className={cls.toolButton} loading={isImporting} block={isMobile}>
+            {t('Импорт из Excel')}
+          </Button>
+        </Upload>
+        <Button
+          type="link"
+          className={classNames(cls.toolButton, [cls.ghost])}
+          onClick={handleDownloadTemplate}
+          block={isMobile}
+        >
+          {t('Скачать шаблон')}
+        </Button>
+        {canAiCheck && (
+          <Tooltip title={t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}>
             <Button
-              icon={<UploadOutlined />}
-              loading={isImporting}
+              className={classNames(cls.toolButton, [cls.aiButton])}
+              icon={<Sparkles aria-hidden size={TOOL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+              loading={isChecking}
+              disabled={noCredits}
+              onClick={handleAiCheck}
               block={isMobile}
             >
-              {t('Импорт из Excel')}
+              {t('Проверить переводы ИИ')}
             </Button>
-          </Upload>
-          {canAiCheck && (
-            <Tooltip title={t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}>
-              <Button
-                type="primary"
-                icon={<RobotOutlined />}
-                loading={isChecking}
-                disabled={noCredits}
-                onClick={handleAiCheck}
-                block={isMobile}
-              >
-                {t('Проверить через ИИ')}
-              </Button>
-            </Tooltip>
-          )}
-        </HStack>
+          </Tooltip>
+        )}
+      </div>
+
+      <div className={cls.table}>
+        {!isMobile && (
+          <div className={classNames(cls.grid, [cls.head])}>
+            <span>#</span>
+            <span>{t('Слово')}</span>
+            <span>{t('Перевод · авто')}</span>
+            <span>{t('Пример')}</span>
+            <span />
+            <span />
+          </div>
+        )}
 
         {rows.map((row, index) => {
           const termInput = (
@@ -347,12 +372,11 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
                   termRefs.current.delete(row.id);
                 }
               }}
-              className={cls.grow}
+              className={cls.field}
               value={row.term}
               placeholder={t('Слово')}
               onChange={(e) => handleTermChange(row.id, e.target.value)}
               onPressEnter={addRow}
-              suffix={row.term.trim() ? <SpeakButton text={row.term} /> : <span />}
             />
           );
           const hasVariants = row.alternatives.length > 0;
@@ -363,34 +387,44 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
             if (hasVariants) {
               return (
                 <Tooltip title={t('Есть другие варианты перевода')}>
-                  <UnorderedListOutlined
-                    className={cls.variantsHint}
+                  <button
+                    type="button"
+                    className={cls.variants}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={(e) => {
                       e.stopPropagation();
                       setOpenVariantsId((prev) => (prev === row.id ? null : row.id));
                     }}
-                  />
+                  >
+                    {`+${row.alternatives.length}`}
+                  </button>
                 </Tooltip>
               );
             }
             if (row.aiCorrected) {
               return (
                 <Tooltip title={t('Исправлено ИИ')}>
-                  <RobotOutlined className={cls.aiHint} />
+                  <Sparkles
+                    aria-hidden
+                    className={cls.aiHint}
+                    size={TOOL_ICON_SIZE}
+                    strokeWidth={ICON_STROKE}
+                  />
                 </Tooltip>
               );
             }
             return <span />;
           })();
+          // Перевод подставил автопереводчик, пользователь его не трогал
+          const isAuto = Boolean(row.translation.trim()) && !row.translationEdited;
           const translationInput = (
             <AutoComplete
-              className={classNames(cls.grow, { [cls.hasVariants]: hasVariants })}
+              className={classNames(cls.field, [], { [cls.auto]: isAuto })}
               value={row.translation}
               options={row.alternatives.map((variant) => ({ value: variant }))}
               filterOption={false}
               open={openVariantsId === row.id && hasVariants}
-              onDropdownVisibleChange={(visible) => {
+              onOpenChange={(visible) => {
                 setOpenVariantsId(visible && hasVariants ? row.id : null);
               }}
               onChange={(value) => handleTranslationChange(row.id, value)}
@@ -404,29 +438,42 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
           );
           const exampleInput = (
             <Input
-              className={cls.grow}
+              className={classNames(cls.field, [cls.example])}
               value={row.example}
               placeholder={t('Пример')}
               onChange={(e) => updateRow(row.id, 'example', e.target.value)}
               onPressEnter={addRow}
             />
           );
+          const speakButton = row.term.trim()
+            ? (
+              <SpeakButton
+                className={cls.iconButton}
+                text={row.term}
+                icon={<Volume2 aria-hidden size={ROW_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+              />
+            )
+            : <span />;
           const deleteButton = (
             <Button
               type="text"
-              danger
+              className={classNames(cls.iconButton, [cls.remove])}
               aria-label={t('Удалить строку')}
-              icon={<DeleteOutlined />}
+              icon={<X aria-hidden size={ROW_ICON_SIZE} strokeWidth={ICON_STROKE} />}
               onClick={() => removeRow(row.id)}
             />
           );
+          const number = String(index + 1).padStart(2, '0');
 
           if (isMobile) {
             return (
               <VStack key={row.id} max gap="8" align="start" className={cls.cardRow}>
                 <HStack max justify="between" align="center">
-                  <span className={cls.indexBadge}>{index + 1}</span>
-                  {deleteButton}
+                  <span className={cls.index}>{number}</span>
+                  <HStack gap="4" align="center">
+                    {speakButton}
+                    {deleteButton}
+                  </HStack>
                 </HStack>
                 {termInput}
                 {translationInput}
@@ -436,20 +483,28 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
           }
 
           return (
-            <HStack key={row.id} max gap="8" align="center" className={cls.row}>
-              <span className={cls.index}>{index + 1}</span>
+            <div key={row.id} className={classNames(cls.grid, [cls.row])}>
+              <span className={cls.index}>{number}</span>
               {termInput}
               {translationInput}
               {exampleInput}
+              {speakButton}
               {deleteButton}
-            </HStack>
+            </div>
           );
         })}
 
-        <Button type="dashed" icon={<PlusOutlined />} onClick={addRow} block>
-          {t('Добавить строку')}
-        </Button>
-      </VStack>
-    </Modal>
+        <div className={cls.addRow}>
+          <Button
+            type="link"
+            className={classNames(cls.toolButton, [cls.ghost])}
+            icon={<Plus aria-hidden size={TOOL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+            onClick={addRow}
+          >
+            {t('Строка · Enter')}
+          </Button>
+        </div>
+      </div>
+    </ModalFrame>
   );
 };

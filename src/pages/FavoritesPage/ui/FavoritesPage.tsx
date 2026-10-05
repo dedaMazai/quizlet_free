@@ -1,84 +1,77 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
-import { ReadOutlined, BulbOutlined } from '@ant-design/icons';
-import { useGetFavoritesQuery, useGetCardsPageQuery } from '@/entities/Card';
+import {
+  hasLibraryFilter,
+  libraryFilterToSearch,
+  useGetFavoritesQuery,
+  useGetLibraryCardsQuery,
+} from '@/entities/Card';
+import { LibraryFilters, useLibraryFilters } from '@/features/LibraryFilters';
 import { CardList } from '@/widgets/CardList';
-import { SectionPageHeader } from '@/widgets/SectionPage';
-import { NavSectionKey } from '@/shared/const/menu';
-import { VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { LibraryHeader } from '@/widgets/LibraryHeader';
+import { SelectionStrip } from '@/widgets/SelectionStrip';
 import { RoutePath } from '@/shared/config/router/routePath';
+import cls from './FavoritesPage.module.scss';
+
+const PAGE_SIZE = 50;
 
 const FavoritesPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const filters = useLibraryFilters();
+  const { filter } = filters;
+  const [page, setPage] = useState(1);
 
   const { data: favorites } = useGetFavoritesQuery();
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-
   // Сортированная копия — стабильный ключ кэша RTK Query при том же наборе избранного.
   const uuids = useMemo(() => [...(favorites ?? [])].sort(), [favorites]);
-  const { data: cardsPage, isLoading } = useGetCardsPageQuery(
-    { page, pageSize, uuids },
+  const { data, isLoading } = useGetLibraryCardsQuery(
+    {
+      ...filter, uuids, page, pageSize: PAGE_SIZE,
+    },
     { skip: !favorites },
   );
+  const total = data?.total ?? 0;
 
-  const count = favorites?.length ?? 0;
-  const isEmpty = count === 0;
-  const total = cardsPage?.total ?? 0;
+  // При смене фильтра начинаем с первой страницы.
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
 
   // Если текущая страница опустела (сняли звёздочки) — откатываемся назад.
   useEffect(() => {
-    const maxPage = Math.max(1, Math.ceil(total / pageSize));
+    const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
     if (page > maxPage) setPage(maxPage);
-  }, [total, page, pageSize]);
+  }, [total, page]);
+
+  // Сессия по текущей выборке: фильтр уходит в query-параметры
+  const query = libraryFilterToSearch(filter);
 
   return (
-    <VStack max fullHeight gap="16">
-      <SectionPageHeader
-        section={NavSectionKey.LIBRARY}
-        extra={(
-          <>
-            <Button
-              icon={<ReadOutlined />}
-              disabled={isEmpty}
-              onClick={() => navigate(RoutePath.FAVORITES_FLASHCARDS())}
-            >
-              {t('Карточки')}
-            </Button>
-            <Button
-              type="primary"
-              icon={<BulbOutlined />}
-              disabled={isEmpty}
-              onClick={() => navigate(RoutePath.FAVORITES_LEARN())}
-            >
-              {t('Заучивание')}
-            </Button>
-          </>
-        )}
+    <div className={cls.FavoritesPage}>
+      <LibraryHeader />
+      <LibraryFilters state={filters} />
+      <SelectionStrip
+        title={t('{{count}} слов', { count: total })}
+        subtitle={`${t('отмечены звёздочкой')} · ${t('из {{count}} колод', { count: data?.deckCount ?? 0 })}`}
+        cta={t('Заучивать избранное')}
+        disabled={total === 0}
+        onCards={() => navigate(`${RoutePath.FAVORITES_FLASHCARDS()}${query}`)}
+        onLearn={() => navigate(`${RoutePath.FAVORITES_LEARN()}${query}`)}
       />
-      <MyTypography.Base type="secondary">
-        {t('{{count}} слов', { count })}
-      </MyTypography.Base>
-
       <CardList
-        cards={cardsPage?.cards}
+        items={data?.items}
         loading={isLoading || !favorites}
         pagination={{
           current: page,
-          pageSize,
+          pageSize: PAGE_SIZE,
           total,
-          onChange: (nextPage, nextPageSize) => {
-            setPage(nextPage);
-            setPageSize(nextPageSize);
-          },
+          onChange: setPage,
         }}
-        emptyText={t('В избранном пока нет слов')}
+        emptyText={hasLibraryFilter(filter) ? t('Ничего не найдено') : t('В избранном пока нет слов')}
       />
-    </VStack>
+    </div>
   );
 };
 

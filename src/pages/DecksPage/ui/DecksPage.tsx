@@ -1,32 +1,62 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Input, Segmented, Select } from 'antd';
+import { ChevronDown, Search } from 'lucide-react';
 import { DeckList } from '@/widgets/DeckList';
-import { DeckForm } from '@/features/DeckForm';
-import { SectionPageHeader } from '@/widgets/SectionPage';
-import { NavSectionKey } from '@/shared/const/menu';
-import { VStack } from '@/shared/ui/Stack';
+import { LibraryHeader } from '@/widgets/LibraryHeader';
+import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
+import cls from './DecksPage.module.scss';
+
+type DeckFilter = 'all' | 'own' | 'shared';
+type DeckSort = 'recent' | 'name';
+
+const SEARCH_ICON_SIZE = 15;
+const CHEVRON_SIZE = 14;
+const ICON_STROKE = 1.5;
 
 const DecksPage = () => {
   const { t } = useTranslation();
-  const [formOpen, setFormOpen] = useState(false);
+  const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
+  const [filter, setFilter] = useState<DeckFilter>('all');
+  const [sort, setSort] = useState<DeckSort>('recent');
 
   return (
-    <VStack max fullHeight gap="16">
-      <SectionPageHeader
-        section={NavSectionKey.LIBRARY}
-        extra={(
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-            {t('Создать колоду')}
-          </Button>
-        )}
-      />
+    <div className={cls.DecksPage}>
+      <LibraryHeader showCreateDeck />
 
-      <DeckList />
+      <div className={cls.toolbar}>
+        <Input
+          className={cls.search}
+          prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+          allowClear
+          value={search}
+          placeholder={t('Название колоды')}
+          onChange={(e) => setSearchDebounced(e.target.value)}
+        />
+        <Segmented<DeckFilter>
+          className={cls.segmented}
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { label: t('Все'), value: 'all' },
+            { label: t('Мои'), value: 'own' },
+            { label: t('Доступные мне'), value: 'shared' },
+          ]}
+        />
+        <Select<DeckSort>
+          className={cls.sort}
+          value={sort}
+          onChange={setSort}
+          suffixIcon={<ChevronDown aria-hidden size={CHEVRON_SIZE} strokeWidth={ICON_STROKE} />}
+          options={[
+            { label: t('Сначала недавние'), value: 'recent' },
+            { label: t('По названию'), value: 'name' },
+          ]}
+        />
+      </div>
 
-      <DeckForm open={formOpen} onClose={() => setFormOpen(false)} />
-    </VStack>
+      <DeckList filter={filter} sort={sort} search={debouncedSearch} />
+    </div>
   );
 };
 

@@ -1,21 +1,16 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, MouseEvent, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Button, Card, Dropdown, Empty, Tag,
-} from 'antd';
+import { Button, Dropdown, Empty } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   EditOutlined,
   DeleteOutlined,
-  MoreOutlined,
-  ReadOutlined,
-  BulbOutlined,
-  StarFilled,
   ShareAltOutlined,
   CopyOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
+import { Ellipsis } from 'lucide-react';
 import {
   Deck,
   useGetDecksQuery,
@@ -23,26 +18,34 @@ import {
   useDuplicateDeckMutation,
   useRemoveDeckShareMutation,
 } from '@/entities/Deck';
-import {
-  useDeleteCardsByDeckMutation,
-  useGetFavoritesQuery,
-} from '@/entities/Card';
+import { useDeleteCardsByDeckMutation } from '@/entities/Card';
+import { useGetDueSummaryQuery, useGetMasteryQuery } from '@/entities/Statistics';
 import { useUserInfo, useUserAccesses } from '@/entities/User';
 import { DeckForm } from '@/features/DeckForm';
 import { ShareDeckModal } from '@/features/ShareDeck';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { Blueprint } from '@/shared/ui/Blueprint';
+import { DueBadge } from '@/shared/ui/DueBadge';
+import { MasteryBar, MasteryBarSize } from '@/shared/ui/MasteryBar';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from '@/shared/types/accesses';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import cls from './DeckList.module.scss';
 
+const MENU_ICON_SIZE = 18;
+const ICON_STROKE = 1.5;
+const PERCENT = 100;
+
+const toPercent = (part: number, total: number): number => (
+  total > 0 ? Math.round((part / total) * PERCENT) : 0
+);
+
 interface DeckListProps {
   limit?: number;
   sort?: 'default' | 'recent' | 'name';
   filter?: 'all' | 'own' | 'shared';
-  showFavorites?: boolean;
+  /** Поиск по названию колоды */
+  search?: string;
 }
 
 export const DeckList: FC<DeckListProps> = (props) => {
@@ -50,7 +53,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
     limit,
     sort = 'default',
     filter = 'all',
-    showFavorites = true,
+    search = '',
   } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -58,13 +61,15 @@ export const DeckList: FC<DeckListProps> = (props) => {
   const userInfo = useUserInfo();
   const isAdmin = useUserAccesses().includes(Accesses.administration);
 
+  const tz = userInfo?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
   const { data: decks, isLoading } = useGetDecksQuery();
-  const { data: favorites } = useGetFavoritesQuery();
+  const { data: summary } = useGetDueSummaryQuery(tz);
+  const { data: mastery } = useGetMasteryQuery();
   const [deleteDeck] = useDeleteDeckMutation();
   const [duplicateDeck] = useDuplicateDeckMutation();
   const [removeShare] = useRemoveDeckShareMutation();
 
-  const favCount = favorites?.length ?? 0;
   const [deleteCardsByDeck] = useDeleteCardsByDeckMutation();
 
   const [editingDeck, setEditingDeck] = useState<Deck | undefined>(undefined);
@@ -75,6 +80,8 @@ export const DeckList: FC<DeckListProps> = (props) => {
     let list = decks ?? [];
     if (filter === 'own') list = list.filter((deck) => deck.is_owner);
     if (filter === 'shared') list = list.filter((deck) => !deck.is_owner);
+    const query = search.trim().toLowerCase();
+    if (query) list = list.filter((deck) => deck.name.toLowerCase().includes(query));
 
     if (sort === 'recent') {
       list = [...list].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
@@ -83,9 +90,16 @@ export const DeckList: FC<DeckListProps> = (props) => {
     }
 
     return typeof limit === 'number' ? list.slice(0, limit) : list;
-  }, [decks, filter, sort, limit]);
+  }, [decks, filter, search, sort, limit]);
 
-  const showFavoritesCard = showFavorites && filter !== 'shared';
+  const dueByDeck = useMemo(
+    () => new Map((summary?.perDeck ?? []).map((deck) => [deck.deckUuid, deck.due])),
+    [summary],
+  );
+  const masteryByDeck = useMemo(
+    () => new Map((mastery?.perDeck ?? []).map((deck) => [deck.deckKey, deck])),
+    [mastery],
+  );
 
   const handleDelete = (deck: Deck) => {
     modal.confirm({
@@ -192,117 +206,69 @@ export const DeckList: FC<DeckListProps> = (props) => {
     return <Loader />;
   }
 
-  if (!visibleDecks.length && !showFavoritesCard) {
-    return <Empty description={t('Пока нет ни одной колоды')} />;
+  if (!visibleDecks.length) {
+    return (
+      <Empty
+        description={search.trim() ? t('Ничего не найдено') : t('Пока нет ни одной колоды')}
+      />
+    );
   }
 
   return (
     <>
       <div className={cls.grid}>
-        {showFavoritesCard && (
-        <Card
-          variant="borderless"
-          className={`${cls.card} ${cls.favoriteCard}`}
-          onClick={() => navigate(RoutePath.FAVORITES())}
-        >
-          <VStack max gap="12" justify="between" className={cls.cardInner}>
-            <VStack max gap="4">
-              <HStack gap="8" align="center">
-                <StarFilled className={cls.favStar} />
-                <MyTypography.Large strong>{t('Избранное')}</MyTypography.Large>
-              </HStack>
-              <span className={cls.countBadge}>
-                {t('{{count}} слов', { count: favCount })}
-              </span>
-            </VStack>
+        {visibleDecks.map((deck) => {
+          const deckMastery = masteryByDeck.get(deck.uuid);
+          const mastered = toPercent(deckMastery?.mastered ?? 0, deck.cards_count);
+          const learning = toPercent(deckMastery?.learning ?? 0, deck.cards_count);
+          const due = dueByDeck.get(deck.uuid) ?? 0;
+          const author = deck.is_owner ? undefined : deck.owner_name ?? deck.owner_email;
 
-            <HStack max gap="8" wrap>
-              <Button
-                icon={<ReadOutlined />}
-                disabled={favCount === 0}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(RoutePath.FAVORITES_FLASHCARDS());
-                }}
-              >
-                {t('Карточки')}
-              </Button>
-              <Button
-                type="primary"
-                icon={<BulbOutlined />}
-                disabled={favCount === 0}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(RoutePath.FAVORITES_LEARN());
-                }}
-              >
-                {t('Заучивание')}
-              </Button>
-            </HStack>
-          </VStack>
-        </Card>
-        )}
-
-        {visibleDecks.map((deck) => (
-          <Card
-            key={deck.uuid}
-            variant="borderless"
-            className={cls.card}
-            onClick={() => navigate(RoutePath.DECK(deck.uuid))}
-          >
-            <VStack max gap="12" justify="between" className={cls.cardInner}>
-              <VStack max gap="4">
-                <HStack max justify="between" align="start" gap="8">
-                  <MyTypography.Large strong>{deck.name}</MyTypography.Large>
-                  <Dropdown
-                    trigger={['click']}
-                    menu={{ items: deckMenuItems(deck) }}
-                  >
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<MoreOutlined />}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </Dropdown>
-                </HStack>
-                {!deck.is_owner && (deck.owner_name ?? deck.owner_email) && (
-                  <Tag bordered={false} className={cls.authorTag}>
-                    {t('Автор')}: {deck.owner_name ?? deck.owner_email}
-                  </Tag>
-                )}
-                {deck.description && (
-                  <MyTypography.Base type="secondary">{deck.description}</MyTypography.Base>
-                )}
-                <span className={cls.countBadge}>
-                  {t('{{count}} слов', { count: deck.cards_count })}
-                </span>
-              </VStack>
-
-              <HStack max gap="8" wrap>
-                <Button
-                  icon={<ReadOutlined />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(RoutePath.FLASHCARDS(deck.uuid));
-                  }}
+          return (
+            <Blueprint
+              key={deck.uuid}
+              className={cls.card}
+              onClick={() => navigate(RoutePath.DECK(deck.uuid))}
+            >
+              <div className={cls.head}>
+                <div className={cls.titleBlock}>
+                  <span className={cls.name}>{deck.name}</span>
+                  {deck.description && (
+                    <span className={cls.description}>{deck.description}</span>
+                  )}
+                </div>
+                <Dropdown
+                  trigger={['click']}
+                  menu={{ items: deckMenuItems(deck) }}
                 >
-                  {t('Карточки')}
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<BulbOutlined />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(RoutePath.LEARN(deck.uuid));
-                  }}
-                >
-                  {t('Заучивание')}
-                </Button>
-              </HStack>
-            </VStack>
-          </Card>
-        ))}
+                  <Button
+                    type="text"
+                    size="small"
+                    className={cls.menuButton}
+                    aria-label={t('Ещё')}
+                    icon={<Ellipsis size={MENU_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                    onClick={(e: MouseEvent) => e.stopPropagation()}
+                  />
+                </Dropdown>
+              </div>
+              {(due > 0 || author) && (
+                <div className={cls.tags}>
+                  {due > 0 && <DueBadge count={due} />}
+                  {author && (
+                    <span className={cls.author}>{t('от {{author}}', { author })}</span>
+                  )}
+                </div>
+              )}
+              <div className={cls.progress}>
+                <MasteryBar mastered={mastered} learning={learning} size={MasteryBarSize.SM} />
+                <div className={cls.stats}>
+                  <span>{t('{{count}} слов', { count: deck.cards_count })}</span>
+                  <span>{t('{{percent}}% усвоено', { percent: mastered })}</span>
+                </div>
+              </div>
+            </Blueprint>
+          );
+        })}
       </div>
 
       <DeckForm

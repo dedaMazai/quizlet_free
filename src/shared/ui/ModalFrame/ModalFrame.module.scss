@@ -1,0 +1,91 @@
+.frame {
+    position: relative;
+}
+
+.container {
+    padding: 0;
+    border: 1px solid var(--color-divider);
+    border-radius: 0;
+    background: var(--color-bg);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.headings {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 1.1;
+}
+
+.quota {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: var(--color-accent-100);
+    color: var(--color-accent-800);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.close {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    color: var(--color-neutral-700);
+}
+
+.footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 16px 22px;
+    border-top: 1px solid var(--color-divider);
+}
+
+.note {
+    font-size: 13px;
+    color: var(--color-neutral-700);
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+
+    :global(.ant-btn) {
+        height: 40px;
+        padding: 0 16px;
+        font-size: 15px;
+        white-space: nowrap;
+    }
+
+    :global(.ant-btn-primary) {
+        position: relative;
+        padding: 0 18px;
+    }
+}

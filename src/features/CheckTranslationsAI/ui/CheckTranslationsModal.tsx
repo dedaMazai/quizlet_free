@@ -2,12 +2,8 @@ import {
   FC, useMemo, useState, useEffect, useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Button, Modal, Table, Tag, Input,
-} from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Button, Input } from 'antd';
 import type { Key } from 'react';
-import { RobotOutlined } from '@ant-design/icons';
 import {
   useGetCardsQuery,
   useUpdateCardsBulkMutation,
@@ -15,9 +11,15 @@ import {
   useGetAiUsageQuery,
   AiCheckResult,
 } from '@/entities/Card';
-import { VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { useGetDeckQuery } from '@/entities/Deck';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { CheckSquare } from '@/shared/ui/CheckSquare';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import cls from './CheckTranslationsModal.module.scss';
+
+const MODAL_WIDTH = 920;
 
 interface CheckTranslationsModalProps {
   open: boolean;
@@ -48,6 +50,7 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
 
   const { data: cards } = useGetCardsQuery(deckUuid, { skip: !open });
   const { data: remaining } = useGetAiUsageQuery(undefined, { skip: !open });
+  const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
   const [checkTranslations, { isLoading: isChecking }] = useCheckTranslationsMutation();
   const [updateCardsBulk, { isLoading: isApplying }] = useUpdateCardsBulkMutation();
 
@@ -134,102 +137,125 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
     }
   };
 
-  const columns: ColumnsType<ResultRow> = [
-    {
-      title: t('Слово'),
-      dataIndex: 'term',
-      key: 'term',
-      width: 160,
-    },
-    {
-      title: t('Текущий перевод'),
-      key: 'current',
-      width: 180,
-      render: (_, row) => (row.translation_ok
-        ? <MyTypography.Base type="secondary">{row.current}</MyTypography.Base>
-        : (
-          <VStack gap="2">
-            <MyTypography.Base type="secondary">{row.current}</MyTypography.Base>
-            <Tag color="warning">{t('Требует правки')}</Tag>
-          </VStack>
-        )),
-    },
-    {
-      title: t('Новый перевод'),
-      key: 'translation',
-      width: 220,
-      render: (_, row) => (
-        <Input
-          value={edits[row.uuid]?.translation ?? ''}
-          onChange={(e) => setEditField(row.uuid, 'translation', e.target.value)}
-        />
-      ),
-    },
-    {
-      title: t('Пример'),
-      key: 'example',
-      render: (_, row) => (
-        <Input.TextArea
-          autoSize={{ minRows: 1, maxRows: 4 }}
-          value={edits[row.uuid]?.example ?? ''}
-          onChange={(e) => setEditField(row.uuid, 'example', e.target.value)}
-        />
-      ),
-    },
-  ];
+  const selected = new Set(selectedKeys.map(String));
+  const fixCount = rows.filter((r) => !r.translation_ok).length;
+  const exampleCount = rows.filter((r) => r.example).length;
+  const selectedFixCount = rows.filter((r) => selected.has(r.uuid) && !r.translation_ok).length;
+  const selectedExampleCount = rows.filter((r) => selected.has(r.uuid) && r.example).length;
+
+  const toggleRow = (uuid: string, checked: boolean) => {
+    setSelectedKeys((prev) => (checked ? [...prev, uuid] : prev.filter((key) => key !== uuid)));
+  };
 
   return (
-    <Modal
+    <ModalFrame
       open={open}
-      title={t('Проверка переводов ИИ')}
-      footer={null}
-      onCancel={onClose}
-      width={results ? 1000 : 520}
-      destroyOnClose
-    >
-      <VStack max gap="16">
-        <MyTypography.Base type="secondary">
-          {t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}
-        </MyTypography.Base>
-
-        {!results && (
-          <Button
-            type="primary"
-            icon={<RobotOutlined />}
-            loading={isChecking}
-            disabled={noCredits || !hasCards}
-            onClick={handleCheck}
-          >
-            {t('Проверить через ИИ')}
-          </Button>
-        )}
-
-        {results && (
-          <>
-            <Table<ResultRow>
-              size="small"
-              rowKey="uuid"
-              columns={columns}
-              dataSource={rows}
-              scroll={{ y: 440 }}
-              pagination={{ pageSize: 50, showSizeChanger: true, pageSizeOptions: [20, 50, 100] }}
-              rowSelection={{
-                selectedRowKeys: selectedKeys,
-                onChange: setSelectedKeys,
-                preserveSelectedRowKeys: true,
-              }}
-            />
+      width={MODAL_WIDTH}
+      kicker={deck?.name}
+      title={t('Проверка переводов')}
+      quota={t('Осталось {{count}}', { count: remaining ?? 0 })}
+      footerNote={results
+        ? t('Выбрано {{fixes}} правок и {{examples}} примеров', {
+          fixes: selectedFixCount,
+          examples: selectedExampleCount,
+        })
+        : undefined}
+      onClose={onClose}
+      destroyOnHidden
+      actions={(
+        <>
+          <Button onClick={onClose}>{t('Закрыть')}</Button>
+          {results ? (
             <Button
               type="primary"
               loading={isApplying}
               disabled={selectedKeys.length === 0}
               onClick={handleApply}
             >
-              {t('Применить выбранные')}
+              <BlueprintMarks />
+              {t('Применить выбранное')}
             </Button>
+          ) : (
+            <Button
+              type="primary"
+              loading={isChecking}
+              disabled={noCredits || !hasCards}
+              onClick={handleCheck}
+            >
+              <BlueprintMarks />
+              {t('Проверить')}
+            </Button>
+          )}
+        </>
+      )}
+    >
+      <div className={cls.content}>
+        {!results && (
+          <span className={cls.summary}>
+            {t('ИИ проверит переводы {{count}} слов колоды и подберёт к ним примеры.', {
+              count: cards?.length ?? 0,
+            })}
+          </span>
+        )}
+
+        {results && (
+          <>
+            <span className={cls.summary}>
+              {t('ИИ проверил {{count}} слов', { count: rows.length })}
+              {': '}
+              {t('{{count}} переводов стоит поправить', { count: fixCount })}
+              {', '}
+              {t('к {{count}} словам добавлены примеры', { count: exampleCount })}
+              .
+            </span>
+            <div className={classNames(cls.grid, [cls.head])}>
+              <span />
+              <span>{t('Слово')}</span>
+              <span>{t('Сейчас')}</span>
+              <span>{t('Предлагает ИИ')}</span>
+              <span>{t('Пример')}</span>
+            </div>
+            <div className={cls.list}>
+              {rows.map((row) => {
+                const isFix = !row.translation_ok;
+                const translation = edits[row.uuid]?.translation ?? '';
+                return (
+                  <div key={row.uuid} className={classNames(cls.grid, [cls.row])}>
+                    <CheckSquare
+                      checked={selected.has(row.uuid)}
+                      label={row.term}
+                      onChange={(checked) => toggleRow(row.uuid, checked)}
+                    />
+                    <span className={cls.term}>{row.term}</span>
+                    <span className={isFix ? cls.replaced : undefined}>
+                      {row.current}
+                    </span>
+                    {/* Без правки поле пустое и показывает «без изменений»;
+                        очищенное поле возвращает текущий перевод */}
+                    <Input
+                      variant="borderless"
+                      className={classNames(cls.cell, [], { [cls.suggested]: isFix })}
+                      value={!isFix && translation === row.current ? '' : translation}
+                      placeholder={t('без изменений')}
+                      onChange={(e) => setEditField(
+                        row.uuid,
+                        'translation',
+                        isFix ? e.target.value : (e.target.value || row.current),
+                      )}
+                    />
+                    <Input
+                      variant="borderless"
+                      className={classNames(cls.cell, [cls.example])}
+                      value={edits[row.uuid]?.example ?? ''}
+                      onChange={(e) => setEditField(row.uuid, 'example', e.target.value)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </>
         )}
-      </VStack>
-    </Modal>
+      </div>
+    </ModalFrame>
   );
 };

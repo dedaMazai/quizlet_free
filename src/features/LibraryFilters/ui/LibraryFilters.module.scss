@@ -1,0 +1,40 @@
+$control-height: 38px;
+$search-min-width: 220px;
+$deck-select-width: 200px;
+
+.LibraryFilters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.search {
+    flex: 1;
+    min-width: $search-min-width;
+    height: $control-height;
+}
+
+.deckSelect {
+    width: $deck-select-width;
+    height: $control-height;
+}
+
+.status {
+    height: $control-height;
+    gap: 10px;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.statusActive {
+    border-color: var(--color-accent);
+    background: var(--color-accent-100);
+    color: var(--color-accent-800);
+}
+
+.segmented {
+    font-size: 13px;
+}

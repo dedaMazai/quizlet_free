@@ -2,12 +2,10 @@ import {
   FC, useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Button, Input, Modal, Select, Table,
-} from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Button, Input, Select } from 'antd';
+import type { SelectProps } from 'antd';
 import type { Key } from 'react';
-import { RobotOutlined } from '@ant-design/icons';
+import { X } from 'lucide-react';
 import {
   AiChunk,
   useGenerateChunksMutation,
@@ -15,13 +13,19 @@ import {
   useGetCardsQuery,
   useCreateCardsMutation,
 } from '@/entities/Card';
-import { VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { useGetDeckQuery } from '@/entities/Deck';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { CheckSquare } from '@/shared/ui/CheckSquare';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import cls from './GenerateChunksModal.module.scss';
 
 /** Столько же, сколько принимает Edge Function: один кредит — до 10 слов. */
 const MAX_SOURCE_WORDS = 10;
+const MODAL_WIDTH = 880;
+const CHIP_ICON_SIZE = 12;
+const ICON_STROKE = 1.5;
 
 interface GenerateChunksModalProps {
   open: boolean;
@@ -49,6 +53,7 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
 
   const { data: cards } = useGetCardsQuery(deckUuid, { skip: !open });
   const { data: remaining } = useGetAiUsageQuery(undefined, { skip: !open });
+  const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
   const [generateChunks, { isLoading: isGenerating }] = useGenerateChunksMutation();
   const [createCards, { isLoading: isSaving }] = useCreateCardsMutation();
 
@@ -131,120 +136,134 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
     }
   };
 
-  const columns: ColumnsType<ChunkRow> = [
-    {
-      title: t('Слово'),
-      dataIndex: 'sourceTerm',
-      key: 'sourceTerm',
-      width: 140,
-      render: (value: string) => <MyTypography.Base type="secondary">{value}</MyTypography.Base>,
-    },
-    {
-      title: t('Фраза'),
-      key: 'term',
-      width: 220,
-      render: (_, row) => (
-        <Input
-          value={row.term}
-          onChange={(e) => setRowField(row.key, 'term', e.target.value)}
-        />
-      ),
-    },
-    {
-      title: t('Перевод'),
-      key: 'translation',
-      width: 220,
-      render: (_, row) => (
-        <Input
-          value={row.translation}
-          onChange={(e) => setRowField(row.key, 'translation', e.target.value)}
-        />
-      ),
-    },
-    {
-      title: t('Пример'),
-      key: 'example',
-      render: (_, row) => (
-        <Input.TextArea
-          autoSize={{ minRows: 1, maxRows: 4 }}
-          value={row.example}
-          onChange={(e) => setRowField(row.key, 'example', e.target.value)}
-        />
-      ),
-    },
-  ];
+  // Выбранное слово — чип с крестиком (вместо стандартного тега Select)
+  const renderChip: SelectProps['tagRender'] = ({ value, onClose: removeChip }) => {
+    const card = cards?.find((item) => item.uuid === value);
+    return (
+      <span className={cls.chip}>
+        {card?.term ?? value}
+        <button
+          type="button"
+          className={cls.chipRemove}
+          aria-label={t('Убрать')}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={removeChip}
+        >
+          <X aria-hidden size={CHIP_ICON_SIZE} strokeWidth={ICON_STROKE} />
+        </button>
+      </span>
+    );
+  };
+
+  // Фразы группируются по исходному слову в порядке ответа ИИ
+  const groups = useMemo(() => {
+    const map = new Map<string, ChunkRow[]>();
+    (rows ?? []).forEach((row) => {
+      map.set(row.sourceUuid, [...(map.get(row.sourceUuid) ?? []), row]);
+    });
+    return [...map.values()];
+  }, [rows]);
+
+  const selected = new Set(selectedKeys.map(String));
+
+  const toggleRow = (key: string, checked: boolean) => {
+    setSelectedKeys((prev) => (checked ? [...prev, key] : prev.filter((item) => item !== key)));
+  };
 
   return (
-    <Modal
+    <ModalFrame
       open={open}
-      title={t('Сгенерировать фразы (ИИ)')}
-      footer={null}
-      onCancel={onClose}
-      width={rows ? 1000 : 560}
-      destroyOnClose
+      width={MODAL_WIDTH}
+      kicker={deck?.name}
+      title={t('Подобрать фразы')}
+      quota={t('Осталось {{count}}', { count: remaining ?? 0 })}
+      footerNote={t('Фразы свяжутся с исходным словом')}
+      onClose={onClose}
+      destroyOnHidden
+      actions={(
+        <>
+          <Button onClick={onClose}>{t('Отмена')}</Button>
+          <Button
+            type="primary"
+            loading={isSaving}
+            disabled={selectedKeys.length === 0}
+            onClick={handleSave}
+          >
+            <BlueprintMarks />
+            {t('Добавить {{count}} фраз', { count: selectedKeys.length })}
+          </Button>
+        </>
+      )}
     >
-      <VStack max gap="16">
-        <MyTypography.Base type="secondary">
-          {t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}
-        </MyTypography.Base>
+      <div className={cls.content}>
+        <div className={cls.picker}>
+          <Select
+            className={cls.select}
+            variant="borderless"
+            mode="multiple"
+            value={sourceUuids}
+            onChange={setSourceUuids}
+            options={wordOptions}
+            maxCount={MAX_SOURCE_WORDS}
+            placeholder={t('Слова')}
+            optionFilterProp="label"
+            tagRender={renderChip}
+            suffixIcon={null}
+          />
+          <span className={cls.hint}>
+            {t('ещё до {{count}} слов', { count: MAX_SOURCE_WORDS - sourceUuids.length })}
+          </span>
+          <Button
+            className={cls.generate}
+            loading={isGenerating}
+            disabled={noCredits || sourceUuids.length === 0}
+            onClick={handleGenerate}
+          >
+            {rows ? t('Подобрать ещё') : t('Подобрать фразы')}
+          </Button>
+        </div>
 
         {!rows && (
-          <>
-            <MyTypography.Small type="secondary">
-              {t('Выберите до {{count}} слов — к каждому подберём 2-3 частотные фразы', {
-                count: MAX_SOURCE_WORDS,
-              })}
-            </MyTypography.Small>
-            <Select
-              className={cls.fullWidth}
-              mode="multiple"
-              value={sourceUuids}
-              onChange={setSourceUuids}
-              options={wordOptions}
-              maxCount={MAX_SOURCE_WORDS}
-              placeholder={t('Слова')}
-              optionFilterProp="label"
-              allowClear
-            />
-            <Button
-              type="primary"
-              icon={<RobotOutlined />}
-              loading={isGenerating}
-              disabled={noCredits || sourceUuids.length === 0}
-              onClick={handleGenerate}
-            >
-              {t('Подобрать фразы')}
-            </Button>
-          </>
+          <span className={cls.hint}>
+            {t('Выберите до {{count}} слов — к каждому подберём 2-3 частотные фразы', {
+              count: MAX_SOURCE_WORDS,
+            })}
+          </span>
         )}
 
-        {rows && (
-          <>
-            <Table<ChunkRow>
-              className={cls.fullWidth}
-              size="small"
-              rowKey="key"
-              columns={columns}
-              dataSource={rows}
-              scroll={{ y: 440 }}
-              pagination={false}
-              rowSelection={{
-                selectedRowKeys: selectedKeys,
-                onChange: setSelectedKeys,
-                preserveSelectedRowKeys: true,
-              }}
-            />
-            <Button
-              type="primary"
-              loading={isSaving}
-              disabled={selectedKeys.length === 0}
-              onClick={handleSave}
-            >
-              {t('Добавить выбранные')}
-            </Button>
-          </>
-        )}
-      </VStack>
-    </Modal>
+        {groups.map((group) => (
+          <div key={group[0].sourceUuid} className={cls.group}>
+            <span className={cls.groupTitle}>{group[0].sourceTerm}</span>
+            {group.map((row) => (
+              <div key={row.key} className={cls.row}>
+                <CheckSquare
+                  checked={selected.has(row.key)}
+                  label={row.term}
+                  onChange={(checked) => toggleRow(row.key, checked)}
+                />
+                <Input
+                  variant="borderless"
+                  className={classNames(cls.cell, [cls.phrase])}
+                  value={row.term}
+                  onChange={(e) => setRowField(row.key, 'term', e.target.value)}
+                />
+                <Input
+                  variant="borderless"
+                  className={cls.cell}
+                  value={row.translation}
+                  onChange={(e) => setRowField(row.key, 'translation', e.target.value)}
+                />
+                <Input
+                  variant="borderless"
+                  className={classNames(cls.cell, [cls.example])}
+                  value={row.example}
+                  onChange={(e) => setRowField(row.key, 'example', e.target.value)}
+                />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </ModalFrame>
   );
 };

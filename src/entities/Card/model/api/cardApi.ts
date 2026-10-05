@@ -4,7 +4,9 @@ import {
   Card, CardCreateDto, CardType, CardUpdateDto, CardsPage, CardsPageArgs,
 } from '../types/card';
 import { inferCardType } from '../lib/inferCardType';
-import { CardReview, DueCard } from '../types/cardReview';
+import {
+  CardReview, DueCard, LibraryCardsArgs, LibraryCardsPage,
+} from '../types/cardReview';
 import { AiCheckInput, AiCheckResult } from '../types/aiCheck';
 import { AiChunkInput, AiChunksResult } from '../types/aiChunks';
 
@@ -150,6 +152,36 @@ const cardApi = rtkApi.injectEndpoints({
         return { data: { cards: (data as CardRow[]).map(mapCard), total: count ?? 0 } };
       },
       providesTags: [ApiTag.Cards],
+    }),
+    // Библиотека: страница слов вместе со статусом и датой показа (get_library_cards).
+    getLibraryCards: build.query<LibraryCardsPage, LibraryCardsArgs>({
+      queryFn: async ({
+        search, deckUuid, status, type, uuids, page, pageSize,
+      }) => {
+        if (uuids && uuids.length === 0) {
+          return { data: { items: [], total: 0, deckCount: 0 } };
+        }
+        const paged = page !== undefined && pageSize !== undefined;
+        const { data, error } = await supabase.rpc('get_library_cards', {
+          p_search: search?.trim() || null,
+          p_deck_id: deckUuid ?? null,
+          p_status: status ?? null,
+          p_type: type ?? null,
+          p_ids: uuids ?? null,
+          p_offset: paged ? (page - 1) * pageSize : 0,
+          p_limit: paged ? pageSize : null,
+        });
+        if (error) return supabaseError(error.message);
+        const row = data as { total: number; deck_count: number; cards: DueRow[] };
+        return {
+          data: {
+            items: row.cards.map(mapDueCard),
+            total: row.total,
+            deckCount: row.deck_count,
+          },
+        };
+      },
+      providesTags: [ApiTag.Cards, ApiTag.CardReviews],
     }),
     // Общее число слов пользователя (без загрузки строк).
     getCardsCount: build.query<number, void>({
@@ -433,6 +465,7 @@ const cardApi = rtkApi.injectEndpoints({
 export const {
   useGetCardsQuery,
   useGetCardsPageQuery,
+  useGetLibraryCardsQuery,
   useGetCardsCountQuery,
   useGetRecentCardsQuery,
   useCreateCardMutation,

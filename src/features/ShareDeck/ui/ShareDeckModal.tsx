@@ -1,10 +1,8 @@
 import { FC, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Button, List, Modal, Select, Switch,
-} from 'antd';
+import { Button, Select, Switch } from 'antd';
 import type { DefaultOptionType } from 'antd/es/select';
-import { DeleteOutlined, UserAddOutlined } from '@ant-design/icons';
+import { ChevronDown } from 'lucide-react';
 import {
   useShareDeckMutation,
   useGetShareableUsersQuery,
@@ -13,11 +11,17 @@ import {
   useRemoveDeckShareMutation,
   useSetDeckSharedEditMutation,
 } from '@/entities/Deck';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { Kicker, KickerSize } from '@/shared/ui/Kicker';
+import { ModalFrame } from '@/shared/ui/ModalFrame';
+import { Loader } from '@/shared/ui/Loader';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { UserAvatar } from './UserAvatar';
 import cls from './ShareDeckModal.module.scss';
+
+const MODAL_WIDTH = 520;
+const CHEVRON_SIZE = 14;
+const ICON_STROKE = 1.5;
 
 interface ShareOption extends DefaultOptionType {
   value: string;
@@ -87,25 +91,27 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
   };
 
   return (
-    <Modal
+    <ModalFrame
       open={open}
+      width={MODAL_WIDTH}
+      kicker={deck?.name}
       title={t('Доступ к колоде')}
-      footer={null}
-      onCancel={onClose}
-      destroyOnClose
+      onClose={onClose}
+      destroyOnHidden
+      actions={<Button onClick={onClose}>{t('Готово')}</Button>}
     >
-      <VStack max gap="16">
-        <HStack max gap="8" align="start">
+      <div className={cls.content}>
+        <div className={cls.shareRow}>
           <Select<string, ShareOption>
             className={cls.select}
-            size="large"
             value={email}
             onChange={setEmail}
             options={options}
             loading={isUsersLoading}
             showSearch
             allowClear
-            placeholder={t('Выберите пользователя')}
+            suffixIcon={<ChevronDown aria-hidden size={CHEVRON_SIZE} strokeWidth={ICON_STROKE} />}
+            placeholder={t('Почта или имя пользователя')}
             notFoundContent={t('Нет доступных пользователей')}
             filterOption={(input, option) => {
               const query = input.trim().toLowerCase();
@@ -117,75 +123,66 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
             optionRender={(option) => {
               const data = option.data as ShareOption;
               return (
-                <HStack gap="12" align="center" className={cls.option}>
-                  <UserAvatar email={data.email} name={data.name} size={32} />
-                  <VStack gap="2">
-                    <MyTypography.Base strong className={cls.name}>
-                      {data.name ?? data.email}
-                    </MyTypography.Base>
-                    {data.name && (
-                      <MyTypography.Small type="secondary">{data.email}</MyTypography.Small>
-                    )}
-                  </VStack>
-                </HStack>
+                <div className={cls.person}>
+                  <UserAvatar email={data.email} name={data.name} />
+                  <div className={cls.personText}>
+                    <span className={cls.name}>{data.name ?? data.email}</span>
+                    {data.name && <span className={cls.email}>{data.email}</span>}
+                  </div>
+                </div>
               );
             }}
           />
           <Button
             type="primary"
-            size="large"
-            icon={<UserAddOutlined />}
+            className={cls.shareButton}
             loading={isSharing}
             disabled={!email}
             onClick={handleShare}
           >
+            <BlueprintMarks />
             {t('Поделиться')}
           </Button>
-        </HStack>
+        </div>
 
-        <VStack max gap="8">
-          <MyTypography.Small type="secondary" className={cls.sectionTitle}>
-            {t('Есть доступ')}
-          </MyTypography.Small>
-          <List
-            className={cls.list}
-            loading={isLoading}
-            dataSource={shares ?? []}
-            locale={{ emptyText: t('Пока ни с кем не поделились') }}
-            renderItem={(share) => (
-              <List.Item
-                actions={[
-                  <Button
-                    key="remove"
-                    type="text"
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleRemove(share.user_id)}
-                  />,
-                ]}
+        <div className={cls.shared}>
+          <Kicker size={KickerSize.SM} className={cls.sharedTitle}>
+            {t('Есть доступ · {{count}}', { count: shares?.length ?? 0 })}
+          </Kicker>
+          {isLoading && <Loader />}
+          {!isLoading && !shares?.length && (
+            <span className={cls.empty}>{t('Пока ни с кем не поделились')}</span>
+          )}
+          {shares?.map((share) => (
+            <div key={share.user_id} className={cls.person}>
+              <UserAvatar email={share.email} name={share.name} />
+              <div className={cls.personText}>
+                <span className={cls.name}>{share.name ?? share.email}</span>
+                {share.name && <span className={cls.email}>{share.email}</span>}
+              </div>
+              <Button
+                type="link"
+                className={cls.revoke}
+                onClick={() => handleRemove(share.user_id)}
               >
-                <List.Item.Meta
-                  avatar={<UserAvatar email={share.email} name={share.name} />}
-                  title={share.name ?? share.email}
-                  description={share.name ? share.email : undefined}
-                />
-              </List.Item>
-            )}
-          />
-        </VStack>
+                {t('Закрыть доступ')}
+              </Button>
+            </div>
+          ))}
+        </div>
 
-        <HStack max gap="8" align="center">
+        <label className={cls.editToggle}>
+          <span>{t('Разрешить редактирование всем, у кого есть доступ')}</span>
           <Switch
             checked={deck?.allow_shared_edit ?? true}
             loading={isToggling || !deck}
             onChange={handleToggleSharedEdit}
           />
-          <MyTypography.Base>
-            {t('Разрешить редактирование всем, у кого есть доступ')}
-          </MyTypography.Base>
-        </HStack>
-      </VStack>
-    </Modal>
+        </label>
+        <span className={cls.note}>
+          {t('У каждого гостя свой прогресс. Гость может скопировать колоду себе.')}
+        </span>
+      </div>
+    </ModalFrame>
   );
 };

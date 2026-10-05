@@ -1,36 +1,108 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 22px 4px;
+}
+
+.shareRow {
+  display: flex;
+  gap: 8px;
+}
+
 .select {
   flex: 1;
+  min-width: 0;
+  height: 40px;
 }
 
-.list {
-  width: 100%;
+.shareButton {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 15px;
+  white-space: nowrap;
 }
 
-.option {
-  padding: 4px 0;
+.shared {
+  display: flex;
+  flex-direction: column;
+}
+
+.sharedTitle {
+  padding-bottom: 6px;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+
+  .shared & {
+    border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  }
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: var(--color-accent-200);
+  color: var(--color-accent-800);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.personText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .name {
   overflow: hidden;
+  font-size: 14px;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.sectionTitle {
-  padding-top: 4px;
+.email {
+  font-size: 12px;
+  color: var(--color-neutral-700);
 }
 
-.avatar {
-  flex-shrink: 0;
-  color: #fff;
-  font-weight: 600;
+.revoke {
+  height: 32px;
+  padding-inline: 6px;
+  color: var(--color-accent);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
-.c0 { background: #1677ff; }
-.c1 { background: #722ed1; }
-.c2 { background: #eb2f96; }
-.c3 { background: #f57834; }
-.c4 { background: #13a8a8; }
-.c5 { background: #52c41a; }
-.c6 { background: #2f54eb; }
-.c7 { background: #fa8c16; }
+.empty {
+  padding: 10px 0;
+  font-size: 13px;
+  color: var(--color-neutral-700);
+}
+
+.editToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  background: var(--color-accent-100);
+  font-size: 14px;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.note {
+  font-size: 12px;
+  color: var(--color-neutral-700);
+}

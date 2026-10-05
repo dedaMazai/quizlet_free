@@ -1,121 +1,66 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Input, Select } from 'antd';
-import { ReadOutlined, BulbOutlined, SearchOutlined } from '@ant-design/icons';
-import { useGetCardsPageQuery, useGetCardsCountQuery } from '@/entities/Card';
-import { useGetDecksQuery } from '@/entities/Deck';
+import {
+  hasLibraryFilter, libraryFilterToSearch, useGetLibraryCardsQuery,
+} from '@/entities/Card';
+import { LibraryFilters, useLibraryFilters } from '@/features/LibraryFilters';
 import { CardList } from '@/widgets/CardList';
-import { SectionPageHeader } from '@/widgets/SectionPage';
-import { NavSectionKey } from '@/shared/const/menu';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
+import { LibraryHeader } from '@/widgets/LibraryHeader';
+import { SelectionStrip } from '@/widgets/SelectionStrip';
 import { RoutePath } from '@/shared/config/router/routePath';
 import cls from './AllWordsPage.module.scss';
+
+const PAGE_SIZE = 50;
 
 const AllWordsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  const { data: decks } = useGetDecksQuery();
-  const { data: totalWords } = useGetCardsCountQuery();
-
-  const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
-  const [deckFilter, setDeckFilter] = useState<string | undefined>(undefined);
+  const filters = useLibraryFilters();
+  const { filter } = filters;
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
 
-  const trimmedSearch = debouncedSearch.trim();
-  const { data: cardsPage, isLoading } = useGetCardsPageQuery({
-    page,
-    pageSize,
-    search: trimmedSearch || undefined,
-    deckUuid: deckFilter,
-  });
-  const total = cardsPage?.total ?? 0;
+  const { data, isLoading } = useGetLibraryCardsQuery({ ...filter, page, pageSize: PAGE_SIZE });
+  const total = data?.total ?? 0;
 
-  // При смене поиска/фильтра начинаем с первой страницы.
+  // При смене фильтра начинаем с первой страницы.
   useEffect(() => {
     setPage(1);
-  }, [trimmedSearch, deckFilter]);
+  }, [filter]);
 
   // Если текущая страница опустела (например, после удаления слов) — откатываемся назад.
   useEffect(() => {
-    const maxPage = Math.max(1, Math.ceil(total / pageSize));
+    const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
     if (page > maxPage) setPage(maxPage);
-  }, [total, page, pageSize]);
+  }, [total, page]);
 
-  const deckOptions = useMemo(
-    () => (decks ?? []).map((deck) => ({ value: deck.uuid, label: deck.name })),
-    [decks],
-  );
-
-  const isEmpty = (totalWords ?? 0) === 0;
-  const hasFilter = Boolean(trimmedSearch || deckFilter);
+  // Сессия по текущей выборке: фильтр уходит в query-параметры
+  const query = libraryFilterToSearch(filter);
 
   return (
-    <VStack max fullHeight gap="16">
-      <SectionPageHeader
-        section={NavSectionKey.LIBRARY}
-        extra={(
-          <>
-            <Button
-              icon={<ReadOutlined />}
-              disabled={isEmpty}
-              onClick={() => navigate(RoutePath.ALL_WORDS_FLASHCARDS())}
-            >
-              {t('Карточки')}
-            </Button>
-            <Button
-              type="primary"
-              icon={<BulbOutlined />}
-              disabled={isEmpty}
-              onClick={() => navigate(RoutePath.ALL_WORDS_LEARN())}
-            >
-              {t('Заучивание')}
-            </Button>
-          </>
-        )}
+    <div className={cls.AllWordsPage}>
+      <LibraryHeader />
+      <LibraryFilters state={filters} withStatus />
+      <SelectionStrip
+        title={t('{{count}} слов', { count: total })}
+        subtitle={`${t('в фильтре')} · ${t('из {{count}} колод', { count: data?.deckCount ?? 0 })}`}
+        cta={t('Заучивать выборку')}
+        disabled={total === 0}
+        onCards={() => navigate(`${RoutePath.ALL_WORDS_FLASHCARDS()}${query}`)}
+        onLearn={() => navigate(`${RoutePath.ALL_WORDS_LEARN()}${query}`)}
       />
-      <MyTypography.Base type="secondary">
-        {t('{{count}} слов', { count: total })}
-      </MyTypography.Base>
-
-      <HStack max gap="8" wrap>
-        <Input
-          className={cls.search}
-          prefix={<SearchOutlined />}
-          allowClear
-          value={search}
-          placeholder={t('Поиск слов')}
-          onChange={(e) => setSearchDebounced(e.target.value)}
-        />
-        <Select
-          className={cls.deckSelect}
-          allowClear
-          value={deckFilter}
-          placeholder={t('Все колоды')}
-          options={deckOptions}
-          onChange={(value) => setDeckFilter(value)}
-        />
-      </HStack>
-
       <CardList
-        cards={cardsPage?.cards}
+        items={data?.items}
         loading={isLoading}
         pagination={{
           current: page,
-          pageSize,
+          pageSize: PAGE_SIZE,
           total,
-          onChange: (nextPage, nextPageSize) => {
-            setPage(nextPage);
-            setPageSize(nextPageSize);
-          },
+          onChange: setPage,
         }}
-        emptyText={hasFilter ? t('Ничего не найдено') : undefined}
+        emptyText={hasLibraryFilter(filter) ? t('Ничего не найдено') : undefined}
       />
-    </VStack>
+    </div>
   );
 };
 

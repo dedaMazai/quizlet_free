@@ -10,6 +10,8 @@ export enum MasteryBarSize {
     SM = 'sm',
     /** 6px — карточка колоды на главной */
     MD = 'md',
+    /** 10px — страница колоды */
+    LG = 'lg',
 }
 
 interface MasteryBarProps {

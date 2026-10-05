@@ -1,7 +1,24 @@
 .toolbar {
+  display: flex;
   flex-wrap: wrap;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-subtle);
+  gap: 8px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.toolButton {
+  height: 34px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.ghost {
+  padding-inline: 6px;
+  color: var(--color-accent);
+}
+
+.aiButton {
+  margin-left: auto;
 }
 
 .importFull {
@@ -12,64 +29,94 @@
   }
 }
 
+.table {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 22px 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr) 24px 24px;
+  gap: 10px;
+  align-items: center;
+}
+
+.head {
+  padding: 8px 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+  white-space: nowrap;
+}
+
 .row {
-  width: 100%;
+  padding: 6px 0;
 }
 
 .index {
-  flex: 0 0 auto;
-  width: 20px;
-  color: var(--color-text-secondary);
-  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  white-space: nowrap;
 }
 
-.grow {
-  flex: 1 1 0;
-  min-width: 0;
+.field {
   width: 100%;
+  min-width: 0;
+  height: 38px;
 }
 
-// Иконка-подсказка в поле перевода: показывает, что есть другие варианты.
-.variantsHint {
-  color: var(--color-link);
-  cursor: pointer;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 0.7;
-  }
+.example {
+  font-size: 13px;
+  color: var(--color-neutral-800);
 }
 
-// Иконка-маркер в поле перевода: перевод/пример подставил ИИ.
-.aiHint {
-  color: var(--color-primary);
-}
-
-// Подсветка поля перевода, когда автопереводчик предложил несколько вариантов.
-.hasVariants {
+// Перевод подставил автопереводчик и пользователь его не трогал
+.auto {
   :global(.ant-input-affix-wrapper),
   :global(.ant-select-selector) {
-    border-color: var(--color-link);
+    border-color: var(--color-accent-400);
   }
+}
+
+// Бейдж «+N»: есть другие варианты перевода, клик открывает список
+.variants {
+  flex: none;
+  padding: 1px 4px;
+  border: 0;
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+// Маркер в поле перевода: перевод/пример подставил ИИ
+.aiHint {
+  color: var(--color-accent);
+}
+
+.iconButton {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--color-neutral-600);
+}
+
+.remove {
+  color: var(--color-neutral-500);
+}
+
+.addRow {
+  padding: 8px 0 4px;
 }
 
 .cardRow {
-  padding: 12px;
-  border-radius: 14px;
-  background: var(--bg-color-secondary);
-  border: 1px solid var(--border-subtle);
-}
-
-.indexBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  background: var(--bg-color);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-divider);
 }

@@ -1,0 +1,25 @@
+$button-height: 38px;
+
+.button {
+    position: relative;
+    height: $button-height;
+    gap: 8px;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.picker {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 22px 4px;
+}
+
+.pickerLabel {
+    font-size: 14px;
+    color: var(--color-neutral-800);
+}
+
+.pickerSelect {
+    width: 100%;
+}

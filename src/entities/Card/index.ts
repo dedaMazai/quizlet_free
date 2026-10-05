@@ -1,12 +1,15 @@
 export type {
   Card, CardCreateDto, CardType, CardUpdateDto, CardsPage, CardsPageArgs,
 } from './model/types/card';
-export type { CardLevel, CardReview, DueCard } from './model/types/cardReview';
+export type {
+  CardLevel, CardReview, CardStatus, DueCard, LibraryCardsArgs, LibraryCardsPage,
+} from './model/types/cardReview';
 export type { AiCheckInput, AiCheckResult } from './model/types/aiCheck';
 export type { AiChunk, AiChunkInput, AiChunksResult } from './model/types/aiChunks';
 export {
   useGetCardsQuery,
   useGetCardsPageQuery,
+  useGetLibraryCardsQuery,
   useGetCardsCountQuery,
   useGetRecentCardsQuery,
   useCreateCardMutation,
@@ -28,6 +31,12 @@ export {
 } from './model/api/cardApi';
 export { findDuplicateGroups } from './model/lib/findDuplicateGroups';
 export { inferCardType } from './model/lib/inferCardType';
+export { statusOf, dueStatusOf } from './model/lib/cardStatus';
+export type { LibraryFilter } from './model/lib/libraryFilter';
+export {
+  hasLibraryFilter, libraryFilterToSearch, libraryFilterFromParams,
+} from './model/lib/libraryFilter';
+export { useLibraryFilterCards } from './model/hooks/useLibraryFilterCards';
 export type { ReviewGrade } from './model/lib/srs';
 export {
   LEARNING_STEPS,

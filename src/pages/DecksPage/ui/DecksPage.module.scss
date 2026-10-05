@@ -1,0 +1,30 @@
+$control-height: 38px;
+$sort-width: 200px;
+
+.DecksPage {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    width: 100%;
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.search {
+    flex: 1;
+    height: $control-height;
+}
+
+.segmented {
+    font-size: 13px;
+}
+
+.sort {
+    width: $sort-width;
+    height: $control-height;
+}

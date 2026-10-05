@@ -1,9 +1,12 @@
-import { ElementType, HTMLAttributes, memo, ReactNode } from 'react';
+import {
+    ButtonHTMLAttributes, ElementType, HTMLAttributes, memo, ReactNode,
+} from 'react';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import cls from './AccentPanel.module.scss';
 
-interface AccentPanelProps extends HTMLAttributes<HTMLElement> {
+interface AccentPanelProps extends HTMLAttributes<HTMLElement>,
+    Pick<ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'disabled'> {
     as?: ElementType;
     className?: string;
     children?: ReactNode;

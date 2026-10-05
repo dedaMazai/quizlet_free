@@ -1,24 +1,26 @@
-import { useMemo, useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Dropdown, Empty, Input, MenuProps, Segmented, Tag } from 'antd';
 import {
-  PlusOutlined,
-  ReadOutlined,
-  BulbOutlined,
-  EditOutlined,
-  ShareAltOutlined,
-  CopyOutlined,
-  UserDeleteOutlined,
-  DiffOutlined,
-  ExportOutlined,
-  MoreOutlined,
-  RobotOutlined,
-  SearchOutlined,
-  StarOutlined,
-  FormOutlined,
-  BuildOutlined,
-} from '@ant-design/icons';
+  Button, Dropdown, Empty, Input, MenuProps, Segmented,
+} from 'antd';
+import {
+  ArrowRight,
+  Copy,
+  CopyMinus,
+  Download,
+  Ellipsis,
+  LayoutGrid,
+  Layers,
+  Lightbulb,
+  PenLine,
+  Plus,
+  Search,
+  Sparkles,
+  Star,
+  UserMinus,
+  Users,
+} from 'lucide-react';
 import {
   useGetDeckQuery,
   useDuplicateDeckMutation,
@@ -27,7 +29,10 @@ import {
 import { useUserInfo, useUserAccesses } from '@/entities/User';
 import {
   CardType,
+  DueCard,
+  isDue,
   useGetCardsQuery,
+  useGetCardReviewsQuery,
   useGetFavoritesQuery,
   findDuplicateGroups,
 } from '@/entities/Card';
@@ -38,16 +43,42 @@ import { DuplicateCardsModal } from '@/features/DuplicateCardsModal';
 import { CheckTranslationsModal } from '@/features/CheckTranslationsAI';
 import { GenerateChunksModal } from '@/features/GenerateChunksAI';
 import { useDeckExport, ExportFormat } from '@/features/ExportDeck';
+import { ROUND_SIZE } from '@/features/LearnSession';
+import { AccentPanel } from '@/shared/ui/AccentPanel';
 import { BackLink } from '@/shared/ui/BackLink';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { Blueprint } from '@/shared/ui/Blueprint';
+import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
+import { MasteryBar, MasteryBarSize } from '@/shared/ui/MasteryBar';
+import { SectionHeader } from '@/shared/ui/SectionHeader';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from '@/shared/types/accesses';
-import { MenuItem } from '@/shared/const/menu';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
+import { recommendMode, StudyMode, STUDY_MODES } from '../model/recommendMode';
 import cls from './DeckPage.module.scss';
+
+const ICON_STROKE = 1.5;
+const BUTTON_ICON_SIZE = 16;
+const MODE_ICON_SIZE = 20;
+const SMALL_ICON_SIZE = 14;
+const SEARCH_ICON_SIZE = 15;
+const MORE_ICON_SIZE = 18;
+const PERCENT = 100;
+
+const toPercent = (part: number, total: number): number => (
+  total > 0 ? Math.round((part / total) * PERCENT) : 0
+);
+
+interface ModeInfo {
+  icon: ReactNode;
+  name: string;
+  desc: string;
+  meta: string;
+  path: string;
+  disabled?: boolean;
+}
 
 const DeckPage = () => {
   const { t } = useTranslation();
@@ -65,6 +96,7 @@ const DeckPage = () => {
   const [duplicateDeck, { isLoading: isDuplicating }] = useDuplicateDeckMutation();
   const [removeShare, { isLoading: isLeaving }] = useRemoveDeckShareMutation();
   const { data: cards } = useGetCardsQuery(deckId!, { skip: !deckId });
+  const { data: reviews } = useGetCardReviewsQuery(deckId!, { skip: !deckId });
   const { data: favorites } = useGetFavoritesQuery();
   const userAccesses = useUserAccesses();
   const dupCount = useMemo(() => findDuplicateGroups(cards ?? []).length, [cards]);
@@ -73,21 +105,52 @@ const DeckPage = () => {
     [cards, favorites],
   );
 
+  // Слова вместе с состоянием повторения: статус в таблице и полоса освоения.
+  const items = useMemo<DueCard[]>(() => {
+    const reviewByUuid = new Map((reviews ?? []).map((review) => [review.card_uuid, review]));
+    return (cards ?? []).map((card) => ({ card, review: reviewByUuid.get(card.uuid) ?? null }));
+  }, [cards, reviews]);
+
+  const stats = useMemo(() => {
+    const now = new Date();
+    let mastered = 0;
+    let learning = 0;
+    let due = 0;
+    let phrases = 0;
+    let examples = 0;
+    items.forEach(({ card, review }) => {
+      if (review?.level === 2) mastered += 1;
+      if (review?.level === 1) learning += 1;
+      if (review && isDue(review, now)) due += 1;
+      if (card.card_type === 'phrase') phrases += 1;
+      if (card.example) examples += 1;
+    });
+    return {
+      total: items.length,
+      mastered,
+      learning,
+      fresh: items.length - mastered - learning,
+      due,
+      phrases,
+      examples,
+    };
+  }, [items]);
+
   const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
   const [typeFilter, setTypeFilter] = useState<CardType | 'all'>('all');
-  const [favFilter, setFavFilter] = useState<'all' | 'favorite' | 'notFavorite'>('all');
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
   const filtered = useMemo(() => {
     const query = debouncedSearch.trim().toLowerCase();
     const favSet = new Set(favorites ?? []);
-    return (cards ?? []).filter((card) => {
+    return items.filter(({ card }) => {
       if (typeFilter !== 'all' && card.card_type !== typeFilter) return false;
-      if (favFilter !== 'all' && favSet.has(card.uuid) !== (favFilter === 'favorite')) return false;
+      if (onlyFavorites && !favSet.has(card.uuid)) return false;
       if (!query) return true;
       return card.term.toLowerCase().includes(query)
         || card.translation.toLowerCase().includes(query)
         || (card.example?.toLowerCase().includes(query) ?? false);
     });
-  }, [cards, debouncedSearch, typeFilter, favFilter, favorites]);
+  }, [items, debouncedSearch, typeFilter, onlyFavorites, favorites]);
   const hasSearch = Boolean(debouncedSearch.trim());
   const { exportDeck, exporting, disabled: exportDisabled } = useDeckExport(
     deckId ?? '',
@@ -126,202 +189,305 @@ const DeckPage = () => {
     }
   };
 
-  // Второстепенные действия колоды собраны в одно меню «...».
-  // Пунктов до десяти, поэтому они разложены по смысловым группам:
-  // режимы занятий, работа со словами, действия над самой колодой.
-  const moreGroups: { key: string; label: string; items: MenuItem[] }[] = [
+  // Режимы вынесены в сетку «Как учить»; в «…» — второстепенные действия.
+  const moreItems: MenuProps['items'] = [
     {
-      key: 'modes',
-      label: t('Режимы'),
-      items: [
-        {
-          key: 'cloze',
-          icon: <FormOutlined />,
-          label: t('Пропуски'),
-          // Режим строится на поле «Пример»: без примеров пропуск делать не из чего.
-          disabled: !cards?.some((card) => card.example),
-        },
-        {
-          key: 'order',
-          icon: <BuildOutlined />,
-          label: t('Собери фразу'),
-          // Собирать имеет смысл только фразы: одиночное слово собирать нечего.
-          disabled: !cards?.some((card) => card.card_type === 'phrase'),
-        },
-        {
-          key: 'learn-favorites',
-          icon: <StarOutlined />,
-          label: t('Заучивание избранного'),
-          disabled: favCount === 0,
-        },
-      ].filter(Boolean),
+      key: 'export',
+      icon: <Download size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      label: t('Экспорт'),
+      disabled: exportDisabled,
+      children: [
+        { key: 'export:excel', label: t('Excel') },
+        { key: 'export:json', label: t('JSON') },
+        { key: 'export:markdown', label: t('Markdown') },
+      ],
     },
     {
-      key: 'words',
-      label: t('Слова'),
-      items: [
-        canEditCards
-          ? { key: 'ai-check', icon: <RobotOutlined />, label: t('Проверить через ИИ') }
-          : null,
-        canEditCards
-          ? { key: 'ai-chunks', icon: <RobotOutlined />, label: t('Сгенерировать фразы (ИИ)') }
-          : null,
-        canEditCards && dupCount > 0
-          ? { key: 'dedup', icon: <DiffOutlined />, label: t('Дубли ({{count}})', { count: dupCount }) }
-          : null,
-      ].filter(Boolean),
+      key: 'learn-favorites',
+      icon: <Star size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      label: t('Заучивание избранного'),
+      disabled: favCount === 0,
     },
-    {
-      key: 'deck',
-      label: t('Колода'),
-      items: [
-        {
-          key: 'export',
-          icon: <ExportOutlined />,
-          label: t('Экспорт'),
-          disabled: exportDisabled,
-          children: [
-            { key: 'export:excel', label: t('Excel') },
-            { key: 'export:json', label: t('JSON') },
-            { key: 'export:markdown', label: t('Markdown') },
-          ],
-        },
-        isOwner
-          ? { key: 'share', icon: <ShareAltOutlined />, label: t('Поделиться') }
-          : null,
-        !isOwner
-          ? { key: 'duplicate', icon: <CopyOutlined />, label: t('Дублировать') }
-          : null,
-        !isOwner
-          ? { key: 'leave', icon: <UserDeleteOutlined />, label: t('Убрать из своих') }
-          : null,
-      ].filter(Boolean),
-    },
-  ];
-
-  // Пустая группа оставила бы висящий заголовок.
-  const moreItems: MenuProps['items'] = moreGroups
-    .filter((group) => group.items.length > 0)
-    .map((group) => ({ key: group.key, type: 'group', label: group.label, children: group.items }));
+    canEditCards && dupCount > 0
+      ? {
+        key: 'dedup',
+        icon: <CopyMinus size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+        label: t('Дубли ({{count}})', { count: dupCount }),
+      }
+      : null,
+    !isOwner
+      ? {
+        key: 'duplicate',
+        icon: <Copy size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+        label: t('Дублировать'),
+      }
+      : null,
+    !isOwner
+      ? {
+        key: 'leave',
+        icon: <UserMinus size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+        label: t('Убрать из своих'),
+      }
+      : null,
+  ].filter(Boolean);
 
   const handleMoreClick: MenuProps['onClick'] = ({ key }) => {
     if (key.startsWith('export:')) {
       exportDeck(key.split(':')[1] as ExportFormat);
       return;
     }
-    if (key === 'cloze') navigate(RoutePath.CLOZE(deckId));
-    if (key === 'order') navigate(RoutePath.ORDER(deckId));
     if (key === 'learn-favorites') navigate(RoutePath.DECK_FAVORITES_LEARN(deckId));
-    if (key === 'ai-check') setAiOpen(true);
-    if (key === 'ai-chunks') setChunksOpen(true);
-    if (key === 'share') setShareOpen(true);
     if (key === 'dedup') setDupOpen(true);
     if (key === 'duplicate') handleDuplicate();
     if (key === 'leave') handleLeave();
   };
 
+  const aiItems: MenuProps['items'] = [
+    { key: 'ai-check', label: t('Проверить переводы') },
+    { key: 'ai-chunks', label: t('Подобрать фразы') },
+  ];
+
+  const handleAiClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'ai-check') setAiOpen(true);
+    if (key === 'ai-chunks') setChunksOpen(true);
+  };
+
+  const recommended = recommendMode({
+    newCount: stats.fresh,
+    dueCount: stats.due,
+    examplesCount: stats.examples,
+  });
+
+  const modes: Record<StudyMode, ModeInfo> = {
+    [StudyMode.LEARN]: {
+      icon: <Lightbulb size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      name: t('Заучивание'),
+      desc: t('Выбор, затем ввод'),
+      meta: t('Раунды по {{count}}', { count: ROUND_SIZE }),
+      path: RoutePath.LEARN(deckId),
+    },
+    [StudyMode.WRITE]: {
+      icon: <PenLine size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      name: t('Письмо'),
+      desc: t('Ввод перевода в обе стороны'),
+      meta: t('RU → EN · EN → RU'),
+      path: RoutePath.WRITE(deckId),
+    },
+    [StudyMode.CLOZE]: {
+      icon: <Sparkles size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      name: t('Пропуски'),
+      desc: t('Слово скрыто в своём примере'),
+      meta: t('{{count}} примеров', { count: stats.examples }),
+      path: RoutePath.CLOZE(deckId),
+      // Режим строится на поле «Пример»: без примеров пропуск делать не из чего.
+      disabled: stats.examples === 0,
+    },
+    [StudyMode.ORDER]: {
+      icon: <Layers size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      name: t('Собери фразу'),
+      desc: t('Порядок слов на чанках'),
+      meta: t('{{count}} фраз', { count: stats.phrases }),
+      path: RoutePath.ORDER(deckId),
+      // Собирать имеет смысл только фразы: одиночное слово собирать нечего.
+      disabled: stats.phrases === 0,
+    },
+    [StudyMode.CARDS]: {
+      icon: <LayoutGrid size={MODE_ICON_SIZE} strokeWidth={ICON_STROKE} />,
+      name: t('Карточки'),
+      desc: t('Знакомство, без записи прогресса'),
+      meta: t('Просмотр'),
+      path: RoutePath.FLASHCARDS(deckId),
+    },
+  };
+
+  const learnDesc = stats.fresh > 0
+    ? t('{{count}} новых слов — раунды по {{size}}: выбор, затем ввод', {
+      count: stats.fresh, size: ROUND_SIZE,
+    })
+    : t('{{count}} слов к повторению — раунды по {{size}}: выбор, затем ввод', {
+      count: stats.due, size: ROUND_SIZE,
+    });
+  const recommendedMode = modes[recommended];
+
   return (
-    <VStack max fullHeight gap="16">
-      <BackLink
-        items={[
-          { label: t('Библиотека'), to: RoutePath.DECKS() },
-          { label: t('Колоды'), to: RoutePath.DECKS() },
-        ]}
-      />
-      <HStack max justify="between" align="start" gap="16" wrap>
-        <VStack gap="4">
-          <HStack gap="8" align="center" wrap>
-            <MyTypography.Large strong>{deck.name}</MyTypography.Large>
-            {!isOwner && authorLabel && (
-              <Tag bordered={false}>{t('Автор')}: {authorLabel}</Tag>
+    <div className={cls.DeckPage}>
+      <header className={cls.header}>
+        <BackLink
+          items={[
+            { label: t('Библиотека'), to: RoutePath.DECKS() },
+            { label: t('Колоды'), to: RoutePath.DECKS() },
+          ]}
+        />
+        <div className={cls.titleRow}>
+          <div className={cls.titleBlock}>
+            <Kicker>
+              {`${t('Колода')} · ${t('{{count}} слов', { count: stats.total })} · ${
+                t('{{count}} фраз', { count: stats.phrases })}`}
+            </Kicker>
+            <h1 className={cls.title}>{deck.name}</h1>
+            {(deck.description || (!isOwner && authorLabel)) && (
+              <div className={cls.description}>
+                {deck.description}
+                {!isOwner && authorLabel && (
+                  <span className={cls.author}>{t('от {{author}}', { author: authorLabel })}</span>
+                )}
+              </div>
             )}
-          </HStack>
-          {deck.description && (
-            <MyTypography.Base type="secondary">{deck.description}</MyTypography.Base>
+          </div>
+          <div className={cls.actions}>
+            {isOwner && (
+              <Button
+                className={cls.headerButton}
+                icon={<Users size={BUTTON_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                onClick={() => setShareOpen(true)}
+              >
+                {t('Поделиться')}
+              </Button>
+            )}
+            {canEditCards && (
+              <Button
+                className={cls.headerButton}
+                icon={<Plus size={BUTTON_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                onClick={() => setFormOpen(true)}
+              >
+                {t('Слова')}
+              </Button>
+            )}
+            <Dropdown
+              trigger={['click']}
+              menu={{ items: moreItems, onClick: handleMoreClick }}
+            >
+              <Button
+                className={cls.moreButton}
+                aria-label={t('Ещё')}
+                icon={<Ellipsis size={MORE_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                loading={exporting || isDuplicating || isLeaving}
+              />
+            </Dropdown>
+          </div>
+        </div>
+        <div className={cls.mastery}>
+          <MasteryBar
+            size={MasteryBarSize.LG}
+            mastered={toPercent(stats.mastered, stats.total)}
+            learning={toPercent(stats.learning, stats.total)}
+          />
+          <div className={cls.legend}>
+            <span className={cls.legendItem}>
+              <i className={classNames(cls.legendMark, [cls.mastered])} />
+              {t('Усвоено {{count}}', { count: stats.mastered })}
+            </span>
+            <span className={cls.legendItem}>
+              <i className={classNames(cls.legendMark, [cls.learning])} />
+              {t('Изучаю {{count}}', { count: stats.learning })}
+            </span>
+            <span className={cls.legendItem}>
+              <i className={classNames(cls.legendMark, [cls.fresh])} />
+              {t('Новые {{count}}', { count: stats.fresh })}
+            </span>
+            {stats.due > 0 && (
+              <span className={cls.due}>{t('{{count}} к повторению', { count: stats.due })}</span>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <section className={cls.section}>
+        <SectionHeader title={t('Как учить')} />
+        <div className={cls.modes}>
+          <AccentPanel
+            as="button"
+            type="button"
+            className={cls.recommended}
+            onClick={() => navigate(recommendedMode.path)}
+          >
+            <div className={cls.recommendedHead}>
+              <Kicker size={KickerSize.SM} tone={KickerTone.ON_DARK}>{t('Рекомендуем')}</Kicker>
+              {recommendedMode.icon}
+            </div>
+            <span className={cls.recommendedName}>{recommendedMode.name}</span>
+            <span className={cls.recommendedDesc}>
+              {recommended === StudyMode.LEARN ? learnDesc : recommendedMode.desc}
+            </span>
+            <span className={cls.recommendedStart}>
+              {t('Начать')}
+              <ArrowRight aria-hidden size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />
+            </span>
+          </AccentPanel>
+          {STUDY_MODES.filter((mode) => mode !== recommended).map((mode) => {
+            const info = modes[mode];
+            return (
+              <Blueprint
+                key={mode}
+                as="button"
+                type="button"
+                className={cls.mode}
+                disabled={info.disabled}
+                onClick={() => navigate(info.path)}
+              >
+                <span className={cls.modeIcon}>{info.icon}</span>
+                <span className={cls.modeName}>{info.name}</span>
+                <span className={cls.modeDesc}>{info.desc}</span>
+                <span className={cls.modeMeta}>{info.meta}</span>
+              </Blueprint>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className={cls.section}>
+        <div className={cls.toolbar}>
+          <h2 className={cls.wordsTitle}>{t('Слова')}</h2>
+          <Input
+            className={cls.search}
+            prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+            allowClear
+            value={search}
+            placeholder={t('Поиск в колоде')}
+            onChange={(e) => setSearchDebounced(e.target.value)}
+          />
+          <Segmented<CardType | 'all'>
+            className={cls.segmented}
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={[
+              { label: t('Все'), value: 'all' },
+              { label: t('Слова'), value: 'word' },
+              { label: t('Фразы'), value: 'phrase' },
+            ]}
+          />
+          <Button
+            className={classNames(cls.favButton, [], { [cls.favButtonActive]: onlyFavorites })}
+            aria-pressed={onlyFavorites}
+            icon={<Star size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+            onClick={() => setOnlyFavorites((prev) => !prev)}
+          >
+            {t('Избранные')}
+          </Button>
+          {canEditCards && (
+            <Dropdown
+              trigger={['click']}
+              placement="bottomRight"
+              menu={{ items: aiItems, onClick: handleAiClick }}
+            >
+              <Button
+                type="link"
+                className={cls.aiButton}
+                icon={<Sparkles size={BUTTON_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+              >
+                {t('ИИ: проверить и подобрать фразы')}
+              </Button>
+            </Dropdown>
           )}
-        </VStack>
-        <HStack gap="8" wrap>
-          <Button
-            icon={<ReadOutlined />}
-            onClick={() => navigate(RoutePath.FLASHCARDS(deckId))}
-          >
-            {t('Карточки')}
-          </Button>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => navigate(RoutePath.WRITE(deckId))}
-          >
-            {t('Письмо')}
-          </Button>
-          <Button
-            type="primary"
-            icon={<BulbOutlined />}
-            onClick={() => navigate(RoutePath.LEARN(deckId))}
-          >
-            {t('Заучивание')}
-          </Button>
-          <Dropdown
-            trigger={['click']}
-            menu={{ items: moreItems, onClick: handleMoreClick }}
-          >
-            <Button
-              icon={<MoreOutlined />}
-              loading={exporting || isDuplicating || isLeaving}
-            />
-          </Dropdown>
-        </HStack>
-      </HStack>
+        </div>
 
-      <HStack max align="center" gap="16" wrap>
-        <HStack gap="8" align="center">
-          <MyTypography.Base strong>{t('Слова')}</MyTypography.Base>
-          <MyTypography.Small type="secondary">
-            {t('{{count}} слов', { count: cards?.length ?? 0 })}
-          </MyTypography.Small>
-        </HStack>
-        <Input
-          className={cls.search}
-          prefix={<SearchOutlined />}
-          allowClear
-          value={search}
-          placeholder={t('Поиск слов')}
-          onChange={(e) => setSearchDebounced(e.target.value)}
+        <CardList
+          deckUuid={deckId}
+          readOnly={!canEditCards}
+          items={filtered}
+          emptyText={hasSearch || onlyFavorites || typeFilter !== 'all' ? t('Ничего не найдено') : undefined}
         />
-        <Segmented<CardType | 'all'>
-          value={typeFilter}
-          onChange={setTypeFilter}
-          options={[
-            { label: t('Все'), value: 'all' },
-            { label: t('Слова'), value: 'word' },
-            { label: t('Фразы'), value: 'phrase' },
-          ]}
-        />
-        <Segmented<'all' | 'favorite' | 'notFavorite'>
-          value={favFilter}
-          onChange={setFavFilter}
-          options={[
-            { label: t('Все'), value: 'all' },
-            { label: t('Избранные'), value: 'favorite' },
-            { label: t('Неизбранные'), value: 'notFavorite' },
-          ]}
-        />
-        {canEditCards && (
-          <Button
-            className={cls.addButton}
-            icon={<PlusOutlined />}
-            onClick={() => setFormOpen(true)}
-          >
-            {t('Добавить слова')}
-          </Button>
-        )}
-      </HStack>
-
-      <CardList
-        deckUuid={deckId}
-        readOnly={!canEditCards}
-        cards={filtered}
-        emptyText={hasSearch || favFilter !== 'all' ? t('Ничего не найдено') : undefined}
-      />
+      </section>
 
       {canEditCards && (
         <>
@@ -338,7 +504,7 @@ const DeckPage = () => {
       {isOwner && (
         <ShareDeckModal open={shareOpen} deckUuid={deckId} onClose={() => setShareOpen(false)} />
       )}
-    </VStack>
+    </div>
   );
 };
 
