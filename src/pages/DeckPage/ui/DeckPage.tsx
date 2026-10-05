@@ -2,7 +2,7 @@ import { ReactNode, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Dropdown, Empty, Input, MenuProps, Segmented,
+  Button, Dropdown, Empty, Input, MenuProps, Segmented, Tooltip,
 } from 'antd';
 import {
   ArrowRight,
@@ -10,6 +10,7 @@ import {
   CopyMinus,
   Download,
   Ellipsis,
+  FilePlusCorner,
   LayoutGrid,
   Layers,
   Lightbulb,
@@ -29,9 +30,11 @@ import {
 } from '@/entities/Deck';
 import { useUserInfo, useUserAccesses } from '@/entities/User';
 import {
+  AiQuotaNotice,
   CardType,
   DueCard,
   isDue,
+  useAiQuota,
   useGetCardsQuery,
   useGetCardReviewsQuery,
   useGetFavoritesQuery,
@@ -49,6 +52,7 @@ import { AccentPanel } from '@/shared/ui/AccentPanel';
 import { BackBar } from '@/shared/ui/BackBar';
 import { BackLink } from '@/shared/ui/BackLink';
 import { Blueprint } from '@/shared/ui/Blueprint';
+import { EmptyState } from '@/shared/ui/EmptyState';
 import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import { MasteryBar, MasteryBarSize } from '@/shared/ui/MasteryBar';
 import { SectionHeader } from '@/shared/ui/SectionHeader';
@@ -56,7 +60,7 @@ import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from '@/shared/types/accesses';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { recommendMode, StudyMode, STUDY_MODES } from '../model/recommendMode';
@@ -93,10 +97,11 @@ interface ModeInfo {
 const DeckPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { message } = useAntdApp();
+  const toast = useToast();
   const { deckId } = useParams();
   const userInfo = useUserInfo();
   const [formOpen, setFormOpen] = useState(false);
+  const [importOnOpen, setImportOnOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [dupOpen, setDupOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
@@ -110,6 +115,7 @@ const DeckPage = () => {
   const { data: cards } = useGetCardsQuery(deckId!, { skip: !deckId });
   const { data: reviews } = useGetCardReviewsQuery(deckId!, { skip: !deckId });
   const { data: favorites } = useGetFavoritesQuery();
+  const { isExhausted: aiExhausted } = useAiQuota();
   const userAccesses = useUserAccesses();
   const dupCount = useMemo(() => findDuplicateGroups(cards ?? []).length, [cards]);
   const favCount = useMemo(
@@ -186,10 +192,10 @@ const DeckPage = () => {
   const handleDuplicate = async () => {
     try {
       const copy = await duplicateDeck(deck).unwrap();
-      message.success(t('Колода скопирована'));
+      toast.success(t('Колода скопирована'));
       navigate(RoutePath.DECK(copy.uuid));
     } catch {
-      message.error(t('Не удалось скопировать колоду'));
+      toast.error(t('Не удалось скопировать колоду'));
     }
   };
 
@@ -197,10 +203,10 @@ const DeckPage = () => {
     if (!userInfo) return;
     try {
       await removeShare({ deckUuid: deck.uuid, userId: userInfo.uuid }).unwrap();
-      message.success(t('Вы больше не видите эту колоду'));
+      toast.success(t('Вы больше не видите эту колоду'));
       navigate(RoutePath.DECKS());
     } catch {
-      message.error(t('Не удалось убрать колоду'));
+      toast.error(t('Не удалось убрать колоду'));
     }
   };
 
@@ -325,6 +331,27 @@ const DeckPage = () => {
     });
   const recommendedMode = modes[recommended];
 
+  // Колода без слов: вместо режимов и списка — пустое состояние
+  const isEmptyDeck = cards !== undefined && cards.length === 0;
+  const emptyDeckState = (
+    <EmptyState
+      icon={FilePlusCorner}
+      kicker={t('Колода пуста')}
+      title={t('Добавьте 10–20 слов, чтобы начать')}
+      description={t('Можно вводить вручную или загрузить таблицу Excel.')}
+      primary={canEditCards ? { label: t('Добавить слова'), onClick: () => setFormOpen(true) } : undefined}
+      secondary={canEditCards
+        ? {
+          label: t('Импорт'),
+          onClick: () => {
+            setImportOnOpen(true);
+            setFormOpen(true);
+          },
+        }
+        : undefined}
+    />
+  );
+
   const cardList = (
     <CardList
       deckUuid={deckId}
@@ -338,7 +365,15 @@ const DeckPage = () => {
     <>
       {canEditCards && (
         <>
-          <CardEditor open={formOpen} deckUuid={deckId} onClose={() => setFormOpen(false)} />
+          <CardEditor
+            open={formOpen}
+            deckUuid={deckId}
+            openFilePicker={importOnOpen}
+            onClose={() => {
+              setFormOpen(false);
+              setImportOnOpen(false);
+            }}
+          />
           <DuplicateCardsModal open={dupOpen} deckUuid={deckId} onClose={() => setDupOpen(false)} />
           <CheckTranslationsModal open={aiOpen} deckUuid={deckId} onClose={() => setAiOpen(false)} />
           <GenerateChunksModal
@@ -369,6 +404,8 @@ const DeckPage = () => {
           key: 'ai',
           icon: <Sparkles size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />,
           label: t('ИИ: проверить и подобрать фразы'),
+          // Лимит исчерпан — пункт недоступен до завтра
+          disabled: aiExhausted,
           children: aiItems,
         }]
         : []),
@@ -431,82 +468,86 @@ const DeckPage = () => {
             <h1 className={cls.mobileTitle}>{deck.name}</h1>
           </div>
 
-          <div className={cls.mastery}>
-            <MasteryBar
-              size={MasteryBarSize.LG}
-              className={cls.mobileBar}
-              mastered={toPercent(stats.mastered, stats.total)}
-              learning={toPercent(stats.learning, stats.total)}
-            />
-            <div className={cls.mobileLegend}>
-              <span>{t('Усвоено {{count}}', { count: stats.mastered })}</span>
-              <span>{t('Изучаю {{count}}', { count: stats.learning })}</span>
-              <span>{t('Новые {{count}}', { count: stats.fresh })}</span>
-            </div>
-          </div>
+          {isEmptyDeck ? emptyDeckState : (
+            <>
+              <div className={cls.mastery}>
+                <MasteryBar
+                  size={MasteryBarSize.LG}
+                  className={cls.mobileBar}
+                  mastered={toPercent(stats.mastered, stats.total)}
+                  learning={toPercent(stats.learning, stats.total)}
+                />
+                <div className={cls.mobileLegend}>
+                  <span>{t('Усвоено {{count}}', { count: stats.mastered })}</span>
+                  <span>{t('Изучаю {{count}}', { count: stats.learning })}</span>
+                  <span>{t('Новые {{count}}', { count: stats.fresh })}</span>
+                </div>
+              </div>
 
-          <AccentPanel
-            as="button"
-            type="button"
-            className={cls.mobileRecommended}
-            onClick={() => navigate(recommendedMode.path)}
-          >
-            <span className={cls.mobileRecommendedText}>
-              <Kicker size={KickerSize.SM} tone={KickerTone.ON_DARK} className={cls.mobileRecommendedKicker}>
-                {t('Рекомендуем')}
-              </Kicker>
-              <span className={cls.mobileRecommendedName}>{recommendedMode.name}</span>
-              <span className={cls.mobileRecommendedMeta}>{recommendedMeta}</span>
-            </span>
-            <span className={cls.play}>
-              <Play aria-hidden size={PLAY_ICON_SIZE} strokeWidth={ICON_STROKE} />
-            </span>
-          </AccentPanel>
+              <AccentPanel
+                as="button"
+                type="button"
+                className={cls.mobileRecommended}
+                onClick={() => navigate(recommendedMode.path)}
+              >
+                <span className={cls.mobileRecommendedText}>
+                  <Kicker size={KickerSize.SM} tone={KickerTone.ON_DARK} className={cls.mobileRecommendedKicker}>
+                    {t('Рекомендуем')}
+                  </Kicker>
+                  <span className={cls.mobileRecommendedName}>{recommendedMode.name}</span>
+                  <span className={cls.mobileRecommendedMeta}>{recommendedMeta}</span>
+                </span>
+                <span className={cls.play}>
+                  <Play aria-hidden size={PLAY_ICON_SIZE} strokeWidth={ICON_STROKE} />
+                </span>
+              </AccentPanel>
 
-          <div className={cls.mobileModes}>
-            {STUDY_MODES.filter((mode) => mode !== recommended).map((mode) => {
-              const info = modes[mode];
-              return (
-                <Blueprint
-                  key={mode}
-                  as="button"
-                  type="button"
-                  className={cls.mobileMode}
-                  disabled={info.disabled}
-                  onClick={() => navigate(info.path)}
-                >
-                  <span className={cls.modeIcon}>{info.icon}</span>
-                  <span className={cls.mobileModeName}>{info.name}</span>
-                </Blueprint>
-              );
-            })}
-          </div>
+              <div className={cls.mobileModes}>
+                {STUDY_MODES.filter((mode) => mode !== recommended).map((mode) => {
+                  const info = modes[mode];
+                  return (
+                    <Blueprint
+                      key={mode}
+                      as="button"
+                      type="button"
+                      className={cls.mobileMode}
+                      disabled={info.disabled}
+                      onClick={() => navigate(info.path)}
+                    >
+                      <span className={cls.modeIcon}>{info.icon}</span>
+                      <span className={cls.mobileModeName}>{info.name}</span>
+                    </Blueprint>
+                  );
+                })}
+              </div>
 
-          <section className={cls.mobileWords}>
-            <div className={cls.mobileWordsHead}>
-              <h2 className={cls.mobileWordsTitle}>{t('Слова')}</h2>
-              <Button
-                type="text"
-                className={cls.mobileSearchButton}
-                aria-label={t('Поиск в колоде')}
-                aria-pressed={searchOpen}
-                icon={<Search size={MOBILE_SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
-                onClick={toggleSearch}
-              />
-            </div>
-            {searchOpen && (
-              <Input
-                autoFocus
-                className={cls.mobileSearch}
-                prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
-                allowClear
-                value={search}
-                placeholder={t('Поиск в колоде')}
-                onChange={(e) => setSearchDebounced(e.target.value)}
-              />
-            )}
-            {cardList}
-          </section>
+              <section className={cls.mobileWords}>
+                <div className={cls.mobileWordsHead}>
+                  <h2 className={cls.mobileWordsTitle}>{t('Слова')}</h2>
+                  <Button
+                    type="text"
+                    className={cls.mobileSearchButton}
+                    aria-label={t('Поиск в колоде')}
+                    aria-pressed={searchOpen}
+                    icon={<Search size={MOBILE_SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                    onClick={toggleSearch}
+                  />
+                </div>
+                {searchOpen && (
+                  <Input
+                    autoFocus
+                    className={cls.mobileSearch}
+                    prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                    allowClear
+                    value={search}
+                    placeholder={t('Поиск в колоде')}
+                    onChange={(e) => setSearchDebounced(e.target.value)}
+                  />
+                )}
+                {cardList}
+              </section>
+            </>
+          )}
         </div>
         {modals}
       </div>
@@ -596,97 +637,114 @@ const DeckPage = () => {
         </div>
       </header>
 
-      <section className={cls.section}>
-        <SectionHeader title={t('Как учить')} />
-        <div className={cls.modes}>
-          <AccentPanel
-            as="button"
-            type="button"
-            className={cls.recommended}
-            onClick={() => navigate(recommendedMode.path)}
-          >
-            <div className={cls.recommendedHead}>
-              <Kicker size={KickerSize.SM} tone={KickerTone.ON_DARK}>{t('Рекомендуем')}</Kicker>
-              {recommendedMode.icon}
-            </div>
-            <span className={cls.recommendedName}>{recommendedMode.name}</span>
-            <span className={cls.recommendedDesc}>
-              {recommended === StudyMode.LEARN ? learnDesc : recommendedMode.desc}
-            </span>
-            <span className={cls.recommendedStart}>
-              {t('Начать')}
-              <ArrowRight aria-hidden size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />
-            </span>
-          </AccentPanel>
-          {STUDY_MODES.filter((mode) => mode !== recommended).map((mode) => {
-            const info = modes[mode];
-            return (
-              <Blueprint
-                key={mode}
+      {isEmptyDeck ? emptyDeckState : (
+        <>
+          <section className={cls.section}>
+            <SectionHeader title={t('Как учить')} />
+            <div className={cls.modes}>
+              <AccentPanel
                 as="button"
                 type="button"
-                className={cls.mode}
-                disabled={info.disabled}
-                onClick={() => navigate(info.path)}
+                className={cls.recommended}
+                onClick={() => navigate(recommendedMode.path)}
               >
-                <span className={cls.modeIcon}>{info.icon}</span>
-                <span className={cls.modeName}>{info.name}</span>
-                <span className={cls.modeDesc}>{info.desc}</span>
-                <span className={cls.modeMeta}>{info.meta}</span>
-              </Blueprint>
-            );
-          })}
-        </div>
-      </section>
+                <div className={cls.recommendedHead}>
+                  <Kicker size={KickerSize.SM} tone={KickerTone.ON_DARK}>{t('Рекомендуем')}</Kicker>
+                  {recommendedMode.icon}
+                </div>
+                <span className={cls.recommendedName}>{recommendedMode.name}</span>
+                <span className={cls.recommendedDesc}>
+                  {recommended === StudyMode.LEARN ? learnDesc : recommendedMode.desc}
+                </span>
+                <span className={cls.recommendedStart}>
+                  {t('Начать')}
+                  <ArrowRight aria-hidden size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />
+                </span>
+              </AccentPanel>
+              {STUDY_MODES.filter((mode) => mode !== recommended).map((mode) => {
+                const info = modes[mode];
+                return (
+                  <Blueprint
+                    key={mode}
+                    as="button"
+                    type="button"
+                    className={cls.mode}
+                    disabled={info.disabled}
+                    onClick={() => navigate(info.path)}
+                  >
+                    <span className={cls.modeIcon}>{info.icon}</span>
+                    <span className={cls.modeName}>{info.name}</span>
+                    <span className={cls.modeDesc}>{info.desc}</span>
+                    <span className={cls.modeMeta}>{info.meta}</span>
+                  </Blueprint>
+                );
+              })}
+            </div>
+          </section>
 
-      <section className={cls.section}>
-        <div className={cls.toolbar}>
-          <h2 className={cls.wordsTitle}>{t('Слова')}</h2>
-          <Input
-            className={cls.search}
-            prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
-            allowClear
-            value={search}
-            placeholder={t('Поиск в колоде')}
-            onChange={(e) => setSearchDebounced(e.target.value)}
-          />
-          <Segmented<CardType | 'all'>
-            className={cls.segmented}
-            value={typeFilter}
-            onChange={setTypeFilter}
-            options={[
-              { label: t('Все'), value: 'all' },
-              { label: t('Слова'), value: 'word' },
-              { label: t('Фразы'), value: 'phrase' },
-            ]}
-          />
-          <Button
-            className={classNames(cls.favButton, [], { [cls.favButtonActive]: onlyFavorites })}
-            aria-pressed={onlyFavorites}
-            icon={<Star size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
-            onClick={() => setOnlyFavorites((prev) => !prev)}
-          >
-            {t('Избранные')}
-          </Button>
-          {canEditCards && (
-            <Dropdown
-              trigger={['click']}
-              placement="bottomRight"
-              menu={{ items: aiItems, onClick: handleAiClick }}
-            >
+          <section className={cls.section}>
+            <div className={cls.toolbar}>
+              <h2 className={cls.wordsTitle}>{t('Слова')}</h2>
+              <Input
+                className={cls.search}
+                prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                allowClear
+                value={search}
+                placeholder={t('Поиск в колоде')}
+                onChange={(e) => setSearchDebounced(e.target.value)}
+              />
+              <Segmented<CardType | 'all'>
+                className={cls.segmented}
+                value={typeFilter}
+                onChange={setTypeFilter}
+                options={[
+                  { label: t('Все'), value: 'all' },
+                  { label: t('Слова'), value: 'word' },
+                  { label: t('Фразы'), value: 'phrase' },
+                ]}
+              />
               <Button
-                type="link"
-                className={cls.aiButton}
-                icon={<Sparkles size={BUTTON_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                className={classNames(cls.favButton, [], { [cls.favButtonActive]: onlyFavorites })}
+                aria-pressed={onlyFavorites}
+                icon={<Star size={SMALL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                onClick={() => setOnlyFavorites((prev) => !prev)}
               >
-                {t('ИИ: проверить и подобрать фразы')}
+                {t('Избранные')}
               </Button>
-            </Dropdown>
-          )}
-        </div>
+              {canEditCards && aiExhausted && (
+                <Tooltip title={t('Лимит обновится завтра')}>
+                  <Button
+                    disabled
+                    type="link"
+                    className={cls.aiButton}
+                    icon={<Sparkles size={BUTTON_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                  >
+                    {t('ИИ: проверить и подобрать фразы')}
+                  </Button>
+                </Tooltip>
+              )}
+              {canEditCards && !aiExhausted && (
+                <Dropdown
+                  trigger={['click']}
+                  placement="bottomRight"
+                  menu={{ items: aiItems, onClick: handleAiClick }}
+                >
+                  <Button
+                    type="link"
+                    className={cls.aiButton}
+                    icon={<Sparkles size={BUTTON_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                  >
+                    {t('ИИ: проверить и подобрать фразы')}
+                  </Button>
+                </Dropdown>
+              )}
+            </div>
+            {canEditCards && <AiQuotaNotice />}
 
-        {cardList}
-      </section>
+            {cardList}
+          </section>
+        </>
+      )}
 
       {modals}
     </div>

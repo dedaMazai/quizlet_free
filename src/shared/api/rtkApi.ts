@@ -5,11 +5,10 @@ import type {
     FetchArgs,
     FetchBaseQueryError,
 } from '@reduxjs/toolkit/query';
-import { notification } from 'antd';
 import { getCookie } from 'typescript-cookie';
 import { IS_OLD_SAFARI } from '../const/const';
 import { callAuthFailureHandler } from './authenticatedFetch';
-import { getGlobalNotification } from '../lib/helpers/globalAntdApi';
+import { getGlobalToast } from '../lib/toast';
 import i18n from 'i18next';
 
 export enum ApiTag {
@@ -98,17 +97,15 @@ const baseQueryWithReAuth: BaseQueryFn<
         && (errorMessage || result.error.status)
         && !isUnauthorized
     ) {
-        // Используем глобальный API для наследования темы, или fallback на статический
-        const notificationApi = getGlobalNotification() ?? notification;
+        // Тосты вне React — через глобальный доступ ToastProvider
+        const toastApi = getGlobalToast();
         let message = errorMessage ? i18n.t(errorMessage) : `Error status: ${result.error.status}`;
 
         if (result.error.status === 502) {
             message = i18n.t('Сервис временно недоступен. Попробуйте позже.');
         }
 
-        // notificationApi.error({
-        //     message,
-        // });
+        // toastApi?.error(message);
     }
     return result;
 };

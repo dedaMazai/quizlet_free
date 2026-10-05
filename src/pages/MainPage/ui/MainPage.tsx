@@ -4,18 +4,24 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Input, InputRef, Segmented } from 'antd';
-import { ArrowRight, Flame, Search } from 'lucide-react';
-import { DeckCard, useGetDecksQuery } from '@/entities/Deck';
+import {
+    ArrowRight, Flame, Layers, Search,
+} from 'lucide-react';
+import { DeckCard, DeckCardSkeleton, useGetDecksQuery } from '@/entities/Deck';
 import { useGetCardsPageQuery } from '@/entities/Card';
 import {
     useGetDueSummaryQuery, useGetMasteryQuery, useGetStudyOverviewQuery, useTodayAnswers,
 } from '@/entities/Statistics';
 import { UserAvatar, useUserInfo } from '@/entities/User';
 import { useDailyGoal } from '@/entities/UserSettings';
+import { CardEditor } from '@/features/CardEditor';
+import { DeckForm } from '@/features/DeckForm';
 import { DueHero } from '@/widgets/DueHero';
 import { NextSteps } from '@/widgets/NextSteps';
 import { StreakCard } from '@/widgets/StreakCard';
+import { EmptyState } from '@/shared/ui/EmptyState';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
+import { FadeIn } from '@/shared/ui/Skeleton';
 import { SectionHeader, SectionHeaderSize } from '@/shared/ui/SectionHeader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
@@ -58,7 +64,7 @@ const MainPage: FC = () => {
         [userInfo?.timezone],
     );
 
-    const { data: decks } = useGetDecksQuery();
+    const { data: decks, isLoading: isDecksLoading } = useGetDecksQuery();
     // Долг и освоение по колодам нужны только сетке колод — на мобильной её нет
     const { data: summary } = useGetDueSummaryQuery({ tz }, { skip: isMobile });
     const { data: mastery } = useGetMasteryQuery(undefined, { skip: isMobile });
@@ -69,6 +75,10 @@ const MainPage: FC = () => {
 
     const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
     const [filter, setFilter] = useState<DeckFilter>('recent');
+    // Пустая главная: «Создать колоду» / «Импорт из Excel» (DeckForm → CardEditor новой колоды)
+    const [deckFormOpen, setDeckFormOpen] = useState(false);
+    const [importAfterCreate, setImportAfterCreate] = useState(false);
+    const [importDeckUuid, setImportDeckUuid] = useState<string>();
 
     // Кнопка поиска в Topbar ведёт сюда с фокусом в поле (до палитры ⌘K)
     useEffect(() => {
@@ -124,6 +134,45 @@ const MainPage: FC = () => {
         [mastery],
     );
 
+    // Только по успешному ответу: при ошибке запроса колоды могут быть, просто не загрузились
+    const hasNoDecks = decks?.length === 0;
+
+    const openDeckForm = (withImport: boolean) => {
+        setImportAfterCreate(withImport);
+        setDeckFormOpen(true);
+    };
+
+    const noDecksState = (
+        <EmptyState
+            icon={Layers}
+            kicker={t('Начало')}
+            title={t('Создайте первую колоду')}
+            description={t('Колода — набор слов с переводами, из неё строятся все режимы.')}
+            primary={{ label: t('Создать колоду'), onClick: () => openDeckForm(false) }}
+            secondary={{ label: t('Импорт из Excel'), onClick: () => openDeckForm(true) }}
+        />
+    );
+
+    const deckModals = (
+        <>
+            <DeckForm
+                open={deckFormOpen}
+                onClose={() => setDeckFormOpen(false)}
+                onCreated={(deck) => {
+                    if (importAfterCreate) setImportDeckUuid(deck.uuid);
+                }}
+            />
+            {importDeckUuid && (
+                <CardEditor
+                    open
+                    openFilePicker
+                    deckUuid={importDeckUuid}
+                    onClose={() => setImportDeckUuid(undefined)}
+                />
+            )}
+        </>
+    );
+
     // Мобильная главная (6.35): шапка с серией и аватаром, hero, цель дня, следующий шаг
     if (isMobile) {
         const streakDays = overview?.currentStreak ?? 0;
@@ -153,19 +202,24 @@ const MainPage: FC = () => {
                     </div>
                 </header>
 
-                <DueHero tz={tz} />
+                {hasNoDecks ? noDecksState : (
+                    <>
+                        <DueHero tz={tz} />
 
-                <div className={cls.dailyGoal}>
-                    <div className={cls.dailyGoalHead}>
-                        <span>{t('Цель дня')}</span>
-                        <span className={cls.dailyGoalValue}>{`${todayAnswers} / ${goal}`}</span>
-                    </div>
-                    <div className={cls.dailyGoalTrack} style={goalStyle}>
-                        <div className={cls.dailyGoalFill} />
-                    </div>
-                </div>
+                        <div className={cls.dailyGoal}>
+                            <div className={cls.dailyGoalHead}>
+                                <span>{t('Цель дня')}</span>
+                                <span className={cls.dailyGoalValue}>{`${todayAnswers} / ${goal}`}</span>
+                            </div>
+                            <div className={cls.dailyGoalTrack} style={goalStyle}>
+                                <div className={cls.dailyGoalFill} />
+                            </div>
+                        </div>
 
-                <NextSteps tz={tz} />
+                        <NextSteps tz={tz} />
+                    </>
+                )}
+                {deckModals}
             </div>
         );
     }
@@ -206,55 +260,66 @@ const MainPage: FC = () => {
                         </div>
                     </header>
 
-                    <div className={cls.overview}>
-                        <DueHero tz={tz} />
-                        <StreakCard tz={tz} />
-                    </div>
+                    {hasNoDecks ? noDecksState : (
+                        <>
+                            <div className={cls.overview}>
+                                <DueHero tz={tz} />
+                                <StreakCard tz={tz} />
+                            </div>
 
-                    <NextSteps tz={tz} />
+                            <NextSteps tz={tz} />
 
-                    <section className={cls.decks}>
-                        <SectionHeader
-                            className={cls.decksHeader}
-                            size={SectionHeaderSize.LG}
-                            title={t('Колоды')}
-                            titleExtra={(
-                                <Segmented<DeckFilter>
-                                    className={cls.filter}
-                                    classNames={{ item: cls.filterItem, label: cls.filterLabel }}
-                                    value={filter}
-                                    onChange={setFilter}
-                                    options={[
-                                        { label: t('Недавние'), value: 'recent' },
-                                        { label: t('Мои'), value: 'own' },
-                                        { label: t('Общие'), value: 'shared' },
-                                    ]}
+                            <section className={cls.decks}>
+                                <SectionHeader
+                                    className={cls.decksHeader}
+                                    size={SectionHeaderSize.LG}
+                                    title={t('Колоды')}
+                                    titleExtra={(
+                                        <Segmented<DeckFilter>
+                                            className={cls.filter}
+                                            classNames={{ item: cls.filterItem, label: cls.filterLabel }}
+                                            value={filter}
+                                            onChange={setFilter}
+                                            options={[
+                                                { label: t('Недавние'), value: 'recent' },
+                                                { label: t('Мои'), value: 'own' },
+                                                { label: t('Общие'), value: 'shared' },
+                                            ]}
+                                        />
+                                    )}
+                                    extra={(
+                                        <Link to={RoutePath.DECKS()} className={cls.allDecks}>
+                                            {t('Все {{count}} колод', { count: deckList.length })}
+                                            <ArrowRight aria-hidden size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
+                                        </Link>
+                                    )}
                                 />
-                            )}
-                            extra={(
-                                <Link to={RoutePath.DECKS()} className={cls.allDecks}>
-                                    {t('Все {{count}} колод', { count: deckList.length })}
-                                    <ArrowRight aria-hidden size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
-                                </Link>
-                            )}
-                        />
-                        <div className={cls.deckGrid}>
-                            {visibleDecks.map((deck) => {
-                                const deckMastery = masteryByDeck.get(deck.uuid);
-                                return (
-                                    <DeckCard
-                                        key={deck.uuid}
-                                        deck={deck}
-                                        dueCount={dueByDeck.get(deck.uuid) ?? 0}
-                                        mastered={toPercent(deckMastery?.mastered ?? 0, deck.cards_count)}
-                                        learning={toPercent(deckMastery?.learning ?? 0, deck.cards_count)}
-                                    />
-                                );
-                            })}
-                        </div>
-                    </section>
+                                {isDecksLoading ? (
+                                    <div className={cls.deckGrid}>
+                                        {Array.from({ length: DECKS_LIMIT }, (_, i) => <DeckCardSkeleton key={i} />)}
+                                    </div>
+                                ) : (
+                                    <FadeIn className={cls.deckGrid}>
+                                        {visibleDecks.map((deck) => {
+                                            const deckMastery = masteryByDeck.get(deck.uuid);
+                                            return (
+                                                <DeckCard
+                                                    key={deck.uuid}
+                                                    deck={deck}
+                                                    dueCount={dueByDeck.get(deck.uuid) ?? 0}
+                                                    mastered={toPercent(deckMastery?.mastered ?? 0, deck.cards_count)}
+                                                    learning={toPercent(deckMastery?.learning ?? 0, deck.cards_count)}
+                                                />
+                                            );
+                                        })}
+                                    </FadeIn>
+                                )}
+                            </section>
+                        </>
+                    )}
                 </>
             )}
+            {deckModals}
         </div>
     );
 };

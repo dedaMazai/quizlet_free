@@ -1,14 +1,14 @@
 import { memo } from 'react';
 import { useDailyGoal, useUpdateUserPreferencesMutation } from '@/entities/UserSettings';
 import { DAILY_GOAL_OPTIONS } from '@/shared/const/const';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { BoxSegmented } from '@/shared/ui/BoxSegmented';
 import { useTranslation } from 'react-i18next';
 
 /** Выбор цели дня: сколько карточек повторять в день */
 export const DailyGoalSwitcher = memo(() => {
     const { t } = useTranslation();
-    const { message } = useAntdApp();
+    const toast = useToast();
     const goal = useDailyGoal();
     const [updatePreferences] = useUpdateUserPreferencesMutation();
 
@@ -16,7 +16,7 @@ export const DailyGoalSwitcher = memo(() => {
         try {
             await updatePreferences({ dailyGoal }).unwrap();
         } catch {
-            message.error(t('Не удалось сохранить цель дня'));
+            toast.error(t('Не удалось сохранить цель дня'));
         }
     };
 

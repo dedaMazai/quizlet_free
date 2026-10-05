@@ -4,7 +4,7 @@ import { Button, Form, Input } from 'antd';
 import { useChangePasswordMutation } from '@/entities/User';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import cls from './ProfileForm.module.scss';
 
 const MODAL_WIDTH = 440;
@@ -24,7 +24,7 @@ interface ChangePasswordModalProps {
 export const ChangePasswordModal: FC<ChangePasswordModalProps> = (props) => {
   const { open, onClose } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
   const [form] = Form.useForm<ChangePasswordValues>();
   const [changePassword, { isLoading }] = useChangePasswordMutation();
 
@@ -32,10 +32,10 @@ export const ChangePasswordModal: FC<ChangePasswordModalProps> = (props) => {
     const { password } = await form.validateFields();
     try {
       await changePassword(password).unwrap();
-      message.success(t('Пароль изменён'));
+      toast.success(t('Пароль изменён'));
       onClose();
     } catch {
-      message.error(t('Не удалось изменить пароль'));
+      toast.error(t('Не удалось изменить пароль'));
     }
   };
 

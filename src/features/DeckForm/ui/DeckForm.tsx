@@ -10,7 +10,7 @@ import {
 } from '@/entities/Deck';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './DeckForm.module.scss';
 
@@ -23,12 +23,16 @@ interface DeckFormProps {
   open: boolean;
   onClose: () => void;
   deck?: Deck;
+  /** После создания новой колоды — например, чтобы сразу открыть импорт */
+  onCreated?: (deck: Deck) => void;
 }
 
 export const DeckForm: FC<DeckFormProps> = (props) => {
-  const { open, onClose, deck } = props;
+  const {
+    open, onClose, deck, onCreated,
+  } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
   const [form] = Form.useForm<DeckFormValues>();
   const { isMobile } = useMatchMedia();
 
@@ -49,15 +53,16 @@ export const DeckForm: FC<DeckFormProps> = (props) => {
     try {
       if (deck) {
         await updateDeck({ uuid: deck.uuid, ...values }).unwrap();
-        message.success(t('Колода обновлена'));
+        toast.success(t('Колода обновлена'));
       } else {
-        await createDeck(values).unwrap();
-        message.success(t('Колода создана'));
+        const created = await createDeck(values).unwrap();
+        toast.success(t('Колода создана'));
+        onCreated?.(created);
       }
       form.resetFields();
       onClose();
     } catch {
-      message.error(t('Не удалось сохранить колоду'));
+      toast.error(t('Не удалось сохранить колоду'));
     }
   };
 

@@ -1,10 +1,15 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Segmented } from 'antd';
+import { ChartNoAxesColumn } from 'lucide-react';
 import { useUserInfo } from '@/entities/User';
-import { StatsPeriod, useGetStudyOverviewQuery } from '@/entities/Statistics';
+import {
+    selectLearnDeckUuid, StatsPeriod, useGetDueSummaryQuery, useGetStudyOverviewQuery,
+} from '@/entities/Statistics';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { RoutePath } from '@/shared/config/router/routePath';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { AccuracyTimeCards } from '@/widgets/AccuracyTimeCards';
 import { StreakHeatmap } from '@/widgets/StreakHeatmap';
@@ -14,6 +19,7 @@ import cls from './ProgressPage.module.scss';
 
 const ProgressPage = () => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const user = useUserInfo();
     const [period, setPeriod] = useState<StatsPeriod>(StatsPeriod.YEAR);
     const { isMobile } = useMatchMedia();
@@ -26,6 +32,9 @@ const ProgressPage = () => {
     const { data: overview, isLoading } = useGetStudyOverviewQuery(tz);
     // Пока сводка грузится, виджеты показывают скелетоны — пустое состояние не мелькает
     const showStats = isLoading || (overview?.totalAnswers ?? 0) > 0;
+    // «Начать заучивание» — колода с наибольшим числом новых слов
+    const { data: summary } = useGetDueSummaryQuery({ tz }, { skip: showStats });
+    const learnDeckUuid = selectLearnDeckUuid(summary);
 
     return (
         <div className={cls.ProgressPage}>
@@ -60,9 +69,14 @@ const ProgressPage = () => {
                 </>
             ) : (
                 <EmptyState
-                    type="recent"
-                    title={t('Пока нет данных для статистики')}
-                    description={t('Пройдите заучивание, чтобы увидеть свой прогресс')}
+                    icon={ChartNoAxesColumn}
+                    kicker={t('Прогресс')}
+                    title={t('Статистика появится после первого занятия')}
+                    description={t('Серия, точность и освоение колод считаются по ответам.')}
+                    primary={{
+                        label: t('Начать заучивание'),
+                        onClick: () => navigate(learnDeckUuid ? RoutePath.LEARN(learnDeckUuid) : RoutePath.DECKS()),
+                    }}
                 />
             )}
         </div>

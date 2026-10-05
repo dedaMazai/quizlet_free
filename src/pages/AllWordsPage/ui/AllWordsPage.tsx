@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { SearchX } from 'lucide-react';
 import {
   hasLibraryFilter, libraryFilterToSearch, useGetLibraryCardsQuery,
 } from '@/entities/Card';
@@ -8,6 +9,7 @@ import { LibraryFilters, useLibraryFilters } from '@/features/LibraryFilters';
 import { CardList } from '@/widgets/CardList';
 import { LibraryHeader } from '@/widgets/LibraryHeader';
 import { SelectionStrip } from '@/widgets/SelectionStrip';
+import { EmptyState } from '@/shared/ui/EmptyState';
 import { RoutePath } from '@/shared/config/router/routePath';
 import cls from './AllWordsPage.module.scss';
 
@@ -37,6 +39,18 @@ const AllWordsPage = () => {
   // Сессия по текущей выборке: фильтр уходит в query-параметры
   const query = libraryFilterToSearch(filter);
 
+  const notFound = (
+    <EmptyState
+      icon={SearchX}
+      kicker={t('Ничего не найдено')}
+      title={filter.search
+        ? t('По «{{query}}» нет слов', { query: filter.search })
+        : t('Нет слов по этим фильтрам')}
+      description={t('Проверьте написание или сбросьте фильтры.')}
+      primary={{ label: t('Сбросить фильтры'), onClick: filters.resetFilters }}
+    />
+  );
+
   return (
     <div className={cls.AllWordsPage}>
       <LibraryHeader />
@@ -58,7 +72,7 @@ const AllWordsPage = () => {
           total,
           onChange: setPage,
         }}
-        emptyText={hasLibraryFilter(filter) ? t('Ничего не найдено') : undefined}
+        empty={hasLibraryFilter(filter) ? notFound : undefined}
       />
     </div>
   );

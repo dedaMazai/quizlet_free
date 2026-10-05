@@ -4,7 +4,7 @@ import { Button, Input, InputRef } from 'antd';
 import { ImportOutlined, PlusOutlined } from '@ant-design/icons';
 import { CycleWord, useAddCycleWordsMutation } from '@/entities/LearningCycle';
 import { HStack } from '@/shared/ui/Stack';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { ImportCycleWordsModal } from './ImportCycleWordsModal';
 import cls from './AddCycleWords.module.scss';
 
@@ -18,7 +18,7 @@ interface AddCycleWordsProps {
 export const AddCycleWords: FC<AddCycleWordsProps> = (props) => {
   const { cycleUuid, words } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
   const [term, setTerm] = useState('');
   const [translation, setTranslation] = useState('');
   const [importOpen, setImportOpen] = useState(false);
@@ -47,7 +47,7 @@ export const AddCycleWords: FC<AddCycleWordsProps> = (props) => {
     queueRef.current = queueRef.current
       .then(() => addWords({ cycleUuid, words: [word] }).unwrap())
       .catch(() => {
-        message.error(t('Не удалось добавить слово «{{term}}»', { term: word.term }));
+        toast.error(t('Не удалось добавить слово «{{term}}»', { term: word.term }));
       });
   };
 

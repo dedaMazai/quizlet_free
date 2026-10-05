@@ -11,7 +11,7 @@ import {
 } from '@/entities/User';
 import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { AvatarPicker } from './AvatarPicker';
 import { ChangePasswordModal } from './ChangePasswordModal';
@@ -55,7 +55,7 @@ interface ProfileFormProps {
 /** Профиль 6.24: аватар, поля профиля, «Сохранить» и «Сменить пароль» */
 export const ProfileForm: FC<ProfileFormProps> = ({ hidePasswordChange }) => {
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
   const user = useUserInfo();
   const [form] = Form.useForm<ProfileFormValues>();
   const [passwordOpen, setPasswordOpen] = useState(false);
@@ -86,9 +86,9 @@ export const ProfileForm: FC<ProfileFormProps> = ({ hidePasswordChange }) => {
   const handleSubmit = async (values: ProfileFormValues) => {
     try {
       await updateMeInfo(values).unwrap();
-      message.success(t('Профиль обновлён'));
+      toast.success(t('Профиль обновлён'));
     } catch {
-      message.error(t('Не удалось сохранить профиль'));
+      toast.error(t('Не удалось сохранить профиль'));
     }
   };
 
@@ -105,7 +105,7 @@ export const ProfileForm: FC<ProfileFormProps> = ({ hidePasswordChange }) => {
         requiredMark={false}
         className={cls.form}
         onFinish={handleSubmit}
-        onFinishFailed={() => message.error(t('Введите имя'))}
+        onFinishFailed={() => toast.error(t('Введите имя'))}
       >
         <div className={cls.avatarRow}>
           <UserAvatar user={preview} size={UserAvatarSize.LG} />

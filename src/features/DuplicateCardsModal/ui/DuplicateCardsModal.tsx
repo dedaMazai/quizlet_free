@@ -18,6 +18,7 @@ import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast, useUndoableDelete } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './DuplicateCardsModal.module.scss';
 
@@ -30,13 +31,23 @@ interface DuplicateCardsModalProps {
 export const DuplicateCardsModal: FC<DuplicateCardsModalProps> = (props) => {
   const { open, onClose, deckUuid } = props;
   const { t } = useTranslation();
-  const { modal, message } = useAntdApp();
+  const { modal } = useAntdApp();
+  const toast = useToast();
   const { isMobile } = useMatchMedia();
 
   const { data: cards, isLoading } = useGetCardsQuery(deckUuid, { skip: !open });
   const [deleteCard] = useDeleteCardMutation();
 
-  const groups = useMemo(() => findDuplicateGroups(cards ?? []), [cards]);
+  // Удаление с «Отменить»: слово скрыто сразу, запрос уходит через 6 с
+  const { hiddenIds, remove: removeCard } = useUndoableDelete({
+    onCommit: (uuid) => deleteCard(uuid).unwrap(),
+    onError: () => toast.error(t('Не удалось удалить слово')),
+  });
+
+  const groups = useMemo(
+    () => findDuplicateGroups((cards ?? []).filter((card) => !hiddenIds.has(card.uuid))),
+    [cards, hiddenIds],
+  );
 
   const [editingCard, setEditingCard] = useState<Card | undefined>(undefined);
 
@@ -46,10 +57,7 @@ export const DuplicateCardsModal: FC<DuplicateCardsModalProps> = (props) => {
       okText: t('Удалить'),
       okButtonProps: { danger: true },
       cancelText: t('Отмена'),
-      onOk: async () => {
-        await deleteCard(card.uuid).unwrap();
-        message.success(t('Слово удалено'));
-      },
+      onOk: () => removeCard(card.uuid, t('Слово удалено'), t('Отменить')),
     });
   };
 

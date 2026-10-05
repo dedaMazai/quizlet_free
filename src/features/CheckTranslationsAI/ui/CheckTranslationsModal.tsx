@@ -2,21 +2,22 @@ import {
   FC, useMemo, useState, useEffect, useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Input } from 'antd';
+import { Button, Input, Tooltip } from 'antd';
 import type { Key } from 'react';
 import {
   useGetCardsQuery,
   useUpdateCardsBulkMutation,
   useCheckTranslationsMutation,
-  useGetAiUsageQuery,
+  useAiQuota,
   AiCheckResult,
+  AiQuotaNotice,
 } from '@/entities/Card';
 import { useGetDeckQuery } from '@/entities/Deck';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { CheckSquare } from '@/shared/ui/CheckSquare';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import cls from './CheckTranslationsModal.module.scss';
 
 const MODAL_WIDTH = 920;
@@ -42,14 +43,14 @@ interface EditValue {
 export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) => {
   const { open, deckUuid, onClose } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
 
   const [results, setResults] = useState<AiCheckResult[] | null>(null);
   const [edits, setEdits] = useState<Record<string, EditValue>>({});
   const [selectedKeys, setSelectedKeys] = useState<Key[]>([]);
 
   const { data: cards } = useGetCardsQuery(deckUuid, { skip: !open });
-  const { data: remaining } = useGetAiUsageQuery(undefined, { skip: !open });
+  const { remaining, isExhausted: noCredits } = useAiQuota({ skip: !open });
   const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
   const [checkTranslations, { isLoading: isChecking }] = useCheckTranslationsMutation();
   const [updateCardsBulk, { isLoading: isApplying }] = useUpdateCardsBulkMutation();
@@ -80,7 +81,6 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
       .filter((r): r is ResultRow => r !== null);
   }, [results, cardsByUuid]);
 
-  const noCredits = remaining !== undefined && remaining <= 0;
   const hasCards = (cards?.length ?? 0) > 0;
 
   const setEditField = useCallback((uuid: string, field: keyof EditValue, value: string) => {
@@ -107,13 +107,13 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
       setEdits(initialEdits);
       // По умолчанию выбираем все строки — ИИ заполняет примеры для каждого слова.
       setSelectedKeys(data.map((r) => r.uuid));
-      message.success(t('Переводы проверены'));
+      toast.success(t('Переводы проверены'));
     } catch (err) {
       const code = (err as { error?: string })?.error;
       if (code === 'AI_LIMIT_EXCEEDED') {
-        message.error(t('Лимит запросов к ИИ исчерпан'));
+        toast.error(t('Лимит запросов к ИИ исчерпан'));
       } else {
-        message.error(t('Не удалось проверить переводы'));
+        toast.error(t('Не удалось проверить переводы'));
       }
     }
   };
@@ -130,10 +130,10 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
     if (payload.length === 0) return;
     try {
       await updateCardsBulk(payload).unwrap();
-      message.success(t('Изменения применены'));
+      toast.success(t('Изменения применены'));
       onClose();
     } catch {
-      message.error(t('Не удалось применить изменения'));
+      toast.error(t('Не удалось применить изменения'));
     }
   };
 
@@ -176,20 +176,23 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
               {t('Применить выбранное')}
             </Button>
           ) : (
-            <Button
-              type="primary"
-              loading={isChecking}
-              disabled={noCredits || !hasCards}
-              onClick={handleCheck}
-            >
-              <BlueprintMarks />
-              {t('Проверить')}
-            </Button>
+            <Tooltip title={noCredits ? t('Лимит обновится завтра') : undefined}>
+              <Button
+                type="primary"
+                loading={isChecking}
+                disabled={noCredits || !hasCards}
+                onClick={handleCheck}
+              >
+                <BlueprintMarks />
+                {t('Проверить')}
+              </Button>
+            </Tooltip>
           )}
         </>
       )}
     >
       <div className={cls.content}>
+        {!results && <AiQuotaNotice />}
         {!results && (
           <span className={cls.summary}>
             {t('ИИ проверит переводы {{count}} слов колоды и подберёт к ним примеры.', {

@@ -3,22 +3,21 @@ import {
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Result } from 'antd';
-import dayjs from 'dayjs';
+import { CheckCheck } from 'lucide-react';
 import {
   Card,
   CardReview,
   DueCard,
   REVIEW_EVENTS_KEY,
   useGetDueCardsQuery,
-  useGetDueCountQuery,
 } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
-import { useGetDueSummaryQuery, useGetMasteryQuery } from '@/entities/Statistics';
+import { selectLearnDeckUuid, useGetDueSummaryQuery, useGetMasteryQuery } from '@/entities/Statistics';
 import { useUserInfo } from '@/entities/User';
 import { LearnSession } from '@/features/LearnSession';
 import { SessionResult } from '@/widgets/SessionResult';
 import { SectionPageHeader } from '@/widgets/SectionPage';
+import { EmptyState } from '@/shared/ui/EmptyState';
 import { VStack } from '@/shared/ui/Stack';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
@@ -58,12 +57,11 @@ const ReviewPage = () => {
   const location = useLocation();
 
   const { data: dueCards, isLoading } = useGetDueCardsQuery(undefined);
-  const { data: dueCount } = useGetDueCountQuery(undefined);
   const { data: decks } = useGetDecksQuery();
   const { data: mastery } = useGetMasteryQuery();
   const userInfo = useUserInfo();
   const tz = userInfo?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-  const { data: dueSummary } = useGetDueSummaryQuery({ tz, days: FORECAST_DAYS });
+  const { data: dueSummary, isLoading: isSummaryLoading } = useGetDueSummaryQuery({ tz, days: FORECAST_DAYS });
 
   // Колоды, исключённые из сессии, — только на этом устройстве
   const [excludedDecks, setExcludedDecks] = useLocalStorage<string[]>(
@@ -169,22 +167,24 @@ const ReviewPage = () => {
   if (isLoading) return <Loader />;
 
   if (!dueCards?.length) {
+    // Заголовок зависит от прогноза на завтра — не показываем его вполовину
+    if (isSummaryLoading) return <Loader />;
+
+    const tomorrowCount = dueSummary?.forecast[1]?.count ?? 0;
+    const learnDeckUuid = selectLearnDeckUuid(dueSummary);
+    const learnNew = () => navigate(learnDeckUuid ? RoutePath.LEARN(learnDeckUuid) : RoutePath.DECKS());
+
     return (
       <VStack max fullHeight gap="24">
         <SectionPageHeader section={NavSectionKey.LEARN} />
-        <Result
-          status="success"
-          title={t('На сегодня всё!')}
-          subTitle={dueCount?.nextDueAt
-            ? t('Ближайший повтор: {{date}}', {
-              date: dayjs(dueCount.nextDueAt).format('D MMMM, HH:mm'),
-            })
-            : undefined}
-          extra={(
-            <Button type="primary" onClick={() => navigate(RoutePath.DECKS())}>
-              {t('Учить новые слова')}
-            </Button>
-          )}
+        <EmptyState
+          icon={CheckCheck}
+          kicker={t('Всё повторено')}
+          title={tomorrowCount > 0
+            ? t('На сегодня всё. Следующие {{count}} — завтра', { count: tomorrowCount })
+            : t('На сегодня всё')}
+          description={t('Новые слова можно учить, не дожидаясь повторений.')}
+          primary={{ label: t('Учить новые'), onClick: learnNew }}
         />
       </VStack>
     );

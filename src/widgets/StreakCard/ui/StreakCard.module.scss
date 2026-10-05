@@ -1,12 +1,45 @@
 $days-size: 64px;
 $goal-height: 8px;
 $scale-height: 4px;
+$card-gap: 20px;
+
+// Геометрия скелетона = итоговые блоки: огонь 56px, шкала уровней, цель дня
+$flame-size: 56px;
+$header-height: 20px;
+$levels-height: 47px;
+$goal-block-height: 63px;
 
 .StreakCard {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: $card-gap;
     padding: 24px;
+}
+
+.content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: $card-gap;
+}
+
+.recordSkeleton {
+    width: 88px;
+    height: $header-height;
+}
+
+.streakRowSkeleton {
+    width: 60%;
+    height: $flame-size;
+}
+
+.levelsSkeleton {
+    height: $levels-height;
+}
+
+.goalSkeleton {
+    height: $goal-block-height;
+    margin-top: auto;
 }
 
 // Цвет текущего уровня серии — для плашки, числа и ячеек недели

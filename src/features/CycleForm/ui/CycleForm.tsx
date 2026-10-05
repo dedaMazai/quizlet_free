@@ -9,7 +9,7 @@ import {
   useCreateCycleMutation,
   useUpdateCycleMutation,
 } from '@/entities/LearningCycle';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
@@ -42,7 +42,7 @@ export const CycleForm: FC<CycleFormProps> = (props) => {
     open, onClose, cycle, words = [], onCreated,
   } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
   const { isMobile } = useMatchMedia();
   const [form] = Form.useForm<CycleFormValues>();
 
@@ -80,19 +80,19 @@ export const CycleForm: FC<CycleFormProps> = (props) => {
           daily_new_count: values.daily_new_count,
           start_word_uuid: values.start_word_uuid ?? null,
         }).unwrap();
-        message.success(t('Цикл обновлён'));
+        toast.success(t('Цикл обновлён'));
       } else {
         const created = await createCycle({
           name: values.name,
           daily_new_count: values.daily_new_count,
         }).unwrap();
-        message.success(t('Цикл создан'));
+        toast.success(t('Цикл создан'));
         onCreated?.(created);
       }
       form.resetFields();
       onClose();
     } catch {
-      message.error(t('Не удалось сохранить цикл'));
+      toast.error(t('Не удалось сохранить цикл'));
     }
   };
 

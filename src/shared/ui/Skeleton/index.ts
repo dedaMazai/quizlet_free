@@ -1,1 +1,1 @@
-export { Skeleton } from './Skeleton';
+export { Skeleton, SkeletonTone, FadeIn } from './Skeleton';

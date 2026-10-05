@@ -37,6 +37,7 @@ export {
   hasLibraryFilter, libraryFilterToSearch, libraryFilterFromParams,
 } from './model/lib/libraryFilter';
 export { useLibraryFilterCards } from './model/hooks/useLibraryFilterCards';
+export { useAiQuota } from './model/hooks/useAiQuota';
 export type { ReviewGrade } from './model/lib/srs';
 export {
   LEARNING_STEPS,
@@ -56,3 +57,4 @@ export {
 export { ALL_WORDS_PROGRESS_KEY } from './model/const/allWords';
 export { REVIEW_EVENTS_KEY } from './model/const/review';
 export { FavoriteToggle } from './ui/FavoriteToggle/FavoriteToggle';
+export { AiQuotaNotice } from './ui/AiQuotaNotice/AiQuotaNotice';

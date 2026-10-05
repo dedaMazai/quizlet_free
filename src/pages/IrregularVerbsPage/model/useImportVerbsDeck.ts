@@ -5,12 +5,12 @@ import { Deck, useCreateDeckMutation, useGetDecksQuery } from '@/entities/Deck';
 import { useCreateCardsMutation } from '@/entities/Card';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { VerbBand, verbToTerm } from '@/shared/const/grammar';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 
 export const useImportVerbsDeck = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { message } = useAntdApp();
+    const toast = useToast();
     const { data: decks } = useGetDecksQuery();
     const [createDeck] = useCreateDeckMutation();
     const [createCards] = useCreateCardsMutation();
@@ -38,10 +38,10 @@ export const useImportVerbsDeck = () => {
                 translation: verb.translation,
                 card_type: 'word' as const,
             }))).unwrap();
-            message.success(t('Колода создана'));
+            toast.success(t('Колода создана'));
             navigate(RoutePath.DECK(deck.uuid));
         } catch {
-            message.error(t('Не удалось создать колоду'));
+            toast.error(t('Не удалось создать колоду'));
         } finally {
             setImportingBand(null);
         }

@@ -6,6 +6,7 @@ $next-col: 96px;
 $col-gap: 16px;
 $mark-size: 8px;
 $icon-button: 24px;
+$mobile-text-block: 40px;
 
 .CardList {
     display: flex;
@@ -51,6 +52,20 @@ $icon-button: 24px;
     &:hover {
         background: var(--color-accent-100);
     }
+}
+
+.skeletonRow:hover {
+    background: none;
+}
+
+.cellSkeleton {
+    // Самый высокий элемент строки — иконки 24px: по ним скелетон совпадает с итоговой
+    height: $icon-button;
+}
+
+.mobileSkeleton {
+    flex: 1;
+    height: $mobile-text-block;
 }
 
 .editable {

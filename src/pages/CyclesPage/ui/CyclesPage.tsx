@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty, Result } from 'antd';
-import { Plus } from 'lucide-react';
+import { Button, Result } from 'antd';
+import { Plus, Repeat } from 'lucide-react';
 import {
   CycleDayPlan,
   CycleWordPortion,
@@ -18,7 +18,8 @@ import { SectionPageHeader } from '@/widgets/SectionPage';
 import { NavSectionKey } from '@/shared/const/menu';
 import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
-import { Loader } from '@/shared/ui/Loader';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { FadeIn, Skeleton } from '@/shared/ui/Skeleton';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
@@ -29,6 +30,7 @@ const MOBILE_ICON_SIZE = 20;
 const ICON_STROKE = 1.5;
 /** Ячеек в полосе карточки: доли слов «в повторе / сегодня / в очереди» */
 const CELLS_COUNT = 30;
+const SKELETON_CARDS = 3;
 
 type CellKind = 'review' | 'today' | 'locked';
 
@@ -115,7 +117,18 @@ const CyclesPage = () => {
           : t('Записывайте слова по порядку, как в тетради. Каждый день открывается N новых, а все предыдущие идут в повтор.')}
       </p>
 
-      {isLoading && <Loader />}
+      {isLoading && (
+        <div className={cls.grid}>
+          {Array.from({ length: SKELETON_CARDS }, (_, i) => (
+            <Blueprint key={i} className={classNames(cls.card, [cls.skeletonCard])}>
+              <Skeleton className={cls.kickerSkeleton} />
+              <Skeleton className={cls.nameSkeleton} />
+              <Skeleton className={cls.cellsSkeleton} />
+              <Skeleton className={cls.metaSkeleton} />
+            </Blueprint>
+          ))}
+        </div>
+      )}
       {isError && (
         <Result
           status="error"
@@ -124,13 +137,17 @@ const CyclesPage = () => {
         />
       )}
       {!isLoading && !isError && !cycles?.length && (
-        <Empty className={cls.empty} description={t('Циклов пока нет')}>
-          {createButton}
-        </Empty>
+        <EmptyState
+          icon={Repeat}
+          kicker={t('Циклы')}
+          title={t('Записывайте слова по порядку, как в тетради')}
+          description={t('Каждый день цикл открывает новую порцию и повторяет прошлые.')}
+          primary={{ label: t('Создать цикл'), onClick: () => setFormOpen(true) }}
+        />
       )}
 
       {cards.length > 0 && (
-        <div className={cls.grid}>
+        <FadeIn className={cls.grid}>
           {cards.map(({
             cycle, plan, todo, cells,
           }) => (
@@ -162,7 +179,7 @@ const CyclesPage = () => {
               </div>
             </Blueprint>
           ))}
-        </div>
+        </FadeIn>
       )}
 
       <CycleForm

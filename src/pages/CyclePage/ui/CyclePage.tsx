@@ -32,6 +32,7 @@ import { SectionHeader } from '@/shared/ui/SectionHeader';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './CyclePage.module.scss';
 
@@ -43,7 +44,8 @@ const PERCENT = 100;
 const CyclePage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { modal, message } = useAntdApp();
+  const { modal } = useAntdApp();
+  const toast = useToast();
   const { cycleId } = useParams();
   const { isMobile } = useMatchMedia();
   const [formOpen, setFormOpen] = useState(false);
@@ -91,9 +93,9 @@ const CyclePage = () => {
       onOk: async () => {
         try {
           await syncPortion({ cycleUuid: cycle.uuid, today: getToday(), forceNew: true }).unwrap();
-          message.success(t('Открыта новая порция слов'));
+          toast.success(t('Открыта новая порция слов'));
         } catch {
-          message.error(t('Не удалось открыть новую порцию'));
+          toast.error(t('Не удалось открыть новую порцию'));
         }
       },
     });
@@ -112,7 +114,7 @@ const CyclePage = () => {
           clearCycleSessions(cycle.uuid);
           navigate(RoutePath.CYCLES());
         } catch {
-          message.error(t('Не удалось удалить цикл'));
+          toast.error(t('Не удалось удалить цикл'));
         }
       },
     });

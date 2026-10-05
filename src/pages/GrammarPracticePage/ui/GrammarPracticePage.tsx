@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
-import { Button, Input } from 'antd';
+import { Button, Input, Tooltip } from 'antd';
 import { SlidersHorizontal, Sparkles } from 'lucide-react';
-import { useGetAiUsageQuery } from '@/entities/Card';
+import { AiQuotaNotice, useAiQuota } from '@/entities/Card';
 import {
     AiCheckResultItem,
     useCheckGrammarAnswersMutation,
@@ -16,7 +16,7 @@ import {
     ASPECT_GROUP_ORDER, ASPECT_GROUPS, AspectGroupId, PRACTICE_TASKS_COUNT,
 } from '@/shared/const/grammar';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
@@ -55,7 +55,7 @@ const shortTense = (tense: string): string => tense
 
 const GrammarPracticePage = () => {
     const { t, i18n } = useTranslation();
-    const { message } = useAntdApp();
+    const toast = useToast();
     const [searchParams] = useSearchParams();
     const { isMobile } = useMatchMedia();
     // Мобильная 6.53: настройки набора — в шторке по кнопке в шапке
@@ -75,7 +75,7 @@ const GrammarPracticePage = () => {
     // Повтор «Только ошибки» — тренировка без записи в освоенность
     const [isRetry, setIsRetry] = useState(false);
 
-    const { data: aiRemaining } = useGetAiUsageQuery();
+    const { remaining: aiRemaining, isExhausted: aiExhausted } = useAiQuota();
     const [generateExercises, { isLoading: isGenerating }] = useGenerateGrammarExercisesMutation();
     const [checkAnswers, { isLoading: isChecking }] = useCheckGrammarAnswersMutation();
     const [saveTenseAnswers] = useSaveTenseAnswersMutation();
@@ -101,7 +101,7 @@ const GrammarPracticePage = () => {
     /** true — набор показан; шторка настроек на мобильном закрывается только тогда */
     const startSession = async (): Promise<boolean> => {
         if (groups.length === 0) {
-            message.warning(t('Выберите хотя бы одну группу времён'));
+            toast.warning(t('Выберите хотя бы одну группу времён'));
             return false;
         }
 
@@ -116,14 +116,14 @@ const GrammarPracticePage = () => {
                 count: PRACTICE_TASKS_COUNT,
             }).unwrap();
             if (exercises.length === 0) {
-                message.error(t('Не удалось получить задания от ИИ'));
+                toast.error(t('Не удалось получить задания от ИИ'));
                 return false;
             }
             showTasks(exercises);
             return true;
         } catch (error) {
             const code = (error as { error?: string })?.error ?? '';
-            message.error(code.includes('AI_LIMIT_EXCEEDED')
+            toast.error(code.includes('AI_LIMIT_EXCEEDED')
                 ? t('Лимит запросов к ИИ исчерпан')
                 : t('Не удалось получить задания от ИИ'));
             return false;
@@ -138,7 +138,7 @@ const GrammarPracticePage = () => {
         // Освоенность — фоновая запись: её сбой не мешает разбору ответов
         saveTenseAnswers(tasks.map((task) => ({ tense: task.tense, ok: Boolean(byId[task.id]?.ok) })))
             .unwrap()
-            .catch(() => message.error(t('Не удалось сохранить результат')));
+            .catch(() => toast.error(t('Не удалось сохранить результат')));
     };
 
     const submitAnswers = async () => {
@@ -160,7 +160,7 @@ const GrammarPracticePage = () => {
             applyResults(response.results);
         } catch (error) {
             const code = (error as { error?: string })?.error ?? '';
-            message.error(code.includes('AI_LIMIT_EXCEEDED')
+            toast.error(code.includes('AI_LIMIT_EXCEEDED')
                 ? t('Лимит запросов к ИИ исчерпан')
                 : t('Не удалось проверить ответы'));
         }
@@ -169,6 +169,11 @@ const GrammarPracticePage = () => {
     const retryMistakes = () => {
         showTasks(tasks.filter((task) => !results[task.id]?.ok), true);
     };
+
+    // Лимит ИИ исчерпан: генерация в режиме ИИ и проверка ИИ-заданий недоступны до завтра
+    const startBlocked = mode === 'ai' && aiExhausted;
+    const checkBlocked = aiExhausted && !tasks.every((task) => task.expected);
+    const limitHint = (blocked: boolean) => (blocked ? t('Лимит обновится завтра') : undefined);
 
     const isChecked = phase === 'checked';
     const correctCount = tasks.filter((task) => results[task.id]?.ok).length;
@@ -241,6 +246,7 @@ const GrammarPracticePage = () => {
                             count: aiRemaining ?? 0,
                         })}
                 </span>
+                {mode === 'ai' && <AiQuotaNotice />}
             </div>
         </>
     );
@@ -274,14 +280,16 @@ const GrammarPracticePage = () => {
                     width="100%"
                     title={t('Настройки практики')}
                     actions={(
-                        <Button
-                            type="primary"
-                            loading={isGenerating}
-                            disabled={groups.length === 0}
-                            onClick={startFromSheet}
-                        >
-                            {t('Новый набор')}
-                        </Button>
+                        <Tooltip title={limitHint(startBlocked)}>
+                            <Button
+                                type="primary"
+                                loading={isGenerating}
+                                disabled={groups.length === 0 || startBlocked}
+                                onClick={startFromSheet}
+                            >
+                                {t('Новый набор')}
+                            </Button>
+                        </Tooltip>
                     )}
                 >
                     <div className={cls.settingsSheet}>{settingsFields}</div>
@@ -293,14 +301,16 @@ const GrammarPracticePage = () => {
                     <Blueprint className={cls.settings}>
                         {settingsFields}
 
-                        <Button
-                            className={cls.newSet}
-                            loading={isGenerating}
-                            disabled={groups.length === 0}
-                            onClick={startSession}
-                        >
-                            {t('Новый набор')}
-                        </Button>
+                        <Tooltip title={limitHint(startBlocked)}>
+                            <Button
+                                className={cls.newSet}
+                                loading={isGenerating}
+                                disabled={groups.length === 0 || startBlocked}
+                                onClick={startSession}
+                            >
+                                {t('Новый набор')}
+                            </Button>
+                        </Tooltip>
                     </Blueprint>
                 )}
 
@@ -387,32 +397,36 @@ const GrammarPracticePage = () => {
                         {isChecked
                             ? (
                                 <>
-                                    <Button
-                                        type="primary"
-                                        className={cls.primaryAction}
-                                        loading={isGenerating}
-                                        disabled={groups.length === 0}
-                                        onClick={startSession}
-                                    >
-                                        <BlueprintMarks />
-                                        {t('Ещё раз')}
-                                    </Button>
+                                    <Tooltip title={limitHint(startBlocked)}>
+                                        <Button
+                                            type="primary"
+                                            className={cls.primaryAction}
+                                            loading={isGenerating}
+                                            disabled={groups.length === 0 || startBlocked}
+                                            onClick={startSession}
+                                        >
+                                            <BlueprintMarks />
+                                            {t('Ещё раз')}
+                                        </Button>
+                                    </Tooltip>
                                     <Button className={cls.secondaryAction} disabled={!hasMistakes} onClick={retryMistakes}>
                                         {t('Только ошибки')}
                                     </Button>
                                 </>
                             )
                             : (
-                                <Button
-                                    type="primary"
-                                    className={cls.primaryAction}
-                                    loading={isChecking}
-                                    disabled={tasks.length === 0}
-                                    onClick={submitAnswers}
-                                >
-                                    <BlueprintMarks />
-                                    {t('Проверить')}
-                                </Button>
+                                <Tooltip title={limitHint(checkBlocked)}>
+                                    <Button
+                                        type="primary"
+                                        className={cls.primaryAction}
+                                        loading={isChecking}
+                                        disabled={tasks.length === 0 || checkBlocked}
+                                        onClick={submitAnswers}
+                                    >
+                                        <BlueprintMarks />
+                                        {t('Проверить')}
+                                    </Button>
+                                </Tooltip>
                             )}
                     </div>
                 </div>

@@ -54,9 +54,15 @@
     --focus-topbar-height: 72px;
     --public-header-height: 72px;
 
+    // Мобильный таб-бар: 50 + отступы 6/24 + рамка — тосты встают над ним
+    --tabbar-height: 81px;
+
     // z-indexes
     --modal-z-index: 1000;
     --overlay-z-index: 100;
+
+    // Выше модалок AntD (1000): тост об ошибке из модалки должен быть виден
+    --toast-z-index: 1100;
     --overlay-color: rgb(0 0 0 / 0.6);
 
     // Semantic colors

@@ -12,6 +12,7 @@ import {
 import { useDailyGoal } from '@/entities/UserSettings';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import { Kicker } from '@/shared/ui/Kicker';
+import { FadeIn, Skeleton } from '@/shared/ui/Skeleton';
 import { StreakFlame } from '@/shared/ui/StreakFlame';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { getStreakLevel, STREAK_LEVEL_NAMES, STREAK_LEVEL_THRESHOLDS } from '@/shared/lib/streak';
@@ -38,8 +39,9 @@ export const StreakCard = memo((props: StreakCardProps) => {
     const { tz, className } = props;
     const { t, i18n } = useTranslation();
 
-    const { data: overview } = useGetStudyOverviewQuery(tz);
-    const { data: heatmap } = useGetStudyHeatmapQuery(tz);
+    const { data: overview, isLoading: isOverviewLoading } = useGetStudyOverviewQuery(tz);
+    const { data: heatmap, isLoading: isHeatmapLoading } = useGetStudyHeatmapQuery(tz);
+    const isLoading = isOverviewLoading || isHeatmapLoading;
     const todayAnswers = useTodayAnswers(tz);
     const goal = useDailyGoal();
 
@@ -71,88 +73,112 @@ export const StreakCard = memo((props: StreakCardProps) => {
         '--progress': `${Math.min(PERCENT, (todayAnswers / goal) * PERCENT)}%`,
     } as CSSProperties;
 
-    return (
-        <Blueprint className={classNames(cls.StreakCard, [className, LEVEL_CLASSES[level.index]])}>
-            <div className={cls.header}>
-                <div className={cls.title}>
+    if (isLoading) {
+        return (
+            <Blueprint className={classNames(cls.StreakCard, [className])}>
+                <div className={cls.header}>
                     <Kicker>{t('Серия')}</Kicker>
-                    <span
-                        className={classNames(cls.levelTag, [], {
-                            [cls.levelTagLight]: level.index >= LIGHT_TAG_LEVEL_INDEX,
-                        })}
-                    >
-                        {t(STREAK_LEVEL_NAMES[level.index])}
-                    </span>
+                    <Skeleton className={cls.recordSkeleton} />
                 </div>
-                <span className={cls.record}>{t('рекорд — {{count}}', { count: record })}</span>
-            </div>
-
-            <div className={cls.streakRow}>
-                <StreakFlame days={days} />
-                <span
-                    className={classNames(cls.days, [], {
-                        [cls.daysColored]: level.index >= COLORED_DAYS_LEVEL_INDEX,
-                    })}
-                >
-                    {days}
-                </span>
-                <span className={cls.daysUnit}>{t('дней подряд', { count: days })}</span>
-            </div>
-
-            <div className={cls.week}>
-                {week.map((day, i) => (
-                    <div key={day.key} className={cls.day}>
-                        <div
-                            className={classNames(cls.dayCell, [], {
-                                [cls.dayDone]: day.done,
-                                [cls.dayToday]: !day.done && i === week.length - 1,
-                            })}
-                        >
-                            {day.done && (
-                                <Check aria-hidden size={CHECK_SIZE} strokeWidth={CHECK_STROKE} />
-                            )}
-                        </div>
-                        <span className={cls.dayLabel}>{day.label}</span>
-                    </div>
-                ))}
-            </div>
-
-            <div className={cls.levels}>
-                <div className={cls.scale}>
-                    {STREAK_LEVEL_THRESHOLDS.map((min, i) => (
-                        <div key={min} className={cls.scaleStep}>
-                            <i
-                                className={classNames(cls.scaleBar, [], {
-                                    [SCALE_CLASSES[i]]: i <= level.index,
-                                })}
-                            />
-                            <span
-                                className={classNames(cls.scaleLabel, [], {
-                                    [cls.scaleLabelCurrent]: i === level.index,
-                                })}
-                            >
-                                {`${min}+`}
-                            </span>
+                <Skeleton className={cls.streakRowSkeleton} />
+                <div className={cls.week}>
+                    {week.map((day) => (
+                        <div key={day.key} className={cls.day}>
+                            <Skeleton className={cls.dayCell} />
+                            <span className={cls.dayLabel}>{day.label}</span>
                         </div>
                     ))}
                 </div>
-                <span className={cls.nextHint}>{nextHint}</span>
-            </div>
+                <Skeleton className={cls.levelsSkeleton} />
+                <Skeleton className={cls.goalSkeleton} />
+            </Blueprint>
+        );
+    }
 
-            <div className={cls.goal}>
-                <div className={cls.goalHead}>
-                    <span>{t('Цель дня')}</span>
-                    <span className={cls.goalValue}>{`${todayAnswers} / ${goal}`}</span>
+    return (
+        <Blueprint className={classNames(cls.StreakCard, [className, LEVEL_CLASSES[level.index]])}>
+            <FadeIn className={cls.content}>
+                <div className={cls.header}>
+                    <div className={cls.title}>
+                        <Kicker>{t('Серия')}</Kicker>
+                        <span
+                            className={classNames(cls.levelTag, [], {
+                                [cls.levelTagLight]: level.index >= LIGHT_TAG_LEVEL_INDEX,
+                            })}
+                        >
+                            {t(STREAK_LEVEL_NAMES[level.index])}
+                        </span>
+                    </div>
+                    <span className={cls.record}>{t('рекорд — {{count}}', { count: record })}</span>
                 </div>
-                <div className={cls.goalTrack} style={goalStyle}>
-                    <div className={cls.goalFill} />
+
+                <div className={cls.streakRow}>
+                    <StreakFlame days={days} />
+                    <span
+                        className={classNames(cls.days, [], {
+                            [cls.daysColored]: level.index >= COLORED_DAYS_LEVEL_INDEX,
+                        })}
+                    >
+                        {days}
+                    </span>
+                    <span className={cls.daysUnit}>{t('дней подряд', { count: days })}</span>
                 </div>
-                <span className={cls.goalNote}>
-                    {goalLeft > 0
-                        ? t('Ещё {{count}} карточек — и цель выполнена', { count: goalLeft })
-                        : t('Цель дня выполнена')}
-                </span>
-            </div>
+
+                <div className={cls.week}>
+                    {week.map((day, i) => (
+                        <div key={day.key} className={cls.day}>
+                            <div
+                                className={classNames(cls.dayCell, [], {
+                                    [cls.dayDone]: day.done,
+                                    [cls.dayToday]: !day.done && i === week.length - 1,
+                                })}
+                            >
+                                {day.done && (
+                                    <Check aria-hidden size={CHECK_SIZE} strokeWidth={CHECK_STROKE} />
+                                )}
+                            </div>
+                            <span className={cls.dayLabel}>{day.label}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className={cls.levels}>
+                    <div className={cls.scale}>
+                        {STREAK_LEVEL_THRESHOLDS.map((min, i) => (
+                            <div key={min} className={cls.scaleStep}>
+                                <i
+                                    className={classNames(cls.scaleBar, [], {
+                                        [SCALE_CLASSES[i]]: i <= level.index,
+                                    })}
+                                />
+                                <span
+                                    className={classNames(cls.scaleLabel, [], {
+                                        [cls.scaleLabelCurrent]: i === level.index,
+                                    })}
+                                >
+                                    {`${min}+`}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    <span className={cls.nextHint}>{nextHint}</span>
+                </div>
+
+                <div className={cls.goal}>
+                    <div className={cls.goalHead}>
+                        <span>{t('Цель дня')}</span>
+                        <span className={cls.goalValue}>{`${todayAnswers} / ${goal}`}</span>
+                    </div>
+                    <div className={cls.goalTrack} style={goalStyle}>
+                        <div className={cls.goalFill} />
+                    </div>
+                    <span className={cls.goalNote}>
+                        {goalLeft > 0
+                            ? t('Ещё {{count}} карточек — и цель выполнена', { count: goalLeft })
+                            : t('Цель дня выполнена')}
+                    </span>
+                </div>
+            </FadeIn>
         </Blueprint>
     );
 });

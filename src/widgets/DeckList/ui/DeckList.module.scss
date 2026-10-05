@@ -1,5 +1,10 @@
 $card-min-height: 150px;
 
+// Скелетон: название 19×1.1, мобильное — 18px
+$name-line: 21px;
+$name-line-mobile: 22px;
+$meta-line: 12px;
+
 .grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -19,6 +24,23 @@ $card-min-height: 150px;
     &:hover {
         background: var(--color-accent-100);
     }
+}
+
+.skeletonCard {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: $card-min-height;
+    padding: 16px;
+}
+
+.nameSkeleton {
+    width: 70%;
+    height: $name-line;
+}
+
+.lineSkeleton {
+    height: $meta-line;
 }
 
 .head {
@@ -107,6 +129,19 @@ $card-min-height: 150px;
     padding: 12px 14px;
     color: var(--color-text);
     cursor: pointer;
+}
+
+.mobileSkeletonCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+}
+
+.mobileNameSkeleton {
+    width: 60%;
+    height: $name-line-mobile;
 }
 
 .mobileHead {

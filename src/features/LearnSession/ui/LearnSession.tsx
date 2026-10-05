@@ -15,6 +15,7 @@ import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { Loader } from '@/shared/ui/Loader';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { useAutoSpeak } from '@/shared/lib/hooks/useAutoSpeak';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { useSpeech } from '@/shared/lib/hooks/useSpeech';
@@ -56,7 +57,8 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
     deckKey, deckName, cards, savedReviews, allowReset, title, onExit, renderResult,
   } = props;
   const { t } = useTranslation();
-  const { modal, message } = useAntdApp();
+  const { modal } = useAntdApp();
+  const toast = useToast();
   const [resetReviews] = useResetCardReviewsMutation();
   const { autoSpeak, toggleAutoSpeak } = useAutoSpeak();
   const { speak } = useSpeech();
@@ -114,7 +116,7 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
       onOk: async () => {
         await resetReviews(cards.map((card) => card.uuid)).unwrap();
         restart();
-        message.success(t('Прогресс сброшен'));
+        toast.success(t('Прогресс сброшен'));
       },
     });
   };

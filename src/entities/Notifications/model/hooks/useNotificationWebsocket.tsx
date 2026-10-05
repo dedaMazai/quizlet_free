@@ -6,11 +6,10 @@ import {
     useRef,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
 import { useNavigate } from 'react-router';
 import { getCookie } from 'typescript-cookie';
 import { io, Socket } from 'socket.io-client';
-import { useNotificationFn } from '@/shared/lib/context/NotificationContext';
+import { useToast } from '@/shared/lib/toast';
 import { useAppDispatch } from '@/shared/lib/hooks/useAppDispatch';
 import { useUserInfo } from '@/entities/User';
 import { ApiTag } from '@/shared/api/rtkApi';
@@ -38,7 +37,7 @@ export const useNotificationWebsocket = () => {
     const { t } = useTranslation();
     const [isConnected, setIsConnected] = useState(false);
     const socketRef = useRef<Socket | null>(null);
-    const notification = useNotificationFn();
+    const toast = useToast();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const userInfo = useUserInfo();
@@ -66,25 +65,11 @@ export const useNotificationWebsocket = () => {
                 extra: wsNotification.extra,
             });
 
-            const buttonData = link
-                ? {
-                    title: t('Открыть'),
-                    handler: () => navigate(link),
-                }
-                : undefined;
-
-            notification?.info({
-                message: wsNotification.text,
-                btn: buttonData
-                    ? (
-                        <Button onClick={buttonData.handler} type="primary">
-                            {buttonData.title}
-                        </Button>
-                    )
-                    : undefined,
+            toast.info(wsNotification.text, {
+                action: link ? { label: t('Открыть'), onClick: () => navigate(link) } : undefined,
             });
         },
-        [notification, navigate, t],
+        [toast, navigate, t],
     );
 
     showNotificationRef.current = showNotification;

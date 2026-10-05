@@ -3,7 +3,9 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input, Select } from 'antd';
-import { ChevronDown, Search } from 'lucide-react';
+import {
+    ChevronDown, Search, SearchX, Users,
+} from 'lucide-react';
 import {
     RoleSelect,
     UserAvatar,
@@ -48,6 +50,13 @@ export const UsersTable = () => {
         applyDebouncedSearch(e.target.value);
     };
 
+    const resetFilters = () => {
+        setSearch('');
+        setDebouncedSearch('');
+        setRoleFilter(undefined);
+        setStatusFilter('all');
+    };
+
     const statusOptions = useMemo(() => [
         { value: 'all' as const, label: t('Все статусы') },
         { value: 'active' as const, label: t('Активные') },
@@ -85,7 +94,13 @@ export const UsersTable = () => {
         : `${aiUsage?.[user.uuid] ?? 0}/${user.ai_limit ?? DEFAULT_AI_LIMIT}`);
 
     if (!isLoading && !users?.length) {
-        return <EmptyState type="recent" title={t('Пользователи не найдены')} />;
+        return (
+            <EmptyState
+                icon={Users}
+                kicker={t('Пользователи')}
+                title={t('Пользователи не найдены')}
+            />
+        );
     }
 
     return (
@@ -158,7 +173,13 @@ export const UsersTable = () => {
                     ))}
 
                     {!isLoading && !filteredUsers.length && (
-                        <EmptyState type="search" title={t('Пользователи не найдены')} />
+                        <EmptyState
+                            className={cls.empty}
+                            icon={SearchX}
+                            kicker={t('Ничего не найдено')}
+                            title={t('Пользователи не найдены')}
+                            primary={{ label: t('Сбросить поиск'), onClick: resetFilters }}
+                        />
                     )}
                 </div>
             </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, useGetCardsQuery } from '@/entities/Card';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import {
   exportCardsToExcel,
   exportCardsToJson,
@@ -26,21 +26,21 @@ interface UseDeckExport {
 /** Загружает карточки колоды и выгружает их в выбранный формат с нотификациями. */
 export const useDeckExport = (deckUuid: string, deckName: string): UseDeckExport => {
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
   const { data: cards, isLoading } = useGetCardsQuery(deckUuid);
   const [exporting, setExporting] = useState(false);
 
   const exportDeck = async (format: ExportFormat) => {
     if (!cards?.length) {
-      message.warning(t('В колоде нет слов для экспорта'));
+      toast.warning(t('В колоде нет слов для экспорта'));
       return;
     }
     setExporting(true);
     try {
       await EXPORTERS[format](cards, deckName);
-      message.success(t('Колода выгружена'));
+      toast.success(t('Колода выгружена'));
     } catch {
-      message.error(t('Не удалось выгрузить колоду'));
+      toast.error(t('Не удалось выгрузить колоду'));
     } finally {
       setExporting(false);
     }

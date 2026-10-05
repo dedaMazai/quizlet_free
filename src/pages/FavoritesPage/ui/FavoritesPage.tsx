@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { SearchX, Star } from 'lucide-react';
 import {
   hasLibraryFilter,
   libraryFilterToSearch,
@@ -11,6 +12,7 @@ import { LibraryFilters, useLibraryFilters } from '@/features/LibraryFilters';
 import { CardList } from '@/widgets/CardList';
 import { LibraryHeader } from '@/widgets/LibraryHeader';
 import { SelectionStrip } from '@/widgets/SelectionStrip';
+import { EmptyState } from '@/shared/ui/EmptyState';
 import { RoutePath } from '@/shared/config/router/routePath';
 import cls from './FavoritesPage.module.scss';
 
@@ -48,6 +50,27 @@ const FavoritesPage = () => {
   // Сессия по текущей выборке: фильтр уходит в query-параметры
   const query = libraryFilterToSearch(filter);
 
+  const notFound = (
+    <EmptyState
+      icon={SearchX}
+      kicker={t('Ничего не найдено')}
+      title={filter.search
+        ? t('По «{{query}}» нет слов', { query: filter.search })
+        : t('Нет слов по этим фильтрам')}
+      description={t('Проверьте написание или сбросьте фильтры.')}
+      primary={{ label: t('Сбросить фильтры'), onClick: filters.resetFilters }}
+    />
+  );
+  const noFavorites = (
+    <EmptyState
+      icon={Star}
+      kicker={t('Избранное')}
+      title={t('Отмечайте трудные слова звёздочкой')}
+      description={t('Они соберутся здесь — их можно учить отдельной сессией.')}
+      primary={{ label: t('К колодам'), onClick: () => navigate(RoutePath.DECKS()) }}
+    />
+  );
+
   return (
     <div className={cls.FavoritesPage}>
       <LibraryHeader />
@@ -69,7 +92,7 @@ const FavoritesPage = () => {
           total,
           onChange: setPage,
         }}
-        emptyText={hasLibraryFilter(filter) ? t('Ничего не найдено') : t('В избранном пока нет слов')}
+        empty={hasLibraryFilter(filter) ? notFound : noFavorites}
       />
     </div>
   );

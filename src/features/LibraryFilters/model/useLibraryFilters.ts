@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { CardStatus, CardType, LibraryFilter } from '@/entities/Card';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
 
@@ -14,11 +14,13 @@ export interface LibraryFiltersState {
   setType: (value: CardType | 'all') => void;
   /** Итоговый фильтр выборки (поиск — с задержкой) */
   filter: LibraryFilter;
+  /** Сбросить поиск и все фильтры сразу, без задержки */
+  resetFilters: () => void;
 }
 
 /** Состояние фильтров «Всех слов» / «Избранного» */
 export const useLibraryFilters = (): LibraryFiltersState => {
-  const [search, debouncedSearch, , setSearch] = useDebounceState('');
+  const [search, debouncedSearch, resetSearch, setSearch] = useDebounceState('');
   const [deckUuid, setDeckUuid] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<CardStatus | undefined>(undefined);
   const [type, setType] = useState<CardType | 'all'>('all');
@@ -30,7 +32,14 @@ export const useLibraryFilters = (): LibraryFiltersState => {
     type: type === 'all' ? undefined : type,
   }), [debouncedSearch, deckUuid, status, type]);
 
+  const resetFilters = useCallback(() => {
+    resetSearch('');
+    setDeckUuid(undefined);
+    setStatus(undefined);
+    setType('all');
+  }, [resetSearch]);
+
   return {
-    search, setSearch, deckUuid, setDeckUuid, status, setStatus, type, setType, filter,
+    search, setSearch, deckUuid, setDeckUuid, status, setStatus, type, setType, filter, resetFilters,
   };
 };

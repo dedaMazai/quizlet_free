@@ -3,6 +3,13 @@ $bar-width: 18px;
 $bar-max-height: 50px;
 $bars-height: 64px;
 
+// Геометрия скелетона = итоговый блок: число 132px × line-height .78, кнопка 58 (мобильная — 52)
+$count-row-height: 103px;
+$count-row-height-mobile: 75px;
+$primary-height: 58px;
+$primary-height-mobile: 52px;
+$bars-width: 168px;
+
 .DueHero {
     display: flex;
     flex-direction: column;
@@ -59,6 +66,31 @@ $bars-height: 64px;
 .meta {
     font-size: 14px;
     color: var(--color-accent-300);
+}
+
+.countSkeleton {
+    width: 160px;
+    height: $count-row-height;
+}
+
+.unitSkeleton {
+    width: 140px;
+    height: 28px;
+}
+
+.metaSkeleton {
+    width: 180px;
+    height: 17px;
+}
+
+.barsSkeleton {
+    width: $bars-width;
+    height: $bars-height;
+}
+
+.primarySkeleton {
+    width: 240px;
+    height: $primary-height;
 }
 
 .forecast {
@@ -177,6 +209,16 @@ $bars-height: 64px;
 
     .count {
         font-size: 96px;
+    }
+
+    .countSkeleton {
+        width: 110px;
+        height: $count-row-height-mobile;
+    }
+
+    .primarySkeleton {
+        width: 100%;
+        height: $primary-height-mobile;
     }
 
     .countText {

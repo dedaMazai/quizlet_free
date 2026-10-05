@@ -2,14 +2,17 @@ import {
   FC, useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Input, Select } from 'antd';
+import {
+  Button, Input, Select, Tooltip,
+} from 'antd';
 import type { SelectProps } from 'antd';
 import type { Key } from 'react';
 import { X } from 'lucide-react';
 import {
   AiChunk,
+  AiQuotaNotice,
+  useAiQuota,
   useGenerateChunksMutation,
-  useGetAiUsageQuery,
   useGetCardsQuery,
   useCreateCardsMutation,
 } from '@/entities/Card';
@@ -18,7 +21,7 @@ import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { CheckSquare } from '@/shared/ui/CheckSquare';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import cls from './GenerateChunksModal.module.scss';
 
 /** Столько же, сколько принимает Edge Function: один кредит — до 10 слов. */
@@ -45,14 +48,14 @@ type EditableField = 'term' | 'translation' | 'example';
 export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
   const { open, deckUuid, onClose } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
 
   const [sourceUuids, setSourceUuids] = useState<string[]>([]);
   const [rows, setRows] = useState<ChunkRow[] | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Key[]>([]);
 
   const { data: cards } = useGetCardsQuery(deckUuid, { skip: !open });
-  const { data: remaining } = useGetAiUsageQuery(undefined, { skip: !open });
+  const { remaining, isExhausted: noCredits } = useAiQuota({ skip: !open });
   const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
   const [generateChunks, { isLoading: isGenerating }] = useGenerateChunksMutation();
   const [createCards, { isLoading: isSaving }] = useCreateCardsMutation();
@@ -74,7 +77,6 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
     [cards],
   );
 
-  const noCredits = remaining !== undefined && remaining <= 0;
 
   const setRowField = useCallback((key: string, field: EditableField, value: string) => {
     setRows((prev) => (prev ?? []).map(
@@ -103,13 +105,13 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
 
       setRows(next);
       setSelectedKeys(next.map((row) => row.key));
-      message.success(t('Фразы подобраны'));
+      toast.success(t('Фразы подобраны'));
     } catch (err) {
       const code = (err as { error?: string })?.error;
       if (code === 'AI_LIMIT_EXCEEDED') {
-        message.error(t('Лимит запросов к ИИ исчерпан'));
+        toast.error(t('Лимит запросов к ИИ исчерпан'));
       } else {
-        message.error(t('Не удалось подобрать фразы'));
+        toast.error(t('Не удалось подобрать фразы'));
       }
     }
   };
@@ -129,10 +131,10 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
     if (payload.length === 0) return;
     try {
       await createCards(payload).unwrap();
-      message.success(t('Фразы добавлены'));
+      toast.success(t('Фразы добавлены'));
       onClose();
     } catch {
-      message.error(t('Не удалось добавить фразы'));
+      toast.error(t('Не удалось добавить фразы'));
     }
   };
 
@@ -196,6 +198,7 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
       )}
     >
       <div className={cls.content}>
+        <AiQuotaNotice />
         <div className={cls.picker}>
           <Select
             className={cls.select}
@@ -213,14 +216,16 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
           <span className={cls.hint}>
             {t('ещё до {{count}} слов', { count: MAX_SOURCE_WORDS - sourceUuids.length })}
           </span>
-          <Button
-            className={cls.generate}
-            loading={isGenerating}
-            disabled={noCredits || sourceUuids.length === 0}
-            onClick={handleGenerate}
-          >
-            {rows ? t('Подобрать ещё') : t('Подобрать фразы')}
-          </Button>
+          <Tooltip title={noCredits ? t('Лимит обновится завтра') : undefined}>
+            <Button
+              className={cls.generate}
+              loading={isGenerating}
+              disabled={noCredits || sourceUuids.length === 0}
+              onClick={handleGenerate}
+            >
+              {rows ? t('Подобрать ещё') : t('Подобрать фразы')}
+            </Button>
+          </Tooltip>
         </div>
 
         {!rows && (

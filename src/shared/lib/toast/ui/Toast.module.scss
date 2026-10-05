@@ -1,0 +1,126 @@
+$stack-offset: 24px;
+$stack-offset-mobile: 16px;
+$toast-width: 360px;
+$stripe-width: 3px;
+$enter-shift: 8px;
+
+.ToastStack {
+    position: fixed;
+    bottom: $stack-offset;
+    left: $stack-offset;
+    z-index: var(--toast-z-index);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: $toast-width;
+    pointer-events: none;
+}
+
+.Toast {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 12px 12px 16px;
+    border: 1px solid var(--color-divider);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-md);
+    color: var(--color-text);
+
+    // Портал в body — шрифт приложения не наследуется
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.4;
+    pointer-events: auto;
+    animation: toast-enter var(--motion-fast) var(--ease-enter);
+
+    // Полоса цвета смысла слева
+    &::before {
+        content: '';
+        position: absolute;
+        inset: -1px auto -1px -1px;
+        width: $stripe-width;
+        background: var(--toast-color);
+    }
+}
+
+.success {
+    --toast-color: var(--color-success);
+}
+
+.error {
+    --toast-color: var(--color-error);
+}
+
+.warning {
+    --toast-color: var(--color-warning);
+}
+
+.info {
+    --toast-color: var(--color-accent);
+}
+
+.leaving {
+    animation: toast-exit var(--motion-fast) var(--ease-exit) forwards;
+}
+
+.icon {
+    flex: none;
+    color: var(--toast-color);
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+
+    // Не больше двух строк
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.action {
+    flex: none;
+    height: auto;
+    padding: 0;
+    line-height: 1.4;
+}
+
+@keyframes toast-enter {
+    from {
+        opacity: 0;
+        transform: translateY($enter-shift);
+    }
+}
+
+@keyframes toast-exit {
+    to {
+        opacity: 0;
+    }
+}
+
+@media (width <= 650px) {
+    .ToastStack {
+        right: $stack-offset-mobile;
+        bottom: calc(var(--tabbar-height) + #{$stack-offset-mobile});
+        left: $stack-offset-mobile;
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .Toast {
+        animation: toast-fade var(--motion-instant) linear;
+    }
+
+    .leaving {
+        animation: toast-exit var(--motion-instant) linear forwards;
+    }
+}
+
+@keyframes toast-fade {
+    from {
+        opacity: 0;
+    }
+}

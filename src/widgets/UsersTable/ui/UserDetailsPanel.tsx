@@ -18,6 +18,7 @@ import type { RoleName, UserInfo } from '@/entities/User';
 import { Accesses } from '@/shared/types/accesses';
 import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { getUserFullName } from '../lib/getUserFullName';
@@ -38,7 +39,8 @@ interface UserDetailsPanelProps {
 export const UserDetailsPanel: FC<UserDetailsPanelProps> = (props) => {
     const { user, aiUsed, isSelf } = props;
     const { t } = useTranslation();
-    const { message, modal } = useAntdApp();
+    const { modal } = useAntdApp();
+    const toast = useToast();
 
     const { data: stats } = useGetAdminUserStatsQuery(user.uuid);
     const [updateUserRole] = useUpdateUserRoleMutation();
@@ -71,9 +73,9 @@ export const UserDetailsPanel: FC<UserDetailsPanelProps> = (props) => {
             if (blockedChanged) {
                 await setUserBlocked({ user_uuid: user.uuid, blocked }).unwrap();
             }
-            message.success(t('Изменения сохранены'));
+            toast.success(t('Изменения сохранены'));
         } catch {
-            message.error(t('Не удалось сохранить изменения'));
+            toast.error(t('Не удалось сохранить изменения'));
         } finally {
             setIsSaving(false);
         }
@@ -93,7 +95,7 @@ export const UserDetailsPanel: FC<UserDetailsPanelProps> = (props) => {
                     // Полная перезагрузка: состояние админа не должно пережить смену сессии
                     window.location.assign(RoutePath.MAIN());
                 } catch {
-                    message.error(t('Не удалось войти как пользователь'));
+                    toast.error(t('Не удалось войти как пользователь'));
                 }
             },
         });
@@ -111,9 +113,9 @@ export const UserDetailsPanel: FC<UserDetailsPanelProps> = (props) => {
             onOk: async () => {
                 try {
                     await deleteUser(user.uuid).unwrap();
-                    message.success(t('Пользователь удалён'));
+                    toast.success(t('Пользователь удалён'));
                 } catch {
-                    message.error(t('Не удалось удалить пользователя'));
+                    toast.error(t('Не удалось удалить пользователя'));
                 }
             },
         });

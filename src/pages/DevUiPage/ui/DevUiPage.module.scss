@@ -1,6 +1,8 @@
 $box-size: 96px;
 $light-box-size: 48px;
 $grid-column: 220px;
+$skeleton-width: 240px;
+$skeleton-height: 48px;
 
 .DevUiPage {
     display: flex;
@@ -86,4 +88,9 @@ $grid-column: 220px;
 .kpis {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.skeleton {
+    width: $skeleton-width;
+    height: $skeleton-height;
 }

@@ -15,3 +15,4 @@ export {
   useRemoveDeckShareMutation,
 } from './model/api/deckApi';
 export { DeckCard } from './ui/DeckCard/DeckCard';
+export { DeckCardSkeleton } from './ui/DeckCard/DeckCardSkeleton';

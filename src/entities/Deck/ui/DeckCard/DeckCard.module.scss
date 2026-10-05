@@ -53,3 +53,27 @@
     color: var(--color-neutral-700);
     white-space: nowrap;
 }
+
+// Скелетон: высоты строк сверены с итоговой карточкой
+$name-line: 21px;
+$badge-height: 25px;
+$bar-height: 6px;
+$stats-line: 16px;
+
+.nameSkeleton {
+    width: 70%;
+    height: $name-line;
+}
+
+.badgeSkeleton {
+    width: 96px;
+    height: $badge-height;
+}
+
+.barSkeleton {
+    height: $bar-height;
+}
+
+.statsSkeleton {
+    height: $stats-line;
+}

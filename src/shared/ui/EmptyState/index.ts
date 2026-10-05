@@ -1,1 +1,2 @@
-export { EmptyState } from './EmptyState';
+export { EmptyState, EmptyStateAlign } from './EmptyState';
+export type { EmptyStateAction } from './EmptyState';

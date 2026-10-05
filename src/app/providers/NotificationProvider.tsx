@@ -7,6 +7,7 @@ import {
 } from 'antd';
 import { NotificationContext } from '@/shared/lib/context/NotificationContext';
 import { setGlobalAntdApi } from '@/shared/lib/helpers/globalAntdApi';
+import { ToastProvider } from '@/shared/lib/toast';
 
 export function NotificationProvider({ children }: PropsWithChildren) {
   const [api, contentHolder] = notification.useNotification({
@@ -27,7 +28,8 @@ export function NotificationProvider({ children }: PropsWithChildren) {
 
   return (
     <NotificationContext.Provider value={useMemo(() => api, [api])}>
-      {children}
+      {/* Тосты приложения — свой стек (BACKLOG §3) вместо message/notification AntD */}
+      <ToastProvider>{children}</ToastProvider>
       {contentHolder}
     </NotificationContext.Provider>
   );

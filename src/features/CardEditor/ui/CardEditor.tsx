@@ -14,7 +14,8 @@ import {
   CardCreateDto,
   useCheckTranslationsMutation,
   useCreateCardsMutation,
-  useGetAiUsageQuery,
+  AiQuotaNotice,
+  useAiQuota,
 } from '@/entities/Card';
 import { useGetDeckQuery } from '@/entities/Deck';
 import { TranslationResult } from '@/shared/lib/translate';
@@ -24,6 +25,7 @@ import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
 import { VStack } from '@/shared/ui/Stack';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { useAutoTranslate } from '../model/useAutoTranslate';
 import { downloadCardsTemplate, parseCardsFromExcel } from '../model/cardsExcel';
@@ -65,6 +67,8 @@ interface CardEditorProps {
   open: boolean;
   onClose: () => void;
   deckUuid: string;
+  /** Сразу открыть выбор Excel-файла — для действия «Импорт» */
+  openFilePicker?: boolean;
 }
 
 const makeEmptyRow = (): CardRow => ({
@@ -80,9 +84,12 @@ const makeEmptyRow = (): CardRow => ({
 const makeInitialRows = (): CardRow[] => [makeEmptyRow(), makeEmptyRow(), makeEmptyRow()];
 
 export const CardEditor: FC<CardEditorProps> = (props) => {
-  const { open, onClose, deckUuid } = props;
+  const {
+    open, onClose, deckUuid, openFilePicker,
+  } = props;
   const { t } = useTranslation();
-  const { message, modal } = useAntdApp();
+  const { modal } = useAntdApp();
+  const toast = useToast();
   const { isMobile } = useMatchMedia();
 
   const [rows, setRows] = useState<CardRow[]>(makeInitialRows);
@@ -91,11 +98,12 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   const [isImporting, setIsImporting] = useState(false);
   const [createCards, { isLoading }] = useCreateCardsMutation();
   const [checkTranslations, { isLoading: isChecking }] = useCheckTranslationsMutation();
-  const { data: remaining } = useGetAiUsageQuery(undefined, { skip: !open });
+  const { remaining, isExhausted: noCredits } = useAiQuota({ skip: !open });
   const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
 
   const termRefs = useRef<Map<string, InputRef>>(new Map());
   const focusIdRef = useRef<string | null>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
 
   // Сброс редактора при каждом открытии.
   useEffect(() => {
@@ -103,6 +111,16 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
       setRows(makeInitialRows());
     }
   }, [open]);
+
+  // «Импорт»: окно выбора файла открываем сами — клик пользователя был только что,
+  // браузер разрешает. Содержимое модалки монтируется после open — ждём кадр.
+  useEffect(() => {
+    if (!open || !openFilePicker) return undefined;
+    const timer = setTimeout(() => {
+      toolbarRef.current?.querySelector<HTMLInputElement>('input[type="file"]')?.click();
+    });
+    return () => clearTimeout(timer);
+  }, [open, openFilePicker]);
 
   // Фокус на только что добавленной строке.
   useEffect(() => {
@@ -179,16 +197,16 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
       }));
 
     if (!dtos.length) {
-      message.warning(t('Заполните хотя бы одно слово'));
+      toast.warning(t('Заполните хотя бы одно слово'));
       return;
     }
 
     try {
       await createCards(dtos).unwrap();
-      message.success(t('Добавлено слов: {{count}}', { count: dtos.length }));
+      toast.success(t('Добавлено слов: {{count}}', { count: dtos.length }));
       onClose();
     } catch {
-      message.error(t('Не удалось сохранить слова'));
+      toast.error(t('Не удалось сохранить слова'));
     }
   };
 
@@ -222,13 +240,13 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
       }));
       // Закрываем выпадашку вариантов — перевод подставлен ИИ.
       setOpenVariantsId(null);
-      message.success(t('Переводы проверены'));
+      toast.success(t('Переводы проверены'));
     } catch (err) {
       const code = (err as { error?: string })?.error;
       if (code === 'AI_LIMIT_EXCEEDED') {
-        message.error(t('Лимит запросов к ИИ исчерпан'));
+        toast.error(t('Лимит запросов к ИИ исчерпан'));
       } else {
-        message.error(t('Не удалось проверить переводы'));
+        toast.error(t('Не удалось проверить переводы'));
       }
     }
   };
@@ -243,12 +261,12 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
       for (const part of chunk(dtos, IMPORT_CHUNK_SIZE)) {
         await createCards(part).unwrap();
       }
-      message.success(t('Добавлено слов: {{count}}', { count: dtos.length }));
+      toast.success(t('Добавлено слов: {{count}}', { count: dtos.length }));
       onClose();
     } catch {
-      message.error(t('Не удалось сохранить слова'));
+      toast.error(t('Не удалось сохранить слова'));
     }
-  }, [createCards, message, onClose, t]);
+  }, [createCards, toast, onClose, t]);
 
   const handleImport = useCallback(async (file: File) => {
     setIsImporting(true);
@@ -256,7 +274,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
       const { rows: parsed, skipped } = await parseCardsFromExcel(file);
 
       if (!parsed.length) {
-        message.warning(t('В файле нет подходящих слов'));
+        toast.warning(t('В файле нет подходящих слов'));
         return;
       }
 
@@ -280,11 +298,11 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
         onOk: () => saveImported(dtos),
       });
     } catch {
-      message.error(t('Не удалось прочитать файл'));
+      toast.error(t('Не удалось прочитать файл'));
     } finally {
       setIsImporting(false);
     }
-  }, [deckUuid, message, modal, saveImported, t]);
+  }, [deckUuid, toast, modal, saveImported, t]);
 
   // beforeUpload возвращает false — отменяем штатную загрузку antd и парсим файл сами.
   const handleBeforeUpload = useCallback<NonNullable<UploadProps['beforeUpload']>>((file) => {
@@ -296,7 +314,6 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   const readyCount = rows.filter((row) => row.term.trim() && row.translation.trim()).length;
   // ИИ-проверка доступна, когда добавлено больше 3 слов.
   const canAiCheck = filledCount > 3;
-  const noCredits = remaining !== undefined && remaining <= 0;
 
   return (
     <ModalFrame
@@ -317,7 +334,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
         </>
       )}
     >
-      <div className={cls.toolbar}>
+      <div ref={toolbarRef} className={cls.toolbar}>
         <Upload
           accept={EXCEL_ACCEPT}
           showUploadList={false}
@@ -338,7 +355,11 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
           </Button>
         )}
         {canAiCheck && (
-          <Tooltip title={t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}>
+          <Tooltip
+            title={noCredits
+              ? t('Лимит обновится завтра')
+              : t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}
+          >
             <Button
               className={classNames(cls.toolButton, [cls.aiButton])}
               icon={<Sparkles aria-hidden size={TOOL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
@@ -351,6 +372,7 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
           </Tooltip>
         )}
       </div>
+      {canAiCheck && <AiQuotaNotice className={cls.aiNotice} />}
 
       <div className={cls.table}>
         {!isMobile && (

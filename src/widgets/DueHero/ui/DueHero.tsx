@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check } from 'lucide-react';
 import { useGetDueCountQuery } from '@/entities/Card';
-import { formatDayWeekday, useGetDueSummaryQuery } from '@/entities/Statistics';
+import { formatDayWeekday, selectLearnDeckUuid, useGetDueSummaryQuery } from '@/entities/Statistics';
 import { AccentPanel } from '@/shared/ui/AccentPanel';
 import { Blueprint, BlueprintCorners } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
+import { FadeIn, Skeleton, SkeletonTone } from '@/shared/ui/Skeleton';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { estimateReviewMinutes, ReviewLocationState } from '@/shared/const/const';
 import { classNames } from '@/shared/lib/classNames/classNames';
@@ -31,8 +32,10 @@ export const DueHero = memo((props: DueHeroProps) => {
     const navigate = useNavigate();
     const { isMobile } = useMatchMedia();
 
-    const { data: due } = useGetDueCountQuery(undefined);
-    const { data: summary } = useGetDueSummaryQuery({ tz });
+    const { data: due, isLoading: isDueLoading } = useGetDueCountQuery(undefined);
+    const { data: summary, isLoading: isSummaryLoading } = useGetDueSummaryQuery({ tz });
+    // До загрузки count = 0 — без скелетона мелькал бы «Долг закрыт»
+    const isLoading = isDueLoading || isSummaryLoading;
 
     const count = due?.count ?? 0;
     const hasDebt = count > 0;
@@ -40,13 +43,7 @@ export const DueHero = memo((props: DueHeroProps) => {
     const tomorrowCount = summary?.forecast[1]?.count ?? 0;
 
     // Колода с наибольшим числом новых — для «Учить новые» при закрытом долге
-    const learnDeckUuid = useMemo(() => {
-        const best = summary?.perDeck.reduce<{ deckUuid: string; new: number } | null>(
-            (acc, deck) => (deck.new > (acc?.new ?? 0) ? deck : acc),
-            null,
-        );
-        return best?.deckUuid;
-    }, [summary]);
+    const learnDeckUuid = useMemo(() => selectLearnDeckUuid(summary), [summary]);
 
     const bars = useMemo(() => {
         const forecast = summary?.forecast ?? [];
@@ -75,12 +72,42 @@ export const DueHero = memo((props: DueHeroProps) => {
     };
 
     useKeyDown((e) => {
-        if (e.key === 'Enter') start();
+        if (e.key === 'Enter' && !isLoading) start();
     });
+
+    if (isLoading) {
+        return (
+            <AccentPanel className={classNames(cls.DueHero, [className])}>
+                <div className={cls.top}>
+                    <div className={cls.summary}>
+                        <Kicker tone={KickerTone.ON_DARK} className={cls.kicker}>
+                            {t('К повторению сегодня')}
+                        </Kicker>
+                        <div className={cls.countRow}>
+                            <Skeleton tone={SkeletonTone.ON_DARK} className={cls.countSkeleton} />
+                            <div className={cls.countText}>
+                                <Skeleton tone={SkeletonTone.ON_DARK} className={cls.unitSkeleton} />
+                                <Skeleton tone={SkeletonTone.ON_DARK} className={cls.metaSkeleton} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className={cls.forecast}>
+                        <Kicker size={KickerSize.SM} tone={KickerTone.ON_DARK}>
+                            {t('Прогноз на неделю')}
+                        </Kicker>
+                        <Skeleton tone={SkeletonTone.ON_DARK} className={cls.barsSkeleton} />
+                    </div>
+                </div>
+                <div className={cls.actions}>
+                    <Skeleton tone={SkeletonTone.ON_DARK} className={cls.primarySkeleton} />
+                </div>
+            </AccentPanel>
+        );
+    }
 
     return (
         <AccentPanel className={classNames(cls.DueHero, [className])}>
-            <div className={cls.top}>
+            <FadeIn className={cls.top}>
                 <div className={cls.summary}>
                     <Kicker tone={KickerTone.ON_DARK} className={cls.kicker}>
                         {t('К повторению сегодня')}
@@ -129,7 +156,7 @@ export const DueHero = memo((props: DueHeroProps) => {
                         ))}
                     </div>
                 </div>
-            </div>
+            </FadeIn>
             <div className={cls.actions}>
                 <Blueprint
                     as="button"

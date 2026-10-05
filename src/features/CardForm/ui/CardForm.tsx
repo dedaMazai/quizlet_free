@@ -12,7 +12,7 @@ import {
 } from '@/entities/Card';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './CardForm.module.scss';
 
@@ -37,7 +37,7 @@ export const CardForm: FC<CardFormProps> = (props) => {
     open, onClose, deckUuid, card, onDelete,
   } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
   const [form] = Form.useForm<CardFormValues>();
   const { isMobile } = useMatchMedia();
 
@@ -63,15 +63,15 @@ export const CardForm: FC<CardFormProps> = (props) => {
     try {
       if (card) {
         await updateCard({ uuid: card.uuid, ...values }).unwrap();
-        message.success(t('Слово обновлено'));
+        toast.success(t('Слово обновлено'));
       } else {
         await createCard({ deck_uuid: deckUuid, ...values }).unwrap();
-        message.success(t('Слово добавлено'));
+        toast.success(t('Слово добавлено'));
       }
       form.resetFields();
       onClose();
     } catch {
-      message.error(t('Не удалось сохранить слово'));
+      toast.error(t('Не удалось сохранить слово'));
     }
   };
 

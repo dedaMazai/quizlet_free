@@ -12,7 +12,7 @@ import { Loader } from '@/shared/ui/Loader';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerTone } from '@/shared/ui/Kicker';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
-import { useNotificationFn } from '@/shared/lib/context/NotificationContext';
+import { useToast } from '@/shared/lib/toast';
 import { ReactComponent as Logo } from '@/shared/assets/icons/LogoZubrika.svg';
 import cls from './LoginPage.module.scss';
 
@@ -30,7 +30,7 @@ const LoginPage = () => {
     const { t } = useTranslation();
     const [login, { isLoading: isLoginLoading }] = useLoginMutation();
     const [register, { isLoading: isRegisterLoading }] = useRegisterMutation();
-    const notification = useNotificationFn();
+    const toast = useToast();
     const [form] = Form.useForm<LoginForm>();
     const [isRegisterMode, setIsRegisterMode] = useState(false);
     const [
@@ -67,20 +67,14 @@ const LoginPage = () => {
                 name: values.name,
             });
             if ('error' in result) {
-                notification?.error({
-                    message: t('Не удалось зарегистрироваться'),
-                });
+                toast.error(t('Не удалось зарегистрироваться'));
             } else if (result.data === null) {
-                notification?.info({
-                    message: t('Подтвердите регистрацию по ссылке в письме'),
-                });
+                toast.info(t('Подтвердите регистрацию по ссылке в письме'));
             }
         } else {
             const result = await login(values);
             if ('error' in result) {
-                notification?.error({
-                    message: t('Неверный логин или пароль'),
-                });
+                toast.error(t('Неверный логин или пароль'));
             }
         }
     };

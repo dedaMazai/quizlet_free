@@ -1,13 +1,17 @@
-import { memo, ReactNode } from 'react';
+import { memo, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button, Tooltip } from 'antd';
+import { Layers, SearchX, Sparkles } from 'lucide-react';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { STREAK_LEVEL_THRESHOLDS } from '@/shared/lib/streak';
+import { ToastTone, useToast, useUndoableDelete } from '@/shared/lib/toast';
 import { AccentPanel } from '@/shared/ui/AccentPanel';
 import { AnswerFeedback, AnswerFeedbackTone } from '@/shared/ui/AnswerFeedback';
 import { AnswerOption, AnswerOptionState } from '@/shared/ui/AnswerOption';
 import { AnswerReveal, getRevealParts } from '@/shared/ui/AnswerReveal';
 import { Blueprint, BlueprintCorners } from '@/shared/ui/Blueprint';
 import { DueBadge } from '@/shared/ui/DueBadge';
+import { EmptyState, EmptyStateAlign } from '@/shared/ui/EmptyState';
 import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import { KeyHint } from '@/shared/ui/KeyHint';
 import { MasteryBar, MasteryBarSize } from '@/shared/ui/MasteryBar';
@@ -15,6 +19,7 @@ import { SectionHeader, SectionHeaderSize } from '@/shared/ui/SectionHeader';
 import { SectionTabs, SectionTabItem } from '@/shared/ui/SectionTabs';
 import { SessionButton, SessionButtonSize, SessionButtonVariant } from '@/shared/ui/SessionButton';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
+import { Skeleton, SkeletonTone } from '@/shared/ui/Skeleton';
 import { StatCell, StatCellTone } from '@/shared/ui/StatCell';
 import { StreakFlame } from '@/shared/ui/StreakFlame';
 import { TickProgress, TickProgressSize, TickState } from '@/shared/ui/TickProgress';
@@ -59,10 +64,41 @@ const Case = ({ caption, children }: CaseProps) => (
 
 const noop = () => {};
 
+const UNDO_DEMO_ITEMS = ['apple', 'banana', 'cherry', 'date'];
+
+/** Хук удаления с отменой на локальном списке: «запрос» — удаление из state */
+const UndoDeleteDemo = () => {
+    const { t } = useTranslation();
+    const [items, setItems] = useState(UNDO_DEMO_ITEMS);
+    const [committed, setCommitted] = useState<string[]>([]);
+    const { hiddenIds, remove } = useUndoableDelete({
+        onCommit: async (id) => {
+            setItems((prev) => prev.filter((item) => item !== id));
+            setCommitted((prev) => [...prev, id]);
+        },
+    });
+
+    return (
+        <div className={cls.row}>
+            {items.filter((item) => !hiddenIds.has(item)).map((item) => (
+                <Button key={item} onClick={() => remove(item, t('Слово удалено'), t('Отменить'))}>
+                    {item}
+                </Button>
+            ))}
+            <code className={cls.caption} data-testid="undo-committed">{committed.join(',')}</code>
+        </div>
+    );
+};
+
+const TOAST_TONES = Object.values(ToastTone);
+const AI_ICON_SIZE = 16;
+const TOAST_WITH_ACTION = 'action';
+
 const TYPO_REVEAL = getRevealParts('travel light', 'travel litght', 'almost');
 
 const DevUiPage = () => {
     const { t } = useTranslation();
+    const toast = useToast();
 
     const learnTabs: SectionTabItem[] = [
         {
@@ -250,6 +286,70 @@ const DevUiPage = () => {
                     <SessionButton variant={SessionButtonVariant.GHOST}>{t('Не помню')}</SessionButton>
                     <KeyHint>ESC</KeyHint>
                 </div>
+            </Demo>
+
+            <Demo name="EmptyState">
+                <div className={cls.grid}>
+                    <Case caption="align=start · primary + secondary">
+                        <EmptyState
+                            icon={Layers}
+                            kicker={t('Начало')}
+                            title={t('Создайте первую колоду')}
+                            description={t('Колода — набор слов с переводами, из неё строятся все режимы.')}
+                            primary={{ label: t('Создать колоду'), onClick: noop }}
+                            secondary={{ label: t('Импорт из Excel'), onClick: noop }}
+                        />
+                    </Case>
+                    <Case caption="align=center">
+                        <EmptyState
+                            align={EmptyStateAlign.CENTER}
+                            icon={SearchX}
+                            kicker={t('Ничего не найдено')}
+                            title={t('Нет слов по этим фильтрам')}
+                            primary={{ label: t('Сбросить фильтры'), onClick: noop }}
+                        />
+                    </Case>
+                </div>
+            </Demo>
+
+            <Demo name="Skeleton">
+                <div className={cls.row}>
+                    <Case caption="tone=default">
+                        <Skeleton className={cls.skeleton} />
+                    </Case>
+                    <Case caption="tone=onDark">
+                        <AccentPanel className={cls.panel}>
+                            <Skeleton tone={SkeletonTone.ON_DARK} className={cls.skeleton} />
+                        </AccentPanel>
+                    </Case>
+                </div>
+            </Demo>
+
+            <Demo name="useToast">
+                <div className={cls.row}>
+                    {TOAST_TONES.map((tone) => (
+                        <Button key={tone} onClick={() => toast[tone](t('Колода создана'))}>{tone}</Button>
+                    ))}
+                    <Button
+                        onClick={() => toast.success(t('Слово удалено'), {
+                            action: { label: t('Отменить'), onClick: noop },
+                        })}
+                    >
+                        {TOAST_WITH_ACTION}
+                    </Button>
+                </div>
+            </Demo>
+
+            <Demo name="useUndoableDelete">
+                <UndoDeleteDemo />
+            </Demo>
+
+            <Demo name="Лимит ИИ · disabled + Tooltip">
+                <Tooltip title={t('Лимит обновится завтра')}>
+                    <Button disabled type="link" icon={<Sparkles size={AI_ICON_SIZE} strokeWidth={1.5} />}>
+                        {t('ИИ: проверить и подобрать фразы')}
+                    </Button>
+                </Tooltip>
             </Demo>
 
             <Demo name="StreakFlame">

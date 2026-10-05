@@ -6,13 +6,13 @@ import { HStack, VStack } from '@/shared/ui/Stack';
 import { usePasswordRecoveryMutation } from '@/entities/User';
 import { getQueryParams } from '@/shared/lib/hooks/addQueryParams';
 import { RoutePath } from '@/shared/config/router/routePath';
-import { useNotificationFn } from '@/shared/lib/context/NotificationContext';
+import { useToast } from '@/shared/lib/toast';
 import { PasswordStrengthIndicator, PasswordStrength, MIN_PASSWORD_STRENGTH } from '@/shared/ui/PasswordStrengthIndicator';
 
 const ChangePasswordPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const notification = useNotificationFn();
+    const toast = useToast();
     const { token } = getQueryParams<{ token: string }>();
     const mainPage = RoutePath.MAIN();
 
@@ -41,9 +41,7 @@ const ChangePasswordPage = () => {
         if ('data' in result) {
             setIsSuccess(true);
         } else if ('error' in result) {
-            notification?.error({
-                message: t('Ссылка недействительна, попробуйте восстановить пароль заново'),
-            });
+            toast.error(t('Ссылка недействительна, попробуйте восстановить пароль заново'));
         }
     };
 

@@ -26,16 +26,18 @@ import { ShareDeckModal } from '@/features/ShareDeck';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import { DueBadge } from '@/shared/ui/DueBadge';
 import { MasteryBar, MasteryBarSize } from '@/shared/ui/MasteryBar';
-import { Loader } from '@/shared/ui/Loader';
+import { FadeIn, Skeleton } from '@/shared/ui/Skeleton';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from '@/shared/types/accesses';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast, useUndoableDelete } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './DeckList.module.scss';
 
 const MENU_ICON_SIZE = 18;
 const ICON_STROKE = 1.5;
 const PERCENT = 100;
+const SKELETON_CARDS = 6;
 
 const toPercent = (part: number, total: number): number => (
   total > 0 ? Math.round((part / total) * PERCENT) : 0
@@ -58,7 +60,8 @@ export const DeckList: FC<DeckListProps> = (props) => {
   } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { modal, message } = useAntdApp();
+  const { modal } = useAntdApp();
+  const toast = useToast();
   const userInfo = useUserInfo();
   const isAdmin = useUserAccesses().includes(Accesses.administration);
   const { isMobile } = useMatchMedia();
@@ -74,12 +77,21 @@ export const DeckList: FC<DeckListProps> = (props) => {
 
   const [deleteCardsByDeck] = useDeleteCardsByDeckMutation();
 
+  // Удаление с «Отменить»: колода скрыта сразу, запросы уходят через 6 с
+  const { hiddenIds, remove: removeDeck } = useUndoableDelete({
+    onCommit: async (uuid) => {
+      await deleteDeck(uuid).unwrap();
+      await deleteCardsByDeck(uuid).unwrap();
+    },
+    onError: () => toast.error(t('Не удалось удалить колоду')),
+  });
+
   const [editingDeck, setEditingDeck] = useState<Deck | undefined>(undefined);
   const [formOpen, setFormOpen] = useState(false);
   const [sharingDeckUuid, setSharingDeckUuid] = useState<string | undefined>(undefined);
 
   const visibleDecks = useMemo(() => {
-    let list = decks ?? [];
+    let list = (decks ?? []).filter((deck) => !hiddenIds.has(deck.uuid));
     if (filter === 'own') list = list.filter((deck) => deck.is_owner);
     if (filter === 'shared') list = list.filter((deck) => !deck.is_owner);
     const query = search.trim().toLowerCase();
@@ -92,7 +104,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
     }
 
     return typeof limit === 'number' ? list.slice(0, limit) : list;
-  }, [decks, filter, search, sort, limit]);
+  }, [decks, hiddenIds, filter, search, sort, limit]);
 
   const dueByDeck = useMemo(
     () => new Map((summary?.perDeck ?? []).map((deck) => [deck.deckUuid, deck.due])),
@@ -110,20 +122,16 @@ export const DeckList: FC<DeckListProps> = (props) => {
       okText: t('Удалить'),
       okButtonProps: { danger: true },
       cancelText: t('Отмена'),
-      onOk: async () => {
-        await deleteDeck(deck.uuid).unwrap();
-        await deleteCardsByDeck(deck.uuid).unwrap();
-        message.success(t('Колода удалена'));
-      },
+      onOk: () => removeDeck(deck.uuid, t('Колода удалена'), t('Отменить')),
     });
   };
 
   const handleDuplicate = async (deck: Deck) => {
     try {
       await duplicateDeck(deck).unwrap();
-      message.success(t('Колода скопирована'));
+      toast.success(t('Колода скопирована'));
     } catch {
-      message.error(t('Не удалось скопировать колоду'));
+      toast.error(t('Не удалось скопировать колоду'));
     }
   };
 
@@ -137,7 +145,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
       cancelText: t('Отмена'),
       onOk: async () => {
         await removeShare({ deckUuid: deck.uuid, userId: userInfo.uuid }).unwrap();
-        message.success(t('Вы больше не видите эту колоду'));
+        toast.success(t('Вы больше не видите эту колоду'));
       },
     });
   };
@@ -205,7 +213,17 @@ export const DeckList: FC<DeckListProps> = (props) => {
   };
 
   if (isLoading) {
-    return <Loader />;
+    // Скелетон: та же сетка и размеры карточек
+    return (
+      <div className={cls.grid}>
+        {Array.from({ length: SKELETON_CARDS }, (_, i) => (
+          <Blueprint key={i} className={isMobile ? cls.mobileSkeletonCard : cls.skeletonCard}>
+            <Skeleton className={isMobile ? cls.mobileNameSkeleton : cls.nameSkeleton} />
+            <Skeleton className={cls.lineSkeleton} />
+          </Blueprint>
+        ))}
+      </div>
+    );
   }
 
   if (!visibleDecks.length) {
@@ -218,7 +236,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
 
   return (
     <>
-      <div className={cls.grid}>
+      <FadeIn className={cls.grid}>
         {visibleDecks.map((deck) => {
           const deckMastery = masteryByDeck.get(deck.uuid);
           const mastered = toPercent(deckMastery?.mastered ?? 0, deck.cards_count);
@@ -304,7 +322,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
             </Blueprint>
           );
         })}
-      </div>
+      </FadeIn>
 
       <DeckForm
         open={formOpen}

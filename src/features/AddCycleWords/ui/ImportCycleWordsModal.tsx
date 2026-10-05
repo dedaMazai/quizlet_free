@@ -10,7 +10,7 @@ import { useGetDecksQuery } from '@/entities/Deck';
 import { CycleWord, useAddCycleWordsMutation } from '@/entities/LearningCycle';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { normalize } from '@/shared/lib/text';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
@@ -36,7 +36,7 @@ export const ImportCycleWordsModal: FC<ImportCycleWordsModalProps> = (props) => 
     open, onClose, cycleUuid, words,
   } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
   const { isMobile } = useMatchMedia();
   const [source, setSource] = useState<string>(FAVORITES_SOURCE);
   const [search, setSearch] = useState('');
@@ -95,10 +95,10 @@ export const ImportCycleWordsModal: FC<ImportCycleWordsModalProps> = (props) => 
     if (!toAdd.length) return;
     try {
       await addWords({ cycleUuid, words: toAdd }).unwrap();
-      message.success(t('Добавлено слов: {{count}}', { count: toAdd.length }));
+      toast.success(t('Добавлено слов: {{count}}', { count: toAdd.length }));
       handleClose();
     } catch {
-      message.error(t('Не удалось добавить слова'));
+      toast.error(t('Не удалось добавить слова'));
     }
   };
 

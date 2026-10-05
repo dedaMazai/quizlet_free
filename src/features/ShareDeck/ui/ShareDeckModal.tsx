@@ -15,7 +15,7 @@ import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { Loader } from '@/shared/ui/Loader';
-import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast } from '@/shared/lib/toast';
 import { UserAvatar } from './UserAvatar';
 import cls from './ShareDeckModal.module.scss';
 
@@ -38,7 +38,7 @@ interface ShareDeckModalProps {
 export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
   const { open, deckUuid, onClose } = props;
   const { t } = useTranslation();
-  const { message } = useAntdApp();
+  const toast = useToast();
 
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [shareDeck, { isLoading: isSharing }] = useShareDeckMutation();
@@ -65,11 +65,11 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
     if (!email) return;
     try {
       await shareDeck({ deckUuid, email }).unwrap();
-      message.success(t('Доступ открыт'));
+      toast.success(t('Доступ открыт'));
       setEmail(undefined);
     } catch (err) {
       const text = (err as { error?: string })?.error;
-      message.error(text ? t(text) : t('Не удалось открыть доступ'));
+      toast.error(text ? t(text) : t('Не удалось открыть доступ'));
     }
   };
 
@@ -77,16 +77,16 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
     try {
       await setSharedEdit({ uuid: deckUuid, allow }).unwrap();
     } catch {
-      message.error(t('Не удалось изменить настройку'));
+      toast.error(t('Не удалось изменить настройку'));
     }
   };
 
   const handleRemove = async (userId: string) => {
     try {
       await removeShare({ deckUuid, userId }).unwrap();
-      message.success(t('Доступ закрыт'));
+      toast.success(t('Доступ закрыт'));
     } catch {
-      message.error(t('Не удалось закрыть доступ'));
+      toast.error(t('Не удалось закрыть доступ'));
     }
   };
 

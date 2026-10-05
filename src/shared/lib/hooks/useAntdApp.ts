@@ -1,27 +1,23 @@
 import { App } from 'antd';
 
 /**
- * Хук для использования контекстных методов Ant Design (modal, message, notification).
- * Эти методы наследуют тему из ConfigProvider, в отличие от статических методов.
+ * Хук для использования контекстного modal из Ant Design.
+ * Наследует тему из ConfigProvider, в отличие от статических методов.
+ * Тосты — через `useToast` из `@/shared/lib/toast`.
  *
  * @example
- * const { modal, message, notification } = useAntdApp();
+ * const { modal } = useAntdApp();
  *
  * // Вместо Modal.confirm используйте:
  * modal.confirm({
  *   title: 'Подтверждение',
  *   onOk: () => handleConfirm(),
  * });
- *
- * // Вместо message.success используйте:
- * message.success('Успешно!');
  */
 export const useAntdApp = () => {
-    const { modal, message, notification } = App.useApp();
+    const { modal } = App.useApp();
 
     return {
         modal,
-        message,
-        notification,
     };
 };

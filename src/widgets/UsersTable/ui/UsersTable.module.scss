@@ -87,6 +87,10 @@ $row-divider: color-mix(in srgb, var(--color-text) 8%, transparent);
   border-bottom: 1px solid $row-divider;
 }
 
+.empty {
+  padding: 24px 4px;
+}
+
 .person {
   display: flex;
   align-items: center;

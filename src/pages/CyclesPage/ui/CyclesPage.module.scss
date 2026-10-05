@@ -5,6 +5,13 @@ $cells-in-row: 10;
 $cells-count: 30;
 $cell-height-mobile: 8px;
 
+// Скелетон карточки = итоговая: строка kicker с плашкой «новых», имя 24×1.05, 3 ряда ячеек, мета 12
+$kicker-line: 20px;
+$name-line: 25px;
+$name-line-mobile: 22px;
+$cells-block: 34px;
+$meta-line: 19px;
+
 .CyclesPage {
   display: flex;
   flex-direction: column;
@@ -106,9 +113,30 @@ $cell-height-mobile: 8px;
   color: var(--color-neutral-700);
 }
 
-.empty {
-  width: 100%;
-  padding: 48px 0;
+.skeletonCard {
+  cursor: default;
+
+  &:hover {
+    background: transparent;
+  }
+}
+
+.kickerSkeleton {
+  width: 64px;
+  height: $kicker-line;
+}
+
+.nameSkeleton {
+  width: 70%;
+  height: $name-line;
+}
+
+.cellsSkeleton {
+  height: $cells-block;
+}
+
+.metaSkeleton {
+  height: $meta-line;
 }
 
 @media (width <= 1100px) {
@@ -161,6 +189,14 @@ $cell-height-mobile: 8px;
   }
 
   .cell {
+    height: $cell-height-mobile;
+  }
+
+  .nameSkeleton {
+    height: $name-line-mobile;
+  }
+
+  .cellsSkeleton {
     height: $cell-height-mobile;
   }
 }

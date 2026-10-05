@@ -1,5 +1,5 @@
 import {
-  FC, MouseEvent, useMemo, useState,
+  FC, MouseEvent, ReactNode, useMemo, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Empty, Pagination } from 'antd';
@@ -17,9 +17,10 @@ import {
 import { useGetDecksQuery } from '@/entities/Deck';
 import { CardForm } from '@/features/CardForm';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
-import { Loader } from '@/shared/ui/Loader';
+import { FadeIn, Skeleton } from '@/shared/ui/Skeleton';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useToast, useUndoableDelete } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './CardList.module.scss';
 
@@ -29,6 +30,7 @@ const ICON_SIZE = 16;
 const MOBILE_STAR_SIZE = 18;
 const ICON_STROKE = 1.5;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const SKELETON_ROWS = 8;
 
 /** Серверная пагинация: список в items — одна страница из total строк. */
 interface CardListPagination {
@@ -48,6 +50,8 @@ interface CardListProps {
   loading?: boolean;
   /** Текст пустого состояния (например, «Ничего не найдено» при поиске). */
   emptyText?: string;
+  /** Своё пустое состояние (EmptyState) — вместо emptyText */
+  empty?: ReactNode;
   /** Если true — без редактирования/удаления (чужая, расшаренная колода). */
   readOnly?: boolean;
 }
@@ -96,15 +100,26 @@ const FavoriteStar: FC<FavoriteStarProps> = ({ cardUuid, mobile }) => {
 
 export const CardList: FC<CardListProps> = (props) => {
   const {
-    deckUuid, items, pagination, loading, emptyText, readOnly,
+    deckUuid, items, pagination, loading, emptyText, empty, readOnly,
   } = props;
   const { t } = useTranslation();
-  const { modal, message } = useAntdApp();
+  const { modal } = useAntdApp();
+  const toast = useToast();
   const { isMobile } = useMatchMedia();
   const isLibrary = !deckUuid;
 
   const { data: decks } = useGetDecksQuery(undefined, { skip: !isLibrary });
   const [deleteCard] = useDeleteCardMutation();
+
+  // Удаление с «Отменить»: слово скрыто сразу, запрос уходит через 6 с
+  const { hiddenIds, remove: removeCard } = useUndoableDelete({
+    onCommit: (uuid) => deleteCard(uuid).unwrap(),
+    onError: () => toast.error(t('Не удалось удалить слово')),
+  });
+  const shownItems = useMemo(
+    () => items?.filter(({ card }) => !hiddenIds.has(card.uuid)),
+    [items, hiddenIds],
+  );
 
   const [editingCard, setEditingCard] = useState<Card | undefined>(undefined);
   const [clientPage, setClientPage] = useState(1);
@@ -123,19 +138,36 @@ export const CardList: FC<CardListProps> = (props) => {
       okText: t('Удалить'),
       okButtonProps: { danger: true },
       cancelText: t('Отмена'),
-      onOk: async () => {
-        await deleteCard(card.uuid).unwrap();
-        message.success(t('Слово удалено'));
-      },
+      onOk: () => removeCard(card.uuid, t('Слово удалено'), t('Отменить')),
     });
   };
 
   if (loading) {
-    return <Loader />;
+    // Скелетон строк: та же сетка и отступы, что у итоговых строк
+    const rows = Array.from({ length: SKELETON_ROWS }, (_, i) => i);
+    return isMobile ? (
+      <div className={cls.mobileList}>
+        {rows.map((i) => (
+          <div key={i} className={cls.mobileRow}>
+            <Skeleton className={cls.mobileSkeleton} />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className={classNames(cls.CardList, [isLibrary ? cls.library : cls.deck])}>
+        {rows.map((i) => (
+          <div key={i} className={classNames(cls.row, [cls.item, cls.skeletonRow])}>
+            <span />
+            <Skeleton className={cls.cellSkeleton} />
+            <Skeleton className={cls.cellSkeleton} />
+          </div>
+        ))}
+      </div>
+    );
   }
 
-  if (!items?.length) {
-    return <Empty description={emptyText ?? t('Пока нет слов')} />;
+  if (!shownItems?.length) {
+    return empty ?? <Empty description={emptyText ?? t('Пока нет слов')} />;
   }
 
   const editor = readOnly ? null : (
@@ -152,18 +184,21 @@ export const CardList: FC<CardListProps> = (props) => {
     />
   );
 
+  // Скрытые до подтверждения удаления строки уже не считаем в «из N»
+  const hiddenOnPage = (items?.length ?? 0) - shownItems.length;
   // Без серверной пагинации длинный список режем на страницы на клиенте.
-  const pager = pagination ?? (items.length > CLIENT_PAGE_SIZE
+  const pager = (pagination && { ...pagination, total: pagination.total - hiddenOnPage })
+    ?? (shownItems.length > CLIENT_PAGE_SIZE
     ? {
       current: clientPage,
       pageSize: CLIENT_PAGE_SIZE,
-      total: items.length,
+      total: shownItems.length,
       onChange: (page: number) => setClientPage(page),
     }
     : undefined);
   const visibleItems = !pagination && pager
-    ? items.slice((pager.current - 1) * pager.pageSize, pager.current * pager.pageSize)
-    : items;
+    ? shownItems.slice((pager.current - 1) * pager.pageSize, pager.current * pager.pageSize)
+    : shownItems;
   const now = new Date();
   const statusLabels: Record<CardStatus, string> = {
     mastered: t('Усвоено'),
@@ -176,7 +211,7 @@ export const CardList: FC<CardListProps> = (props) => {
     // Mobile 6.36: маркер статуса · слово/перевод · звезда; тап — правка
     return (
       <>
-        <div className={cls.mobileList}>
+        <FadeIn className={cls.mobileList}>
           {visibleItems.map(({ card, review }) => {
             const status = isLibrary ? statusOf(review) : dueStatusOf(review, now);
             return (
@@ -204,7 +239,7 @@ export const CardList: FC<CardListProps> = (props) => {
               onChange={pager.onChange}
             />
           )}
-        </div>
+        </FadeIn>
         {editor}
       </>
     );
@@ -220,7 +255,7 @@ export const CardList: FC<CardListProps> = (props) => {
 
   return (
     <>
-      <div className={classNames(cls.CardList, [isLibrary ? cls.library : cls.deck])}>
+      <FadeIn className={classNames(cls.CardList, [isLibrary ? cls.library : cls.deck])}>
         <div className={classNames(cls.row, [cls.head])}>
           <span />
           <span>{t('Слово')}</span>
@@ -307,7 +342,7 @@ export const CardList: FC<CardListProps> = (props) => {
             />
           </div>
         )}
-      </div>
+      </FadeIn>
       {editor}
     </>
   );

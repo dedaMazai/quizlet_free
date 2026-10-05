@@ -32,3 +32,4 @@ export {
 } from './model/lib/days';
 export { useTodayAnswers } from './model/hooks/useTodayAnswers';
 export { useTodayKey } from './model/hooks/useTodayKey';
+export { selectLearnDeckUuid } from './model/lib/selectLearnDeckUuid';

@@ -1,12 +1,12 @@
 export type Styles = {
-  actionButton: string;
+  actions: string;
+  center: string;
   description: string;
   EmptyState: string;
-  iconBg: string;
-  iconWrapper: string;
-  large: string;
-  medium: string;
-  small: string;
+  icon: string;
+  kicker: string;
+  primary: string;
+  secondary: string;
   title: string;
 };
 

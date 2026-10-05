@@ -1,107 +1,79 @@
-import { FC, ReactNode } from 'react';
-import { Typography, Button } from 'antd';
-import {
-    FileTextOutlined,
-    CommentOutlined,
-    HistoryOutlined,
-    InboxOutlined,
-    FileAddOutlined,
-    FolderOutlined,
-    StarOutlined,
-    ClockCircleOutlined,
-    FileSearchOutlined,
-} from '@ant-design/icons';
+import { memo } from 'react';
+import { Button } from 'antd';
+import type { LucideIcon } from 'lucide-react';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { VStack } from '@/shared/ui/Stack';
-
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import cls from './EmptyState.module.scss';
 
-type EmptyStateType = 
-    | 'documents'
-    | 'search'
-    | 'comments'
-    | 'history'
-    | 'general'
-    | 'drafts'
-    | 'templates'
-    | 'collections'
-    | 'starred'
-    | 'recent';
+const ICON_SIZE = 32;
+const ICON_STROKE = 1.25;
 
-interface EmptyStateProps {
-    className?: string;
-    type?: EmptyStateType;
-    title: string;
-    description?: string;
-    icon?: ReactNode;
-    action?: {
-        label: string;
-        onClick: () => void;
-    };
-    size?: 'small' | 'medium' | 'large';
+export enum EmptyStateAlign {
+    /** По левому краю — в контенте */
+    START = 'start',
+    /** По центру — в фокус-режиме */
+    CENTER = 'center',
 }
 
-const DEFAULT_ICONS: Record<EmptyStateType, ReactNode> = {
-    documents: <FileTextOutlined />,
-    search: <FileSearchOutlined />,
-    comments: <CommentOutlined />,
-    history: <HistoryOutlined />,
-    general: <InboxOutlined />,
-    drafts: <FileAddOutlined />,
-    templates: <FileTextOutlined />,
-    collections: <FolderOutlined />,
-    starred: <StarOutlined />,
-    recent: <ClockCircleOutlined />,
-};
+export interface EmptyStateAction {
+    label: string;
+    onClick: () => void;
+}
 
-/**
- * EmptyState - A component for displaying empty state feedback
- * with consistent visual design across the application
- */
-export const EmptyState: FC<EmptyStateProps> = ({
-    className,
-    type = 'general',
-    title,
-    description,
-    icon,
-    action,
-    size = 'medium',
-}) => {
-    const iconContent = icon || DEFAULT_ICONS[type];
+interface EmptyStateProps {
+    icon: LucideIcon;
+    kicker: string;
+    title: string;
+    /** Одна строка пояснения */
+    description?: string;
+    primary?: EmptyStateAction;
+    /** Ghost-действие рядом с primary */
+    secondary?: EmptyStateAction;
+    align?: EmptyStateAlign;
+    className?: string;
+}
+
+/** Пустое состояние (BACKLOG §1): иконка в рамке, kicker, заголовок, строка пояснения, одно primary-действие */
+export const EmptyState = memo((props: EmptyStateProps) => {
+    const {
+        icon: Icon,
+        kicker,
+        title,
+        description,
+        primary,
+        secondary,
+        align = EmptyStateAlign.START,
+        className,
+    } = props;
 
     return (
-        <VStack
-            align="center"
-            justify="center"
-            gap={size === 'small' ? '8' : size === 'medium' ? '12' : '16'}
-            className={classNames(cls.EmptyState, [className, cls[size]])}
+        <section
+            className={classNames(cls.EmptyState, [className], { [cls.center]: align === EmptyStateAlign.CENTER })}
         >
-            <div className={cls.iconWrapper}>
-                <div className={cls.iconBg}>
-                    {iconContent}
+            <span className={cls.icon}>
+                <Icon aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />
+            </span>
+            <Kicker size={KickerSize.MD} className={cls.kicker}>{kicker}</Kicker>
+            <h2 className={cls.title}>{title}</h2>
+            {description && <p className={cls.description}>{description}</p>}
+            {(primary || secondary) && (
+                <div className={cls.actions}>
+                    {primary && (
+                        <Button type="primary" className={cls.primary} onClick={primary.onClick}>
+                            <BlueprintMarks />
+                            {primary.label}
+                        </Button>
+                    )}
+                    {secondary && (
+                        <Button type="link" className={cls.secondary} onClick={secondary.onClick}>
+                            {secondary.label}
+                        </Button>
+                    )}
                 </div>
-            </div>
-
-            <VStack align="center" gap="4">
-                <Typography.Text strong className={cls.title}>
-                    {title}
-                </Typography.Text>
-                {description && (
-                    <Typography.Text type="secondary" className={cls.description}>
-                        {description}
-                    </Typography.Text>
-                )}
-            </VStack>
-
-            {action && (
-                <Button
-                    type="primary"
-                    onClick={action.onClick}
-                    className={cls.actionButton}
-                >
-                    {action.label}
-                </Button>
             )}
-        </VStack>
+        </section>
     );
-};
+});
+
+EmptyState.displayName = 'EmptyState';

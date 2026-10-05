@@ -1,5 +1,6 @@
 import { Suspense, useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import { NetworkBanner } from '@/widgets/NetworkBanner';
 import { PageLoader } from '@/widgets/PageLoader';
 import { Sidebar } from '@/widgets/Sidebar';
 import { TabBar } from '@/widgets/TabBar';
@@ -29,6 +30,7 @@ const AuthLayoutContent = ({ withSidebar = true }: AuthLayoutProps) => {
             {withSidebar && !focus && !isMobile && <Sidebar />}
             <div className={cls.column}>
                 {!focus && !isMobile && <Topbar />}
+                <NetworkBanner />
                 <main className={classNames(cls.main, { [cls.focus]: focus })}>
                     <Suspense key={stableKey} fallback={<PageLoader />}>
                         <Outlet />
