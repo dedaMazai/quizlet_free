@@ -1,14 +1,11 @@
 import {
-    CSSProperties, FC, useEffect, useMemo, useRef, useState,
+    CSSProperties, FC, useMemo, useState,
 } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Input, InputRef, Segmented } from 'antd';
-import {
-    ArrowRight, Flame, Layers, Search,
-} from 'lucide-react';
+import { Segmented } from 'antd';
+import { ArrowRight, Flame, Layers } from 'lucide-react';
 import { DeckCard, DeckCardSkeleton, useGetDecksQuery } from '@/entities/Deck';
-import { useGetCardsPageQuery } from '@/entities/Card';
 import {
     useGetDueSummaryQuery, useGetMasteryQuery, useGetStudyOverviewQuery, useTodayAnswers,
 } from '@/entities/Statistics';
@@ -24,11 +21,8 @@ import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import { FadeIn } from '@/shared/ui/Skeleton';
 import { SectionHeader, SectionHeaderSize } from '@/shared/ui/SectionHeader';
 import { RoutePath } from '@/shared/config/router/routePath';
-import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { getStreakLevel } from '@/shared/lib/streak';
-import { FocusSearchLocationState } from '@/shared/const/const';
-import { GlobalSearchResults } from './GlobalSearchResults';
 import cls from './MainPage.module.scss';
 
 type DeckFilter = 'recent' | 'own' | 'shared';
@@ -36,7 +30,6 @@ type DeckFilter = 'recent' | 'own' | 'shared';
 const DECKS_LIMIT = 4;
 const ARROW_SIZE = 14;
 const ICON_STROKE = 1.5;
-const SEARCH_ICON_SIZE = 16;
 const PERCENT = 100;
 const FLAME_SIZE = 18;
 const STREAK_LEVEL_CLASSES = [cls.streak0, cls.streak1, cls.streak2, cls.streak3, cls.streak4];
@@ -54,9 +47,7 @@ const toPercent = (part: number, total: number): number => (
 
 const MainPage: FC = () => {
     const { t, i18n } = useTranslation();
-    const location = useLocation();
     const userInfo = useUserInfo();
-    const searchRef = useRef<InputRef>(null);
     const { isMobile } = useMatchMedia();
 
     const tz = useMemo(
@@ -73,25 +64,11 @@ const MainPage: FC = () => {
     // Серия на мобильной — только чипом в шапке (StreakCard скрыт)
     const { data: overview } = useGetStudyOverviewQuery(tz, { skip: !isMobile });
 
-    const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
     const [filter, setFilter] = useState<DeckFilter>('recent');
     // Пустая главная: «Создать колоду» / «Импорт из Excel» (DeckForm → CardEditor новой колоды)
     const [deckFormOpen, setDeckFormOpen] = useState(false);
     const [importAfterCreate, setImportAfterCreate] = useState(false);
     const [importDeckUuid, setImportDeckUuid] = useState<string>();
-
-    // Кнопка поиска в Topbar ведёт сюда с фокусом в поле (до палитры ⌘K)
-    useEffect(() => {
-        if ((location.state as FocusSearchLocationState | null)?.focusSearch) {
-            searchRef.current?.focus();
-        }
-    }, [location.key, location.state]);
-
-    const hasSearch = Boolean(debouncedSearch.trim());
-    const { data: searchResults } = useGetCardsPageQuery(
-        { page: 1, pageSize: 20, search: debouncedSearch.trim() },
-        { skip: !hasSearch },
-    );
 
     const name = userInfo?.name ?? '';
     const now = new Date();
@@ -107,14 +84,6 @@ const MainPage: FC = () => {
     ].join(' · ');
 
     const deckList = useMemo(() => decks ?? [], [decks]);
-
-    const deckNameByUuid = useMemo(() => {
-        const map: Record<string, string> = {};
-        deckList.forEach((deck) => {
-            map[deck.uuid] = deck.name;
-        });
-        return map;
-    }, [deckList]);
 
     const visibleDecks = useMemo(() => {
         let list = deckList;
@@ -226,97 +195,76 @@ const MainPage: FC = () => {
 
     return (
         <div className={cls.MainPage}>
-            <Input
-                ref={searchRef}
-                className={cls.search}
-                allowClear
-                prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
-                value={search}
-                placeholder={t('Найти колоды и слова')}
-                onChange={(e) => setSearchDebounced(e.target.value)}
-            />
+            <header className={cls.header}>
+                <div className={cls.greeting}>
+                    <Kicker>{dateKicker}</Kicker>
+                    <h1 className={cls.title}>
+                        {name
+                            ? t('{{greeting}}, {{name}}', { greeting, name })
+                            : greeting}
+                    </h1>
+                </div>
+                <div className={cls.goal}>
+                    <span className={cls.goalLabel}>{t('Цель дня')}</span>
+                    <span className={cls.goalValue}>{`${todayAnswers} / ${goal}`}</span>
+                </div>
+            </header>
 
-            {hasSearch ? (
-                <GlobalSearchResults
-                    query={debouncedSearch}
-                    decks={deckList}
-                    cards={searchResults?.cards ?? []}
-                    deckNameByUuid={deckNameByUuid}
-                />
-            ) : (
+            {hasNoDecks ? noDecksState : (
                 <>
-                    <header className={cls.header}>
-                        <div className={cls.greeting}>
-                            <Kicker>{dateKicker}</Kicker>
-                            <h1 className={cls.title}>
-                                {name
-                                    ? t('{{greeting}}, {{name}}', { greeting, name })
-                                    : greeting}
-                            </h1>
-                        </div>
-                        <div className={cls.goal}>
-                            <span className={cls.goalLabel}>{t('Цель дня')}</span>
-                            <span className={cls.goalValue}>{`${todayAnswers} / ${goal}`}</span>
-                        </div>
-                    </header>
+                    <div className={cls.overview}>
+                        <DueHero tz={tz} />
+                        <StreakCard tz={tz} />
+                    </div>
 
-                    {hasNoDecks ? noDecksState : (
-                        <>
-                            <div className={cls.overview}>
-                                <DueHero tz={tz} />
-                                <StreakCard tz={tz} />
-                            </div>
+                    <NextSteps tz={tz} />
 
-                            <NextSteps tz={tz} />
-
-                            <section className={cls.decks}>
-                                <SectionHeader
-                                    className={cls.decksHeader}
-                                    size={SectionHeaderSize.LG}
-                                    title={t('Колоды')}
-                                    titleExtra={(
-                                        <Segmented<DeckFilter>
-                                            className={cls.filter}
-                                            classNames={{ item: cls.filterItem, label: cls.filterLabel }}
-                                            value={filter}
-                                            onChange={setFilter}
-                                            options={[
-                                                { label: t('Недавние'), value: 'recent' },
-                                                { label: t('Мои'), value: 'own' },
-                                                { label: t('Общие'), value: 'shared' },
-                                            ]}
-                                        />
-                                    )}
-                                    extra={(
-                                        <Link to={RoutePath.DECKS()} className={cls.allDecks}>
-                                            {t('Все {{count}} колод', { count: deckList.length })}
-                                            <ArrowRight aria-hidden size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
-                                        </Link>
-                                    )}
+                    <section className={cls.decks}>
+                        <SectionHeader
+                            className={cls.decksHeader}
+                            size={SectionHeaderSize.LG}
+                            title={t('Колоды')}
+                            titleExtra={(
+                                <Segmented<DeckFilter>
+                                    className={cls.filter}
+                                    classNames={{ item: cls.filterItem, label: cls.filterLabel }}
+                                    value={filter}
+                                    onChange={setFilter}
+                                    options={[
+                                        { label: t('Недавние'), value: 'recent' },
+                                        { label: t('Мои'), value: 'own' },
+                                        { label: t('Общие'), value: 'shared' },
+                                    ]}
                                 />
-                                {isDecksLoading ? (
-                                    <div className={cls.deckGrid}>
-                                        {Array.from({ length: DECKS_LIMIT }, (_, i) => <DeckCardSkeleton key={i} />)}
-                                    </div>
-                                ) : (
-                                    <FadeIn className={cls.deckGrid}>
-                                        {visibleDecks.map((deck) => {
-                                            const deckMastery = masteryByDeck.get(deck.uuid);
-                                            return (
-                                                <DeckCard
-                                                    key={deck.uuid}
-                                                    deck={deck}
-                                                    dueCount={dueByDeck.get(deck.uuid) ?? 0}
-                                                    mastered={toPercent(deckMastery?.mastered ?? 0, deck.cards_count)}
-                                                    learning={toPercent(deckMastery?.learning ?? 0, deck.cards_count)}
-                                                />
-                                            );
-                                        })}
-                                    </FadeIn>
-                                )}
-                            </section>
-                        </>
-                    )}
+                            )}
+                            extra={(
+                                <Link to={RoutePath.DECKS()} className={cls.allDecks}>
+                                    {t('Все {{count}} колод', { count: deckList.length })}
+                                    <ArrowRight aria-hidden size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
+                                </Link>
+                            )}
+                        />
+                        {isDecksLoading ? (
+                            <div className={cls.deckGrid}>
+                                {Array.from({ length: DECKS_LIMIT }, (_, i) => <DeckCardSkeleton key={i} />)}
+                            </div>
+                        ) : (
+                            <FadeIn className={cls.deckGrid}>
+                                {visibleDecks.map((deck) => {
+                                    const deckMastery = masteryByDeck.get(deck.uuid);
+                                    return (
+                                        <DeckCard
+                                            key={deck.uuid}
+                                            deck={deck}
+                                            dueCount={dueByDeck.get(deck.uuid) ?? 0}
+                                            mastered={toPercent(deckMastery?.mastered ?? 0, deck.cards_count)}
+                                            learning={toPercent(deckMastery?.learning ?? 0, deck.cards_count)}
+                                        />
+                                    );
+                                })}
+                            </FadeIn>
+                        )}
+                    </section>
                 </>
             )}
             {deckModals}

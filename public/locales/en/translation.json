@@ -2421,5 +2421,14 @@
   "Не удалось удалить слово": "Failed to delete the word",
   "Нет соединения — изменения не сохранятся, пока сеть не вернётся": "No connection — changes won't be saved until the network is back",
   "ИИ-запросов на сегодня: {{count}}": "AI requests left today: {{count}}",
-  "Лимит обновится завтра": "The limit resets tomorrow"
+  "Лимит обновится завтра": "The limit resets tomorrow",
+  "Недавние колоды": "Recent decks",
+  "Действия": "Actions",
+  "Перейти": "Go to",
+  "Новая колода": "New deck",
+  "Добавить слова в «{{name}}»": "Add words to “{{name}}”",
+  "Поиск колод, слов и разделов": "Search decks, words and sections",
+  "↑↓ выбрать": "↑↓ select",
+  "↵ открыть": "↵ open",
+  "Esc закрыть": "Esc close"
 }

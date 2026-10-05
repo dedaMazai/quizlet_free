@@ -1,4 +1,6 @@
-import { ReactNode, useMemo, useState } from 'react';
+import {
+  ReactNode, useEffect, useMemo, useState,
+} from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -27,6 +29,7 @@ import {
   useGetDeckQuery,
   useDuplicateDeckMutation,
   useRemoveDeckShareMutation,
+  pushRecentDeck,
 } from '@/entities/Deck';
 import { useUserInfo, useUserAccesses } from '@/entities/User';
 import {
@@ -110,6 +113,11 @@ const DeckPage = () => {
   const { isMobile } = useMatchMedia();
 
   const { data: deck, isLoading } = useGetDeckQuery(deckId!, { skip: !deckId });
+
+  // Недавние колоды для палитры ⌘K — только реально открытые (не 404)
+  useEffect(() => {
+    if (deck?.uuid) pushRecentDeck(deck.uuid);
+  }, [deck?.uuid]);
   const [duplicateDeck, { isLoading: isDuplicating }] = useDuplicateDeckMutation();
   const [removeShare, { isLoading: isLeaving }] = useRemoveDeckShareMutation();
   const { data: cards } = useGetCardsQuery(deckId!, { skip: !deckId });
