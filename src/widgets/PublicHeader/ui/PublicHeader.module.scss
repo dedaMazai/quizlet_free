@@ -2,87 +2,89 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    width: 100%;
-    background: var(--bg-color);
-    border-bottom: 1px solid var(--border-subtle);
-    backdrop-filter: blur(12px);
-}
-
-.inner {
     display: flex;
-    flex-wrap: wrap;
+    flex: none;
     align-items: center;
-    gap: 8px 16px;
-    width: 100%;
-    max-width: 1200px;
-    padding: 10px 24px;
-    margin: 0 auto;
+    gap: 32px;
+    height: var(--public-header-height);
+    padding: 0 56px;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-divider);
 
     @media (width <= 767px) {
-        padding: 8px 12px;
+        gap: 16px;
+        padding: 0 16px;
     }
 }
 
 .logo {
     display: flex;
-    flex-shrink: 0;
-    color: var(--color-logo);
-    border-radius: var(--border-radius);
-
-    &:focus-visible {
-        outline: 2px solid var(--color-accent);
-        outline-offset: 4px;
-    }
-}
-
-.nav {
-    display: flex;
-    flex: 1 1 auto;
-    gap: 4px;
+    flex: none;
     align-items: center;
-    justify-content: center;
-
-    @media (width <= 767px) {
-        order: 3;
-        flex-basis: 100%;
-        justify-content: flex-start;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-}
-
-.actions {
-    flex-shrink: 0;
-    margin-left: auto;
-}
-
-.link {
-    display: flex;
-    align-items: center;
-    min-height: 40px;
-    padding: 6px 12px;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    border-radius: var(--border-radius);
-    transition: color 0.2s ease, background 0.2s ease;
+    gap: 10px;
+    color: var(--color-accent-900);
 
     &:hover {
-        color: var(--text);
-        background: var(--hover-bg);
+        color: var(--color-accent-900);
     }
 
     &:focus-visible {
         outline: 2px solid var(--color-accent);
         outline-offset: 2px;
     }
+}
+
+.logoIcon {
+    flex: none;
+    width: 20px;
+    height: 26px;
+}
+
+.logoText {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 22px;
+    white-space: nowrap;
+}
+
+.nav {
+    display: flex;
+    gap: 24px;
+    font-size: 15px;
 
     @media (width <= 767px) {
-        min-height: 44px;
+        display: none;
+    }
+}
+
+.link {
+    color: var(--color-text);
+    white-space: nowrap;
+
+    &:hover {
+        color: var(--color-accent-700);
     }
 
-    &.active {
-        font-weight: 600;
-        color: var(--text);
-        background: var(--color-accent-soft);
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
     }
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.button {
+    position: relative;
+    height: 40px;
+    padding: 0 16px;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.primary {
+    padding: 0 18px;
 }

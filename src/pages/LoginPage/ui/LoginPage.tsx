@@ -1,75 +1,38 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Form, Input, Typography, Badge } from 'antd';
-import { UserOutlined, LockOutlined, CloseOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import { NavLink } from 'react-router';
-import { CSSProperties, memo, ReactNode, useEffect, useRef, useState } from 'react';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { Button, Form, Input } from 'antd';
+import { Link } from 'react-router';
+import { useEffect, useState } from 'react';
 import { RoutePath } from '@/shared/config/router/routePath';
 import {
-    useLoginImpersonateMutation,
     useLoginMutation,
     useRegisterMutation,
     useUserInfoQuery,
 } from '@/entities/User';
 import { Loader } from '@/shared/ui/Loader';
+import { BlueprintMarks } from '@/shared/ui/Blueprint';
+import { Kicker, KickerTone } from '@/shared/ui/Kicker';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
 import { useNotificationFn } from '@/shared/lib/context/NotificationContext';
-import { ReactComponent as LogoFlashcards } from '@/shared/assets/icons/LogoFlashcards.svg';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { ReactComponent as Logo } from '@/shared/assets/icons/LogoZubrika.svg';
 import cls from './LoginPage.module.scss';
+
+/** Название продукта не переводится. */
+const APP_NAME = 'Zubrika';
 
 interface LoginForm {
     email: string;
     password: string;
     name?: string;
-    remember: boolean;
-    impersonate_email?: string;
 }
 
-interface WrapperCardProps {
-    children: ReactNode;
-    isImpersonateMode: boolean;
-    style?: CSSProperties;
-}
-
-const WrapperCard = memo(({ children, isImpersonateMode, style }: WrapperCardProps) => {
-    const { t } = useTranslation();
-
-    const styleProp = {
-        width: 562,
-        backgroundColor: 'var(--card-bg)',
-        border: 'none',
-        position: 'relative' as const,
-        ...style,
-    }
-
-    if (isImpersonateMode) {
-        return (
-            <Badge.Ribbon text={t('Режим имперсонации')} color="orange">
-                <Card style={styleProp}>
-                    {children}
-                </Card>
-            </Badge.Ribbon>
-        )
-    }
-
-    return (
-        <Card style={styleProp}>
-            {children}
-        </Card>
-    )
-})
-
+/** Вход и регистрация (Public 6.31/6.32): слева тёмное поле со слоганом, справа форма */
 const LoginPage = () => {
     const { t } = useTranslation();
-    const [login, { isLoading: isAdminLoading }] = useLoginMutation();
+    const [login, { isLoading: isLoginLoading }] = useLoginMutation();
     const [register, { isLoading: isRegisterLoading }] = useRegisterMutation();
-    const [loginImpersonate, { isLoading: isImpersonateLoading }] = useLoginImpersonateMutation();
     const notification = useNotificationFn();
     const [form] = Form.useForm<LoginForm>();
-    const [isImpersonateMode, setIsImpersonateMode] = useState(false);
     const [isRegisterMode, setIsRegisterMode] = useState(false);
-    const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
     const [
         storageFields,
     ] = useLocalStorage<{
@@ -78,24 +41,26 @@ const LoginPage = () => {
         email: undefined,
     });
 
-    const handleLongPressStart = () => {
-        longPressTimerRef.current = setTimeout(() => {
-            setIsImpersonateMode(true);
-            notification?.info({
-                message: t('Режим имперсонации активирован'),
-            });
-        }, 7000);
-    };
-
-    const handleLongPressEnd = () => {
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
-    };
+    const pillars = [
+        {
+            key: 'srs',
+            title: t('Интервальные повторения'),
+            description: t('Слово возвращается ровно тогда, когда начинает забываться.'),
+        },
+        {
+            key: 'context',
+            title: t('Слово в контексте'),
+            description: t('Режим «Пропуски» — вставить слово в свой пример.'),
+        },
+        {
+            key: 'chunks',
+            title: t('Фразы с ИИ'),
+            description: t('К каждому слову — 2–3 частотные коллокации.'),
+        },
+    ];
 
     const onFinish = async (values: LoginForm) => {
-        if (isRegisterMode && !isImpersonateMode) {
+        if (isRegisterMode) {
             const result = await register({
                 email: values.email,
                 password: values.password,
@@ -110,22 +75,11 @@ const LoginPage = () => {
                     message: t('Подтвердите регистрацию по ссылке в письме'),
                 });
             }
-        } else if (!isImpersonateMode) {
+        } else {
             const result = await login(values);
             if ('error' in result) {
                 notification?.error({
                     message: t('Неверный логин или пароль'),
-                });
-            }
-        } else if (values.impersonate_email) {
-            const result = await loginImpersonate({
-                admin_email: values.email,
-                admin_password: values.password,
-                user_email: values.impersonate_email,
-            });
-            if ('error' in result) {
-                notification?.error({
-                    message: t('Ошибка имперсонации'),
                 });
             }
         }
@@ -139,15 +93,7 @@ const LoginPage = () => {
         }
     }, [form, storageFields]);
 
-    useEffect(() => {
-        return () => {
-            if (longPressTimerRef.current) {
-                clearTimeout(longPressTimerRef.current);
-            }
-        };
-    }, []);
-
-    const isLoading = isAdminLoading || isImpersonateLoading || isRegisterLoading;
+    const isLoading = isLoginLoading || isRegisterLoading;
 
     const { isLoading: userInfoIsLoading, isFetching: userInfoIsFetching } = useUserInfoQuery();
 
@@ -157,176 +103,138 @@ const LoginPage = () => {
 
     if (isAuthProbing) {
         return (
-            <HStack style={{ padding: 24 }} max justify="center">
-                <VStack gap="16" align="center">
-                    <Loader />
-                    <MyTypography.Base style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                        {t('Проверка авторизации...')}
-                    </MyTypography.Base>
-                </VStack>
-            </HStack>
+            <div className={cls.probing}>
+                <Loader />
+                <span className={cls.probingText}>{t('Проверка авторизации...')}</span>
+            </div>
         );
     }
 
     return (
-        <HStack style={{ padding: 24 }} max justify="center">
-            <WrapperCard isImpersonateMode={isImpersonateMode}>
-                {isImpersonateMode && (
-                    <Button
-                        size="small"
-                        icon={<CloseOutlined />}
-                        onClick={() => {
-                            setIsImpersonateMode(false);
-                            form.setFieldValue('impersonate_email', undefined);
-                        }}
-                        style={{ position: 'absolute', top: 16, left: 16 }}
-                    >
-                        {t('Выйти из режима имперсонации')}
-                    </Button>
-                )}
-                <HStack max justify='center'>
-                    <div
-                        onMouseDown={handleLongPressStart}
-                        onMouseUp={handleLongPressEnd}
-                        onMouseLeave={handleLongPressEnd}
-                        onTouchStart={handleLongPressStart}
-                        onTouchEnd={handleLongPressEnd}
-                        style={{
-                            cursor: 'pointer',
-                            userSelect: 'none',
-                        }}
-                    >
-                        <LogoFlashcards width={104} height={40} style={{ color: 'var(--color-logo)' }} />
+        <div className={cls.LoginPage}>
+            <section className={cls.panel}>
+                <div className={cls.logo}>
+                    <Logo className={cls.logoIcon} />
+                    <span className={cls.logoText}>{APP_NAME}</span>
+                </div>
+                <div className={cls.slogan}>
+                    <Kicker tone={KickerTone.ON_DARK}>{t('Английский по карточкам')}</Kicker>
+                    <span className={cls.sloganTitle}>{t('Учите фразами. Не забывайте через месяц.')}</span>
+                </div>
+                <div className={cls.pillars}>
+                    {pillars.map((pillar, index) => (
+                        <div key={pillar.key} className={cls.pillar}>
+                            <span className={cls.pillarIndex}>{String(index + 1).padStart(2, '0')}</span>
+                            <span className={cls.pillarTitle}>{pillar.title}</span>
+                            <span className={cls.pillarText}>{pillar.description}</span>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            <section className={cls.formSide}>
+                <div className={cls.formBox}>
+                    <div className={cls.heading}>
+                        <h1 className={cls.title}>{isRegisterMode ? t('Регистрация') : t('Вход')}</h1>
+                        <span className={cls.subtitle}>
+                            {isRegisterMode
+                                ? t('Пара полей — и можно создавать первую колоду')
+                                : t('С возвращением. Повторения ждут.')}
+                        </span>
                     </div>
-                </HStack>
-                <Typography.Title level={3} style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    {isRegisterMode && !isImpersonateMode ? t('Регистрация') : t('Вход в личный кабинет')}
-                </Typography.Title>
-                <Form
-                    form={form}
-                    name="login"
-                    initialValues={{
-                        remember: false,
-                    }}
-                    style={{
-                        width: '100%',
-                    }}
-                    onFinish={onFinish}
-                >
-                    {isRegisterMode && !isImpersonateMode && (
-                        <Form.Item name="name">
-                            <Input
-                                prefix={<UserOutlined style={{ color: 'var(--color-logo)' }} />}
-                                placeholder={t('Имя (необязательно)')}
-                                size="large"
-                            />
-                        </Form.Item>
-                    )}
-                    <Form.Item
-                        name="email"
-                        validateDebounce={700}
-                        rules={[
-                            {
-                                required: true,
-                                message: t('Пожалуйста введите почту'),
-                            },
-                        ]}
-                    >
-                        <Input
-                            prefix={<UserOutlined style={{ color: 'var(--color-logo)' }} />}
-                            placeholder={t('Почта')}
-                            size="large"
-                        />
-                    </Form.Item>
-                    <Form.Item
-                        validateDebounce={700}
-                        name="password"
-                        rules={[
-                            {
-                                required: true,
-                                message: t('Пожалуйста введите пароль'),
-                            },
-                        ]}
-                    >
-                        <Input.Password
-                            prefix={<LockOutlined style={{ color: 'var(--color-logo)' }} />}
-                            iconRender={(visible) =>
-                                visible
-                                    ? <EyeOutlined style={{ color: 'var(--color-logo)' }} />
-                                    : <EyeInvisibleOutlined style={{ color: 'var(--color-logo)' }} />
-                            }
-                            placeholder={t('Пароль')}
-                            size="large"
-                        />
-                    </Form.Item>
 
-                    {isImpersonateMode && (
-                        <Form.Item
-                            name="impersonate_email"
-                            validateDebounce={700}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t('Пожалуйста введите email пользователя'),
-                                },
-                                {
-                                    type: 'email',
-                                    message: t('Введите корректную почту'),
-                                },
-                            ]}
-                        >
-                            <Input
-                                prefix={<UserOutlined style={{ color: 'var(--color-warning)' }} />}
-                                placeholder={t('Email пользователя для входа')}
-                                size="large"
-                            />
-                        </Form.Item>
-                    )}
-
-                    <Form.Item
-                        style={{
-                            marginBottom: 12,
-                        }}
+                    <Form
+                        form={form}
+                        name="login"
+                        layout="vertical"
+                        requiredMark={false}
+                        className={cls.form}
+                        onFinish={onFinish}
                     >
-                        <Button
-                            size="large"
-                            color="default"
-                            block
-                            htmlType="submit"
-                        >
+                        <div className={cls.fields}>
+                            {isRegisterMode && (
+                                <Form.Item name="name" label={t('Имя · необязательно')} className={cls.field}>
+                                    <Input
+                                        className={cls.input}
+                                        placeholder={t('Как к вам обращаться')}
+                                        autoComplete="name"
+                                    />
+                                </Form.Item>
+                            )}
+                            <Form.Item
+                                name="email"
+                                label={t('Почта')}
+                                className={cls.field}
+                                validateDebounce={700}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t('Пожалуйста введите почту'),
+                                    },
+                                ]}
+                            >
+                                <Input className={cls.input} autoComplete="email" />
+                            </Form.Item>
+                            <Form.Item
+                                name="password"
+                                label={t('Пароль')}
+                                className={cls.field}
+                                validateDebounce={700}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t('Пожалуйста введите пароль'),
+                                    },
+                                ]}
+                            >
+                                <Input.Password
+                                    className={cls.input}
+                                    autoComplete={isRegisterMode ? 'new-password' : 'current-password'}
+                                    // AntD перезаписывает className у возвращённого элемента — стиль на вложенном
+                                    iconRender={(visible) => (
+                                        <span>
+                                            <span className={cls.toggle}>
+                                                {visible ? t('Скрыть') : t('Показать')}
+                                            </span>
+                                        </span>
+                                    )}
+                                />
+                            </Form.Item>
+                        </div>
+
+                        <Button type="primary" htmlType="submit" block className={cls.submit} disabled={isLoading}>
+                            <BlueprintMarks />
                             {isLoading
                                 ? <Loader className={cls.loader} />
-                                : (isRegisterMode && !isImpersonateMode ? t('Зарегистрироваться') : t('Войти'))}
+                                : (isRegisterMode ? t('Зарегистрироваться') : t('Войти'))}
                         </Button>
-                    </Form.Item>
-                </Form>
-                {!isImpersonateMode && (
-                    <HStack max justify="center" style={{ marginBottom: 12 }}>
-                        <Button
-                            type="link"
+                    </Form>
+
+                    <div className={cls.links}>
+                        <button
+                            type="button"
+                            className={cls.switch}
                             onClick={() => setIsRegisterMode((prev) => !prev)}
                         >
                             {isRegisterMode
                                 ? t('Уже есть аккаунт? Войти')
-                                : t('Нет аккаунта? Зарегистрироваться')}
-                        </Button>
-                    </HStack>
-                )}
-                <HStack max justify="center" style={{ marginBottom: 12 }}>
-                    <NavLink to={RoutePath.ABOUT()}>
-                        {t('О сервисе')}
-                    </NavLink>
-                </HStack>
-                <HStack max justify="center">
-                    <MyTypography.Small style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                        {t('Нажимая «Войти», вы принимаете')}{' '}
-                        <NavLink to={RoutePath.PRIVACY()}>
+                                : t('Нет аккаунта? Регистрация')}
+                        </button>
+                        <Link to={RoutePath.ABOUT()} className={cls.about}>
+                            {t('О сервисе')}
+                        </Link>
+                    </div>
+
+                    <span className={cls.terms}>
+                        {t('Продолжая, вы принимаете')}{' '}
+                        <Link to={RoutePath.PRIVACY()}>
                             {t('пользовательское соглашение и политику конфиденциальности')}
-                        </NavLink>
-                    </MyTypography.Small>
-                </HStack>
-            </WrapperCard>
-        </HStack>
+                        </Link>
+                        .
+                    </span>
+                </div>
+            </section>
+        </div>
     );
 };
 

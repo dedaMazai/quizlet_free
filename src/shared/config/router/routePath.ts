@@ -47,6 +47,14 @@ export const SETTINGS_TAB_PARAM = 'activeTab';
 export const SETTINGS_USERS_TAB = 'Users';
 export const getSettingsUsersPath = () => RoutePath.SETTINGS(`?${SETTINGS_TAB_PARAM}=${SETTINGS_USERS_TAB}`);
 
+/** Якоря секций страницы «О сервисе»: бывшие страницы FEATURES и FAQ ведут сюда */
+export enum AboutAnchor {
+  FEATURES = 'features',
+  COMPARE = 'compare',
+  FAQ = 'faq',
+}
+export const getAboutAnchorPath = (anchor: AboutAnchor) => `${RoutePath.ABOUT()}#${anchor}`;
+
 export const PUBLIC_PAGES = [
   RoutePath.LOGIN(),
   RoutePath.CHANGE_PASSWORD(),

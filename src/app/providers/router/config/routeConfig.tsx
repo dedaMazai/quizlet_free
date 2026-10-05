@@ -1,6 +1,7 @@
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { LoginPage } from '@/pages/LoginPage';
-import { RoutePath } from '@/shared/config/router/routePath';
+import { Navigate } from 'react-router';
+import { AboutAnchor, getAboutAnchorPath, RoutePath } from '@/shared/config/router/routePath';
 import { AppRoutesProps } from '@/shared/types/router';
 import { ForbiddenPage } from '@/pages/ForbiddenPage';
 import { UserPage } from '@/pages/UserPage';
@@ -26,8 +27,6 @@ import { WritePage } from '@/pages/WritePage';
 import { ClozePage } from '@/pages/ClozePage';
 import { OrderPage } from '@/pages/OrderPage';
 import { AboutPage } from '@/pages/AboutPage';
-import { FeaturesPage } from '@/pages/FeaturesPage';
-import { FaqPage } from '@/pages/FaqPage';
 import { GrammarTensesPage } from '@/pages/GrammarTensesPage';
 import { TenseGroupPage } from '@/pages/TenseGroupPage';
 import { IrregularVerbsPage } from '@/pages/IrregularVerbsPage';
@@ -235,18 +234,19 @@ export const routeConfig: AppRoutesProps[] = [
     },
     {
         path: RoutePath.FEATURES(),
-        element: <FeaturesPage />,
+        element: <Navigate to={getAboutAnchorPath(AboutAnchor.FEATURES)} replace />,
         publicLayout: true,
     },
     {
         path: RoutePath.FAQ(),
-        element: <FaqPage />,
+        element: <Navigate to={getAboutAnchorPath(AboutAnchor.FAQ)} replace />,
         publicLayout: true,
     },
     {
         path: RoutePath.FORBIDDEN(),
         element: <ForbiddenPage />,
         authOnly: true,
+        focusLayout: true,
     },
     // Проверочная страница примитивов shared/ui — только в dev-сборке
     ...(__IS_DEV__ ? [{
@@ -259,5 +259,6 @@ export const routeConfig: AppRoutesProps[] = [
         path: '*',
         element: <NotFoundPage />,
         authOnly: true,
+        focusLayout: true,
     },
 ];

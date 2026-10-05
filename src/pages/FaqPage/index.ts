@@ -1,1 +1,0 @@
-export { FaqPageAsync as FaqPage } from './ui/FaqPage.async';

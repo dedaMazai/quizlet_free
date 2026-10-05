@@ -1,47 +1,29 @@
 .PublicFooter {
-    flex-shrink: 0;
-    width: 100%;
-    padding: 40px 24px;
-    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    padding: 24px 56px;
+    font-size: 13px;
+    color: var(--color-neutral-700);
+    border-top: 1px solid var(--color-divider);
 
     @media (width <= 767px) {
-        padding: 28px 12px;
+        padding: 24px 16px;
     }
-}
-
-.inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 20px;
-    align-items: center;
-    justify-content: center;
 }
 
 .link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 32px;
-    padding: 0 4px;
-    color: var(--text-secondary);
-    border-radius: var(--border-radius);
-    transition: color 0.2s ease;
-
-    @media (width <= 767px) {
-        min-height: 44px;
-    }
+    color: var(--color-neutral-700);
 
     &:hover {
-        color: var(--color-accent);
+        color: var(--color-accent-700);
     }
 
     &:focus-visible {
         outline: 2px solid var(--color-accent);
-        outline-offset: 4px;
+        outline-offset: 2px;
     }
 }

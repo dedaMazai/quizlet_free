@@ -17,8 +17,6 @@ export const PublicLayout = () => {
     useEffect(() => {
         const titles: Record<string, string> = {
             [RoutePath.ABOUT()]: t('О сервисе'),
-            [RoutePath.FEATURES()]: t('Возможности'),
-            [RoutePath.FAQ()]: t('Вопросы и ответы'),
         };
         const pageTitle = titles[pathname];
 
