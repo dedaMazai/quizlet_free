@@ -2457,5 +2457,14 @@
   "Серия, точность и освоение колод появятся после первых ответов.": "Streak, accuracy and deck mastery will appear after the first answers.",
   "К пользователям": "To users",
   "Открыть статистику": "Open statistics",
-  "копия": "copy"
+  "копия": "copy",
+  "Забыли пароль?": "Forgot password?",
+  "Вспомнили пароль? Войти": "Remembered your password? Sign in",
+  "Пришлём на почту ссылку, по которой можно задать новый пароль": "We'll email you a link to set a new password",
+  "Не удалось отправить письмо, попробуйте позже": "Could not send the email, please try again later",
+  "Если аккаунт с этой почтой есть, мы отправили ссылку для сброса пароля": "If an account with this email exists, we've sent a password reset link",
+  "Ссылка недействительна": "Link is invalid",
+  "Ссылка устарела или уже была использована. Запросите новую на странице входа.": "The link has expired or has already been used. Request a new one on the sign-in page.",
+  "Запросить новую ссылку": "Request a new link",
+  "Придумайте новый пароль для входа": "Choose a new password to sign in"
 }

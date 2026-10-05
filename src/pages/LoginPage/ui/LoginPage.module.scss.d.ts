@@ -2,6 +2,7 @@ export type Styles = {
   about: string;
   field: string;
   fields: string;
+  forgot: string;
   form: string;
   formBox: string;
   formSide: string;

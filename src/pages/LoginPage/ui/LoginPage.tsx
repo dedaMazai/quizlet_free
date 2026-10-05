@@ -6,6 +6,7 @@ import { RoutePath } from '@/shared/config/router/routePath';
 import {
     useLoginMutation,
     useRegisterMutation,
+    useRequestPasswordResetMutation,
     useUserInfoQuery,
 } from '@/entities/User';
 import { Loader } from '@/shared/ui/Loader';
@@ -19,6 +20,12 @@ import cls from './LoginPage.module.scss';
 /** Название продукта не переводится. */
 const APP_NAME = 'Zubrika';
 
+enum LoginMode {
+    LOGIN = 'login',
+    REGISTER = 'register',
+    RESET = 'reset',
+}
+
 interface LoginForm {
     email: string;
     password: string;
@@ -30,9 +37,12 @@ const LoginPage = () => {
     const { t } = useTranslation();
     const [login, { isLoading: isLoginLoading }] = useLoginMutation();
     const [register, { isLoading: isRegisterLoading }] = useRegisterMutation();
+    const [requestPasswordReset, { isLoading: isResetLoading }] = useRequestPasswordResetMutation();
     const toast = useToast();
     const [form] = Form.useForm<LoginForm>();
-    const [isRegisterMode, setIsRegisterMode] = useState(false);
+    const [mode, setMode] = useState(LoginMode.LOGIN);
+    const isRegisterMode = mode === LoginMode.REGISTER;
+    const isResetMode = mode === LoginMode.RESET;
     const [
         storageFields,
     ] = useLocalStorage<{
@@ -60,7 +70,15 @@ const LoginPage = () => {
     ];
 
     const onFinish = async (values: LoginForm) => {
-        if (isRegisterMode) {
+        if (isResetMode) {
+            const result = await requestPasswordReset(values.email);
+            if ('error' in result) {
+                toast.error(t('Не удалось отправить письмо, попробуйте позже'));
+            } else {
+                toast.success(t('Если аккаунт с этой почтой есть, мы отправили ссылку для сброса пароля'));
+                setMode(LoginMode.LOGIN);
+            }
+        } else if (isRegisterMode) {
             const result = await register({
                 email: values.email,
                 password: values.password,
@@ -87,7 +105,23 @@ const LoginPage = () => {
         }
     }, [form, storageFields]);
 
-    const isLoading = isLoginLoading || isRegisterLoading;
+    const isLoading = isLoginLoading || isRegisterLoading || isResetLoading;
+
+    const titles: Record<LoginMode, string> = {
+        [LoginMode.LOGIN]: t('Вход'),
+        [LoginMode.REGISTER]: t('Регистрация'),
+        [LoginMode.RESET]: t('Восстановление пароля'),
+    };
+    const subtitles: Record<LoginMode, string> = {
+        [LoginMode.LOGIN]: t('С возвращением. Повторения ждут.'),
+        [LoginMode.REGISTER]: t('Пара полей — и можно создавать первую колоду'),
+        [LoginMode.RESET]: t('Пришлём на почту ссылку, по которой можно задать новый пароль'),
+    };
+    const submitLabels: Record<LoginMode, string> = {
+        [LoginMode.LOGIN]: t('Войти'),
+        [LoginMode.REGISTER]: t('Зарегистрироваться'),
+        [LoginMode.RESET]: t('Отправить ссылку'),
+    };
 
     const { isLoading: userInfoIsLoading, isFetching: userInfoIsFetching } = useUserInfoQuery();
 
@@ -131,12 +165,8 @@ const LoginPage = () => {
             <section className={cls.formSide}>
                 <div className={cls.formBox}>
                     <div className={cls.heading}>
-                        <h1 className={cls.title}>{isRegisterMode ? t('Регистрация') : t('Вход')}</h1>
-                        <span className={cls.subtitle}>
-                            {isRegisterMode
-                                ? t('Пара полей — и можно создавать первую колоду')
-                                : t('С возвращением. Повторения ждут.')}
-                        </span>
+                        <h1 className={cls.title}>{titles[mode]}</h1>
+                        <span className={cls.subtitle}>{subtitles[mode]}</span>
                     </div>
 
                     <Form
@@ -171,38 +201,49 @@ const LoginPage = () => {
                             >
                                 <Input className={cls.input} autoComplete="email" />
                             </Form.Item>
-                            <Form.Item
-                                name="password"
-                                label={t('Пароль')}
-                                className={cls.field}
-                                validateDebounce={700}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t('Пожалуйста введите пароль'),
-                                    },
-                                ]}
-                            >
-                                <Input.Password
-                                    className={cls.input}
-                                    autoComplete={isRegisterMode ? 'new-password' : 'current-password'}
-                                    // AntD перезаписывает className у возвращённого элемента — стиль на вложенном
-                                    iconRender={(visible) => (
-                                        <span>
-                                            <span className={cls.toggle}>
-                                                {visible ? t('Скрыть') : t('Показать')}
+                            {!isResetMode && (
+                                <Form.Item
+                                    name="password"
+                                    label={t('Пароль')}
+                                    className={cls.field}
+                                    validateDebounce={700}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: t('Пожалуйста введите пароль'),
+                                        },
+                                    ]}
+                                >
+                                    <Input.Password
+                                        className={cls.input}
+                                        autoComplete={isRegisterMode ? 'new-password' : 'current-password'}
+                                        // AntD перезаписывает className у возвращённого элемента — стиль на вложенном
+                                        iconRender={(visible) => (
+                                            <span>
+                                                <span className={cls.toggle}>
+                                                    {visible ? t('Скрыть') : t('Показать')}
+                                                </span>
                                             </span>
-                                        </span>
-                                    )}
-                                />
-                            </Form.Item>
+                                        )}
+                                    />
+                                </Form.Item>
+                            )}
+                            {mode === LoginMode.LOGIN && (
+                                <button
+                                    type="button"
+                                    className={cls.forgot}
+                                    onClick={() => setMode(LoginMode.RESET)}
+                                >
+                                    {t('Забыли пароль?')}
+                                </button>
+                            )}
                         </div>
 
                         <Button type="primary" htmlType="submit" block className={cls.submit} disabled={isLoading}>
                             <BlueprintMarks />
                             {isLoading
                                 ? <Loader className={cls.loader} />
-                                : (isRegisterMode ? t('Зарегистрироваться') : t('Войти'))}
+                                : submitLabels[mode]}
                         </Button>
                     </Form>
 
@@ -210,11 +251,11 @@ const LoginPage = () => {
                         <button
                             type="button"
                             className={cls.switch}
-                            onClick={() => setIsRegisterMode((prev) => !prev)}
+                            onClick={() => setMode(mode === LoginMode.LOGIN ? LoginMode.REGISTER : LoginMode.LOGIN)}
                         >
-                            {isRegisterMode
-                                ? t('Уже есть аккаунт? Войти')
-                                : t('Нет аккаунта? Регистрация')}
+                            {mode === LoginMode.LOGIN && t('Нет аккаунта? Регистрация')}
+                            {mode === LoginMode.REGISTER && t('Уже есть аккаунт? Войти')}
+                            {mode === LoginMode.RESET && t('Вспомнили пароль? Войти')}
                         </button>
                         <Link to={RoutePath.ABOUT()} className={cls.about}>
                             {t('О сервисе')}

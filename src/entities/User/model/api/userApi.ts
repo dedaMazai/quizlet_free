@@ -9,6 +9,7 @@ import { fetchUserInfo } from '../lib/fetchUserInfo';
 import { mapProfile, ProfileRow } from '../lib/mapProfile';
 import { OrderingType, PaginationResult } from '@/shared/types/types';
 import { GenderUser } from '@/shared/const/const';
+import { RoutePath } from '@/shared/config/router/routePath';
 
 interface RequestLogin {
   password: string
@@ -122,16 +123,24 @@ const userApi = rtkApi.injectEndpoints({
         }
       },
     }),
-    passwordRecovery: build.mutation<void, {
-      new_password: string
-      confirm_password: string
-      secret_token: string
-    }>({
-      query: (body) => ({
-        url: '/auth/password/recovery',
-        method: 'POST',
-        body,
-      })
+    requestPasswordReset: build.mutation<void, string>({
+      // Письмо со ссылкой на /change_password?token_hash=… (шаблон Reset Password в дашборде Supabase).
+      // Supabase не сообщает, есть ли такой email, — ответ одинаковый.
+      queryFn: async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}${RoutePath.CHANGE_PASSWORD()}`,
+        });
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
+    }),
+    verifyPasswordReset: build.mutation<void, string>({
+      // Одноразовый токен из письма обменивается на сессию; затем пароль меняет changePassword.
+      queryFn: async (tokenHash) => {
+        const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+        if (error) return supabaseError(error.message);
+        return { data: undefined };
+      },
     }),
     userInfo: build.query<UserInfo, void>({
       // Восстанавливаем пользователя из сессии Supabase (хранится в localStorage).
@@ -420,7 +429,8 @@ export const {
   useRegisterMutation,
   useLogoutMutation,
   useUpdateUserRoleMutation,
-  usePasswordRecoveryMutation,
+  useRequestPasswordResetMutation,
+  useVerifyPasswordResetMutation,
   useGetUsersQuery,
   useDeleteUserMutation,
   useGetUsersSearchQuery,
