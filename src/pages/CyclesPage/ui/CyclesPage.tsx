@@ -7,7 +7,9 @@ import {
 import { PlusOutlined } from '@ant-design/icons';
 import { useGetCyclesQuery } from '@/entities/LearningCycle';
 import { CycleForm } from '@/features/CycleForm';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { SectionPageHeader } from '@/widgets/SectionPage';
+import { NavSectionKey } from '@/shared/const/menu';
+import { VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
@@ -23,12 +25,14 @@ const CyclesPage = () => {
 
   return (
     <VStack max fullHeight gap="16">
-      <HStack max justify="between" align="center">
-        <MyTypography.Large strong>{t('Циклы заучивания')}</MyTypography.Large>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-          {t('Создать цикл')}
-        </Button>
-      </HStack>
+      <SectionPageHeader
+        section={NavSectionKey.LEARN}
+        extra={(
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
+            {t('Создать цикл')}
+          </Button>
+        )}
+      />
 
       <MyTypography.Base type="secondary">
         {t('Записывайте слова по порядку, учите по N новых в день и повторяйте все предыдущие — как в тетради.')}

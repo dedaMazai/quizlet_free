@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { Button, Card, Input, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { SectionPageHeader } from '@/widgets/SectionPage';
+import { NavSectionKey } from '@/shared/const/menu';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { IrregularVerb, VERB_BANDS } from '@/shared/const/grammar';
 import { MyTypography } from '@/shared/ui/MyTypography';
@@ -11,7 +13,7 @@ import { useImportVerbsDeck } from '../model/useImportVerbsDeck';
 
 import cls from './IrregularVerbsPage.module.scss';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 /** Подпись и цвет группы по её номеру (с единицы) — глаголы идут по убыванию частотности. */
 const BAND_BADGES: { label: string; color: string }[] = [
@@ -58,8 +60,8 @@ const IrregularVerbsPage = () => {
 
     return (
         <VStack max gap="24" className={cls.IrregularVerbsPage}>
-            <VStack max gap="8">
-                <Title level={1}>{t('Неправильные глаголы')}</Title>
+            <VStack max gap="16">
+                <SectionPageHeader section={NavSectionKey.GRAMMAR} />
                 <MyTypography.Large type="secondary">
                     {t('Три формы самых частотных неправильных глаголов. Создайте колоду из группы и учите формы в привычных режимах: карточки, выбор, письмо.')}
                 </MyTypography.Large>

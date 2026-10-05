@@ -2070,5 +2070,12 @@
   "Всё повторено": "All reviewed",
   "Много слов ждут — повторите сегодня": "Many words are waiting — review them today",
   "Слова, которые пора повторить": "Words due for review",
-  "{{count}} к повторению": "{{count}} to review"
+  "{{count}} к повторению": "{{count}} to review",
+  "≈ {{count}} мин": "≈ {{count}} min",
+  "Поиск по колодам и словам": "Search decks and words",
+  "Настройки, тема, язык": "Settings, theme, language",
+  "Профиль": "Profile",
+  "Свернуть меню": "Collapse menu",
+  "Развернуть меню": "Expand menu",
+  "Времена": "Tenses"
 }

@@ -1,8 +1,10 @@
-import { FC, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {
+    FC, useEffect, useMemo, useRef, useState,
+} from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-    Input, Segmented, Typography,
+    Input, InputRef, Segmented, Typography,
 } from 'antd';
 import { SearchOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { useGetDecksQuery } from '@/entities/Deck';
@@ -18,6 +20,7 @@ import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
+import { FocusSearchLocationState } from '@/shared/const/const';
 import { StatsStrip } from './StatsStrip';
 import { QuickActions } from './QuickActions';
 import { RecentWords } from './RecentWords';
@@ -36,7 +39,9 @@ const getGreetingKey = (hour: number): string => {
 const MainPage: FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const location = useLocation();
     const userInfo = useUserInfo();
+    const searchRef = useRef<InputRef>(null);
 
     const { data: decks } = useGetDecksQuery();
     const { data: wordsCount } = useGetCardsCountQuery();
@@ -45,6 +50,13 @@ const MainPage: FC = () => {
 
     const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
     const [filter, setFilter] = useState<DeckFilter>('all');
+
+    // Кнопка поиска в Topbar ведёт сюда с фокусом в поле (до палитры ⌘K)
+    useEffect(() => {
+        if ((location.state as FocusSearchLocationState | null)?.focusSearch) {
+            searchRef.current?.focus();
+        }
+    }, [location.key, location.state]);
 
     const hasSearch = Boolean(debouncedSearch.trim());
     const { data: searchResults } = useGetCardsPageQuery(
@@ -84,6 +96,7 @@ const MainPage: FC = () => {
                     </Typography.Paragraph>
                 </VStack>
                 <Input
+                    ref={searchRef}
                     className={cls.search}
                     size="large"
                     allowClear

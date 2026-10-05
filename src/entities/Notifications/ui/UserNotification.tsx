@@ -9,8 +9,8 @@ import {
 } from 'antd';
 import Icon, {
     CloseOutlined,
-    NotificationOutlined,
 } from '@ant-design/icons';
+import { Bell } from 'lucide-react';
 import { BrowserView, isMobile, MobileView } from 'react-device-detect';
 import { useNavigate } from 'react-router-dom';
 import { HStack, VStack } from '@/shared/ui/Stack';
@@ -309,7 +309,7 @@ export const UserNotificationDefault = memo(() => {
                         <div style={{
                             position: 'relative'
                         }}>
-                            <Button color="default" variant="filled" className={cls.triggerBtn} icon={<NotificationOutlined />} />
+                            <Button className={cls.triggerBtn} aria-label={t('Уведомления')} icon={<Bell size={18} strokeWidth={1.5} />} />
                             {!!notificationIds.notRead.length && (
                                 <div
                                     className={cls.badge}
@@ -327,7 +327,7 @@ export const UserNotificationDefault = memo(() => {
                 <div style={{
                     position: 'relative'
                 }}>
-                    <Button onClick={() => setOpen(true)} color="default" variant="filled" className={cls.triggerBtn} icon={<NotificationOutlined />} />
+                    <Button onClick={() => setOpen(true)} className={cls.triggerBtn} aria-label={t('Уведомления')} icon={<Bell size={18} strokeWidth={1.5} />} />
                     {!!notificationIds.notRead.length && (
                         <div
                             className={cls.badge}

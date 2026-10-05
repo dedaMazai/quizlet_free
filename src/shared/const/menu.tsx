@@ -1,201 +1,134 @@
 import { ReactNode } from 'react';
 import { MenuProps } from "antd";
 import type { TFunction } from 'i18next';
-import Icon, {
-    HomeOutlined, AppstoreOutlined, UnorderedListOutlined, SettingOutlined,
-    StarOutlined, LineChartOutlined, UserOutlined, HistoryOutlined,
-    ReadOutlined, FieldTimeOutlined, SyncOutlined, CheckCircleOutlined,
-    HourglassOutlined, OrderedListOutlined, ThunderboltOutlined, CompassOutlined,
-    RetweetOutlined,
-} from '@ant-design/icons';
-import { filterValuesForAccess } from "@/entities/User";
+import { matchPath } from 'react-router';
+import {
+    BookOpen, ChartLine, GraduationCap, House, Library,
+} from 'lucide-react';
 import { RoutePath } from '@/shared/config/router/routePath';
-import { Accesses } from "../types/accesses";
+import type { SectionTabItem } from '@/shared/ui/SectionTabs';
 
 export type MenuItem = Required<MenuProps>['items'][number];
 
-export interface NavItem {
-    /** Путь; он же key для antd Menu и цель navigate. */
-    key: string;
-    label: string;
-    icon: ReactNode;
-    /** Активен только при точном совпадении pathname (нужно для '/'). */
-    exact?: boolean;
+export enum NavSectionKey {
+    HOME = 'home',
+    LEARN = 'learn',
+    LIBRARY = 'library',
+    GRAMMAR = 'grammar',
+    PROGRESS = 'progress',
 }
 
-/** Элемент конфига до фильтрации по доступам. */
-type NavItemConfig = NavItem & { accesses?: Accesses[] };
+const NAV_ICON_SIZE = 18;
+const NAV_ICON_STROKE = 1.5;
 
 export interface NavSection {
-    key: string;
-    /** Заголовок группы; у первой секции отсутствует. */
-    label?: string;
-    items: NavItem[];
+    key: NavSectionKey;
+    label: string;
+    icon: ReactNode;
+    /** Куда ведёт пункт сайдбара */
+    path: string;
+    /** Паттерны маршрутов, на которых раздел подсвечен (вложенные пути тоже) */
+    match: string[];
+    /** Подсвечивать только при точном совпадении (нужно для '/') */
+    exact?: boolean;
+    /** Вкладки раздела (SectionTabs) */
+    tabs?: SectionTabItem[];
 }
 
-/** Активен при точном совпадении либо когда путь — вложенный (граница по '/'). */
-export const isNavItemActive = (pathname: string, item: NavItem): boolean => (
-    item.exact
-        ? pathname === item.key
-        : pathname === item.key || pathname.startsWith(`${item.key}/`)
-);
+/** Единый источник правды для сайдбара, мобильного меню и вкладок разделов (README §2). */
+export const getNavSections = ({ t }: { t: TFunction }): NavSection[] => {
+    const iconProps = { size: NAV_ICON_SIZE, strokeWidth: NAV_ICON_STROKE };
 
-/** Единый источник правды для сайдбара и мобильного меню. */
-export const getNavSections = ({
-    t,
-    userAccesses,
-}: {
-    t: TFunction
-    userAccesses: Accesses[]
-}): NavSection[] => {
-
-    const sections: { key: string, label?: string, items: NavItemConfig[] }[] = [
+    return [
         {
-            key: 'main',
-            items: [
-                {
-                    key: RoutePath.MAIN(),
-                    label: t('Главная'),
-                    icon: <Icon component={HomeOutlined} />,
-                    exact: true,
-                },
-            ],
+            key: NavSectionKey.HOME,
+            label: t('Главная'),
+            icon: <House {...iconProps} />,
+            path: RoutePath.MAIN(),
+            match: [RoutePath.MAIN()],
+            exact: true,
         },
         {
-            key: 'study',
+            key: NavSectionKey.LEARN,
             label: t('Учить'),
-            items: [
-                {
-                    key: RoutePath.ROADMAP(),
-                    label: t('Дорожная карта'),
-                    icon: <Icon component={CompassOutlined} />,
-                },
-                {
-                    key: RoutePath.REVIEW(),
-                    label: t('К повторению'),
-                    icon: <Icon component={HistoryOutlined} />,
-                },
-                {
-                    key: RoutePath.CYCLES(),
-                    label: t('Циклы заучивания'),
-                    icon: <Icon component={RetweetOutlined} />,
-                },
+            icon: <GraduationCap {...iconProps} />,
+            path: RoutePath.REVIEW(),
+            match: [
+                RoutePath.REVIEW(),
+                RoutePath.CYCLES(),
+                RoutePath.ROADMAP(),
+                RoutePath.GRAMMAR_TOPIC(':topic'),
+            ],
+            tabs: [
+                { to: RoutePath.REVIEW(), label: t('К повторению') },
+                { to: RoutePath.CYCLES(), label: t('Циклы заучивания') },
+                { to: RoutePath.ROADMAP(), label: t('Дорожная карта') },
             ],
         },
         {
-            key: 'grammar',
-            label: t('Грамматика'),
-            items: [
-                {
-                    key: RoutePath.GRAMMAR_TENSES(),
-                    label: t('Времена: план и обзор'),
-                    icon: <Icon component={ReadOutlined} />,
-                    exact: true,
-                },
-                {
-                    key: RoutePath.GRAMMAR_TENSE_GROUP('simple'),
-                    label: 'Simple',
-                    icon: <Icon component={FieldTimeOutlined} />,
-                },
-                {
-                    key: RoutePath.GRAMMAR_TENSE_GROUP('continuous'),
-                    label: 'Continuous',
-                    icon: <Icon component={SyncOutlined} />,
-                },
-                {
-                    key: RoutePath.GRAMMAR_TENSE_GROUP('perfect'),
-                    label: 'Perfect',
-                    icon: <Icon component={CheckCircleOutlined} />,
-                },
-                {
-                    key: RoutePath.GRAMMAR_TENSE_GROUP('perfect-continuous'),
-                    label: 'Perfect Continuous',
-                    icon: <Icon component={HourglassOutlined} />,
-                },
-                {
-                    key: RoutePath.GRAMMAR_PRACTICE(),
-                    label: t('Практика времён'),
-                    icon: <Icon component={ThunderboltOutlined} />,
-                },
-                {
-                    key: RoutePath.IRREGULAR_VERBS(),
-                    label: t('Неправильные глаголы'),
-                    icon: <Icon component={OrderedListOutlined} />,
-                },
-            ],
-        },
-        {
-            key: 'library',
+            key: NavSectionKey.LIBRARY,
             label: t('Библиотека'),
-            items: [
-                {
-                    key: RoutePath.DECKS(),
-                    label: t('Колоды'),
-                    icon: <Icon component={AppstoreOutlined} />,
-                },
-                {
-                    key: RoutePath.ALL_WORDS(),
-                    label: t('Все слова'),
-                    icon: <Icon component={UnorderedListOutlined} />,
-                },
-                {
-                    key: RoutePath.FAVORITES(),
-                    label: t('Избранное'),
-                    icon: <Icon component={StarOutlined} />,
-                },
+            icon: <Library {...iconProps} />,
+            path: RoutePath.DECKS(),
+            match: [
+                RoutePath.DECKS(),
+                RoutePath.ALL_WORDS(),
+                RoutePath.FAVORITES(),
+            ],
+            tabs: [
+                { to: RoutePath.DECKS(), label: t('Колоды') },
+                { to: RoutePath.ALL_WORDS(), label: t('Все слова') },
+                { to: RoutePath.FAVORITES(), label: t('Избранное') },
             ],
         },
         {
-            key: 'account',
-            label: t('Аккаунт'),
-            items: [
-                {
-                    key: RoutePath.PROGRESS(),
-                    label: t('Прогресс'),
-                    icon: <Icon component={LineChartOutlined} />,
-                },
-                {
-                    key: RoutePath.PROFILE(),
-                    label: t('Личный кабинет'),
-                    icon: <Icon component={UserOutlined} />,
-                },
-                {
-                    key: RoutePath.SETTINGS(),
-                    label: t('Настройки'),
-                    icon: <Icon component={SettingOutlined} />,
-                },
+            key: NavSectionKey.GRAMMAR,
+            label: t('Грамматика'),
+            icon: <BookOpen {...iconProps} />,
+            path: RoutePath.GRAMMAR_TENSES(),
+            match: [
+                RoutePath.GRAMMAR_TENSES(),
+                RoutePath.GRAMMAR_PRACTICE(),
+                RoutePath.IRREGULAR_VERBS(),
             ],
+            tabs: [
+                { to: RoutePath.GRAMMAR_TENSES(), label: t('Времена') },
+                { to: RoutePath.GRAMMAR_PRACTICE(), label: t('Практика времён') },
+                { to: RoutePath.IRREGULAR_VERBS(), label: t('Неправильные глаголы') },
+            ],
+        },
+        {
+            key: NavSectionKey.PROGRESS,
+            label: t('Прогресс'),
+            icon: <ChartLine {...iconProps} />,
+            path: RoutePath.PROGRESS(),
+            match: [RoutePath.PROGRESS()],
         },
     ];
-
-    return sections
-        .map(({ items, ...rest }) => ({
-            ...rest,
-            items: filterValuesForAccess<NavItem>(items, userAccesses),
-        }))
-        .filter(({ items }) => items.length > 0);
 };
+
+/** Раздел подсвечен, если pathname совпадает с одним из match (или вложен в него). */
+export const isNavSectionActive = (pathname: string, section: NavSection): boolean => (
+    section.match.some((path) => matchPath({ path, end: !!section.exact }, pathname))
+);
+
+export const getActiveSection = (
+    pathname: string,
+    sections: NavSection[],
+): NavSection | undefined => sections.find((section) => isNavSectionActive(pathname, section));
 
 /** Адаптер конфига в формат antd Menu (мобильное меню). */
 export const getMenuItems = ({
     t,
     className,
-    userAccesses,
 }: {
     t: TFunction
     className?: string
-    userAccesses: Accesses[]
 }): MenuItem[] => (
-    getNavSections({ t, userAccesses }).flatMap(({ key, label, items }): MenuItem[] => {
-        const children = items.map((item) => ({
-            key: item.key,
-            label: item.label,
-            icon: item.icon,
-            className,
-        }));
-
-        return label
-            ? [{ key, type: 'group' as const, label, children }]
-            : children;
-    })
+    getNavSections({ t }).map(({ path, label, icon }) => ({
+        key: path,
+        label,
+        icon,
+        className,
+    }))
 );

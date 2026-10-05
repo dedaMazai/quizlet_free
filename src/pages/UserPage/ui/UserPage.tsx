@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Card, Typography } from 'antd';
 import { useParams } from 'react-router';
+import { BackLink } from '@/shared/ui/BackLink';
+import { getSettingsUsersPath, RoutePath } from '@/shared/config/router/routePath';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { useGetUserQuery, useUserInfo, ROLE_NAMES } from '@/entities/User';
 import { buildName } from '@/shared/lib/helpers/buildName';
@@ -27,6 +29,12 @@ const UserPage = () => {
 
     return (
         <VStack max gap="24">
+            <BackLink
+                items={[
+                    { label: t('Аккаунт'), to: RoutePath.PROFILE() },
+                    { label: t('Пользователи'), to: getSettingsUsersPath() },
+                ]}
+            />
         {user && (
                 <Typography.Title level={1}>
                     {buildName({

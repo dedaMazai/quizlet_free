@@ -1,0 +1,44 @@
+.SidebarReviewCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+}
+
+.stats {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.count {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 0.9;
+    white-space: nowrap;
+}
+
+.time {
+    font-size: 13px;
+    color: var(--color-accent-300);
+}
+
+.action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px;
+    background: var(--color-bg);
+    color: var(--color-brand-ink);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 15px;
+    transition: background var(--motion-fast) var(--ease-standard);
+
+    &:hover {
+        background: var(--color-accent-100);
+        color: var(--color-brand-ink);
+    }
+}

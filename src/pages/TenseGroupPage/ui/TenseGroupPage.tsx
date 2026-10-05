@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { Button, Card, Tag, Typography } from 'antd';
 import { ArrowLeftOutlined, ArrowRightOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { BackLink } from '@/shared/ui/BackLink';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { RoutePath } from '@/shared/config/router/routePath';
 import {
@@ -52,6 +53,12 @@ const TenseGroupPage = () => {
     return (
         <VStack max gap="32" className={cls.TenseGroupPage}>
             <VStack max gap="8">
+                <BackLink
+                    items={[
+                        { label: t('Грамматика'), to: RoutePath.GRAMMAR_TENSES() },
+                        { label: t('Времена'), to: RoutePath.GRAMMAR_TENSES() },
+                    ]}
+                />
                 <HStack max gap="12" wrap justify="between">
                     <HStack gap="12" wrap>
                         <Title level={1} className={cls.pageTitle}>{groupInfo.name}</Title>

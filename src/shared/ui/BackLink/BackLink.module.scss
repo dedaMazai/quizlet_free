@@ -1,0 +1,22 @@
+.BackLink {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-neutral-700);
+    font-size: 13px;
+}
+
+.back,
+.link {
+    display: flex;
+    align-items: center;
+    color: inherit;
+
+    &:hover {
+        color: var(--color-accent-700);
+    }
+}
+
+.separator {
+    color: var(--color-neutral-500);
+}

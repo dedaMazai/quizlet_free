@@ -12,10 +12,12 @@ import {
 } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { LearnSession } from '@/features/LearnSession';
+import { SectionPageHeader } from '@/widgets/SectionPage';
 import { VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { NavSectionKey } from '@/shared/const/menu';
 import { ReviewPreview } from './ReviewPreview';
 
 interface SessionSnapshot {
@@ -87,26 +89,29 @@ const ReviewPage = () => {
 
   if (!dueCards?.length) {
     return (
-      <Result
-        status="success"
-        title={t('На сегодня всё!')}
-        subTitle={dueCount?.nextDueAt
-          ? t('Ближайший повтор: {{date}}', {
-            date: dayjs(dueCount.nextDueAt).format('D MMMM, HH:mm'),
-          })
-          : undefined}
-        extra={(
-          <Button type="primary" onClick={() => navigate(RoutePath.DECKS())}>
-            {t('Учить новые слова')}
-          </Button>
-        )}
-      />
+      <VStack max fullHeight gap="24">
+        <SectionPageHeader section={NavSectionKey.LEARN} />
+        <Result
+          status="success"
+          title={t('На сегодня всё!')}
+          subTitle={dueCount?.nextDueAt
+            ? t('Ближайший повтор: {{date}}', {
+              date: dayjs(dueCount.nextDueAt).format('D MMMM, HH:mm'),
+            })
+            : undefined}
+          extra={(
+            <Button type="primary" onClick={() => navigate(RoutePath.DECKS())}>
+              {t('Учить новые слова')}
+            </Button>
+          )}
+        />
+      </VStack>
     );
   }
 
   return (
     <VStack max fullHeight gap="24">
-      <MyTypography.Large strong>{t('К повторению')}</MyTypography.Large>
+      <SectionPageHeader section={NavSectionKey.LEARN} />
       <ReviewPreview
         dueCount={overdueCount}
         freshCount={freshCount}

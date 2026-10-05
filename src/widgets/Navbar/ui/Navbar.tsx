@@ -3,32 +3,25 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import {
     Avatar,
     Button,
-    Dropdown,
     Menu,
 } from 'antd';
 import {
     useLocation,
-    useMatches,
     useNavigate,
 } from 'react-router';
-import { BrowserView, MobileView } from 'react-device-detect';
 import Icon, {
     UserOutlined,
-    SettingOutlined,
 } from '@ant-design/icons';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { LangSwitcher } from '@/features/LangSwitcher';
 import { ThemeSwitcher } from '@/features/ThemeSwitcher';
 import { HStack, VStack } from '@/shared/ui/Stack';
-import { useLogoutMutation, useUserAccesses, useUserInfo } from '@/entities/User';
+import { useUserInfo } from '@/entities/User';
 import { LogoutButton } from '@/features/Logout';
-import { BreadcrumbsCustom, Crumb } from './BreadcrumbsCustom';
 import { ReactComponent as MenuOutlined } from '@/shared/assets/icons/MenuOutlined.svg';
-import { ReactComponent as Exit } from '@/shared/assets/icons/Sidebar/Exit.svg';
 import { Drawer } from '@/shared/ui/Drawer';
-import { getMenuItems } from '@/shared/const/menu';
+import { getActiveSection, getMenuItems, getNavSections } from '@/shared/const/menu';
 import { buildName } from '@/shared/lib/helpers/buildName';
-import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { UserNotification } from '@/entities/Notifications/ui/UserNotification';
@@ -43,17 +36,17 @@ export const NavbarMenu = memo(() => {
     const location = useLocation();
     const navigate = useNavigate();
     const [openMenu, setOpenMenu] = useState(false);
-    const [open, setOpen] = useState<string>();
-    const userAccesses = useUserAccesses();
 
     const userInfo = useUserInfo();
 
-    const items = useMemo(() => getMenuItems({ userAccesses, t  }), [t, userAccesses])
+    const items = useMemo(() => getMenuItems({ t }), [t]);
 
-    const openRoute = useMemo(() => `/${location.pathname.split('/')[1]}`, [location.pathname]);
+    const activePath = useMemo(
+        () => getActiveSection(location.pathname, getNavSections({ t }))?.path,
+        [location.pathname, t],
+    );
 
     const handleClickItem = useCallback(({ key }: { key: string }) => {
-        setOpen(key);
         navigate(key);
         setOpenMenu(false)
     }, [navigate]);
@@ -131,7 +124,7 @@ export const NavbarMenu = memo(() => {
                     <Menu
                         className={cls.menu}
                         onClick={handleClickItem}
-                        selectedKeys={[open || openRoute]}
+                        selectedKeys={activePath ? [activePath] : []}
                         mode="vertical"
                         items={items}
                         style={{
@@ -150,115 +143,17 @@ export const NavbarMenu = memo(() => {
 });
 
 export const Navbar = memo(({ className }: NavbarProps) => {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
     const userInfo = useUserInfo();
-    const matches = useMatches();
-    const { isMobile } = useMatchMedia();
-    const [logout] = useLogoutMutation();
-
-    const withCrumbs = !!matches.filter((match) =>
-        // @ts-ignore — handle.crumbs is custom route property not in UIMatch type
-        Boolean(match.handle?.crumbs),
-    ).length;
-    const breadcrumbs: Crumb[] = matches
-        // @ts-ignore — handle.crumbs is custom route property not in UIMatch type
-        .filter((match) => Boolean(match.handle?.crumbs))
-        // @ts-ignore — handle.crumbs is custom route property not in UIMatch type
-        .map((match) => match.handle.crumbs?.(match.params))[0] || [{ path: '/' }];
-
-    const showBreadcrumbs = withCrumbs && !isMobile && userInfo;
-
-    const userPhoto = userInfo?.avatar_file?.url;
-
-    const userMenuItems = useMemo(() => [
-        {
-            key: 'username',
-            label: userInfo?.email,
-            disabled: true,
-        },
-        { type: 'divider' as const },
-        {
-            key: 'profile',
-            label: t('Личный кабинет'),
-            icon: <Icon component={UserOutlined} />,
-        },
-        {
-            key: 'settings',
-            label: t('Настройки'),
-            icon: <Icon component={SettingOutlined} />,
-        },
-        { type: 'divider' as const },
-        {
-            key: 'logout',
-            label: t('Выйти'),
-            icon: <Icon component={Exit} />,
-            danger: true,
-        },
-    ], [userInfo?.email, t]);
-
-    const handleUserMenuClick = useCallback(({ key }: { key: string }) => {
-        if (key === 'logout') {
-            logout();
-        }
-        if (key === 'profile') {
-            navigate(RoutePath.PROFILE());
-        }
-        if (key === 'settings') {
-            navigate(RoutePath.SETTINGS());
-        }
-    }, [logout, navigate]);
 
     return (
         <header className={classNames(cls.Navbar, {}, [className])}>
-            {showBreadcrumbs && (
-                <BreadcrumbsCustom breadcrumbs={breadcrumbs}/>
-            )}
             <HStack gap="12" max justify='end'>
-                <BrowserView>
-                    <HStack gap="12" align="center">
+                {userInfo ? <NavbarMenu /> : (
+                    <HStack gap="12">
                         <ThemeSwitcher />
                         <LangSwitcher />
-                        {userInfo && (
-                            <>
-                                <UserNotification />
-                                <Dropdown
-                                    menu={{
-                                        items: userMenuItems,
-                                        onClick: handleUserMenuClick,
-                                    }}
-                                    trigger={['click']}
-                                    placement="bottomRight"
-                                    rootClassName={cls.rootClassName}
-                                >
-                                    <div className={cls.dropDown}>
-                                        {userPhoto ? (
-                                            <Avatar
-                                                size={32}
-                                                src={userPhoto}
-                                                style={{ cursor: 'pointer' }}
-                                            />
-                                        ) : (
-                                            <Avatar
-                                                size={32}
-                                                icon={<UserOutlined />}
-                                                style={{ cursor: 'pointer' }}
-                                            />
-                                        )}
-                                    </div>
-                                </Dropdown>
-                            </>
-                        )}
                     </HStack>
-                </BrowserView>
-                <MobileView>
-                    {userInfo ? <NavbarMenu /> : (
-                        <HStack gap="12">
-                            <ThemeSwitcher />
-                            <LangSwitcher />
-                        </HStack>
-                    )}
-                </MobileView>
+                )}
             </HStack>
         </header>
     );

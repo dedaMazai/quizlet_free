@@ -42,6 +42,11 @@ export const RoutePath = {
   [RouteNames.NOT_FOUND]: () => '/*',
 };
 
+/** Вкладка «Пользователи» на странице Аккаунта открывается query-параметром маршрута SETTINGS */
+export const SETTINGS_TAB_PARAM = 'activeTab';
+export const SETTINGS_USERS_TAB = 'Users';
+export const getSettingsUsersPath = () => RoutePath.SETTINGS(`?${SETTINGS_TAB_PARAM}=${SETTINGS_USERS_TAB}`);
+
 export const PUBLIC_PAGES = [
   RoutePath.LOGIN(),
   RoutePath.CHANGE_PASSWORD(),

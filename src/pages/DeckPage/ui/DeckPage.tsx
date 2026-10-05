@@ -38,6 +38,7 @@ import { DuplicateCardsModal } from '@/features/DuplicateCardsModal';
 import { CheckTranslationsModal } from '@/features/CheckTranslationsAI';
 import { GenerateChunksModal } from '@/features/GenerateChunksAI';
 import { useDeckExport, ExportFormat } from '@/features/ExportDeck';
+import { BackLink } from '@/shared/ui/BackLink';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
@@ -221,6 +222,12 @@ const DeckPage = () => {
 
   return (
     <VStack max fullHeight gap="16">
+      <BackLink
+        items={[
+          { label: t('Библиотека'), to: RoutePath.DECKS() },
+          { label: t('Колоды'), to: RoutePath.DECKS() },
+        ]}
+      />
       <HStack max justify="between" align="start" gap="16" wrap>
         <VStack gap="4">
           <HStack gap="8" align="center" wrap>

@@ -4,8 +4,9 @@ import { Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { DeckList } from '@/widgets/DeckList';
 import { DeckForm } from '@/features/DeckForm';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { SectionPageHeader } from '@/widgets/SectionPage';
+import { NavSectionKey } from '@/shared/const/menu';
+import { VStack } from '@/shared/ui/Stack';
 
 const DecksPage = () => {
   const { t } = useTranslation();
@@ -13,12 +14,14 @@ const DecksPage = () => {
 
   return (
     <VStack max fullHeight gap="16">
-      <HStack max justify="between" align="center">
-        <MyTypography.Large strong>{t('Колоды')}</MyTypography.Large>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
-          {t('Создать колоду')}
-        </Button>
-      </HStack>
+      <SectionPageHeader
+        section={NavSectionKey.LIBRARY}
+        extra={(
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>
+            {t('Создать колоду')}
+          </Button>
+        )}
+      />
 
       <DeckList />
 

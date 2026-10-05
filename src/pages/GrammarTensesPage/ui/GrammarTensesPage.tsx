@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { Button, Card, Tag, Typography } from 'antd';
 import { ThunderboltOutlined } from '@ant-design/icons';
+import { SectionPageHeader } from '@/widgets/SectionPage';
+import { NavSectionKey } from '@/shared/const/menu';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { RoutePath } from '@/shared/config/router/routePath';
 import {
@@ -68,17 +70,8 @@ const GrammarTensesPage = () => {
 
     return (
         <VStack max gap="32" className={cls.GrammarTensesPage}>
-            <VStack max gap="8">
-                <HStack max gap="12" wrap justify="between">
-                    <Title level={1} className={cls.pageTitle}>{t('Времена английского')}</Title>
-                    <Button
-                        type="primary"
-                        icon={<ThunderboltOutlined />}
-                        onClick={() => navigate(RoutePath.GRAMMAR_PRACTICE())}
-                    >
-                        {t('Практика времён')}
-                    </Button>
-                </HStack>
+            <VStack max gap="16">
+                <SectionPageHeader section={NavSectionKey.GRAMMAR} />
                 <MyTypography.Large type="secondary">
                     {t('12 времён — это всего 4 идеи (аспекта) на 3 осях времени. Учите по одной группе за итерацию и регулярно возвращайтесь к сводной таблице.')}
                 </MyTypography.Large>

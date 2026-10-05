@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { Button, Card, Tag, Typography } from 'antd';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { BackLink } from '@/shared/ui/BackLink';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { GRAMMAR_TOPIC_ORDER, GRAMMAR_TOPICS, GrammarTopicId } from '@/shared/const/grammar';
 import { MyTypography } from '@/shared/ui/MyTypography';
@@ -32,6 +33,12 @@ const GrammarTopicPage = () => {
     return (
         <VStack max gap="32" className={cls.GrammarTopicPage}>
             <VStack max gap="8">
+                <BackLink
+                    items={[
+                        { label: t('Учить'), to: RoutePath.REVIEW() },
+                        { label: t('Дорожная карта'), to: RoutePath.ROADMAP() },
+                    ]}
+                />
                 <HStack gap="12" wrap>
                     <Title level={1} className={cls.pageTitle}>{t(info.name)}</Title>
                     <Tag>{info.level}</Tag>

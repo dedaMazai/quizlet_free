@@ -1,217 +1,99 @@
 import {
-    Fragment,
-    memo,
-    useCallback,
-    useMemo,
+    Fragment, memo, useCallback, useMemo,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Badge, Button } from 'antd';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation } from 'react-router';
+import { Button, Tooltip } from 'antd';
 import { BrowserView, isBrowser } from 'react-device-detect';
-import { classNames } from '@/shared/lib/classNames/classNames';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
-import { useResizable } from '@/shared/lib/hooks/useResizable';
-import { ReactComponent as LeftArrow } from '@/shared/assets/icons/Sidebar/LeftArrow.svg';
-import { ReactComponent as LogoFlashcards } from '@/shared/assets/icons/LogoFlashcards.svg';
-import { ReactComponent as LogoFlashcardsBig } from '@/shared/assets/icons/LogoBigFlashcards.svg';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { RoutePath } from '@/shared/config/router/routePath';
-import { getNavSections, isNavItemActive } from '@/shared/const/menu';
-import { useUserAccesses } from '@/entities/User';
-import { useGetDecksQuery } from '@/entities/Deck';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useGetDueCountQuery } from '@/entities/Card';
+import { classNames } from '@/shared/lib/classNames/classNames';
+import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
+import { ReactComponent as Logo } from '@/shared/assets/icons/LogoZubrika.svg';
+import { RoutePath } from '@/shared/config/router/routePath';
+import {
+    getNavSections, isNavSectionActive, NavSection, NavSectionKey,
+} from '@/shared/const/menu';
+import { LOCAL_STORAGE_SIDEBAR_COLLAPSED_KEY } from '@/shared/const/localstorage';
+import { SidebarReviewCard } from '../SidebarReviewCard/SidebarReviewCard';
+import { SidebarProfile } from '../SidebarProfile/SidebarProfile';
 import cls from './Sidebar.module.scss';
 
-const RECENT_DECKS_COUNT = 5;
+const APP_NAME = 'Zubrika';
 
+/** Сайдбар: 236px развёрнут, 76px rail, без ресайза (Shell 6.1, README §2) */
 export const Sidebar = memo(() => {
     const { t } = useTranslation();
-    const location = useLocation();
-    const navigate = useNavigate();
-    const userAccesses = useUserAccesses();
+    const { pathname } = useLocation();
+    const [collapsed, setCollapsed] = useLocalStorage(LOCAL_STORAGE_SIDEBAR_COLLAPSED_KEY, false);
 
-    const [collapsed, setCollapsed] = useLocalStorage('CollapsedSidebar', false);
-    const [sidebarWidth, setSidebarWidth] = useLocalStorage('SidebarWidth', 300);
-    const { width, isDragging, handleMouseDown } = useResizable({
-        initialWidth: sidebarWidth,
-        minWidth: 300,
-        maxWidth: 600,
-        enabled: !collapsed,
-        onResizeEnd: setSidebarWidth,
-    });
+    const sections = useMemo(() => getNavSections({ t }), [t]);
 
-    const sections = useMemo(
-        () => getNavSections({ t, userAccesses }),
-        [t, userAccesses],
-    );
-
-    // Тело компонента исполняется и на мобиле (BrowserView стоит внутри return),
-    // поэтому запрос пропускается и там, и в свёрнутом состоянии.
-    // selectFromResult отдаёт сам data: новый массив на каждый вызов ломал бы
-    // шэллоу-сравнение RTK Query и приводил к лишним рендерам.
-    const { decks } = useGetDecksQuery(undefined, {
-        skip: collapsed || !isBrowser,
-        selectFromResult: ({ data }) => ({ decks: data }),
-    });
-
-    const recentDecks = useMemo(
-        () => [...(decks ?? [])]
-            .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
-            .slice(0, RECENT_DECKS_COUNT),
-        [decks],
-    );
-
-    // Бейдж долга: счётчик тянет потребитель, а не конфиг навигации —
-    // getNavSections обязан остаться чистой функцией от t и доступов.
+    // Тело исполняется и на мобиле (BrowserView внутри return) — там запрос не нужен
     const { data: due } = useGetDueCountQuery(undefined, { skip: !isBrowser });
+    const dueCount = due?.count ?? 0;
 
-    const handleNavigate = useCallback((path: string) => {
-        navigate(path);
-    }, [navigate]);
+    const toggleCollapsed = useCallback(() => {
+        setCollapsed((prev) => !prev);
+    }, [setCollapsed]);
 
-    const handleLogoClick = useCallback(() => {
-        navigate(RoutePath.MAIN());
-    }, [navigate]);
+    const showReviewCard = !collapsed && dueCount > 0 && pathname !== RoutePath.REVIEW();
+
+    const renderItem = (section: NavSection) => {
+        const isActive = isNavSectionActive(pathname, section);
+        const hasBadge = section.key === NavSectionKey.LEARN && dueCount > 0;
+
+        const link = (
+            <Link
+                to={section.path}
+                aria-label={collapsed ? section.label : undefined}
+                aria-current={isActive ? 'page' : undefined}
+                className={classNames(cls.item, [], { [cls.active]: isActive })}
+            >
+                <span className={cls.icon}>
+                    {section.icon}
+                    {collapsed && hasBadge && <span className={cls.dot} />}
+                </span>
+                {!collapsed && <span className={cls.label}>{section.label}</span>}
+                {!collapsed && hasBadge && <span className={cls.badge}>{dueCount}</span>}
+            </Link>
+        );
+
+        return collapsed
+            ? <Tooltip key={section.key} title={section.label} placement="right">{link}</Tooltip>
+            : <Fragment key={section.key}>{link}</Fragment>;
+    };
 
     return (
-        <BrowserView>
-            <div style={{ position: 'relative' }}>
-                <div
-                    className={classNames(
-                        cls.Sidebar,
-                        !collapsed && cls.open,
-                        isDragging && cls.dragging,
-                    )}
-                    style={!collapsed ? { width } : undefined}
-                >
-                    {/* Header with logo and collapse button */}
-                    <HStack
-                        justify="between"
-                        max
-                        className={cls.headerSidebar}
-                        style={{
-                            paddingLeft: collapsed ? '10px' : '22px',
-                        }}
-                    >
-                        <div
-                            onClick={handleLogoClick}
-                            style={{ cursor: 'pointer' }}
-                        >
-                            {collapsed
-                                ? <LogoFlashcards width={40} height={26} style={{ color: 'var(--color-logo)' }} />
-                                : <LogoFlashcardsBig width={104} height={28} />
-                            }
-                        </div>
-                        <Button
-                            className={cls.collapseBtn}
-                            color="default"
-                            variant="text"
-                            icon={
-                                <LeftArrow
-                                    style={{
-                                        transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
-                                        transition: 'transform 0.3s ease',
-                                    }}
-                                />
-                            }
-                            onClick={() => setCollapsed((prev) => !prev)}
-                            style={{
-                                width: collapsed ? '24px' : '50px',
-                            }}
-                        />
-                    </HStack>
-
-                    {/* Navigation modules */}
-                    <div className={cls.modulesContainer}>
-                        {sections.map((section) => (
-                            <Fragment key={section.key}>
-                                {section.label && !collapsed && (
-                                    <MyTypography.Small
-                                        type="secondary"
-                                        className={cls.sectionTitle}
-                                    >
-                                        {section.label}
-                                    </MyTypography.Small>
-                                )}
-                                {section.items.map((item) => (
-                                    <div
-                                        key={item.key}
-                                        className={classNames(cls.moduleHeader, {
-                                            [cls.moduleHeaderActive]: isNavItemActive(
-                                                location.pathname,
-                                                item,
-                                            ),
-                                        })}
-                                        onClick={() => handleNavigate(item.key)}
-                                    >
-                                        <HStack align="center" gap="8" max>
-                                            <span className={cls.moduleIcon}>{item.icon}</span>
-                                            {!collapsed && (
-                                                <MyTypography.Base className={cls.moduleLabel}>
-                                                    {item.label}
-                                                </MyTypography.Base>
-                                            )}
-                                            {item.key === RoutePath.REVIEW() && !!due?.count && (
-                                                collapsed
-                                                    ? <Badge dot />
-                                                    : <Badge count={due.count} overflowCount={99} />
-                                            )}
-                                        </HStack>
-                                    </div>
-                                ))}
-                            </Fragment>
-                        ))}
-
-                        {!collapsed && recentDecks.length > 0 && (
-                            <div className={cls.recentSection}>
-                                <MyTypography.Small
-                                    type="secondary"
-                                    className={cls.sectionTitle}
-                                >
-                                    {t('Недавние колоды')}
-                                </MyTypography.Small>
-                                {recentDecks.map((deck) => (
-                                    <div
-                                        key={deck.uuid}
-                                        className={classNames(cls.moduleItem, {
-                                            [cls.moduleItemActive]:
-                                                location.pathname === RoutePath.DECK(deck.uuid),
-                                        })}
-                                        onClick={() => handleNavigate(RoutePath.DECK(deck.uuid))}
-                                    >
-                                        <MyTypography.Base className={cls.itemLabel}>
-                                            {deck.name}
-                                        </MyTypography.Base>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Bottom section */}
-                    <VStack className={cls.bottomSection} gap="4">
-                        {!collapsed && (
-                            <MyTypography.Small
-                                type="secondary"
-                                style={{ position: 'absolute', bottom: 0, left: 0 }}
-                            >
-                                {__APP_VERSION__}
-                            </MyTypography.Small>
-                        )}
-                    </VStack>
-
-                    {!collapsed && (
-                        <div
-                            className={classNames(
-                                cls.resizeHandle,
-                                isDragging && cls.resizeHandleDragging,
-                            )}
-                            onMouseDown={handleMouseDown}
-                        />
-                    )}
+        <BrowserView renderWithFragment>
+            <aside className={classNames(cls.Sidebar, [], { [cls.collapsed]: collapsed })}>
+                <div className={cls.header}>
+                    <Link to={RoutePath.MAIN()} className={cls.logo} aria-label={APP_NAME}>
+                        <Logo className={cls.logoIcon} />
+                        {!collapsed && <span className={cls.logoText}>{APP_NAME}</span>}
+                    </Link>
+                    <Button
+                        type="text"
+                        className={cls.collapseBtn}
+                        aria-label={collapsed ? t('Развернуть меню') : t('Свернуть меню')}
+                        icon={collapsed
+                            ? <ChevronRight size={16} strokeWidth={1.5} />
+                            : <ChevronLeft size={16} strokeWidth={1.5} />}
+                        onClick={toggleCollapsed}
+                    />
                 </div>
-            </div>
+
+                <nav className={cls.nav}>
+                    {sections.map(renderItem)}
+                </nav>
+
+                <div className={cls.bottom}>
+                    {showReviewCard && <SidebarReviewCard count={dueCount} />}
+                    <SidebarProfile collapsed={collapsed} />
+                </div>
+            </aside>
         </BrowserView>
     );
 });
+
+Sidebar.displayName = 'Sidebar';

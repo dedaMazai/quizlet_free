@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Empty, Statistic } from 'antd';
 import {
-  ArrowLeftOutlined, CalendarOutlined, DeleteOutlined, ReadOutlined, SettingOutlined, SyncOutlined,
+  CalendarOutlined, DeleteOutlined, ReadOutlined, SettingOutlined, SyncOutlined,
 } from '@ant-design/icons';
 import {
   buildNewWords,
@@ -19,6 +19,7 @@ import { CycleWordList } from '@/widgets/CycleWordList';
 import { CycleForm } from '@/features/CycleForm';
 import { AddCycleWords } from '@/features/AddCycleWords';
 import { clearCycleSessions } from '@/features/CycleSession';
+import { BackLink } from '@/shared/ui/BackLink';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
@@ -90,11 +91,14 @@ const CyclePage = () => {
 
   return (
     <VStack max fullHeight gap="24">
+      <BackLink
+        items={[
+          { label: t('Учить'), to: RoutePath.REVIEW() },
+          { label: t('Циклы заучивания'), to: RoutePath.CYCLES() },
+        ]}
+      />
       <HStack max justify="between" align="center" gap="8" wrap>
-        <HStack gap="8" align="center">
-          <Button type="text" icon={<ArrowLeftOutlined />} aria-label={t('Назад')} onClick={() => navigate(RoutePath.CYCLES())} />
-          <MyTypography.Large strong>{cycle.name}</MyTypography.Large>
-        </HStack>
+        <MyTypography.Large strong>{cycle.name}</MyTypography.Large>
         <HStack gap="8">
           <Button icon={<SettingOutlined />} onClick={() => setFormOpen(true)}>
             {t('Настройки')}

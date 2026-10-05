@@ -48,8 +48,9 @@
 
     // Sizes
     --navbar-height: 50px;
-    --sidebar-width: 300px;
-    --sidebar-width-collapsed: 80px;
+    --sidebar-width: 236px;
+    --sidebar-width-collapsed: 76px;
+    --topbar-height: 68px;
 
     // z-indexes
     --modal-z-index: 1000;
@@ -105,6 +106,8 @@
     --color-surface: #e9e9ea;
     --color-text: #1d1f20;
     --color-divider: rgb(29, 31, 32, 0.16);
+    --color-brand-ink: #1d2d3d;
+    --color-field-border: #1d2d3d;
     --shadow-lg: 0 12px 32px rgb(43, 43, 45, 0.22);
 
     // Accent ramp

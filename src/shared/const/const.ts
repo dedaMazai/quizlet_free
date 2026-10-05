@@ -164,3 +164,15 @@ export const TIME_SLOTS = Array.from({ length: 15 }, (_, i) => {
 }); // 8:00 - 22:00
 
 export const MOSCOW_TIMEZONE = 'Europe/Moscow';
+
+/** Средняя длительность повторения одной карточки — для оценки «≈ N мин» */
+export const REVIEW_SECONDS_PER_CARD = 11;
+
+export const estimateReviewMinutes = (count: number): number => (
+    Math.ceil((count * REVIEW_SECONDS_PER_CARD) / 60)
+);
+
+/** location.state для перехода на главную с фокусом в поиске (кнопка «⌘K» до палитры) */
+export interface FocusSearchLocationState {
+    focusSearch?: boolean;
+}

@@ -1,12 +1,10 @@
 export type Styles = {
-  dropDown: string;
   dropDownItem: string;
   FAQButton: string;
   menu: string;
   menuWrap: string;
   Navbar: string;
   profileCard: string;
-  rootClassName: string;
   tabs: string;
 };
 

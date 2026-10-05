@@ -6,6 +6,8 @@ import { ReadOutlined, BulbOutlined, SearchOutlined } from '@ant-design/icons';
 import { useGetCardsPageQuery, useGetCardsCountQuery } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { CardList } from '@/widgets/CardList';
+import { SectionPageHeader } from '@/widgets/SectionPage';
+import { NavSectionKey } from '@/shared/const/menu';
 import { HStack, VStack } from '@/shared/ui/Stack';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
@@ -54,31 +56,31 @@ const AllWordsPage = () => {
 
   return (
     <VStack max fullHeight gap="16">
-      <HStack max justify="between" align="start" gap="16" wrap>
-        <VStack gap="4">
-          <MyTypography.Large strong>{t('Все слова')}</MyTypography.Large>
-          <MyTypography.Base type="secondary">
-            {t('{{count}} слов', { count: total })}
-          </MyTypography.Base>
-        </VStack>
-        <HStack gap="8" wrap>
-          <Button
-            icon={<ReadOutlined />}
-            disabled={isEmpty}
-            onClick={() => navigate(RoutePath.ALL_WORDS_FLASHCARDS())}
-          >
-            {t('Карточки')}
-          </Button>
-          <Button
-            type="primary"
-            icon={<BulbOutlined />}
-            disabled={isEmpty}
-            onClick={() => navigate(RoutePath.ALL_WORDS_LEARN())}
-          >
-            {t('Заучивание')}
-          </Button>
-        </HStack>
-      </HStack>
+      <SectionPageHeader
+        section={NavSectionKey.LIBRARY}
+        extra={(
+          <>
+            <Button
+              icon={<ReadOutlined />}
+              disabled={isEmpty}
+              onClick={() => navigate(RoutePath.ALL_WORDS_FLASHCARDS())}
+            >
+              {t('Карточки')}
+            </Button>
+            <Button
+              type="primary"
+              icon={<BulbOutlined />}
+              disabled={isEmpty}
+              onClick={() => navigate(RoutePath.ALL_WORDS_LEARN())}
+            >
+              {t('Заучивание')}
+            </Button>
+          </>
+        )}
+      />
+      <MyTypography.Base type="secondary">
+        {t('{{count}} слов', { count: total })}
+      </MyTypography.Base>
 
       <HStack max gap="8" wrap>
         <Input

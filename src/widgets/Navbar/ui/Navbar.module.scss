@@ -14,10 +14,6 @@
         z-index: 100;
         box-shadow: 0 2px 8px rgb(0, 0, 0, 0.06);
     }
-
-    .dropDown {
-        cursor: pointer;
-    }
 }
 
 .menuWrap {
@@ -56,10 +52,6 @@
     display: flex;
     gap: 8px;
     align-items: center;
-}
-
-.rootClassName {
-    padding-top: 4px;
 }
 
 .tabs {

@@ -10,6 +10,8 @@ import {
     RightOutlined,
     TrophyOutlined,
 } from '@ant-design/icons';
+import { SectionPageHeader } from '@/widgets/SectionPage';
+import { NavSectionKey } from '@/shared/const/menu';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
 import { MyTypography } from '@/shared/ui/MyTypography';
@@ -18,7 +20,7 @@ import { ROADMAP_STAGES, ROADMAP_STEPS_TOTAL, RoadmapStageId, RoadmapStep } from
 
 import cls from './RoadmapPage.module.scss';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 type StageStatus = 'completed' | 'current' | 'locked';
 
@@ -122,8 +124,8 @@ const RoadmapPage = () => {
 
     return (
         <VStack max gap="24" className={cls.RoadmapPage}>
-            <VStack max gap="8">
-                <Title level={1}>{t('Дорожная карта')}</Title>
+            <VStack max gap="16">
+                <SectionPageHeader section={NavSectionKey.LEARN} />
                 <MyTypography.Large type="secondary">
                     {t('Путь от базы до уверенного уровня: идите по этапам сверху вниз, переходите к блокам по клику и отмечайте пройденное галочкой.')}
                 </MyTypography.Large>

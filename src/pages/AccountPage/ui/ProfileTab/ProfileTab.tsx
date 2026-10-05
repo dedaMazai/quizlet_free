@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     EditOutlined, MailOutlined, PhoneOutlined, UserOutlined,
@@ -12,9 +12,9 @@ import { buildName } from '@/shared/lib/helpers/buildName';
 import { getAvatarSrc } from '@/shared/const/avatars';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { EditProfileModal } from '@/features/EditProfile';
-import cls from './ProfilePage.module.scss';
+import cls from './ProfileTab.module.scss';
 
-const ProfilePage = () => {
+export const ProfileTab = memo(() => {
     const { t } = useTranslation();
     const user = useUserInfo();
     const [editOpen, setEditOpen] = useState(false);
@@ -37,8 +37,7 @@ const ProfilePage = () => {
 
     return (
         <VStack max gap="24">
-            <HStack max justify="between" align="center" wrap gap="12">
-                <Typography.Title level={1}>{t('Личный кабинет')}</Typography.Title>
+            <HStack max justify="end">
                 <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)}>
                     {t('Редактировать')}
                 </Button>
@@ -87,6 +86,6 @@ const ProfilePage = () => {
             <EditProfileModal open={editOpen} onClose={() => setEditOpen(false)} />
         </VStack>
     );
-};
+});
 
-export default ProfilePage;
+ProfileTab.displayName = 'ProfileTab';
