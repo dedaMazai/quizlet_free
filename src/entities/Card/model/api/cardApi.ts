@@ -464,6 +464,7 @@ const cardApi = rtkApi.injectEndpoints({
 
 export const {
   useGetCardsQuery,
+  useLazyGetCardsQuery,
   useGetCardsPageQuery,
   useGetLibraryCardsQuery,
   useGetCardsCountQuery,

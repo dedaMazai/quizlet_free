@@ -54,7 +54,7 @@
 @for $i from 0 through 4 {
     .streak#{$i} .value,
     .streak#{$i} .delta {
-        color: var(--streak-#{$i});
+        color: var(--streak-#{$i}-text);
     }
 }
 

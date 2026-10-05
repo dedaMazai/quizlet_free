@@ -2430,5 +2430,22 @@
   "Поиск колод, слов и разделов": "Search decks, words and sections",
   "↑↓ выбрать": "↑↓ select",
   "↵ открыть": "↵ open",
-  "Esc закрыть": "Esc close"
+  "Esc закрыть": "Esc close",
+  "Знакомство": "Getting started",
+  "Шаг {{current}} из {{total}}": "Step {{current}} of {{total}}",
+  "Сколько карточек в день?": "How many cards a day?",
+  "Цель можно поменять в настройках.": "You can change the goal in settings.",
+  "Первая колода": "First deck",
+  "С каких слов начнём?": "Which words shall we start with?",
+  "Загрузите таблицу: слово и перевод в двух столбцах": "Upload a spreadsheet: word and translation in two columns",
+  "Ввести слова": "Enter words",
+  "Добавьте слова с переводами вручную": "Add words with translations manually",
+  "Готовый набор: неправильные глаголы, группа 1": "Ready-made set: irregular verbs, group 1",
+  "{{count}} частых глаголов в трёх формах_one": "{{count}} common verb in three forms",
+  "{{count}} частых глаголов в трёх формах_other": "{{count}} common verbs in three forms",
+  "Первая сессия": "First session",
+  "Колода готова — {{words}}": "Deck is ready — {{words}}",
+  "≈ {{count}} мин на первое знакомство: переворачивайте карточки и запоминайте перевод.": "≈ {{count}} min to get acquainted: flip the cards and remember the translations.",
+  "Не удалось сохранить занятие": "Failed to save the session",
+  "Не удалось сохранить настройки": "Failed to save settings"
 }

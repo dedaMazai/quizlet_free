@@ -29,7 +29,8 @@ as $$
     select (now() at time zone p_tz)::date as td
   ),
   ev as (
-    select e.is_correct, e.duration_ms, e.created_at, e.session_id,
+    -- is_answer = false — просмотр в «Карточках»: идёт во время и сессии, но не в ответы
+    select e.is_correct, e.duration_ms, e.created_at, e.session_id, e.mode <> 'flashcards' as is_answer,
            case when (e.created_at at time zone p_tz)::date > td - p_days
                 then 'current' else 'previous' end as period,
            lag(e.created_at) over (
@@ -42,8 +43,8 @@ as $$
   select jsonb_object_agg(period, stats)
   from (
     select p.period, jsonb_build_object(
-      'total_answers', count(ev.created_at),
-      'correct_answers', count(ev.created_at) filter (where ev.is_correct),
+      'total_answers', count(ev.created_at) filter (where ev.is_answer),
+      'correct_answers', count(ev.created_at) filter (where ev.is_answer and ev.is_correct),
       'total_duration_ms', coalesce(sum(ev.duration_ms), 0),
       'sessions', count(distinct ev.session_id) + count(ev.created_at) filter (
         where ev.session_id is null

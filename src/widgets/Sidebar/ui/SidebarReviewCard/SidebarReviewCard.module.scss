@@ -30,15 +30,15 @@
     justify-content: center;
     gap: 8px;
     padding: 9px;
-    background: var(--color-bg);
-    color: var(--color-brand-ink);
+    background: var(--color-field-button-bg);
+    color: var(--color-field-button-ink);
     font-family: var(--font-heading);
     font-weight: 600;
     font-size: 15px;
     transition: background var(--motion-fast) var(--ease-standard);
 
     &:hover {
-        background: var(--color-accent-100);
-        color: var(--color-brand-ink);
+        background: var(--color-field-button-hover);
+        color: var(--color-field-button-ink);
     }
 }

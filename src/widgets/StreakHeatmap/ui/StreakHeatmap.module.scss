@@ -86,23 +86,23 @@ $active-days-skeleton-height: 13px;
 }
 
 .level0 {
-  background: var(--color-neutral-200);
+  background: var(--color-heat-0);
 }
 
 .level1 {
-  background: var(--color-accent-300);
+  background: var(--color-heat-1);
 }
 
 .level2 {
-  background: var(--color-accent-500);
+  background: var(--color-heat-2);
 }
 
 .level3 {
-  background: var(--color-accent-700);
+  background: var(--color-heat-3);
 }
 
 .level4 {
-  background: var(--color-accent-900);
+  background: var(--color-heat-4);
 }
 
 @media (width <= 650px) {

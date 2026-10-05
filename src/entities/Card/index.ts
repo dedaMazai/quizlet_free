@@ -8,6 +8,7 @@ export type { AiCheckInput, AiCheckResult } from './model/types/aiCheck';
 export type { AiChunk, AiChunkInput, AiChunksResult } from './model/types/aiChunks';
 export {
   useGetCardsQuery,
+  useLazyGetCardsQuery,
   useGetCardsPageQuery,
   useGetLibraryCardsQuery,
   useGetCardsCountQuery,

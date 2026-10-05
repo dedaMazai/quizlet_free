@@ -12,6 +12,7 @@ import { AccountPage, AccountTab } from '@/pages/AccountPage';
 import { ProgressPage } from '@/pages/ProgressPage';
 import { ReviewPage } from '@/pages/ReviewPage';
 import { MainPage } from '@/pages/MainPage';
+import { OnboardingPage } from '@/pages/OnboardingPage';
 import { DecksPage } from '@/pages/DecksPage';
 import { DeckPage } from '@/pages/DeckPage';
 import { AllWordsPage } from '@/pages/AllWordsPage';
@@ -49,6 +50,12 @@ export const routeConfig: AppRoutesProps[] = [
         element: <MainPage />,
         withSidebar: true,
         authOnly: true,
+    },
+    {
+        path: RoutePath.ONBOARDING(),
+        element: <OnboardingPage />,
+        authOnly: true,
+        focusLayout: true,
     },
     {
         path: RoutePath.PROFILE(),

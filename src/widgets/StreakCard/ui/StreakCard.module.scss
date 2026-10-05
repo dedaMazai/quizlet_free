@@ -46,6 +46,7 @@ $goal-block-height: 63px;
 @for $i from 0 through 4 {
     .level#{$i} {
         --level-color: var(--streak-#{$i});
+        --level-text: var(--streak-#{$i}-text);
     }
 }
 
@@ -64,7 +65,7 @@ $goal-block-height: 63px;
 .levelTag {
     padding: 2px 6px;
     background: var(--level-color);
-    color: var(--color-text);
+    color: var(--color-field-button-ink);
     font-family: var(--font-mono);
     font-size: 10px;
     letter-spacing: 0.1em;
@@ -73,7 +74,7 @@ $goal-block-height: 63px;
 }
 
 .levelTagLight {
-    color: var(--color-bg);
+    color: var(--color-on-field);
 }
 
 .record {
@@ -98,7 +99,7 @@ $goal-block-height: 63px;
 }
 
 .daysColored {
-    color: var(--level-color);
+    color: var(--level-text);
 }
 
 .daysUnit {
@@ -129,7 +130,7 @@ $goal-block-height: 63px;
     width: 100%;
     aspect-ratio: 1;
     border: 1px solid var(--color-divider);
-    color: var(--color-bg);
+    color: var(--color-on-field);
 }
 
 .dayDone {

@@ -4,7 +4,7 @@ export interface StudyEventDraft {
   is_correct: boolean;
   level_before: number;
   level_after: number;
-  mode: 'choice' | 'write' | 'write_ru_en' | 'write_en_ru' | 'cloze' | 'order';
+  mode: 'choice' | 'write' | 'write_ru_en' | 'write_en_ru' | 'cloze' | 'order' | 'flashcards';
   duration_ms: number;
   /** Один запуск режима; новый и при «Заново» */
   session_id: string;

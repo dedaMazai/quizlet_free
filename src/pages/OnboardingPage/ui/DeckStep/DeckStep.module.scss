@@ -1,0 +1,60 @@
+$icon-box: 48px;
+
+.options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 760px;
+
+    @media (width <= 650px) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+}
+
+.option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 20px;
+    font: inherit;
+    text-align: left;
+    color: var(--color-text);
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard);
+
+    &:hover:not(:disabled) {
+        background: var(--color-accent-100);
+    }
+
+    &:disabled {
+        cursor: default;
+    }
+}
+
+.icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: $icon-box;
+    height: $icon-box;
+    margin-bottom: 8px;
+    border: 1px solid var(--color-divider);
+    color: var(--color-accent-700);
+}
+
+.optionTitle {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.optionText {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--color-neutral-700);
+}

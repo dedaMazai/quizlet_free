@@ -114,9 +114,9 @@
 
 .picked,
 .picked:hover {
-  border-color: var(--color-accent-900);
-  background: var(--color-accent-900);
-  color: var(--color-bg);
+  border-color: var(--color-field);
+  background: var(--color-field);
+  color: var(--color-on-field);
 
   @media (width <= 650px) {
     min-height: 0;

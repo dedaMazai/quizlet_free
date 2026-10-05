@@ -144,7 +144,7 @@ $mode-icon: 20px;
 .recommended {
     gap: 10px;
     padding: 18px;
-    color: var(--color-bg);
+    color: var(--color-on-field);
 }
 
 .recommendedHead {
@@ -163,7 +163,7 @@ $mode-icon: 20px;
 .recommendedDesc {
     font-size: 13px;
     text-wrap: pretty;
-    color: var(--color-accent-200);
+    color: var(--color-on-field-soft);
 }
 
 .recommendedStart {
@@ -173,15 +173,15 @@ $mode-icon: 20px;
     gap: 8px;
     margin-top: auto;
     padding: 9px;
-    background: var(--color-bg);
+    background: var(--color-field-button-bg);
     font-family: var(--font-heading);
     font-weight: 600;
     font-size: 15px;
-    color: var(--color-accent-900);
+    color: var(--color-field-button-ink);
     transition: background var(--motion-fast) var(--ease-standard);
 
     .recommended:hover & {
-        background: var(--color-accent-100);
+        background: var(--color-field-button-hover);
     }
 }
 
@@ -354,8 +354,8 @@ $mobile-bar: 8px;
     place-items: center;
     width: $play-size;
     height: $play-size;
-    background: var(--color-bg);
-    color: var(--color-accent-900);
+    background: var(--color-field-button-bg);
+    color: var(--color-field-button-ink);
 }
 
 .mobileModes {

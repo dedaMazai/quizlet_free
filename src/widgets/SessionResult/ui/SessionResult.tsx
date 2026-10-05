@@ -57,6 +57,8 @@ interface SessionResultProps {
   primaryAction?: SessionResultAction;
   /** Запуск по трудным словам; по умолчанию — тот же маршрут с их uuid в state */
   onRepeatHard?: (cardUuids: string[]) => void;
+  /** false — ответы не настоящие (просмотр карточек): точность «—», рекорд не пишется */
+  trackAccuracy?: boolean;
   className?: string;
 }
 
@@ -72,7 +74,7 @@ const readBestAccuracy = (): number | null => {
 /** Итог сессии (6.17): серия, неделя, 4 показателя, трудные слова и 3 действия */
 export const SessionResult: FC<SessionResultProps> = (props) => {
   const {
-    summary, words, onRestart, deckId, deckName, primaryAction, onRepeatHard, className,
+    summary, words, onRestart, deckId, deckName, primaryAction, onRepeatHard, trackAccuracy = true, className,
   } = props;
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -92,15 +94,15 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
 
   // Рекорд точности хранится локально: прошлый лучший читаем один раз, до записи нового
   const [prevBest] = useState(readBestAccuracy);
-  const isRecord = prevBest !== null && summary.answers > 0 && summary.accuracy > prevBest;
+  const isRecord = trackAccuracy && prevBest !== null && summary.answers > 0 && summary.accuracy > prevBest;
   useEffect(() => {
-    if (summary.answers === 0 || (prevBest !== null && summary.accuracy <= prevBest)) return;
+    if (!trackAccuracy || summary.answers === 0 || (prevBest !== null && summary.accuracy <= prevBest)) return;
     try {
       localStorage.setItem(LOCAL_STORAGE_SESSION_BEST_ACCURACY_KEY, String(summary.accuracy));
     } catch {
       // Без localStorage рекорд просто не запоминается
     }
-  }, [prevBest, summary.accuracy, summary.answers]);
+  }, [trackAccuracy, prevBest, summary.accuracy, summary.answers]);
 
   const streak = overview?.currentStreak ?? 0;
   const longest = overview?.longestStreak ?? 0;
@@ -162,7 +164,10 @@ export const SessionResult: FC<SessionResultProps> = (props) => {
   const stats = [
     { label: t('Карточек'), value: summary.cards },
     {
-      label: t('Точность'), value: `${summary.accuracy}%`, success: true, tag: isRecord ? t('Личный рекорд') : null,
+      label: t('Точность'),
+      value: trackAccuracy ? `${summary.accuracy}%` : '—',
+      success: trackAccuracy,
+      tag: isRecord ? t('Личный рекорд') : null,
     },
     { label: t('Время'), value: formatDuration(summary.durationMs) },
     {

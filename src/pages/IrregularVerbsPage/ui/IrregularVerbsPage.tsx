@@ -15,7 +15,7 @@ import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import { MasteryBar, MasteryBarSize } from '@/shared/ui/MasteryBar';
-import { useImportVerbsDeck } from '../model/useImportVerbsDeck';
+import { useImportVerbsDeck } from '@/features/ImportVerbsDeck';
 
 import cls from './IrregularVerbsPage.module.scss';
 
@@ -49,6 +49,11 @@ const IrregularVerbsPage = () => {
         || verb.translation.toLowerCase().includes(normalizedSearch)
     );
 
+    const importAndOpen = async (band: VerbBand) => {
+        const deck = await importBand(band);
+        if (deck) navigate(RoutePath.DECK(deck.uuid));
+    };
+
     // Главная кнопка — у первой группы, для которой ещё нет колоды
     const nextBandIndex = VERB_BANDS.find((band) => !findExistingDeck(band))?.index;
 
@@ -79,7 +84,7 @@ const IrregularVerbsPage = () => {
                 className={className}
                 loading={importingBand === band.index}
                 disabled={importingBand !== null && importingBand !== band.index}
-                onClick={() => importBand(band)}
+                onClick={() => importAndOpen(band)}
             >
                 {isFooter
                     ? t('Создать колоду · {{count}}', { count: band.verbs.length })
@@ -242,7 +247,7 @@ const IrregularVerbsPage = () => {
                                         className={cls.cta}
                                         loading={importingBand === band.index}
                                         disabled={importingBand !== null && importingBand !== band.index}
-                                        onClick={() => importBand(band)}
+                                        onClick={() => importAndOpen(band)}
                                     >
                                         {t('Создать колоду · {{count}}', { count: band.verbs.length })}
                                     </Button>

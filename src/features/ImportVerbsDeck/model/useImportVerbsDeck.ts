@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
 import { Deck, useCreateDeckMutation, useGetDecksQuery } from '@/entities/Deck';
 import { useCreateCardsMutation } from '@/entities/Card';
-import { RoutePath } from '@/shared/config/router/routePath';
 import { VerbBand, verbToTerm } from '@/shared/const/grammar';
 import { useToast } from '@/shared/lib/toast';
 
 export const useImportVerbsDeck = () => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const toast = useToast();
     const { data: decks } = useGetDecksQuery();
     const [createDeck] = useCreateDeckMutation();
@@ -24,7 +21,8 @@ export const useImportVerbsDeck = () => {
         decks?.find((deck) => deck.name === getBandDeckName(band))
     );
 
-    const importBand = async (band: VerbBand) => {
+    /** Создаёт колоду группы глаголов; при ошибке показывает тост и возвращает undefined */
+    const importBand = async (band: VerbBand): Promise<Deck | undefined> => {
         setImportingBand(band.index);
         try {
             const deck = await createDeck({
@@ -39,9 +37,10 @@ export const useImportVerbsDeck = () => {
                 card_type: 'word' as const,
             }))).unwrap();
             toast.success(t('Колода создана'));
-            navigate(RoutePath.DECK(deck.uuid));
+            return deck;
         } catch {
             toast.error(t('Не удалось создать колоду'));
+            return undefined;
         } finally {
             setImportingBand(null);
         }

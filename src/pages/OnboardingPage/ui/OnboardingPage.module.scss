@@ -1,0 +1,40 @@
+// Общие блоки шагов: заголовок по центру и главная кнопка
+$content-max-width: 560px;
+
+.head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    max-width: $content-max-width;
+    text-align: center;
+}
+
+.title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 1.1;
+    color: var(--color-text);
+
+    @media (width <= 650px) {
+        font-size: 28px;
+    }
+}
+
+.text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--color-neutral-700);
+}
+
+.cta {
+    min-width: 200px;
+
+    @media (width <= 650px) {
+        width: 100%;
+        margin-top: auto;
+    }
+}

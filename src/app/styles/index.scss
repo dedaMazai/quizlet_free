@@ -302,3 +302,12 @@ input:-webkit-autofill:active {
     caret-color: var(--text) !important;
     transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Оверлеи: в тёмной теме — рамка divider вместо тени (BACKLOG §6) */
+.ant-modal-container,
+.ant-dropdown-menu,
+.ant-select-dropdown,
+.ant-popover-inner,
+.ant-picker-dropdown .ant-picker-panel-container {
+    border: var(--overlay-border);
+}

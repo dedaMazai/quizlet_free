@@ -59,7 +59,7 @@ $deck-mastery: 200px;
   margin: 0;
   font-size: 14px;
   line-height: 1.5;
-  color: var(--color-accent-200);
+  color: var(--color-on-field-soft);
   text-wrap: pretty;
 }
 
@@ -75,9 +75,9 @@ $deck-mastery: 200px;
   align-items: center;
   gap: 10px;
   padding: 14px 22px;
-  border: 1px solid var(--color-bg);
-  background: var(--color-bg);
-  color: var(--color-accent-900);
+  border: 1px solid var(--color-field-button-bg);
+  background: var(--color-field-button-bg);
+  color: var(--color-field-button-ink);
   font-family: var(--font-heading);
   font-weight: 600;
   font-size: 18px;
@@ -248,7 +248,7 @@ $deck-mastery: 200px;
   .session {
     gap: 16px;
     padding: 20px;
-    border-color: var(--color-accent-900);
+    border-color: var(--color-field-border);
   }
 
   .counts {

@@ -1,5 +1,6 @@
 export const RouteNames = {
   MAIN: 'MAIN',
+  ONBOARDING: 'ONBOARDING',
   PROFILE: 'PROFILE',
   CHANGE_PASSWORD: 'CHANGE_PASSWORD',
   USER: 'USER',

@@ -65,6 +65,9 @@
     --toast-z-index: 1100;
     --overlay-color: rgb(0 0 0 / 0.6);
 
+    // Рамка оверлеев: в тёмной теме вместо тени (BACKLOG §6)
+    --overlay-border: none;
+
     // Semantic colors
     --color-accent-blue: #5B6BFF;
     --color-pending-revision: #4096ff;
@@ -118,6 +121,15 @@
     --color-field-border: #1d2d3d;
     --shadow-lg: 0 12px 32px rgb(43, 43, 45, 0.22);
 
+    // Тёмное поле (hero, полоса выборки, вход): роли, т.к. в тёмной теме ramp отражён
+    --color-field: #1d2d3d;
+    --color-on-field: #f2f2f3;
+    --color-on-field-soft: #d6ebff;
+    --color-field-line: #416180;
+    --color-field-button-bg: #f2f2f3;
+    --color-field-button-ink: #1d2d3d;
+    --color-field-button-hover: #eef6ff;
+
     // Accent ramp
     --color-accent-100: #eef6ff;
     --color-accent-200: #d6ebff;
@@ -140,6 +152,13 @@
     --color-neutral-800: #424244;
     --color-neutral-900: #2b2b2d;
 
+    // Heatmap: 5 ступеней
+    --color-heat-0: #e7e7ea;
+    --color-heat-1: #b5d9fd;
+    --color-heat-2: #749dc4;
+    --color-heat-3: #416180;
+    --color-heat-4: #1d2d3d;
+
     // Signals
     --color-success: oklch(60% 0.11 170deg);
     --color-success-tint: oklch(95% 0.03 170deg);
@@ -157,14 +176,19 @@
     // Streak levels
     --streak-0: oklch(62% 0.02 250deg);
     --streak-0-tint: oklch(94% 0.005 250deg);
+    --streak-0-text: oklch(62% 0.02 250deg);
     --streak-1: oklch(72% 0.12 80deg);
     --streak-1-tint: oklch(95% 0.04 80deg);
+    --streak-1-text: oklch(72% 0.12 80deg);
     --streak-2: oklch(66% 0.15 55deg);
     --streak-2-tint: oklch(94% 0.05 55deg);
+    --streak-2-text: oklch(66% 0.15 55deg);
     --streak-3: oklch(58% 0.17 35deg);
     --streak-3-tint: oklch(93% 0.05 35deg);
+    --streak-3-text: oklch(58% 0.17 35deg);
     --streak-4: oklch(50% 0.17 25deg);
     --streak-4-tint: oklch(90% 0.06 25deg);
+    --streak-4-text: oklch(50% 0.17 25deg);
 
     // Typography
     --font-heading: "Fira Sans Condensed", system-ui, sans-serif;

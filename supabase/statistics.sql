@@ -12,7 +12,7 @@ create table if not exists public.study_events (
   is_correct   boolean not null,
   level_before smallint not null,        -- 0|1|2
   level_after  smallint not null,        -- 0|1|2
-  mode         text not null,            -- 'choice' | 'write_ru_en' | 'write_en_ru' | 'cloze' | 'order'
+  mode         text not null,            -- 'choice' | 'write_ru_en' | 'write_en_ru' | 'cloze' | 'order' | 'flashcards' (просмотр, не ответ)
   duration_ms  integer,                  -- время на ответ (nullable)
   created_at   timestamptz not null default now()
 );
@@ -42,8 +42,10 @@ returns jsonb
 language sql
 stable
 as $$
+  -- is_answer = false — просмотр в «Карточках» (первая сессия онбординга): идёт в серию и время,
+  -- но не в ответы и точность
   with ev as (
-    select is_correct, duration_ms,
+    select is_correct, duration_ms, mode <> 'flashcards' as is_answer,
            (created_at at time zone p_tz)::date as d
     from public.study_events
     where user_id = auth.uid()
@@ -65,10 +67,11 @@ as $$
     select (now() at time zone p_tz)::date as td
   )
   select jsonb_build_object(
-    'total_answers', (select count(*) from ev),
-    'correct_answers', (select count(*) filter (where is_correct) from ev),
+    'total_answers', (select count(*) from ev where is_answer),
+    'correct_answers', (select count(*) filter (where is_correct) from ev where is_answer),
     'accuracy', (select case when count(*) = 0 then null
-                        else round(count(*) filter (where is_correct)::numeric / count(*), 4) end from ev),
+                        else round(count(*) filter (where is_correct)::numeric / count(*), 4) end
+                 from ev where is_answer),
     'total_duration_ms', (select coalesce(sum(duration_ms), 0) from ev),
     'current_streak', coalesce((
         select len from streaks, today
@@ -97,6 +100,7 @@ as $$
 $$;
 
 -- 2.3 Точность по колодам (с последним снапшотом имени — переживает удаление колоды).
+-- Просмотры в «Карточках» (mode = 'flashcards') — не ответы, в точность не входят.
 create or replace function public.get_deck_progress(p_tz text default 'UTC')
 returns jsonb
 language sql
@@ -117,6 +121,7 @@ as $$
            round(count(*) filter (where is_correct)::numeric / count(*), 4) as accuracy
     from public.study_events
     where user_id = auth.uid()
+      and mode <> 'flashcards'
     group by deck_key
   ) t;
 $$;

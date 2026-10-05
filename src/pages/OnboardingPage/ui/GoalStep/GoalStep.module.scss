@@ -1,0 +1,35 @@
+$segment-height: 56px;
+
+.goals {
+    width: 100%;
+    max-width: 480px;
+
+    // Подпись сегмента AntD фиксирует высоту и line-height — здесь в ней две строки
+    :global(.ant-segmented-item-label) {
+        height: auto;
+        min-height: auto;
+        padding: 0;
+        line-height: normal;
+    }
+}
+
+.option {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    height: $segment-height;
+}
+
+.count {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.minutes {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    opacity: 0.75;
+}

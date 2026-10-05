@@ -117,7 +117,7 @@ $bars-width: 168px;
 .bar {
     width: $bar-width;
     height: calc(#{$bar-max-height} * var(--ratio));
-    background: var(--color-accent-700);
+    background: var(--color-field-line);
 }
 
 .barToday {
@@ -143,9 +143,9 @@ $bars-width: 168px;
     align-items: center;
     gap: 10px;
     padding: 14px 22px;
-    border: 1px solid var(--color-bg);
-    background: var(--color-bg);
-    color: var(--color-accent-900);
+    border: 1px solid var(--color-field-button-bg);
+    background: var(--color-field-button-bg);
+    color: var(--color-field-button-ink);
     font-family: var(--font-heading);
     font-weight: 600;
     font-size: 18px;
@@ -154,7 +154,7 @@ $bars-width: 168px;
     transition: background var(--motion-fast) var(--ease-standard);
 
     &:hover {
-        background: var(--color-accent-100);
+        background: var(--color-field-button-hover);
     }
 }
 
@@ -163,9 +163,9 @@ $bars-width: 168px;
     align-items: center;
     gap: 8px;
     padding: 14px 18px;
-    border: 1px solid var(--color-accent-700);
+    border: 1px solid var(--color-field-line);
     background: transparent;
-    color: var(--color-bg);
+    color: var(--color-on-field);
     font-family: var(--font-heading);
     font-weight: 500;
     font-size: 16px;

@@ -16,4 +16,5 @@ export {
     useUserSettingsData,
     useDailyGoal,
 } from './model/hooks';
-export { useUpdateUserPreferencesMutation } from './model/api/userPreferencesApi';
+export { useGetUserPreferencesQuery, useUpdateUserPreferencesMutation } from './model/api/userPreferencesApi';
+export type { UserPreferences } from './model/api/userPreferencesApi';

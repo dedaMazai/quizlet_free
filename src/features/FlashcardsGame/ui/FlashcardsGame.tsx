@@ -38,11 +38,15 @@ interface FlashcardsGameProps {
   onExit: () => void;
   /** Заучивание того же набора — ссылка «Перейти к заучиванию →». */
   learnPath?: string;
+  /** Один проход: «Далее» на последней карточке завершает сессию вместо перехода к первой. */
+  onFinish?: () => void;
+  /** Подпись выхода в топбаре вместо «Выйти» */
+  exitLabel?: string;
 }
 
 export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
   const {
-    cards, withFavoriteFilter = true, title, onExit, learnPath,
+    cards, withFavoriteFilter = true, title, onExit, learnPath, onFinish, exitLabel,
   } = props;
   const { t } = useTranslation();
   const { isMobile } = useMatchMedia();
@@ -93,6 +97,10 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
 
   const goNext = () => {
     if (!order.length) return;
+    if (onFinish && index === order.length - 1) {
+      onFinish();
+      return;
+    }
     setFlipped(false);
     setIndex((i) => (i + 1) % order.length);
   };
@@ -119,6 +127,7 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
       counter={`${order.length ? index + 1 : 0} / ${order.length}`}
       ticks={order.length ? buildPositionTicks(index) : buildSessionTicks([], false)}
       onExit={onExit}
+      exitLabel={exitLabel}
     />
   );
 
@@ -209,17 +218,19 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
           <Empty description={t('Нет карточек по выбранному фильтру')} />
         )}
 
-        <span className={cls.note}>
-          {t('Ознакомительный режим — прогресс не записывается.')}
-          {learnPath && (
-            <>
-              {' '}
-              {t('Готовы?')}
-              {' '}
-              <Link to={learnPath} className={cls.learnLink}>{t('Перейти к заучиванию →')}</Link>
-            </>
-          )}
-        </span>
+        {!onFinish && (
+          <span className={cls.note}>
+            {t('Ознакомительный режим — прогресс не записывается.')}
+            {learnPath && (
+              <>
+                {' '}
+                {t('Готовы?')}
+                {' '}
+                <Link to={learnPath} className={cls.learnLink}>{t('Перейти к заучиванию →')}</Link>
+              </>
+            )}
+          </span>
+        )}
       </SessionStage>
     </>
   );

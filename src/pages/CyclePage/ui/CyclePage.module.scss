@@ -139,21 +139,21 @@ $next-day-button: 32px;
 }
 
 .studyButton {
-  border: 1px solid var(--color-bg);
-  background: var(--color-bg);
-  color: var(--color-accent-900);
+  border: 1px solid var(--color-field-button-bg);
+  background: var(--color-field-button-bg);
+  color: var(--color-field-button-ink);
   font-weight: 600;
   transition: background var(--motion-fast) var(--ease-standard);
 
   &:hover:not(:disabled) {
-    background: var(--color-accent-100);
+    background: var(--color-field-button-hover);
   }
 }
 
 .reviewButton {
-  border: 1px solid var(--color-accent-700);
+  border: 1px solid var(--color-field-line);
   background: transparent;
-  color: var(--color-bg);
+  color: var(--color-on-field);
   font-weight: 500;
   transition: border-color var(--motion-fast) var(--ease-standard);
 
@@ -283,7 +283,7 @@ $next-day-button: 32px;
   .today {
     gap: 14px;
     padding: 18px;
-    border-color: var(--color-accent-900);
+    border-color: var(--color-field-border);
   }
 
   .todayNumbers {

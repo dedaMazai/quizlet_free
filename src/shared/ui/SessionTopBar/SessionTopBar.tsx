@@ -31,14 +31,17 @@ interface SessionTopBarProps {
     onToggleAutoSpeak?: () => void;
     /** Содержимое попапа настроек; без него кнопка неактивна */
     settings?: ReactNode;
+    /** Подпись выхода вместо «Выйти» (онбординг: «Пропустить») */
+    exitLabel?: string;
 }
 
 /** Топбар фокус-режима: «✕ Выйти ESC» · название, счётчик и 14 делений · озвучка и настройки */
 export const SessionTopBar = memo((props: SessionTopBarProps) => {
     const {
-        title, counter, ticks, onExit, autoSpeak, onToggleAutoSpeak, settings,
+        title, counter, ticks, onExit, autoSpeak, onToggleAutoSpeak, settings, exitLabel,
     } = props;
     const { t } = useTranslation();
+    const exitText = exitLabel ?? t('Выйти');
     const [settingsOpen, setSettingsOpen] = useState(false);
     const { isMobile } = useMatchMedia();
 
@@ -54,7 +57,7 @@ export const SessionTopBar = memo((props: SessionTopBarProps) => {
                 <Button
                     type="text"
                     className={cls.mobileBtn}
-                    aria-label={t('Выйти')}
+                    aria-label={exitText}
                     onClick={onExit}
                     icon={<X size={MOBILE_EXIT_ICON_SIZE} strokeWidth={ICON_STROKE} />}
                 />
@@ -98,7 +101,7 @@ export const SessionTopBar = memo((props: SessionTopBarProps) => {
             <div className={cls.left}>
                 <Button className={cls.exit} onClick={onExit}>
                     <X size={EXIT_ICON_SIZE} strokeWidth={ICON_STROKE} />
-                    <span className={cls.exitLabel}>{t('Выйти')}</span>
+                    <span className={cls.exitLabel}>{exitText}</span>
                     <KeyHint className={cls.exitLabel}>ESC</KeyHint>
                 </Button>
             </div>

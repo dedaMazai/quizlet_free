@@ -2,6 +2,7 @@ import { RouteNames } from './routerNames';
 
 export const RoutePath = {
   [RouteNames.MAIN]: () => '/',
+  [RouteNames.ONBOARDING]: () => '/welcome',
   [RouteNames.PROFILE]: () => '/profile',
   [RouteNames.CHANGE_PASSWORD]: () => '/change_password',
   [RouteNames.LOGIN]: () => '/login',

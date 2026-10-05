@@ -45,10 +45,10 @@
 }
 
 .secondary {
-    border: 1px solid var(--color-accent-700);
+    border: 1px solid var(--color-field-line);
     background: transparent;
     font-weight: 500;
-    color: var(--color-bg);
+    color: var(--color-on-field);
 
     &:hover:not(:disabled) {
         border-color: var(--color-accent-400);
@@ -56,12 +56,12 @@
 }
 
 .primary {
-    border: 1px solid var(--color-bg);
-    background: var(--color-bg);
+    border: 1px solid var(--color-field-button-bg);
+    background: var(--color-field-button-bg);
     font-weight: 600;
-    color: var(--color-accent-900);
+    color: var(--color-field-button-ink);
 
     &:hover:not(:disabled) {
-        background: var(--color-accent-100);
+        background: var(--color-field-button-hover);
     }
 }
