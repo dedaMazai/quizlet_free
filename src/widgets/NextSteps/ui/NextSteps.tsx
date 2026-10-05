@@ -5,6 +5,7 @@ import {
     ArrowRight, BookOpen, GraduationCap, Repeat, Sparkles,
 } from 'lucide-react';
 import { useGetDecksQuery } from '@/entities/Deck';
+import { TenseMastery, useGetTenseMasteryQuery } from '@/entities/GrammarPractice';
 import { getToday, useGetCyclesQuery } from '@/entities/LearningCycle';
 import { useGetClozeStatsQuery, useGetDueSummaryQuery } from '@/entities/Statistics';
 import { Blueprint } from '@/shared/ui/Blueprint';
@@ -12,6 +13,7 @@ import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import { SectionHeader, SectionHeaderSize } from '@/shared/ui/SectionHeader';
 import { TickProgress, TickProgressSize, TickState } from '@/shared/ui/TickProgress';
 import { estimateReviewMinutes } from '@/shared/const/const';
+import { PRACTICE_TASKS_COUNT } from '@/shared/const/grammar';
 import { LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY } from '@/shared/const/localstorage';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
@@ -24,6 +26,7 @@ const ICON_SIZE = 18;
 const ARROW_SIZE = 14;
 const ICON_STROKE = 1.5;
 const NO_DONE_STEPS: string[] = [];
+const NO_MASTERY: TenseMastery = {};
 
 interface NextStepView {
     kicker: string;
@@ -50,6 +53,7 @@ export const NextSteps = memo((props: NextStepsProps) => {
     const { data: summary } = useGetDueSummaryQuery({ tz });
     const { data: clozeStats } = useGetClozeStatsQuery();
     const [roadmapDoneSteps] = useLocalStorage(LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY, NO_DONE_STEPS);
+    const { data: tenseMastery } = useGetTenseMasteryQuery();
 
     const steps = useMemo(() => selectNextSteps({
         cycles: cycles ?? [],
@@ -57,9 +61,10 @@ export const NextSteps = memo((props: NextStepsProps) => {
         perDeck: summary?.perDeck ?? [],
         clozeStats: clozeStats ?? [],
         roadmapDoneSteps,
+        tenseMastery: tenseMastery ?? NO_MASTERY,
         today: getToday(),
         now: Date.now(),
-    }), [cycles, decks, summary, clozeStats, roadmapDoneSteps]);
+    }), [cycles, decks, summary, clozeStats, roadmapDoneSteps, tenseMastery]);
 
     const toView = (step: NextStep): NextStepView => {
         const icon = (Icon: typeof Repeat) => (
@@ -92,6 +97,17 @@ export const NextSteps = memo((props: NextStepsProps) => {
                 title: t(step.title),
                 body: t(step.description),
                 meta: t('Шаг {{position}} из {{total}}', { position: step.position, total: step.total }),
+                cta: t('Тренировать'),
+            };
+        case NextStepKind.GRAMMAR:
+            return {
+                kicker: t('Грамматика'),
+                icon: icon(BookOpen),
+                title: step.tense,
+                body: t('Практика времён: {{count}} предложений с объяснением ошибок', {
+                    count: PRACTICE_TASKS_COUNT,
+                }),
+                meta: t('Тема пройдена на {{percent}}%', { percent: step.percent }),
                 cta: t('Тренировать'),
             };
         default:

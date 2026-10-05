@@ -16,6 +16,8 @@ export enum TickState {
 }
 
 export enum TickProgressSize {
+    /** 3px — освоенность времени в матрице грамматики */
+    XS = 'xs',
     /** 6px — карточки «Следующий шаг» */
     SM = 'sm',
     /** 8px — топбар сессии, практика */

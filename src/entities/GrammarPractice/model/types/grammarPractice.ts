@@ -35,3 +35,8 @@ export interface AiCheckResponse {
     results: AiCheckResultItem[];
     advice: string;
 }
+
+export interface TenseMasteryRow {
+    tense_id: string;
+    score: number;
+}

@@ -1,8 +1,11 @@
 import { ApiTag, rtkApi } from '@/shared/api/rtkApi';
 import { supabase, supabaseError } from '@/shared/api/supabaseClient';
 import {
-    AiCheckResponse, AiCheckResultItem, CheckAnswersItem, GenerateExercisesArgs, PracticeTask,
+    AiCheckResponse, AiCheckResultItem, CheckAnswersItem, GenerateExercisesArgs, PracticeTask, TenseMasteryRow,
 } from '../types/grammarPractice';
+import {
+    TENSE_MASTERY_TICKS, TenseAnswer, TenseMastery, findTenseId,
+} from '../lib/tenseMastery';
 
 // Достаёт код ошибки из тела ответа Edge Function (например, AI_LIMIT_EXCEEDED).
 const extractErrorCode = async (error: Error): Promise<string> => {
@@ -44,10 +47,35 @@ const grammarPracticeApi = rtkApi.injectEndpoints({
             },
             invalidatesTags: [ApiTag.AiUsage],
         }),
+        getTenseMastery: build.query<TenseMastery, void>({
+            queryFn: async () => {
+                const { data, error } = await supabase.rpc('get_tense_mastery', { p_window: TENSE_MASTERY_TICKS });
+                if (error) return supabaseError(error.message);
+                const rows = (data as TenseMasteryRow[]) ?? [];
+                return { data: Object.fromEntries(rows.map((row) => [row.tense_id, row.score])) };
+            },
+            providesTags: [ApiTag.GrammarResults],
+        }),
+        saveTenseAnswers: build.mutation<void, TenseAnswer[]>({
+            queryFn: async (answers) => {
+                // Ответы с неизвестным временем (ИИ назвал его иначе) в освоенность не идут
+                const rows = answers.flatMap(({ tense, ok }) => {
+                    const tenseId = findTenseId(tense);
+                    return tenseId ? [{ tense_id: tenseId, is_correct: ok }] : [];
+                });
+                if (rows.length === 0) return { data: undefined };
+                const { error } = await supabase.from('grammar_results').insert(rows);
+                if (error) return supabaseError(error.message);
+                return { data: undefined };
+            },
+            invalidatesTags: [ApiTag.GrammarResults],
+        }),
     }),
 });
 
 export const {
     useGenerateGrammarExercisesMutation,
     useCheckGrammarAnswersMutation,
+    useGetTenseMasteryQuery,
+    useSaveTenseAnswersMutation,
 } = grammarPracticeApi;

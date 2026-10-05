@@ -5,7 +5,7 @@ export {
     ASPECT_GROUP_ORDER, TENSE_TIME_ORDER, ASPECT_GROUPS, TENSES, TENSE_COMPARISONS,
 } from './tenses';
 export type { PracticeExercise } from './practice';
-export { PRACTICE_EXERCISES, normalizeAnswer } from './practice';
+export { PRACTICE_EXERCISES, PRACTICE_TASKS_COUNT, normalizeAnswer } from './practice';
 export type {
     GrammarTopicId, TopicLevel, TopicExample, TopicRule, TopicMistake, GrammarTopicInfo,
 } from './topics';

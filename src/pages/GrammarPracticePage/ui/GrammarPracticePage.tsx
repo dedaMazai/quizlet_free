@@ -1,43 +1,57 @@
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
-import {
-    Alert, Button, Card, Input, Segmented, Tag, Tooltip, Typography,
-} from 'antd';
-import {
-    CheckCircleFilled, CloseCircleFilled, EyeInvisibleOutlined, EyeOutlined,
-} from '@ant-design/icons';
+import { Button, Input } from 'antd';
+import { Sparkles } from 'lucide-react';
 import { useGetAiUsageQuery } from '@/entities/Card';
 import {
     AiCheckResultItem,
     useCheckGrammarAnswersMutation,
     useGenerateGrammarExercisesMutation,
+    useSaveTenseAnswersMutation,
 } from '@/entities/GrammarPractice';
 import { SectionPageHeader } from '@/widgets/SectionPage';
 import { NavSectionKey } from '@/shared/const/menu';
-import { ASPECT_GROUP_ORDER, ASPECT_GROUPS, AspectGroupId } from '@/shared/const/grammar';
+import {
+    ASPECT_GROUP_ORDER, ASPECT_GROUPS, AspectGroupId, PRACTICE_TASKS_COUNT,
+} from '@/shared/const/grammar';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
+import { Kicker, KickerSize } from '@/shared/ui/Kicker';
+import { TickProgress, TickState } from '@/shared/ui/TickProgress';
 import {
     SessionTask, buildTemplateTasks, checkTemplateAnswers, tenseNamesForGroups,
 } from '../model/templateSession';
 
 import cls from './GrammarPracticePage.module.scss';
 
-const { Text } = Typography;
-
 type SourceMode = 'templates' | 'ai';
-type Phase = 'setup' | 'answering' | 'checked';
+type Phase = 'answering' | 'checked';
 
-const TASKS_COUNT = 5;
+const SOURCE_ICON_SIZE = 14;
+const ADVICE_ICON_SIZE = 18;
+const ANSWER_MAX_LENGTH = 80;
+
+/** Подписи групп в настройках: Perfect Continuous не помещается в половину колонки */
+const GROUP_LABELS: Record<AspectGroupId, string> = {
+    simple: 'Simple',
+    continuous: 'Continuous',
+    perfect: 'Perfect',
+    'perfect-continuous': 'Perf. Cont.',
+};
 
 const isAspectGroupId = (value: string | null): value is AspectGroupId => (
     ASPECT_GROUP_ORDER.includes(value as AspectGroupId)
 );
 
+/** Короткая метка времени задания: «Present Perfect» → «Pres. Perfect» */
+const shortTense = (tense: string): string => tense
+    .replace('Perfect Continuous', 'Perf. Cont.')
+    .replace('Present', 'Pres.');
+
 const GrammarPracticePage = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { message } = useAntdApp();
     const [searchParams] = useSearchParams();
 
@@ -46,23 +60,36 @@ const GrammarPracticePage = () => {
         isAspectGroupId(presetGroup) ? [presetGroup] : [...ASPECT_GROUP_ORDER],
     );
     const [mode, setMode] = useState<SourceMode>('templates');
-    const [phase, setPhase] = useState<Phase>('setup');
-    const [tasks, setTasks] = useState<SessionTask[]>([]);
+    const [phase, setPhase] = useState<Phase>('answering');
+    const [tasks, setTasks] = useState<SessionTask[]>(() => buildTemplateTasks(groups, PRACTICE_TASKS_COUNT));
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [results, setResults] = useState<Record<string, AiCheckResultItem>>({});
     const [advice, setAdvice] = useState('');
     const [showTranslations, setShowTranslations] = useState(false);
+    // Повтор «Только ошибки» — тренировка без записи в освоенность
+    const [isRetry, setIsRetry] = useState(false);
 
     const { data: aiRemaining } = useGetAiUsageQuery();
     const [generateExercises, { isLoading: isGenerating }] = useGenerateGrammarExercisesMutation();
     const [checkAnswers, { isLoading: isChecking }] = useCheckGrammarAnswersMutation();
+    const [saveTenseAnswers] = useSaveTenseAnswersMutation();
 
     const toggleGroup = (groupId: AspectGroupId) => {
         setGroups((prev) => (
             prev.includes(groupId)
                 ? prev.filter((id) => id !== groupId)
-                : [...prev, groupId]
+                : ASPECT_GROUP_ORDER.filter((id) => id === groupId || prev.includes(id))
         ));
+    };
+
+    const showTasks = (nextTasks: SessionTask[], retry = false) => {
+        setTasks(nextTasks);
+        setIsRetry(retry);
+        setAnswers({});
+        setResults({});
+        setAdvice('');
+        setShowTranslations(false);
+        setPhase('answering');
     };
 
     const startSession = async () => {
@@ -70,28 +97,22 @@ const GrammarPracticePage = () => {
             message.warning(t('Выберите хотя бы одну группу времён'));
             return;
         }
-        setAnswers({});
-        setResults({});
-        setAdvice('');
-        setShowTranslations(false);
 
         if (mode === 'templates') {
-            setTasks(buildTemplateTasks(groups, TASKS_COUNT));
-            setPhase('answering');
+            showTasks(buildTemplateTasks(groups, PRACTICE_TASKS_COUNT));
             return;
         }
 
         try {
             const exercises = await generateExercises({
                 tenses: tenseNamesForGroups(groups),
-                count: TASKS_COUNT,
+                count: PRACTICE_TASKS_COUNT,
             }).unwrap();
             if (exercises.length === 0) {
                 message.error(t('Не удалось получить задания от ИИ'));
                 return;
             }
-            setTasks(exercises);
-            setPhase('answering');
+            showTasks(exercises);
         } catch (error) {
             const code = (error as { error?: string })?.error ?? '';
             message.error(code.includes('AI_LIMIT_EXCEEDED')
@@ -100,11 +121,21 @@ const GrammarPracticePage = () => {
         }
     };
 
+    const applyResults = (items: AiCheckResultItem[]) => {
+        const byId = Object.fromEntries(items.map((item) => [item.id, item]));
+        setResults(byId);
+        setPhase('checked');
+        if (isRetry) return;
+        // Освоенность — фоновая запись: её сбой не мешает разбору ответов
+        saveTenseAnswers(tasks.map((task) => ({ tense: task.tense, ok: Boolean(byId[task.id]?.ok) })))
+            .unwrap()
+            .catch(() => message.error(t('Не удалось сохранить результат')));
+    };
+
     const submitAnswers = async () => {
-        if (mode === 'templates') {
-            const templateResults = checkTemplateAnswers(tasks, answers);
-            setResults(Object.fromEntries(templateResults.map((result) => [result.id, result])));
-            setPhase('checked');
+        // Шаблонные задания проверяются локально, даже если источник переключили после генерации
+        if (tasks.every((task) => task.expected)) {
+            applyResults(checkTemplateAnswers(tasks, answers));
             return;
         }
 
@@ -116,9 +147,8 @@ const GrammarPracticePage = () => {
                 tense: task.tense,
                 answer: answers[task.id] ?? '',
             }))).unwrap();
-            setResults(Object.fromEntries(response.results.map((result) => [result.id, result])));
             setAdvice(response.advice);
-            setPhase('checked');
+            applyResults(response.results);
         } catch (error) {
             const code = (error as { error?: string })?.error ?? '';
             message.error(code.includes('AI_LIMIT_EXCEEDED')
@@ -127,206 +157,204 @@ const GrammarPracticePage = () => {
         }
     };
 
-    const correctCount = tasks.filter((task) => results[task.id]?.ok).length;
-
-    const renderTask = (task: SessionTask, index: number) => {
-        const [before, after] = task.text.split('___');
-        const result = phase === 'checked' ? results[task.id] : undefined;
-
-        return (
-            <Card key={task.id} className={cls.taskCard}>
-                <VStack max gap="8">
-                    <HStack max gap="8" wrap>
-                        <Text type="secondary">{index + 1}.</Text>
-                        <Tag>{task.tense}</Tag>
-                        <Tag className={cls.verbTag}>{task.verb}</Tag>
-                    </HStack>
-                    <div className={cls.sentence}>
-                        <span>{before}</span>
-                        <Input
-                            className={cls.answerInput}
-                            maxLength={80}
-                            value={answers[task.id] ?? ''}
-                            status={result && !result.ok ? 'error' : undefined}
-                            disabled={phase === 'checked'}
-                            placeholder={t('ответ')}
-                            onChange={(event) => setAnswers((prev) => ({
-                                ...prev,
-                                [task.id]: event.target.value,
-                            }))}
-                        />
-                        <span>{after}</span>
-                        {result && (result.ok
-                            ? <CheckCircleFilled className={cls.okIcon} />
-                            : <CloseCircleFilled className={cls.errorIcon} />)}
-                    </div>
-                    {(showTranslations || phase === 'checked') && (
-                        <Text type="secondary">{task.translation}</Text>
-                    )}
-                    {result && !result.ok && (
-                        <Text>
-                            {`${t('Правильный ответ')}: `}
-                            <Text strong className={cls.correctAnswer}>{result.correct}</Text>
-                        </Text>
-                    )}
-                    {result?.tip && <Text type="warning">{result.tip}</Text>}
-                </VStack>
-            </Card>
-        );
+    const retryMistakes = () => {
+        showTasks(tasks.filter((task) => !results[task.id]?.ok), true);
     };
 
+    const isChecked = phase === 'checked';
+    const correctCount = tasks.filter((task) => results[task.id]?.ok).length;
+    const hasMistakes = isChecked && correctCount < tasks.length;
+
+    const ticks = tasks.map((task) => {
+        if (isChecked) return results[task.id]?.ok ? TickState.CORRECT : TickState.WRONG;
+        return answers[task.id]?.trim() ? TickState.DONE : TickState.TODO;
+    });
+
+    const tensesCount = tenseNamesForGroups(groups).length;
+    const groupsList = new Intl.ListFormat(i18n.language, { type: 'conjunction' })
+        .format(groups.map((groupId) => ASPECT_GROUPS[groupId].name));
+
     return (
-        <VStack max gap="24" className={cls.GrammarPracticePage}>
-            <VStack max gap="16">
-                <SectionPageHeader section={NavSectionKey.GRAMMAR} />
-                <MyTypography.Large type="secondary">
-                    {t('Заполните пропуски глаголом в правильной форме — и проверьте себя.')}
-                </MyTypography.Large>
-            </VStack>
+        <div className={cls.GrammarPracticePage}>
+            <SectionPageHeader section={NavSectionKey.GRAMMAR} />
 
-            {phase === 'setup' && (
-                <Card className={cls.setupCard}>
-                    <VStack max gap="16">
-                        <VStack max gap="8">
-                            <Text strong>{t('Какие времена практиковать')}</Text>
-                            <Text type="secondary">
-                                {t('Каждая группа — это три времени: настоящее, прошедшее и будущее. Задания берутся только из выбранных групп: одна группа — прицельная тренировка, несколько — задания вперемешку. Наведите на группу, чтобы вспомнить её идею.')}
-                            </Text>
-                            <HStack gap="8" wrap>
-                                {ASPECT_GROUP_ORDER.map((groupId) => (
-                                    <Tooltip
-                                        key={groupId}
-                                        title={`${t(ASPECT_GROUPS[groupId].idea)} (${ASPECT_GROUPS[groupId].formulaHint})`}
-                                    >
-                                        <Tag.CheckableTag
-                                            checked={groups.includes(groupId)}
-                                            onChange={() => toggleGroup(groupId)}
-                                            className={cls.groupTag}
-                                        >
-                                            {ASPECT_GROUPS[groupId].name}
-                                        </Tag.CheckableTag>
-                                    </Tooltip>
-                                ))}
-                            </HStack>
-                            {groups.length === 0 ? (
-                                <Text type="warning">
-                                    {t('Выберите хотя бы одну группу, чтобы начать.')}
-                                </Text>
-                            ) : (
-                                <Text type="secondary">
-                                    {t('В тренировку войдут: {{tenses}}', {
-                                        tenses: tenseNamesForGroups(groups).join(', '),
+            <div className={cls.layout}>
+                <Blueprint className={cls.settings}>
+                    <div className={cls.setting}>
+                        <Kicker size={KickerSize.SM}>{t('Группы времён')}</Kicker>
+                        <div className={cls.groups}>
+                            {ASPECT_GROUP_ORDER.map((groupId) => (
+                                <button
+                                    key={groupId}
+                                    type="button"
+                                    aria-pressed={groups.includes(groupId)}
+                                    title={`${t(ASPECT_GROUPS[groupId].idea)} (${ASPECT_GROUPS[groupId].formulaHint})`}
+                                    className={classNames(cls.group, [], {
+                                        [cls.groupActive]: groups.includes(groupId),
                                     })}
-                                </Text>
-                            )}
-                        </VStack>
-
-                        <VStack max gap="8">
-                            <Text strong>{t('Источник заданий')}</Text>
-                            <Segmented
-                                value={mode}
-                                onChange={(value) => setMode(value as SourceMode)}
-                                options={[
-                                    { label: t('Шаблоны'), value: 'templates' },
-                                    { label: t('ИИ (GPT)'), value: 'ai' },
-                                ]}
-                            />
-                            <Text type="secondary">
-                                {mode === 'templates'
-                                    ? t('Готовые задания, проверка мгновенная и без расходования лимита ИИ.')
-                                    : t('ИИ сгенерирует новые предложения и разберёт ваши ответы. Расходует 2 запроса: генерация и проверка.')}
-                            </Text>
-                            {mode === 'ai' && (
-                                <Text type="secondary">
-                                    {t('Осталось запросов: {{count}}', { count: aiRemaining ?? 0 })}
-                                </Text>
-                            )}
-                        </VStack>
-
-                        <HStack max>
-                            <Button
-                                type="primary"
-                                size="large"
-                                loading={isGenerating}
-                                disabled={groups.length === 0}
-                                onClick={startSession}
-                            >
-                                {t('Начать')}
-                            </Button>
-                        </HStack>
-                    </VStack>
-                </Card>
-            )}
-
-            {phase !== 'setup' && (
-                <VStack max gap="16">
-                    {phase === 'answering' && (
-                        <HStack max justify="end">
-                            <Tooltip
-                                title={t('Русские переводы предложений скрыты, чтобы не подсказывать. Нажмите, чтобы показать их.')}
-                            >
-                                <Button
-                                    icon={showTranslations ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                                    onClick={() => setShowTranslations((prev) => !prev)}
+                                    onClick={() => toggleGroup(groupId)}
                                 >
-                                    {showTranslations ? t('Скрыть переводы') : t('Показать переводы')}
+                                    {GROUP_LABELS[groupId]}
+                                </button>
+                            ))}
+                        </div>
+                        <span className={cls.hint}>
+                            {groups.length === 0
+                                ? t('Выберите хотя бы одну группу, чтобы начать.')
+                                : t('В тренировку войдут {{count}} времён: {{groups}} × настоящее, прошедшее, будущее.', {
+                                    count: tensesCount,
+                                    groups: groupsList,
+                                })}
+                        </span>
+                    </div>
+
+                    <div className={cls.setting}>
+                        <Kicker size={KickerSize.SM}>{t('Источник заданий')}</Kicker>
+                        <div className={cls.sources}>
+                            <button
+                                type="button"
+                                aria-pressed={mode === 'templates'}
+                                className={classNames(cls.source, [], { [cls.sourceActive]: mode === 'templates' })}
+                                onClick={() => setMode('templates')}
+                            >
+                                {t('Шаблоны')}
+                            </button>
+                            <button
+                                type="button"
+                                aria-pressed={mode === 'ai'}
+                                className={classNames(cls.source, [], { [cls.sourceActive]: mode === 'ai' })}
+                                onClick={() => setMode('ai')}
+                            >
+                                <Sparkles aria-hidden size={SOURCE_ICON_SIZE} strokeWidth={1.5} />
+                                {t('ИИ')}
+                            </button>
+                        </div>
+                        <span className={cls.hint}>
+                            {mode === 'templates'
+                                ? t('Готовые задания, проверка мгновенная и без расходования лимита ИИ.')
+                                : t('Новые предложения и разбор ответов. 2 запроса · осталось {{count}}.', {
+                                    count: aiRemaining ?? 0,
+                                })}
+                        </span>
+                    </div>
+
+                    <Button
+                        className={cls.newSet}
+                        loading={isGenerating}
+                        disabled={groups.length === 0}
+                        onClick={startSession}
+                    >
+                        {t('Новый набор')}
+                    </Button>
+                </Blueprint>
+
+                <div className={cls.session}>
+                    <div className={cls.summary}>
+                        <span className={cls.score}>
+                            {isChecked
+                                ? t('Верно {{correct}} из {{total}}', { correct: correctCount, total: tasks.length })
+                                : t('Заполните пропуски')}
+                        </span>
+                        <TickProgress ticks={ticks} className={cls.ticks} />
+                        <Button type="text" className={cls.translations} onClick={() => setShowTranslations((prev) => !prev)}>
+                            {showTranslations ? t('Скрыть переводы') : t('Показать переводы')}
+                        </Button>
+                    </div>
+
+                    <div className={cls.tasks}>
+                        {tasks.map((task, index) => {
+                            const [before, after] = task.text.split('___');
+                            const result = isChecked ? results[task.id] : undefined;
+                            const answer = answers[task.id] ?? '';
+
+                            return (
+                                <div key={task.id} className={cls.task}>
+                                    <span className={cls.number}>{String(index + 1).padStart(2, '0')}</span>
+                                    <div className={cls.body}>
+                                        <div className={cls.sentence}>
+                                            {before}
+                                            {result
+                                                ? (
+                                                    <span className={classNames(cls.answer, [], { [cls.answerWrong]: !result.ok })}>
+                                                        {answer.trim() || '—'}
+                                                    </span>
+                                                )
+                                                : (
+                                                    <Input
+                                                        variant="underlined"
+                                                        className={cls.input}
+                                                        maxLength={ANSWER_MAX_LENGTH}
+                                                        value={answer}
+                                                        placeholder={task.verb}
+                                                        aria-label={t('Ответ к заданию {{number}}', { number: index + 1 })}
+                                                        onChange={(event) => setAnswers((prev) => ({
+                                                            ...prev,
+                                                            [task.id]: event.target.value,
+                                                        }))}
+                                                    />
+                                                )}
+                                            {after}
+                                        </div>
+                                        {showTranslations && <span className={cls.translation}>{task.translation}</span>}
+                                        {result && !result.ok && (
+                                            <span className={cls.fix}>
+                                                {`${t('Правильно')}: `}
+                                                <b>{result.correct}</b>
+                                                {result.tip && ` — ${result.tip}`}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <span className={cls.tense}>{shortTense(task.tense)}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {isChecked && advice && (
+                        <Blueprint className={cls.advice}>
+                            <Sparkles aria-hidden size={ADVICE_ICON_SIZE} strokeWidth={1.5} className={cls.adviceIcon} />
+                            <div className={cls.adviceBody}>
+                                <span className={cls.adviceTitle}>{t('Совет ИИ')}</span>
+                                <span className={cls.adviceText}>{advice}</span>
+                            </div>
+                        </Blueprint>
+                    )}
+
+                    <div className={cls.actions}>
+                        {isChecked
+                            ? (
+                                <>
+                                    <Button
+                                        type="primary"
+                                        className={cls.primaryAction}
+                                        loading={isGenerating}
+                                        disabled={groups.length === 0}
+                                        onClick={startSession}
+                                    >
+                                        <BlueprintMarks />
+                                        {t('Ещё раз')}
+                                    </Button>
+                                    <Button className={cls.secondaryAction} disabled={!hasMistakes} onClick={retryMistakes}>
+                                        {t('Только ошибки')}
+                                    </Button>
+                                </>
+                            )
+                            : (
+                                <Button
+                                    type="primary"
+                                    className={cls.primaryAction}
+                                    loading={isChecking}
+                                    disabled={tasks.length === 0}
+                                    onClick={submitAnswers}
+                                >
+                                    <BlueprintMarks />
+                                    {t('Проверить')}
                                 </Button>
-                            </Tooltip>
-                        </HStack>
-                    )}
-                    {phase === 'checked' && (
-                        <Alert
-                            type={correctCount === tasks.length ? 'success' : 'info'}
-                            message={t('Верно: {{correct}} из {{total}}', {
-                                correct: correctCount,
-                                total: tasks.length,
-                            })}
-                            showIcon
-                        />
-                    )}
-                    {phase === 'checked' && advice && (
-                        <Alert type="warning" message={t('Совет ИИ')} description={advice} showIcon />
-                    )}
-
-                    <VStack max gap="12">
-                        {tasks.map((task, index) => (
-                            <Fragment key={task.id}>{renderTask(task, index)}</Fragment>
-                        ))}
-                    </VStack>
-
-                    {phase === 'answering' && (
-                        <HStack max gap="12">
-                            <Button
-                                type="primary"
-                                size="large"
-                                loading={isChecking}
-                                onClick={submitAnswers}
-                            >
-                                {mode === 'ai' ? t('Отправить на проверку (1 запрос)') : t('Проверить')}
-                            </Button>
-                            <Button size="large" onClick={() => setPhase('setup')}>
-                                {t('Изменить настройки')}
-                            </Button>
-                        </HStack>
-                    )}
-                    {phase === 'checked' && (
-                        <HStack max gap="12">
-                            <Button
-                                type="primary"
-                                size="large"
-                                loading={isGenerating}
-                                onClick={startSession}
-                            >
-                                {t('Ещё раз')}
-                            </Button>
-                            <Button size="large" onClick={() => setPhase('setup')}>
-                                {t('Изменить настройки')}
-                            </Button>
-                        </HStack>
-                    )}
-                </VStack>
-            )}
-        </VStack>
+                            )}
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 

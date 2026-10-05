@@ -1,16 +1,24 @@
 import { useTranslation } from 'react-i18next';
-import { Navigate, useNavigate, useParams } from 'react-router';
-import { Button, Card, Tag, Typography } from 'antd';
-import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { Link, Navigate, useParams } from 'react-router';
+import { Button } from 'antd';
+import { ArrowRight, Check, ChevronLeft } from 'lucide-react';
 import { BackLink } from '@/shared/ui/BackLink';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { GRAMMAR_TOPIC_ORDER, GRAMMAR_TOPICS, GrammarTopicId } from '@/shared/const/grammar';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY } from '@/shared/const/localstorage';
+import { ROADMAP_STAGES, ROADMAP_STEPS_TOTAL } from '@/shared/const/roadmap';
+import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
+import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
+import { Kicker } from '@/shared/ui/Kicker';
+import { SectionHeader } from '@/shared/ui/SectionHeader';
 
 import cls from './GrammarTopicPage.module.scss';
 
-const { Title, Text } = Typography;
+const ICON_SIZE = 16;
+const ICON_STROKE = 1.5;
+const NO_STEPS: string[] = [];
+
+const ALL_STEPS = ROADMAP_STAGES.flatMap((stage) => stage.steps);
 
 const isGrammarTopicId = (value: string | undefined): value is GrammarTopicId => (
     GRAMMAR_TOPIC_ORDER.includes(value as GrammarTopicId)
@@ -18,8 +26,8 @@ const isGrammarTopicId = (value: string | undefined): value is GrammarTopicId =>
 
 const GrammarTopicPage = () => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const { topic } = useParams<{ topic: string }>();
+    const [doneSteps, setDoneSteps] = useLocalStorage<string[]>(LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY, NO_STEPS);
 
     if (!isGrammarTopicId(topic)) {
         return <Navigate to={RoutePath.ROADMAP()} replace />;
@@ -30,94 +38,98 @@ const GrammarTopicPage = () => {
     const prevTopic = GRAMMAR_TOPIC_ORDER[topicIndex - 1];
     const nextTopic = GRAMMAR_TOPIC_ORDER[topicIndex + 1];
 
+    // Шаг дорожной карты с тем же id, что и тема
+    const stageIndex = ROADMAP_STAGES.findIndex((stage) => stage.steps.some((step) => step.id === topic));
+    const step = ALL_STEPS.find((item) => item.id === topic);
+    const isDone = doneSteps.includes(topic);
+
+    const toggleDone = () => {
+        setDoneSteps((prev) => (
+            prev.includes(topic) ? prev.filter((id) => id !== topic) : [...prev, topic]
+        ));
+    };
+
     return (
-        <VStack max gap="32" className={cls.GrammarTopicPage}>
-            <VStack max gap="8">
+        <div className={cls.GrammarTopicPage}>
+            <div className={cls.header}>
                 <BackLink
                     items={[
                         { label: t('Учить'), to: RoutePath.REVIEW() },
                         { label: t('Дорожная карта'), to: RoutePath.ROADMAP() },
+                        ...(stageIndex >= 0 ? [{ label: t('Этап {{number}}', { number: stageIndex + 1 }) }] : []),
                     ]}
                 />
-                <HStack gap="12" wrap>
-                    <Title level={1} className={cls.pageTitle}>{t(info.name)}</Title>
-                    <Tag>{info.level}</Tag>
-                    <Tag className={cls.enNameTag}>{info.enName}</Tag>
-                </HStack>
-                <MyTypography.Large type="secondary">{t(info.intro)}</MyTypography.Large>
-            </VStack>
+                <div className={cls.titleRow}>
+                    <div className={cls.titleBlock}>
+                        <Kicker>
+                            {step
+                                ? t('Тема · {{level}} · шаг {{step}} из {{total}}', {
+                                    level: info.level,
+                                    step: ALL_STEPS.indexOf(step) + 1,
+                                    total: ROADMAP_STEPS_TOTAL,
+                                })
+                                : t('Тема · {{level}}', { level: info.level })}
+                        </Kicker>
+                        <h1 className={cls.title}>{t(info.name)}</h1>
+                        <span className={cls.subtitle}>{t(step?.description ?? info.intro)}</span>
+                    </div>
+                    {step && (
+                        <Button
+                            className={cls.markDone}
+                            aria-pressed={isDone}
+                            icon={<Check aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                            onClick={toggleDone}
+                        >
+                            {isDone ? t('Пройдено') : t('Отметить пройденным')}
+                        </Button>
+                    )}
+                </div>
+            </div>
 
-            <div className={cls.rulesGrid}>
+            <div className={cls.rules}>
                 {info.rules.map((rule) => (
-                    <Card
-                        key={rule.title}
-                        className={cls.ruleCard}
-                        title={(
-                            <HStack gap="8" wrap>
-                                <Text strong>{t(rule.title)}</Text>
-                                {rule.formula && <Tag className={cls.formulaTag}>{t(rule.formula)}</Tag>}
-                            </HStack>
-                        )}
-                    >
-                        <VStack max gap="12">
-                            <Text type="secondary">{t(rule.note)}</Text>
-                            <VStack max gap="8">
-                                {rule.examples.map((example) => (
-                                    <VStack key={example.en} max>
-                                        <Text strong>{example.en}</Text>
-                                        <Text type="secondary">{t(example.ru)}</Text>
-                                    </VStack>
-                                ))}
-                            </VStack>
-                        </VStack>
-                    </Card>
+                    <Blueprint key={rule.title} className={cls.rule}>
+                        <span className={cls.mark}>{rule.mark}</span>
+                        <span className={cls.ruleTitle}>{t(rule.title)}</span>
+                        <span className={cls.note}>{t(rule.note)}</span>
+                        <div className={cls.examples}>
+                            {rule.examples.map((example) => (
+                                <span key={example.en} className={cls.example}>{example.en}</span>
+                            ))}
+                        </div>
+                    </Blueprint>
                 ))}
             </div>
 
             {info.mistakes.length > 0 && (
-                <VStack max gap="16">
-                    <Title level={3}>{t('Типичные ошибки')}</Title>
-                    <Card className={cls.mistakesCard}>
-                        <VStack max gap="16">
-                            {info.mistakes.map((mistake) => (
-                                <VStack key={mistake.wrong} max>
-                                    <HStack gap="8" wrap>
-                                        <Text delete type="danger">{mistake.wrong}</Text>
-                                        <Text>→</Text>
-                                        <Text strong className={cls.rightAnswer}>{mistake.right}</Text>
-                                    </HStack>
-                                    <Text type="secondary">{t(mistake.note)}</Text>
-                                </VStack>
-                            ))}
-                        </VStack>
-                    </Card>
-                </VStack>
+                <div className={cls.mistakes}>
+                    <SectionHeader title={t('Типичные ошибки')} />
+                    {info.mistakes.map((mistake) => (
+                        <div key={mistake.wrong} className={cls.mistake}>
+                            <span className={cls.wrong}>{mistake.wrong}</span>
+                            <ArrowRight aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} className={cls.arrow} />
+                            <span className={cls.right}>{mistake.right}</span>
+                        </div>
+                    ))}
+                </div>
             )}
 
-            <HStack max justify="between" wrap gap="12">
+            <div className={cls.footer}>
                 {prevTopic ? (
-                    <Button
-                        icon={<ArrowLeftOutlined />}
-                        onClick={() => navigate(RoutePath.GRAMMAR_TOPIC(prevTopic))}
-                    >
+                    <Link to={RoutePath.GRAMMAR_TOPIC(prevTopic)} className={cls.prev}>
+                        <ChevronLeft aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />
                         {t(GRAMMAR_TOPICS[prevTopic].name)}
-                    </Button>
-                ) : (
-                    <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(RoutePath.ROADMAP())}>
-                        {t('Дорожная карта')}
-                    </Button>
-                )}
+                    </Link>
+                ) : <span />}
                 {nextTopic && (
-                    <Button
-                        iconPosition="end"
-                        icon={<ArrowRightOutlined />}
-                        onClick={() => navigate(RoutePath.GRAMMAR_TOPIC(nextTopic))}
-                    >
-                        {t(GRAMMAR_TOPICS[nextTopic].name)}
-                    </Button>
+                    <Link to={RoutePath.GRAMMAR_TOPIC(nextTopic)} className={cls.next}>
+                        <BlueprintMarks />
+                        {t('Дальше: {{topic}}', { topic: t(GRAMMAR_TOPICS[nextTopic].name) })}
+                        <ArrowRight aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />
+                    </Link>
                 )}
-            </HStack>
-        </VStack>
+            </div>
+        </div>
     );
 };
 

@@ -1,82 +1,266 @@
+$lead-size: 28px;
+$time-column: 96px;
+$plan-number-size: 30px;
+
 .GrammarTensesPage {
-    max-width: 1100px;
-}
-
-.tableWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
     width: 100%;
-    overflow-x: auto;
 }
 
-.tenseTable {
-    width: 100%;
-    min-width: 720px;
-    border-collapse: separate;
-    border-spacing: 4px;
-
-    th,
-    td {
-        padding: 12px;
-        text-align: left;
-        vertical-align: top;
-        border-radius: var(--border-radius);
-    }
+.intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: end;
 }
 
-.timeHeader {
+.lead {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: $lead-size;
+    line-height: 1.15;
+    text-wrap: pretty;
+}
+
+.practice {
+    height: 44px;
+    gap: 8px;
+    padding: 0 20px;
+    font-size: 16px;
     white-space: nowrap;
-    color: var(--text-secondary);
 }
 
-.tenseCell {
+.matrix {
+    display: grid;
+    grid-template-columns: $time-column repeat(4, minmax(0, 1fr));
+    border-top: 1px solid var(--color-divider);
+    border-left: 1px solid var(--color-divider);
+}
+
+.corner,
+.aspect,
+.time,
+.cell {
+    border-right: 1px solid var(--color-divider);
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.aspect {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 16px;
+}
+
+.aspectTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.aspectName {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 20px;
+    white-space: nowrap;
+}
+
+.now {
+    padding: 2px 5px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-bg);
+    background: var(--color-accent);
+}
+
+.aspectIdea {
+    font-size: 12px;
+    color: var(--color-neutral-700);
+}
+
+.time {
+    padding: 14px 12px;
+}
+
+.cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    color: inherit;
     cursor: pointer;
-    transition: filter 0.15s ease;
 
     &:hover {
-        filter: brightness(0.95);
+        color: inherit;
+        background: var(--color-accent-200);
     }
 }
 
-.cellFormula {
-    font-family: monospace;
+.current {
+    background: var(--color-accent-100);
 }
 
-.formulaHint {
-    font-family: monospace;
+.formula {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--color-accent-800);
 }
 
-.cellSimple {
-    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+.example {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--color-neutral-800);
 }
 
-.cellContinuous {
-    background: color-mix(in srgb, var(--color-link) 10%, transparent);
+.ticks {
+    margin-top: 4px;
 }
 
-.cellPerfect {
-    background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+.bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 24px;
 }
 
-.cellPerfectContinuous {
-    background: color-mix(in srgb, var(--color-error) 10%, transparent);
-}
-
-.iterationCard {
-    width: 100%;
-}
-
-.iterationNumber {
+.plan {
     display: flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    font-weight: 600;
-    color: var(--color-primary-bg);
-    background: var(--color-primary);
-    border-radius: 50%;
+    flex-direction: column;
+    gap: 14px;
 }
 
-.answerTag {
-    margin-inline-start: auto;
+.planSteps {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.planStep {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 10px;
+}
+
+.planMarker {
+    display: flex;
+    align-items: center;
+}
+
+.planNumber {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: $plan-number-size;
+    height: $plan-number-size;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 15px;
+    border: 1px solid var(--color-accent-700);
+}
+
+.planLine {
+    flex: 1;
+    height: 1px;
+    background: var(--color-neutral-300);
+}
+
+.planDone {
+    .planNumber {
+        color: var(--color-bg);
+        background: var(--color-accent-700);
+    }
+
+    .planLine {
+        background: var(--color-accent-700);
+    }
+}
+
+.planNow .planNumber {
+    border-style: dashed;
+    color: var(--color-accent-800);
+}
+
+.planNext .planNumber {
+    border-color: var(--color-neutral-400);
+    color: var(--color-neutral-600);
+}
+
+.planTitle {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.planSubtitle {
+    font-size: 12px;
+    color: var(--color-neutral-700);
+}
+
+.decide {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 20px;
+}
+
+.decideTitle {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 20px;
+    white-space: nowrap;
+}
+
+.decideRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 13px;
+    border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+
+.question {
+    text-wrap: pretty;
+}
+
+.answer {
+    flex: none;
+    padding: 2px 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-accent-800);
+    background: var(--color-accent-100);
+}
+
+@media (width <= 1100px) {
+    .bottom {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (width <= 650px) {
+    .intro {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .matrix {
+        overflow-x: auto;
+        grid-template-columns: $time-column repeat(4, minmax(160px, 1fr));
+    }
+
+    .planSteps {
+        grid-template-columns: repeat(3, 1fr);
+        row-gap: 16px;
+    }
 }

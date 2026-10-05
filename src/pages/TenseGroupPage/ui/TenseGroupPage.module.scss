@@ -1,98 +1,208 @@
+$title-size: 52px;
+
 .TenseGroupPage {
-    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
 }
 
-.pageTitle {
-    margin-bottom: 0;
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
-.formulaTag {
-    font-family: monospace;
-}
-
-.tensesGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+.titleRow {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
     gap: 16px;
-    width: 100%;
-    align-items: stretch;
 }
 
-.tenseCard {
-    height: 100%;
+.titleBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-/* Цветовой акцент группы: тот же цвет, что у колонки в сводной таблице. */
-.accentSimple {
-    border-top: 3px solid var(--color-success);
+.titleLine {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 16px;
 }
 
-.accentContinuous {
-    border-top: 3px solid var(--color-link);
-}
-
-.accentPerfect {
-    border-top: 3px solid var(--color-warning);
-}
-
-.accentPerfectContinuous {
-    border-top: 3px solid var(--color-error);
-}
-
-.formulaBlock {
-    padding: 12px;
-    background: color-mix(in srgb, var(--color-primary) 4%, transparent);
-    border-radius: var(--border-radius);
-}
-
-.formula {
-    font-family: monospace;
-}
-
-.formulaSign {
-    width: 16px;
-    font-weight: 600;
-    text-align: center;
-}
-
-.signPlus {
-    color: var(--color-success);
-}
-
-.signMinus {
-    color: var(--color-error);
-}
-
-.signQuestion {
-    color: var(--color-link);
-}
-
-.usageList {
-    padding-left: 20px;
+.title {
     margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: $title-size;
+    line-height: 1;
+    letter-spacing: -0.02em;
 }
 
-.rightAnswer {
-    color: var(--color-success);
+.groupFormula {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    white-space: nowrap;
+    color: var(--color-accent-700);
 }
 
-.comparisonCard {
-    width: 100%;
+.practice {
+    height: 42px;
+    gap: 8px;
+    padding: 0 18px;
+    font-size: 16px;
+    white-space: nowrap;
 }
 
-.comparisonRow {
+.tenses {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.tense {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.markersField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tenseName {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 22px;
+}
+
+.tenseFormula {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--color-accent-800);
+}
+
+.text {
+    font-size: 13px;
+    line-height: 1.45;
+    text-wrap: pretty;
+}
+
+.markers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.marker {
+    padding: 2px 7px;
+    font-size: 12px;
+    white-space: nowrap;
+    color: var(--color-accent-800);
+    background: var(--color-accent-100);
+}
+
+.example {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--color-neutral-800);
+}
+
+.mistake {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-divider);
+    font-size: 13px;
+}
+
+.wrong {
+    color: var(--color-neutral-600);
+    text-decoration: line-through;
+}
+
+.right {
+    font-weight: 500;
+    color: var(--color-accent-800);
+}
+
+.comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.compareGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    width: 100%;
+    border: 1px solid var(--color-divider);
+}
 
-    @media (width <= 767px) {
-        grid-template-columns: 1fr;
+.side {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
+
+    & + & {
+        border-left: 1px solid var(--color-divider);
     }
 }
 
-.comparisonSide {
-    padding: 12px;
-    background: color-mix(in srgb, var(--color-primary) 4%, transparent);
-    border-radius: var(--border-radius);
+.sideCurrent {
+    background: var(--color-accent-100);
+}
+
+.sideTitle {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.sideNote {
+    font-size: 13px;
+    color: var(--color-neutral-800);
+}
+
+.sideExample {
+    font-size: 14px;
+    font-style: italic;
+}
+
+@media (width <= 1100px) {
+    .tenses {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (width <= 650px) {
+    .titleRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .compareGrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .side + .side {
+        border-top: 1px solid var(--color-divider);
+        border-left: none;
+    }
 }

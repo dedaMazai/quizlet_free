@@ -16,6 +16,8 @@ export interface TopicExample {
 }
 
 export interface TopicRule {
+    /** Крупная метка карточки правила: 'a / an', 'the', '1'; не переводится (кроме прочерка). */
+    mark: string;
     /** Название правила — ключ i18n. */
     title: string;
     /** Формула/схема — ключ i18n (часть формул содержит русские пояснения). */
@@ -59,6 +61,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
         intro: 'В английском порядок слов фиксированный, а вопросы и отрицания строятся через вспомогательные глаголы. Это каркас, на который ложится вся остальная грамматика.',
         rules: [
             {
+                mark: 'S + V + O',
                 title: 'Утверждение',
                 formula: 'Subject + Verb + Object',
                 note: 'Подлежащее → сказуемое → дополнение. Обстоятельства времени и места обычно ставятся в конце.',
@@ -68,6 +71,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'Aux?',
                 title: 'Общий вопрос',
                 formula: 'Aux + Subject + V?',
                 note: 'Вопрос начинается со вспомогательного глагола: do/does/did, am/is/are, will, have и т. д.',
@@ -77,6 +81,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'Wh-',
                 title: 'Специальный вопрос',
                 formula: 'Wh- + Aux + Subject + V?',
                 note: 'Вопросительное слово (what, where, why, when, how) ставится перед вспомогательным глаголом.',
@@ -86,6 +91,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'not',
                 title: 'Отрицание',
                 formula: 'Subject + Aux + not + V',
                 note: 'Отрицание тоже строится через вспомогательный глагол + not.',
@@ -116,6 +122,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
         intro: 'Артикль показывает, говорим мы о чём-то впервые упомянутом (a/an), о конкретном и известном (the) или об общем понятии (без артикля).',
         rules: [
             {
+                mark: 'a / an',
                 title: 'a / an — неопределённый',
                 formula: 'a + согласный звук, an + гласный звук',
                 note: 'Один из многих, впервые упомянутый. Только с исчисляемыми существительными в единственном числе.',
@@ -125,6 +132,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'the',
                 title: 'the — определённый',
                 note: 'Конкретный предмет, известный обоим собеседникам, уже упомянутый или единственный в своём роде.',
                 examples: [
@@ -133,6 +141,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: '—',
                 title: 'Нулевой артикль',
                 note: 'Без артикля: множественное число в общем смысле, неисчисляемые понятия, имена, города, языки.',
                 examples: [
@@ -162,6 +171,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
         intro: 'Три главных предлога in, on, at работают и для времени, и для места — по принципу «большое → поверхность/день → точка».',
         rules: [
             {
+                mark: 'in / on / at',
                 title: 'Время: in / on / at',
                 formula: 'in + месяц/год, on + день, at + час',
                 note: 'in — длинные периоды (месяцы, годы, сезоны), on — дни и даты, at — точное время.',
@@ -172,6 +182,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'in / on / at',
                 title: 'Место: in / on / at',
                 note: 'in — внутри объёма, on — на поверхности, at — в точке или месте события.',
                 examples: [
@@ -181,6 +192,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'to / from',
                 title: 'Направление: to / from',
                 note: 'to — движение куда-то, from — откуда-то. Исключение: home употребляется без to.',
                 examples: [
@@ -210,6 +222,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
         intro: 'Модальные глаголы выражают отношение к действию: умение, обязанность, совет, вероятность. После них идёт инфинитив без to, и они не изменяются по лицам.',
         rules: [
             {
+                mark: 'can',
                 title: 'can / could — умение и возможность',
                 formula: 'can + V',
                 note: 'can — умение и возможность сейчас, could — в прошлом или как вежливая просьба.',
@@ -219,6 +232,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'must',
                 title: 'must / have to — необходимость',
                 formula: 'must + V / have to + V',
                 note: 'must — внутренняя обязанность или твёрдая уверенность, have to — необходимость извне (правила, обстоятельства).',
@@ -228,6 +242,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'should',
                 title: 'should — совет',
                 formula: 'should + V',
                 note: 'Совет или рекомендация: «стоит, следует».',
@@ -236,6 +251,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'may',
                 title: 'may / might — вероятность и разрешение',
                 formula: 'may / might + V',
                 note: 'may — разрешение и вероятность, might — более слабая вероятность.',
@@ -266,6 +282,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
         intro: 'Короткие прилагательные сравниваются окончаниями -er/-est, длинные — словами more/most, а несколько самых частых — исключения.',
         rules: [
             {
+                mark: '-er',
                 title: 'Короткие прилагательные',
                 formula: 'big → bigger → the biggest',
                 note: 'К прилагательным из 1–2 слогов добавляются -er (сравнительная) и -est (превосходная).',
@@ -275,6 +292,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'more',
                 title: 'Длинные прилагательные',
                 formula: 'more + adj → the most + adj',
                 note: 'К прилагательным из 3+ слогов добавляются more и the most.',
@@ -284,6 +302,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'better',
                 title: 'Исключения',
                 formula: 'good → better → the best; bad → worse → the worst',
                 note: 'Несколько частых прилагательных образуют степени не по правилам — их нужно запомнить.',
@@ -293,6 +312,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'as … as',
                 title: 'as … as — «такой же, как»',
                 formula: 'as + adj + as',
                 note: 'Равенство выражается конструкцией as … as, неравенство — not as … as.',
@@ -322,6 +342,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
         intro: 'Четыре типа условий — от общих истин до нереального прошлого. Ключевое правило: в части с if не бывает will и would.',
         rules: [
             {
+                mark: '0',
                 title: 'Zero Conditional — общие истины',
                 formula: 'If + Present Simple, Present Simple',
                 note: 'Законы природы и вещи, которые верны всегда.',
@@ -330,6 +351,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: '1',
                 title: 'First Conditional — реальное будущее',
                 formula: 'If + Present Simple, will + V',
                 note: 'Реальное условие в будущем: вполне может произойти.',
@@ -338,6 +360,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: '2',
                 title: 'Second Conditional — нереальное настоящее',
                 formula: 'If + Past Simple, would + V',
                 note: 'Воображаемая ситуация сейчас или в будущем: «если бы, то бы».',
@@ -346,6 +369,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: '3',
                 title: 'Third Conditional — нереальное прошлое',
                 formula: 'If + Past Perfect, would have + V3',
                 note: 'Сожаление о прошлом: условие уже не может исполниться.',
@@ -375,6 +399,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
         intro: 'Пассив нужен, когда важно само действие или его объект, а не тот, кто действует. Формула всегда одна: be в нужном времени + V3.',
         rules: [
             {
+                mark: 'be + V3',
                 title: 'Базовая формула',
                 formula: 'be + V3',
                 note: 'Время выражается формой be, смысловой глагол всегда в третьей форме.',
@@ -384,6 +409,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'is made',
                 title: 'Пассив в разных временах',
                 formula: 'is made / was made / will be made / has been made',
                 note: 'Меняется только форма be — по ней и определяется время.',
@@ -393,6 +419,7 @@ export const GRAMMAR_TOPICS: Record<GrammarTopicId, GrammarTopicInfo> = {
                 ],
             },
             {
+                mark: 'by',
                 title: 'by — кто выполнил действие',
                 formula: '… + by + деятель',
                 note: 'Деятель упоминается через by, только если это действительно важно.',

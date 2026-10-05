@@ -1,53 +1,39 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { Button, Card, Input, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Button, Input } from 'antd';
+import { Search } from 'lucide-react';
+import { useGetMasteryQuery } from '@/entities/Statistics';
 import { SectionPageHeader } from '@/widgets/SectionPage';
 import { NavSectionKey } from '@/shared/const/menu';
 import { RoutePath } from '@/shared/config/router/routePath';
-import { IrregularVerb, VERB_BANDS } from '@/shared/const/grammar';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { IRREGULAR_VERBS, IrregularVerb, VERB_BANDS } from '@/shared/const/grammar';
+import { classNames } from '@/shared/lib/classNames/classNames';
+import { Blueprint } from '@/shared/ui/Blueprint';
+import { Kicker, KickerSize } from '@/shared/ui/Kicker';
+import { MasteryBar } from '@/shared/ui/MasteryBar';
 import { useImportVerbsDeck } from '../model/useImportVerbsDeck';
 
 import cls from './IrregularVerbsPage.module.scss';
 
-const { Text } = Typography;
+const SEARCH_ICON_SIZE = 15;
+/** Сколько глаголов перечислить в подписи группы */
+const PREVIEW_VERBS = 5;
+const FIRST_BAND = 1;
+/** Обозначения форм глагола — не переводятся */
+const FORM_LABELS = ['V1', 'V2', 'V3'];
 
-/** Подпись и цвет группы по её номеру (с единицы) — глаголы идут по убыванию частотности. */
-const BAND_BADGES: { label: string; color: string }[] = [
-    { label: 'самые употребительные', color: 'green' },
-    { label: 'часто употребляются', color: 'blue' },
-    { label: 'реже употребляются', color: 'default' },
-];
+const toPercent = (part: number, total: number): number => (
+    total > 0 ? Math.round((part / total) * 100) : 0
+);
 
 const IrregularVerbsPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [search, setSearch] = useState('');
+    const [openBands, setOpenBands] = useState<number[]>([FIRST_BAND]);
     const { importBand, importingBand, findExistingDeck } = useImportVerbsDeck();
-
-    const columns: ColumnsType<IrregularVerb> = useMemo(() => [
-        {
-            title: 'V1',
-            dataIndex: 'base',
-            render: (value: string) => <Text strong>{value}</Text>,
-        },
-        {
-            title: 'V2',
-            dataIndex: 'past',
-        },
-        {
-            title: 'V3',
-            dataIndex: 'participle',
-        },
-        {
-            title: t('Перевод'),
-            dataIndex: 'translation',
-            render: (value: string) => <Text type="secondary">{value}</Text>,
-        },
-    ], [t]);
+    const { data: mastery } = useGetMasteryQuery();
 
     const normalizedSearch = search.trim().toLowerCase();
     const matchesSearch = (verb: IrregularVerb): boolean => (
@@ -58,81 +44,113 @@ const IrregularVerbsPage = () => {
         || verb.translation.toLowerCase().includes(normalizedSearch)
     );
 
+    // Главная кнопка — у первой группы, для которой ещё нет колоды
+    const nextBandIndex = VERB_BANDS.find((band) => !findExistingDeck(band))?.index;
+
+    const toggleBand = (index: number) => {
+        setOpenBands((prev) => (
+            prev.includes(index) ? prev.filter((item) => item !== index) : [...prev, index]
+        ));
+    };
+
     return (
-        <VStack max gap="24" className={cls.IrregularVerbsPage}>
-            <VStack max gap="16">
-                <SectionPageHeader section={NavSectionKey.GRAMMAR} />
-                <MyTypography.Large type="secondary">
-                    {t('Три формы самых частотных неправильных глаголов. Создайте колоду из группы и учите формы в привычных режимах: карточки, выбор, письмо.')}
-                </MyTypography.Large>
-                <Text type="secondary">
-                    {t('Глаголы упорядочены по частоте употребления и разбиты на три группы: группа 1 — самые популярные, дальше — реже. Начинайте с первой.')}
-                </Text>
-            </VStack>
+        <div className={cls.IrregularVerbsPage}>
+            <SectionPageHeader section={NavSectionKey.GRAMMAR} />
 
-            <Input
-                allowClear
-                placeholder={t('Поиск по форме или переводу')}
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                className={cls.search}
-            />
+            <div className={cls.toolbar}>
+                <Input
+                    className={cls.search}
+                    prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={1.5} />}
+                    allowClear
+                    value={search}
+                    placeholder={t('Форма глагола или перевод')}
+                    onChange={(event) => setSearch(event.target.value)}
+                />
+                <span className={cls.total}>
+                    {t('{{count}} глаголов по частоте · {{bands}} группы', {
+                        count: IRREGULAR_VERBS.length,
+                        bands: VERB_BANDS.length,
+                    })}
+                </span>
+            </div>
 
-            {VERB_BANDS.map((band) => {
-                const visibleVerbs = band.verbs.filter(matchesSearch);
-                if (normalizedSearch && visibleVerbs.length === 0) return null;
+            <div className={cls.bands}>
+                {VERB_BANDS.map((band) => {
+                    const visibleVerbs = band.verbs.filter(matchesSearch);
+                    if (normalizedSearch && visibleVerbs.length === 0) return null;
 
-                const existingDeck = findExistingDeck(band);
-                const badge = BAND_BADGES[band.index - 1] ?? BAND_BADGES[BAND_BADGES.length - 1];
+                    const deck = findExistingDeck(band);
+                    const deckMastery = deck && mastery?.perDeck.find((item) => item.deckKey === deck.uuid);
+                    const percent = toPercent(deckMastery?.mastered ?? 0, deck?.cards_count ?? 0);
+                    // При поиске раскрываются все группы с совпадениями
+                    const isOpen = Boolean(normalizedSearch) || openBands.includes(band.index);
+                    const preview = band.verbs.slice(0, PREVIEW_VERBS).map((verb) => verb.base).join(', ');
 
-                return (
-                    <Card
-                        key={band.index}
-                        className={cls.bandCard}
-                        title={(
-                            <HStack gap="8" wrap>
-                                <span>
-                                    {t('Группа {{index}} · глаголы {{from}}–{{to}}', {
-                                        index: band.index,
-                                        from: band.from,
-                                        to: band.to,
-                                    })}
-                                </span>
-                                <Tag color={badge.color}>{t(badge.label)}</Tag>
-                            </HStack>
-                        )}
-                        extra={existingDeck ? (
-                            <Button onClick={() => navigate(RoutePath.DECK(existingDeck.uuid))}>
-                                {t('Открыть колоду')}
-                            </Button>
-                        ) : (
-                            <Button
-                                type="primary"
-                                loading={importingBand === band.index}
-                                disabled={importingBand !== null && importingBand !== band.index}
-                                onClick={() => importBand(band)}
-                            >
-                                {t('Создать колоду ({{count}} карточек)', { count: band.verbs.length })}
-                            </Button>
-                        )}
-                    >
-                        <Table<IrregularVerb>
-                            size="small"
-                            rowKey="base"
-                            columns={columns}
-                            dataSource={visibleVerbs}
-                            pagination={false}
-                        />
-                    </Card>
-                );
-            })}
-
-            <HStack max gap="8">
-                <Text type="secondary">
-                    {t('Совет: в режиме «Письмо» вводите все три формы через пробел — например, «go went gone».')}
-                </Text>
-            </HStack>
-        </VStack>
+                    return (
+                        <Blueprint key={band.index} className={cls.band}>
+                            <div className={cls.bandHeader}>
+                                <button
+                                    type="button"
+                                    aria-expanded={isOpen}
+                                    className={cls.bandToggle}
+                                    onClick={() => toggleBand(band.index)}
+                                >
+                                    <span className={cls.bandTitle}>
+                                        {t('Группа {{index}} · глаголы {{from}}–{{to}}', {
+                                            index: band.index,
+                                            from: band.from,
+                                            to: band.to,
+                                        })}
+                                    </span>
+                                    <span className={cls.bandSub}>
+                                        {band.index === FIRST_BAND
+                                            ? t('Самые частотные: {{verbs}}…', { verbs: preview })
+                                            : `${preview}…`}
+                                    </span>
+                                </button>
+                                <div className={cls.mastery}>
+                                    <MasteryBar mastered={percent} learning={0} />
+                                    <Kicker size={KickerSize.SM}>
+                                        {t('{{percent}}% усвоено', { percent })}
+                                    </Kicker>
+                                </div>
+                                {deck ? (
+                                    <Button className={cls.cta} onClick={() => navigate(RoutePath.DECK(deck.uuid))}>
+                                        {t('Открыть колоду')}
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        type={band.index === nextBandIndex ? 'primary' : 'default'}
+                                        className={cls.cta}
+                                        loading={importingBand === band.index}
+                                        disabled={importingBand !== null && importingBand !== band.index}
+                                        onClick={() => importBand(band)}
+                                    >
+                                        {t('Создать колоду · {{count}}', { count: band.verbs.length })}
+                                    </Button>
+                                )}
+                            </div>
+                            {isOpen && (
+                                <div className={cls.table}>
+                                    <div className={classNames(cls.row, [cls.head])}>
+                                        {FORM_LABELS.map((label) => <span key={label}>{label}</span>)}
+                                        <span>{t('Перевод')}</span>
+                                    </div>
+                                    {visibleVerbs.map((verb) => (
+                                        <div key={verb.base} className={cls.row}>
+                                            <span className={cls.base}>{verb.base}</span>
+                                            <span>{verb.past}</span>
+                                            <span>{verb.participle}</span>
+                                            <span className={cls.translation}>{verb.translation}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </Blueprint>
+                    );
+                })}
+            </div>
+        </div>
     );
 };
 

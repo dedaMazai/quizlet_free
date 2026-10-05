@@ -43,6 +43,10 @@ export interface AspectGroupInfo {
     name: string;
     /** Идея аспекта одним предложением — ключ i18n. */
     idea: string;
+    /** Идея в двух словах для шапки матрицы — ключ i18n. */
+    shortIdea: string;
+    /** Фокус группы: подпись шага в плане и кикер страницы группы — ключ i18n. */
+    focus: string;
     /** Общий каркас формулы группы, не переводится. */
     formulaHint: string;
 }
@@ -52,8 +56,12 @@ export interface TenseComparison {
     /** Названия сравниваемых времён, не переводятся. */
     leftLabel: string;
     rightLabel: string;
-    /** Ключевое различие — ключ i18n. */
-    summary: string;
+    /** Вопрос-подсказка к левому времени: «Past Simple — когда?» — ключ i18n. */
+    leftTitle: string;
+    /** Когда выбирать левое время — ключ i18n. */
+    leftNote: string;
+    rightTitle: string;
+    rightNote: string;
     rows: { left: TenseExample; right: TenseExample }[];
     /** На страницах каких групп показывать блок. */
     groups: AspectGroupId[];
@@ -68,24 +76,32 @@ export const ASPECT_GROUPS: Record<AspectGroupId, AspectGroupInfo> = {
         id: 'simple',
         name: 'Simple',
         idea: 'Факт, привычка, регулярность. Действие названо целиком, без акцента на процесс.',
+        shortIdea: 'факт, привычка',
+        focus: 'Факты и привычки',
         formulaHint: 'V / V2 / will + V',
     },
     continuous: {
         id: 'continuous',
         name: 'Continuous',
         idea: 'Процесс в конкретный момент: действие «в кадре», оно длится прямо сейчас или длилось в тот момент.',
+        shortIdea: 'процесс',
+        focus: 'Процесс «в кадре»',
         formulaHint: 'be + V-ing',
     },
     perfect: {
         id: 'perfect',
         name: 'Perfect',
         idea: 'Результат к моменту: важно не «когда сделал», а «уже сделано».',
+        shortIdea: 'результат',
+        focus: 'Результат к моменту',
         formulaHint: 'have + V3',
     },
     'perfect-continuous': {
         id: 'perfect-continuous',
         name: 'Perfect Continuous',
         idea: 'Процесс длится вплоть до момента: важно «как долго».',
+        shortIdea: 'длительность',
+        focus: 'Как долго',
         formulaHint: 'have been + V-ing',
     },
 };
@@ -102,7 +118,7 @@ export const TENSES: TenseInfo[] = [
             negative: "don't / doesn't + V",
             question: 'Do / Does … + V?',
         },
-        shortFormula: 'V / V-s',
+        shortFormula: 'V / V+s',
         shortExample: 'I work',
         usage: [
             'Привычки и регулярные действия',
@@ -132,7 +148,7 @@ export const TENSES: TenseInfo[] = [
             negative: "didn't + V",
             question: 'Did … + V?',
         },
-        shortFormula: 'V2 / V-ed',
+        shortFormula: 'V2',
         shortExample: 'I worked',
         usage: [
             'Завершённое действие в известный момент прошлого',
@@ -440,7 +456,10 @@ export const TENSE_COMPARISONS: TenseComparison[] = [
         id: 'simple-vs-continuous',
         leftLabel: 'Present Simple',
         rightLabel: 'Present Continuous',
-        summary: 'Simple — регулярность и факты, Continuous — процесс в конкретный момент.',
+        leftTitle: 'Present Simple — как обычно?',
+        leftNote: 'Регулярность, привычка или факт.',
+        rightTitle: 'Present Continuous — что сейчас?',
+        rightNote: 'Процесс идёт прямо сейчас или временно.',
         groups: ['simple', 'continuous'],
         rows: [
             {
@@ -457,7 +476,10 @@ export const TENSE_COMPARISONS: TenseComparison[] = [
         id: 'past-simple-vs-present-perfect',
         leftLabel: 'Past Simple',
         rightLabel: 'Present Perfect',
-        summary: 'Названо время события — Past Simple; важен результат «к сейчас» — Present Perfect.',
+        leftTitle: 'Past Simple — когда?',
+        leftNote: 'Важен момент в прошлом, он назван или понятен.',
+        rightTitle: 'Present Perfect — что сейчас?',
+        rightNote: 'Важен результат к настоящему, время не важно.',
         groups: ['simple', 'perfect'],
         rows: [
             {
@@ -474,7 +496,10 @@ export const TENSE_COMPARISONS: TenseComparison[] = [
         id: 'perfect-vs-perfect-continuous',
         leftLabel: 'Present Perfect',
         rightLabel: 'Present Perfect Continuous',
-        summary: 'Perfect — результат (сколько сделано), Perfect Continuous — длительность процесса (как долго).',
+        leftTitle: 'Present Perfect — сколько сделано?',
+        leftNote: 'Важен результат: что и сколько уже готово.',
+        rightTitle: 'Present Perfect Continuous — как долго?',
+        rightNote: 'Важна длительность процесса, а не результат.',
         groups: ['perfect', 'perfect-continuous'],
         rows: [
             {
@@ -487,7 +512,10 @@ export const TENSE_COMPARISONS: TenseComparison[] = [
         id: 'continuous-vs-perfect-continuous',
         leftLabel: 'Present Continuous',
         rightLabel: 'Present Perfect Continuous',
-        summary: 'Continuous — процесс сейчас; Perfect Continuous — процесс с указанием, как долго он уже длится.',
+        leftTitle: 'Present Continuous — что сейчас?',
+        leftNote: 'Процесс идёт в этот момент или период.',
+        rightTitle: 'Present Perfect Continuous — как долго?',
+        rightNote: 'Процесс идёт, и важно, сколько он уже длится.',
         groups: ['continuous', 'perfect-continuous'],
         rows: [
             {

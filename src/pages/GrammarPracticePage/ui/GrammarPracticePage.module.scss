@@ -1,47 +1,299 @@
+$settings-width: 300px;
+$number-column: 28px;
+$tense-column: 110px;
+$input-min-width: 120px;
+
 .GrammarPracticePage {
-    max-width: 800px;
-}
-
-.setupCard {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
     width: 100%;
 }
 
-.groupTag {
-    padding: 4px 12px;
-    border: 1px solid var(--text-secondary);
-    border-radius: var(--border-radius);
+.layout {
+    display: grid;
+    grid-template-columns: $settings-width minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
 }
 
-.taskCard {
-    width: 100%;
+.settings {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 18px;
+}
+
+.setting {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.groups {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.group {
+    height: 40px;
+    padding: 0 8px;
+    border: 1px solid var(--color-divider);
+    font: inherit;
+    font-size: 13px;
+    white-space: nowrap;
+    color: var(--color-text);
+    background: transparent;
+    cursor: pointer;
+
+    &:hover {
+        border-color: var(--color-accent-400);
+    }
+}
+
+.groupActive {
+    border-color: var(--color-accent);
+    color: var(--color-accent-800);
+    background: var(--color-accent-100);
+}
+
+.hint {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--color-neutral-700);
+}
+
+.sources {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--color-divider);
+}
+
+.source {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0;
+    border: none;
+    font: inherit;
+    font-size: 13px;
+    color: var(--color-text);
+    background: transparent;
+    cursor: pointer;
+
+    & + & {
+        border-left: 1px solid var(--color-divider);
+    }
+}
+
+.sourceActive {
+    color: var(--color-bg);
+    background: var(--color-accent);
+}
+
+.newSet {
+    height: 40px;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.session {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.score {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 30px;
+    white-space: nowrap;
+}
+
+.ticks {
+    flex: 1;
+}
+
+.translations {
+    height: 32px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.tasks {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-divider);
+}
+
+.task {
+    display: grid;
+    grid-template-columns: $number-column minmax(0, 1fr) $tense-column;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 4px;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+
+.number {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    white-space: nowrap;
+    color: var(--color-neutral-700);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .sentence {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
     font-size: 16px;
+    line-height: 1.5;
 }
 
-.answerInput {
-    width: 220px;
+.input,
+.answer {
+    display: inline-block;
+    min-width: $input-min-width;
+    margin: 0 6px;
+    padding: 0 6px;
+    font-size: 16px;
+    font-weight: 500;
 }
 
-.verbTag {
-    font-family: monospace;
+.input {
+    width: auto;
 }
 
-.okIcon {
-    color: var(--color-success);
-    font-size: 18px;
+// Пропуск в строке — только линия снизу, как ответ после проверки
+.sentence .input {
+    border-bottom: 2px solid var(--color-neutral-400);
+    border-radius: 0;
+    background: transparent;
+
+    &:hover,
+    &:focus {
+        border-bottom-color: var(--color-accent);
+        background: transparent;
+    }
 }
 
-.errorIcon {
-    color: var(--color-error);
-    font-size: 18px;
+.answer {
+    border-bottom: 2px solid var(--color-success);
+    color: var(--color-accent-800);
 }
 
-.correctAnswer {
-    color: var(--color-success);
+.answerWrong {
+    border-bottom-color: var(--color-error);
+    color: var(--color-error-text);
+    text-decoration: line-through;
+}
+
+.translation {
+    font-size: 13px;
+    color: var(--color-neutral-700);
+}
+
+.fix {
+    font-size: 13px;
+    color: var(--color-accent-800);
+
+    b {
+        font-weight: 600;
+    }
+}
+
+.tense {
+    justify-self: end;
+    padding: 2px 6px;
+    border: 1px solid var(--color-divider);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-neutral-700);
+}
+
+.advice {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    border-color: var(--color-accent-300);
+    background: var(--color-accent-100);
+}
+
+.adviceIcon {
+    flex: none;
+    margin-top: 2px;
+    color: var(--color-accent-700);
+}
+
+.adviceBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.adviceTitle {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 17px;
+}
+
+.adviceText {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-neutral-900);
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.primaryAction {
+    height: 42px;
+    padding: 0 20px;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+.secondaryAction {
+    height: 42px;
+    padding: 0 18px;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+@media (width <= 900px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (width <= 650px) {
+    .summary {
+        flex-wrap: wrap;
+    }
+
+    .task {
+        grid-template-columns: $number-column minmax(0, 1fr);
+    }
+
+    .tense {
+        grid-column: 2;
+        justify-self: start;
+    }
 }

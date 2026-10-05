@@ -1,7 +1,11 @@
 import type { Deck } from '@/entities/Deck';
+import {
+    TenseMastery, getCurrentGroup, getGroupMasteryPercent,
+} from '@/entities/GrammarPractice';
 import type { LearningCycle } from '@/entities/LearningCycle';
 import type { DeckClozeStats, DeckDue } from '@/entities/Statistics';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { TENSES } from '@/shared/const/grammar';
 import { ROADMAP_STAGES, ROADMAP_STEPS_TOTAL } from '@/shared/const/roadmap';
 
 /** Карточек «Следующего шага» на главной (BACKLOG §7) */
@@ -16,6 +20,7 @@ export enum NextStepKind {
     CYCLE = 'cycle',
     CLOZE = 'cloze',
     ROADMAP = 'roadmap',
+    GRAMMAR = 'grammar',
     LEARN = 'learn',
 }
 
@@ -51,13 +56,21 @@ export interface RoadmapNextStep extends NextStepBase {
     total: number;
 }
 
+export interface GrammarNextStep extends NextStepBase {
+    kind: NextStepKind.GRAMMAR;
+    /** Самое слабое время текущей группы, не переводится */
+    tense: string;
+    /** Освоенность группы, 0–100 */
+    percent: number;
+}
+
 export interface LearnNextStep extends NextStepBase {
     kind: NextStepKind.LEARN;
     name: string;
     newCount: number;
 }
 
-export type NextStep = CycleNextStep | ClozeNextStep | RoadmapNextStep | LearnNextStep;
+export type NextStep = CycleNextStep | ClozeNextStep | RoadmapNextStep | GrammarNextStep | LearnNextStep;
 
 export interface NextStepsInput {
     cycles: LearningCycle[];
@@ -65,6 +78,8 @@ export interface NextStepsInput {
     perDeck: DeckDue[];
     clozeStats: DeckClozeStats[];
     roadmapDoneSteps: string[];
+    /** Освоенность времён; пусто — практику ещё не начинали */
+    tenseMastery: TenseMastery;
     /** Локальная дата пользователя, YYYY-MM-DD — как в sync_cycle_portion */
     today: string;
     now: number;
@@ -135,6 +150,25 @@ const selectRoadmap = (doneSteps: string[]): RoadmapNextStep | null => {
     };
 };
 
+/** 3. Текущая группа грамматики, если практику уже начали: самое слабое её время */
+const selectGrammar = (mastery: TenseMastery): GrammarNextStep | null => {
+    if (Object.keys(mastery).length === 0) return null;
+    const groupId = getCurrentGroup(mastery);
+    if (!groupId) return null;
+    const weakest = TENSES
+        .filter((tense) => tense.group === groupId)
+        .reduce((min, tense) => ((mastery[tense.id] ?? 0) < (mastery[min.id] ?? 0) ? tense : min));
+    const percent = getGroupMasteryPercent(mastery, groupId);
+    return {
+        kind: NextStepKind.GRAMMAR,
+        key: `grammar-${groupId}`,
+        path: `${RoutePath.GRAMMAR_PRACTICE()}?group=${groupId}`,
+        filled: toTicks(percent, 100),
+        tense: weakest.name,
+        percent,
+    };
+};
+
 /** 4. Колода с наибольшим числом новых слов */
 const selectLearn = (perDeck: DeckDue[], deckByUuid: Map<string, Deck>): LearnNextStep | null => {
     const best = perDeck
@@ -158,7 +192,8 @@ export const selectNextSteps = (input: NextStepsInput): NextStep[] => {
     return [
         selectCycle(input.cycles, input.today),
         selectCloze(input.clozeStats, deckByUuid, input.now),
-        selectRoadmap(input.roadmapDoneSteps),
+        // Правило 3: группа грамматики, если практика начата, иначе шаг дорожной карты
+        selectGrammar(input.tenseMastery) ?? selectRoadmap(input.roadmapDoneSteps),
         selectLearn(input.perDeck, deckByUuid),
     ]
         .filter((step): step is NextStep => step !== null)

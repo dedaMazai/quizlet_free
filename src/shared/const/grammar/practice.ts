@@ -22,6 +22,9 @@ export const normalizeAnswer = (value: string): string => value
     .replace(/\s+/g, ' ')
     .trim();
 
+/** Заданий в наборе практики времён */
+export const PRACTICE_TASKS_COUNT = 6;
+
 export const PRACTICE_EXERCISES: PracticeExercise[] = [
     // Present Simple
     {
