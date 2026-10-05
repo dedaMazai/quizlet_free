@@ -295,6 +295,7 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--motion-base': '220ms',
     '--motion-slow': '360ms',
     '--motion-deliberate': '600ms',
+    '--motion-auto-advance': '1200ms',
     '--ease-standard': 'cubic-bezier(0.2, 0, 0, 1)',
     '--ease-enter': 'cubic-bezier(0, 0, 0, 1)',
     '--ease-exit': 'cubic-bezier(0.3, 0, 1, 1)',

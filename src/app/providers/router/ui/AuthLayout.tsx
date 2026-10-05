@@ -5,14 +5,18 @@ import { PageLoader } from '@/widgets/PageLoader';
 import { Sidebar } from '@/widgets/Sidebar';
 import { Topbar } from '@/widgets/Topbar';
 import { Navbar } from '@/widgets/Navbar';
+import { FocusModeProvider, useFocusModeActive } from '@/shared/lib/focusMode';
+import { classNames } from '@/shared/lib/classNames/classNames';
 import cls from './AuthLayout.module.scss';
 
 interface AuthLayoutProps {
     withSidebar?: boolean;
 }
 
-export const AuthLayout = ({ withSidebar = true }: AuthLayoutProps) => {
+const AuthLayoutContent = ({ withSidebar = true }: AuthLayoutProps) => {
     const location = useLocation();
+    // Повторение запускает сессию без смены URL — оболочка прячется по флагу страницы
+    const focus = useFocusModeActive();
     const stableKey = useMemo(
         () => location.pathname.replace(/\/revisions\/[^/]+$/, ''),
         [location.pathname],
@@ -20,15 +24,19 @@ export const AuthLayout = ({ withSidebar = true }: AuthLayoutProps) => {
 
     return (
         <div className={cls.AuthLayout}>
-            {withSidebar && <Sidebar />}
+            {withSidebar && !focus && <Sidebar />}
             <div className={cls.column}>
-                <BrowserView renderWithFragment>
-                    <Topbar />
-                </BrowserView>
-                <MobileView renderWithFragment>
-                    <Navbar />
-                </MobileView>
-                <main className={cls.main}>
+                {!focus && (
+                    <>
+                        <BrowserView renderWithFragment>
+                            <Topbar />
+                        </BrowserView>
+                        <MobileView renderWithFragment>
+                            <Navbar />
+                        </MobileView>
+                    </>
+                )}
+                <main className={classNames(cls.main, { [cls.focus]: focus })}>
                     <Suspense key={stableKey} fallback={<PageLoader />}>
                         <Outlet />
                     </Suspense>
@@ -37,3 +45,9 @@ export const AuthLayout = ({ withSidebar = true }: AuthLayoutProps) => {
         </div>
     );
 };
+
+export const AuthLayout = (props: AuthLayoutProps) => (
+    <FocusModeProvider>
+        <AuthLayoutContent {...props} />
+    </FocusModeProvider>
+);

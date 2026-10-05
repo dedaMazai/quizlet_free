@@ -1,33 +1,46 @@
-.stage {
+.prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 100%;
+  text-align: center;
+}
+
+.word {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+
+  @media (width <= 650px) {
+    font-size: 40px;
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   width: 100%;
-  max-width: 560px;
-  min-height: 280px;
+  max-width: 680px;
+}
+
+.actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.progressRow {
-  max-width: 560px;
-}
-
-.writeRow {
-  max-width: 480px;
-}
-
-// Кнопки не сжимаются, поле ввода забирает оставшуюся ширину.
-.rowButton {
-  flex-shrink: 0;
-}
-
-.answerInput {
-  flex: 1;
-  min-width: 0;
+  gap: 16px;
 }
 
 // Место под подсмотренный ответ резервируется, чтобы форма не прыгала.
 .peekAnswer {
   min-height: 24px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  text-align: center;
   color: var(--color-accent);
   visibility: hidden;
 
@@ -39,37 +52,9 @@
 // Удержание пальцем не должно выделять текст и открывать контекстное меню.
 .peekButton {
   flex-shrink: 0;
+  width: 48px;
+  height: 48px;
   user-select: none;
   touch-action: none;
   -webkit-touch-callout: none;
-}
-
-.feedbackIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  font-size: 48px;
-
-  &.correct {
-    color: var(--color-success);
-    background: var(--color-success-soft);
-  }
-
-  &.almost {
-    color: var(--color-warning);
-    background: var(--color-warning-soft);
-  }
-
-  &.wrong {
-    color: var(--color-error);
-    background: var(--color-error-soft);
-  }
-}
-
-.mistakes {
-  width: 100%;
-  max-width: 480px;
 }

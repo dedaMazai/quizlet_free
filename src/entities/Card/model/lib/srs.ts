@@ -61,6 +61,9 @@ export const levelFromReview = (reps: number, intervalDays: number): CardLevel =
 export const levelOf = (review: CardReview | null): CardLevel =>
   (review ? levelFromReview(review.reps, review.interval_days) : 0);
 
+/** Уровень «усвоена» (см. levelFromReview) — для итога сессии. */
+export const MASTERED_LEVEL: CardLevel = 2;
+
 /** Пора ли повторять: у новой карточки состояния нет, она доступна всегда. */
 export const isDue = (review: CardReview | null, now: Date = new Date()): boolean =>
   (review ? new Date(review.due_at).getTime() <= now.getTime() : true);

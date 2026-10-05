@@ -1,0 +1,84 @@
+.SessionTopBar {
+    display: grid;
+    flex: none;
+    grid-template-columns: 1fr minmax(0, 560px) 1fr;
+    align-items: center;
+    gap: 24px;
+    height: var(--focus-topbar-height);
+    padding: 0 32px;
+    border-bottom: 1px solid var(--color-divider);
+
+    @media (width <= 650px) {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 12px;
+        padding: 0 12px;
+    }
+}
+
+.left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.exit {
+    gap: 8px;
+    height: 36px;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.exitLabel {
+    @media (width <= 650px) {
+        display: none;
+    }
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.titleRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.title {
+    overflow: hidden;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 16px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.counter {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-neutral-700);
+}
+
+.ticks {
+    width: 100%;
+}
+
+.right {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.iconBtn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+}

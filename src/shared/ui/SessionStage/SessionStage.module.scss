@@ -1,0 +1,28 @@
+.SessionStage {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+
+    @media (width <= 650px) {
+        padding: 24px 16px;
+    }
+}
+
+.sm {
+    gap: 28px;
+}
+
+.md {
+    gap: 32px;
+}
+
+.lg {
+    gap: 36px;
+}
+
+.xl {
+    gap: 40px;
+}

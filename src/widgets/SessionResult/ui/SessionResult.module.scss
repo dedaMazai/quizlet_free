@@ -1,0 +1,218 @@
+.SessionResult {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    padding: 56px 40px;
+
+    @media (width <= 650px) {
+        padding: 32px 16px;
+    }
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: 100%;
+    max-width: 960px;
+}
+
+.head {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 64px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+
+    @media (width <= 650px) {
+        font-size: 40px;
+    }
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 24px;
+
+    @media (width <= 900px) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+// Серия: цвет огня и ячеек недели — по уровню
+@for $i from 0 through 4 {
+    .level#{$i} {
+        --level-color: var(--streak-#{$i});
+    }
+}
+
+.streak {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 28px;
+}
+
+.streakRow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.flame {
+    flex: none;
+    color: var(--level-color);
+}
+
+.streakDays {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 112px;
+    line-height: 0.8;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+
+    @media (width <= 650px) {
+        font-size: 72px;
+    }
+}
+
+.streakText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.streakUnit {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1;
+}
+
+.streakMeta {
+    font-size: 13px;
+    color: var(--color-accent-300);
+}
+
+.week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.dayCell {
+    width: 100%;
+    height: 28px;
+    border: 1px solid var(--color-accent-700);
+}
+
+.dayActive {
+    background: var(--level-color);
+}
+
+.dayToday.dayActive {
+    background: color-mix(in srgb, var(--level-color) 70%, var(--color-bg));
+}
+
+.dayLabel {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-accent-300);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px;
+
+    &:nth-child(odd of .stat) {
+        border-right: 1px solid var(--color-divider);
+    }
+
+    &:nth-child(n + 3 of .stat) {
+        border-top: 1px solid var(--color-divider);
+    }
+}
+
+.statLabel {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-neutral-700);
+}
+
+.statValue {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.success {
+    color: var(--color-success-text);
+}
+
+.tag {
+    align-self: flex-start;
+    padding: 2px 6px;
+    background: var(--color-success-tint);
+    color: var(--color-success-text);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.hard {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    padding: 6px 12px;
+    border: 1px solid var(--color-divider);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}

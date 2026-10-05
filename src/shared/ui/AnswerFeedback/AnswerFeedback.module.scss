@@ -1,0 +1,105 @@
+.AnswerFeedback {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 760px;
+    padding: 16px 20px;
+    border: 1px solid var(--signal);
+    background: var(--signal-tint);
+
+    @media (width <= 650px) {
+        flex-wrap: wrap;
+    }
+}
+
+.success {
+    --signal: var(--color-success);
+    --signal-tint: var(--color-success-tint);
+    --signal-ink: var(--color-success-text);
+}
+
+.error {
+    --signal: var(--color-error);
+    --signal-tint: var(--color-error-tint);
+    --signal-ink: var(--color-error-text);
+}
+
+.warning {
+    --signal: var(--color-warning);
+    --signal-tint: var(--color-warning-tint);
+    --signal-ink: var(--color-warning-text);
+}
+
+.icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    background: var(--signal);
+    color: var(--color-bg);
+}
+
+.text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 20px;
+    color: var(--signal-ink);
+}
+
+.subtitle {
+    font-size: 14px;
+    color: var(--color-neutral-800);
+}
+
+.next {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.nextBtn {
+    padding: 10px 16px;
+    border: 0;
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.timer {
+    position: relative;
+    width: 100%;
+    height: 2px;
+    background: var(--color-neutral-300);
+}
+
+.timerFill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--signal);
+    animation: fill var(--motion-auto-advance) linear forwards;
+}
+
+@keyframes fill {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+}

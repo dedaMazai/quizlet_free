@@ -1,16 +1,20 @@
-import { FC } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Button, Empty, Progress, Result,
-} from 'antd';
+import { Empty } from 'antd';
 import { Card, useGetCardReviewsQuery } from '@/entities/Card';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
+import { SessionTopBar } from '@/shared/ui/SessionTopBar';
+import { useAutoSpeak } from '@/shared/lib/hooks/useAutoSpeak';
+import { useSpeech } from '@/shared/lib/hooks/useSpeech';
+import {
+  buildSessionTicks,
+  SessionResultRenderer,
+  summarizeSession,
+  useIntervalNote,
+} from '@/shared/lib/session';
 import { useClozeSession } from '../model/hooks/useClozeSession';
 import { ClozeSetup } from './ClozeSetup';
 import { ClozePrompt } from './ClozePrompt';
-import { ClozeFeedback } from './ClozeFeedback';
-import cls from './ClozeSession.module.scss';
 
 interface ClozeSessionProps {
   cards: Card[];
@@ -20,85 +24,94 @@ interface ClozeSessionProps {
   deckName: string;
   /** Колода, по которой сузить выборку повторений. */
   reviewsDeckUuid?: string;
+  /** Название в топбаре: «Колода · Пропуски». */
+  title: string;
+  onExit: () => void;
+  renderResult: SessionResultRenderer;
 }
 
 export const ClozeSession: FC<ClozeSessionProps> = (props) => {
   const {
-    cards, deckKey, deckName, reviewsDeckUuid,
+    cards, deckKey, deckName, reviewsDeckUuid, title, onExit, renderResult,
   } = props;
   const { t } = useTranslation();
+  const { autoSpeak, toggleAutoSpeak } = useAutoSpeak();
+  const { speak } = useSpeech();
 
   const { data: reviews } = useGetCardReviewsQuery(reviewsDeckUuid);
   const session = useClozeSession(cards, reviews, { deckKey, deckName });
+  const correctNote = useIntervalNote(session.lastReview?.interval_days);
+
+  // Автоозвучка английского слова при показе фидбэка
+  const spokenTerm = session.phase === 'feedback' ? session.current?.card.term : undefined;
+  useEffect(() => {
+    if (spokenTerm && autoSpeak) speak(spokenTerm, 'en-US');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spokenTerm, session.answers.length]);
+
+  const finished = session.phase === 'finished';
+  const summary = useMemo(
+    () => (finished ? summarizeSession(session.answers, session.startedAt) : null),
+    [finished, session.answers, session.startedAt],
+  );
+
+  const topBar = (
+    <SessionTopBar
+      title={title}
+      counter={`${session.done} / ${session.phase === 'setup' ? session.fitting : session.total}`}
+      ticks={buildSessionTicks(session.answers, session.phase === 'question')}
+      onExit={onExit}
+      autoSpeak={autoSpeak}
+      onToggleAutoSpeak={toggleAutoSpeak}
+    />
+  );
 
   if (!cards.length) {
-    return <Empty description={t('Нет слов для заучивания')} />;
-  }
-
-  if (session.phase === 'setup') {
     return (
-      <ClozeSetup
-        fitting={session.fitting}
-        total={cards.length}
-        defaultTypoTolerance={session.typoTolerance}
-        onStart={session.start}
-      />
+      <>
+        {topBar}
+        <SessionStage>
+          <Empty description={t('Нет слов для заучивания')} />
+        </SessionStage>
+      </>
     );
   }
 
-  if (session.phase === 'finished') {
+  if (summary) {
     return (
-      <Result
-        status="success"
-        title={t('Все пропуски заполнены!')}
-        subTitle={t('Слов: {{count}}, ошибок: {{wrong}}, с опечаткой: {{almost}}', {
-          count: session.total,
-          wrong: session.counters.wrong,
-          almost: session.counters.almost,
-        })}
-        extra={(
-          <Button type="primary" onClick={session.reset}>
-            {t('Пройти заново')}
-          </Button>
-        )}
-      />
+      <>
+        {topBar}
+        {renderResult(summary, session.reset)}
+      </>
     );
   }
 
   return (
-    <VStack max gap="24" align="center">
-      <VStack max gap="4" className={cls.progressRow}>
-        <HStack max justify="between" align="center">
-          <MyTypography.Small type="secondary">{t('Прогресс')}</MyTypography.Small>
-          <MyTypography.Small type="secondary">
-            {session.done} / {session.total}
-          </MyTypography.Small>
-        </HStack>
-        <Progress
-          percent={session.total ? (session.done / session.total) * 100 : 0}
-          showInfo={false}
-          size="small"
-        />
-      </VStack>
-
-      <div className={cls.stage}>
-        {session.phase === 'question' && session.current && (
-          <ClozePrompt
-            item={session.current}
-            onAnswer={session.answer}
-            onSkip={session.skip}
+    <>
+      {topBar}
+      <SessionStage gap={session.phase === 'setup' ? SessionStageGap.SM : SessionStageGap.LG}>
+        {session.phase === 'setup' && (
+          <ClozeSetup
+            fitting={session.fitting}
+            total={cards.length}
+            defaultTypoTolerance={session.typoTolerance}
+            onStart={session.start}
           />
         )}
 
-        {session.phase === 'feedback' && session.current && session.lastGrade && (
-          <ClozeFeedback
+        {session.phase !== 'setup' && session.current && (
+          <ClozePrompt
             item={session.current}
-            grade={session.lastGrade}
+            typoTolerance={session.typoTolerance}
+            grade={session.phase === 'feedback' ? session.lastGrade : null}
             userInput={session.lastInput}
+            correctNote={correctNote}
+            onAnswer={session.answer}
+            onSkip={session.skip}
             onNext={session.next}
           />
         )}
-      </div>
-    </VStack>
+      </SessionStage>
+    </>
   );
 };

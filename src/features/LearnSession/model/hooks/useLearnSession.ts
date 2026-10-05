@@ -1,5 +1,5 @@
 import {
-  useCallback, useEffect, useMemo, useReducer, useRef,
+  useCallback, useEffect, useMemo, useReducer, useRef, useState,
 } from 'react';
 import {
   Card,
@@ -11,6 +11,7 @@ import {
   useSaveCardReviewsMutation,
 } from '@/entities/Card';
 import { StudyEventDraft, useLogStudyEventsMutation } from '@/entities/Statistics';
+import { SessionAnswer } from '@/shared/lib/session';
 import {
   buildQuestion,
   buildRoundQueue,
@@ -264,6 +265,16 @@ export const useLearnSession = (
     return () => window.removeEventListener('pagehide', persistPending);
   }, [meta.deckKey, meta.deckName]);
 
+  // Журнал ответов — только для топбара и итога, на логику сессии не влияет.
+  const [answers, setAnswers] = useState<SessionAnswer[]>([]);
+  const [lastReview, setLastReview] = useState<CardReview | null>(null);
+  const [startedAt, setStartedAt] = useState(() => Date.now());
+  const clearLog = () => {
+    setAnswers([]);
+    setLastReview(null);
+    setStartedAt(Date.now());
+  };
+
   const answer = (input: string) => {
     if (!currentCard) return;
     const uuid = currentCard.uuid;
@@ -288,6 +299,9 @@ export const useLearnSession = (
     });
     if (review) reviewsRef.current.push(review);
     if (eventsRef.current.length >= FLUSH_EVERY) flush();
+    // «Усвоено» в итоге — карточка прошла все шаги обучения в этой сессии
+    setAnswers((prev) => [...prev, { cardUuid: uuid, correct, mastered: graduated }]);
+    setLastReview(review);
 
     dispatch({
       type: 'ANSWER', cardUuid: uuid, correct, input, review,
@@ -295,7 +309,10 @@ export const useLearnSession = (
   };
 
   const next = () => dispatch({ type: 'NEXT' });
-  const reset = () => dispatch({ type: 'RESET' });
+  const reset = () => {
+    clearLog();
+    dispatch({ type: 'RESET' });
+  };
 
   return {
     phase: state.phase,
@@ -306,6 +323,9 @@ export const useLearnSession = (
     lastCorrect: state.lastCorrect,
     lastInput: state.lastInput,
     total: cards.length,
+    answers,
+    lastReview,
+    startedAt,
     answer,
     next,
     reset,

@@ -1,18 +1,16 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import {
   useGetCardsQuery,
   useGetFavoritesQuery,
   FAVORITES_PROGRESS_KEY,
 } from '@/entities/Card';
 import { LearnSession } from '@/features/LearnSession';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { Loader } from '@/shared/ui/Loader';
+import { PageLoader } from '@/widgets/PageLoader';
+import { SessionResult } from '@/widgets/SessionResult';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { useSessionCardFilter } from '@/shared/lib/session';
 
 const FavoriteLearnPage = () => {
   const { t } = useTranslation();
@@ -25,28 +23,26 @@ const FavoriteLearnPage = () => {
     () => (cards ?? []).filter((card) => favorites?.includes(card.uuid)),
     [cards, favorites],
   );
+  const { cards: sessionCards, sessionKey } = useSessionCardFilter(favCards);
 
-  if (isLoading || !cards) return <Loader />;
+  if (isLoading || !cards) return <PageLoader />;
 
   return (
-    <VStack max fullHeight gap="24">
-      <HStack gap="8" align="center">
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate(RoutePath.FAVORITES())}
+    <LearnSession
+      key={sessionKey}
+      cards={sessionCards ?? favCards}
+      deckKey={FAVORITES_PROGRESS_KEY}
+      deckName={FAVORITES_PROGRESS_KEY}
+      title={`${t('Избранное')} · ${t('Заучивание')}`}
+      onExit={() => navigate(RoutePath.FAVORITES())}
+      renderResult={(summary, restart) => (
+        <SessionResult
+          summary={summary}
+          words={sessionCards ?? favCards}
+          onRestart={restart}
         />
-        <MyTypography.Large strong>
-          {t('Заучивание')}: {t('Избранное')}
-        </MyTypography.Large>
-      </HStack>
-      <LearnSession
-        cards={favCards}
-        deckKey={FAVORITES_PROGRESS_KEY}
-        deckName={FAVORITES_PROGRESS_KEY}
-        finishedTitle={t('Избранное выучено!')}
-      />
-    </VStack>
+      )}
+    />
   );
 };
 

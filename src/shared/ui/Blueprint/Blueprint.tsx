@@ -16,6 +16,26 @@ interface BlueprintProps extends HTMLAttributes<HTMLElement> {
     children?: ReactNode;
 }
 
+interface BlueprintMarksProps {
+    corners?: BlueprintCorners;
+}
+
+/** Только метки «+» — для элементов со своей рамкой (кнопки AntD). Родителю нужен position: relative */
+export const BlueprintMarks = memo(({ corners = BlueprintCorners.DEFAULT }: BlueprintMarksProps) => {
+    const cornerCls = classNames(cls.corner, [cls[corners]]);
+
+    return (
+        <>
+            <i aria-hidden className={classNames(cornerCls, [cls.tl])} />
+            <i aria-hidden className={classNames(cornerCls, [cls.tr])} />
+            <i aria-hidden className={classNames(cornerCls, [cls.bl])} />
+            <i aria-hidden className={classNames(cornerCls, [cls.br])} />
+        </>
+    );
+});
+
+BlueprintMarks.displayName = 'BlueprintMarks';
+
 /** Рамка с метками «+» по углам (`.blueprint/.corner` в design/_ds/…/styles.css) */
 export const Blueprint = memo((props: BlueprintProps) => {
     const {
@@ -26,14 +46,9 @@ export const Blueprint = memo((props: BlueprintProps) => {
         ...rest
     } = props;
 
-    const cornerCls = classNames(cls.corner, [cls[corners]]);
-
     return (
         <Tag className={classNames(cls.Blueprint, [className])} {...rest}>
-            <i aria-hidden className={classNames(cornerCls, [cls.tl])} />
-            <i aria-hidden className={classNames(cornerCls, [cls.tr])} />
-            <i aria-hidden className={classNames(cornerCls, [cls.bl])} />
-            <i aria-hidden className={classNames(cornerCls, [cls.br])} />
+            <BlueprintMarks corners={corners} />
             {children}
         </Tag>
     );

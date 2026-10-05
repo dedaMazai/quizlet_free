@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useReducer } from 'react';
+import {
+  useEffect, useMemo, useReducer, useState,
+} from 'react';
+import { SessionAnswer } from '@/shared/lib/session';
 import { CycleWord } from '@/entities/LearningCycle';
 import { checkAnswerVariants } from '@/shared/lib/text';
 import {
@@ -37,12 +40,24 @@ export const useCycleSession = (words: CycleWord[], storageKey: string) => {
   const prompt = currentWord ? promptFor(currentWord, direction) : '';
   const expected = currentWord ? expectedFor(currentWord, direction) : '';
 
+  // Журнал ответов — только для топбара и итога, на логику сессии не влияет.
+  const [answers, setAnswers] = useState<SessionAnswer[]>([]);
+  const [startedAt, setStartedAt] = useState(() => Date.now());
+
   const answer = (input: string) => {
     if (!currentWord) return;
-    dispatch({ type: 'ANSWER', grade: checkAnswerVariants(expected, input, true), input });
+    const grade = checkAnswerVariants(expected, input, true);
+    setAnswers((prev) => [...prev, {
+      cardUuid: currentWord.uuid, correct: grade !== 'wrong', almost: grade === 'almost',
+    }]);
+    dispatch({ type: 'ANSWER', grade, input });
   };
   const next = () => dispatch({ type: 'NEXT' });
-  const restart = () => dispatch({ type: 'RESTART', order });
+  const restart = () => {
+    setAnswers([]);
+    setStartedAt(Date.now());
+    dispatch({ type: 'RESTART', order });
+  };
 
   const mistakeWords = useMemo(
     () => state.mistakes.flatMap((uuid) => byUuid.get(uuid) ?? []),
@@ -63,6 +78,8 @@ export const useCycleSession = (words: CycleWord[], storageKey: string) => {
     mistakeWords,
     done: state.order.length - state.queue.length,
     total: state.order.length,
+    answers,
+    startedAt,
     answer,
     next,
     restart,

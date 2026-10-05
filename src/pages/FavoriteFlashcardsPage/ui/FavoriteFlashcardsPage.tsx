@@ -1,13 +1,9 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useGetCardsQuery, useGetFavoritesQuery } from '@/entities/Card';
 import { FlashcardsGame } from '@/features/FlashcardsGame';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { Loader } from '@/shared/ui/Loader';
+import { PageLoader } from '@/widgets/PageLoader';
 import { RoutePath } from '@/shared/config/router/routePath';
 
 const FavoriteFlashcardsPage = () => {
@@ -22,22 +18,16 @@ const FavoriteFlashcardsPage = () => {
     [cards, favorites],
   );
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <PageLoader />;
 
   return (
-    <VStack max fullHeight gap="24">
-      <HStack gap="8" align="center">
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate(RoutePath.FAVORITES())}
-        />
-        <MyTypography.Large strong>
-          {t('Карточки')}: {t('Избранное')}
-        </MyTypography.Large>
-      </HStack>
-      <FlashcardsGame cards={favCards} withFavoriteFilter={false} />
-    </VStack>
+    <FlashcardsGame
+      cards={favCards}
+      withFavoriteFilter={false}
+      title={`${t('Избранное')} · ${t('Карточки')}`}
+      onExit={() => navigate(RoutePath.FAVORITES())}
+      learnPath={RoutePath.FAVORITES_LEARN()}
+    />
   );
 };
 

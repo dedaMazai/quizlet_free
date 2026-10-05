@@ -1,8 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
-import { ArrowLeftOutlined, SyncOutlined } from '@ant-design/icons';
 import {
   CycleStudyMode,
   buildNewWords,
@@ -12,10 +10,10 @@ import {
   useGetCycleWordsQuery,
 } from '@/entities/LearningCycle';
 import { CycleSession, getCycleSessionKey } from '@/features/CycleSession';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { Loader } from '@/shared/ui/Loader';
+import { PageLoader } from '@/widgets/PageLoader';
+import { SessionResult } from '@/widgets/SessionResult';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { useSessionCardFilter } from '@/shared/lib/session';
 
 const CycleStudyPage = () => {
   const { t } = useTranslation();
@@ -32,47 +30,36 @@ const CycleStudyPage = () => {
     if (!cycle || !words) return [];
     return mode === 'new' ? buildNewWords(cycle, words) : buildReviewWords(cycle, words);
   }, [cycle, words, mode]);
+  // «Повторить трудные» запускает сессию по части слов
+  const { cards: filteredWords, sessionKey } = useSessionCardFilter(sessionWords);
 
   if (!cycleId) return null;
 
+  const modeTitle = mode === 'new' ? t('Новые слова') : t('Повтор цикла');
+  const exit = () => navigate(RoutePath.CYCLE(cycleId));
+
+  if (!isSynced) return <PageLoader />;
+
   return (
-    <VStack max fullHeight gap="24">
-      <HStack gap="8" align="center">
-        <Button type="text" icon={<ArrowLeftOutlined />} aria-label={t('Назад')} onClick={() => navigate(RoutePath.CYCLE(cycleId))} />
-        <MyTypography.Large strong>
-          {mode === 'new' ? t('Новые слова') : t('Повтор цикла')}
-          {cycle ? `: ${cycle.name}` : ''}
-        </MyTypography.Large>
-      </HStack>
-      {isSynced ? (
-        <CycleSession
-          // Свой экземпляр сессии на режим: при переходе «новые → повтор» состояние не переносится.
-          key={mode}
-          words={sessionWords}
-          storageKey={getCycleSessionKey(cycleId, mode)}
-          finishedTitle={mode === 'new' ? t('Новые слова выучены!') : t('Цикл повторён!')}
-          finishedActions={(
-            <>
-              {mode === 'new' && (
-                <Button
-                  type="primary"
-                  icon={<SyncOutlined />}
-                  onClick={() => navigate(RoutePath.CYCLE_STUDY(cycleId, 'review'))}
-                >
-                  {t('Повторить весь цикл')}
-                </Button>
-              )}
-              <Button
-                type={mode === 'new' ? 'default' : 'primary'}
-                onClick={() => navigate(RoutePath.CYCLE(cycleId))}
-              >
-                {t('К циклу')}
-              </Button>
-            </>
-          )}
+    <CycleSession
+      // Свой экземпляр сессии на режим: при переходе «новые → повтор» состояние не переносится.
+      key={`${mode}:${sessionKey}`}
+      words={filteredWords ?? sessionWords}
+      storageKey={getCycleSessionKey(cycleId, mode)}
+      title={cycle ? `${cycle.name} · ${modeTitle}` : modeTitle}
+      onExit={exit}
+      renderResult={(summary, restart) => (
+        <SessionResult
+          summary={summary}
+          words={filteredWords ?? sessionWords}
+          onRestart={restart}
+          primaryAction={mode === 'new' ? {
+            label: t('Повторить весь цикл'),
+            onClick: () => navigate(RoutePath.CYCLE_STUDY(cycleId, 'review')),
+          } : undefined}
         />
-      ) : <Loader />}
-    </VStack>
+      )}
+    />
   );
 };
 

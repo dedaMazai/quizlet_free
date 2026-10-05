@@ -1,10 +1,96 @@
-.stage {
-  width: 100%;
-  max-width: 560px;
-  min-height: 280px;
+.prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 100%;
+  text-align: center;
+}
+
+.wordRow {
   display: flex;
   align-items: center;
+  gap: 14px;
+  max-width: 100%;
+}
+
+.word,
+.writeWord {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.word {
+  font-size: 72px;
+
+  @media (width <= 650px) {
+    font-size: 44px;
+  }
+}
+
+.writeWord {
+  font-size: 64px;
+
+  @media (width <= 650px) {
+    font-size: 40px;
+  }
+}
+
+.gloss {
+  font-size: 15px;
+  color: var(--color-neutral-700);
+}
+
+.favorite {
+  color: var(--color-neutral-500);
+  font-size: 26px;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 760px;
+
+  @media (width <= 650px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hints {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+}
+
+.writeBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 680px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .legendItem {
@@ -12,19 +98,17 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--color-neutral-700);
 }
 
 .dot {
+  flex-shrink: 0;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 
 .dotFresh {
-  background: var(--text-secondary);
-  opacity: 0.4;
+  background: var(--color-neutral-300);
 }
 
 .dotLearning {
@@ -33,90 +117,4 @@
 
 .dotMastered {
   background: var(--color-success);
-}
-
-.choices {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  width: 100%;
-}
-
-.choiceBtn {
-  position: relative;
-  height: 64px;
-  padding: 0 44px;
-  border-radius: 14px;
-  font-size: 16px;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    border-color: var(--color-accent) !important;
-    color: var(--color-accent) !important;
-    background: var(--color-accent-soft) !important;
-    box-shadow: var(--shadow-md);
-  }
-}
-
-// Вариант, выбранный клавиатурой: подсветка как у наведения, но без сдвига —
-// иначе кнопка прыгает на каждое нажатие стрелки
-.choiceActive {
-  border-color: var(--color-accent) !important;
-  color: var(--color-accent) !important;
-  background: var(--color-accent-soft) !important;
-  box-shadow: var(--shadow-md);
-}
-
-// Номер варианта для выбора цифрой с клавиатуры
-.choiceIndex {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: var(--border-subtle);
-  color: var(--text-secondary);
-  font-size: 12px;
-  line-height: 1;
-}
-
-.writeRow {
-  max-width: 480px;
-}
-
-.feedbackIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  font-size: 48px;
-
-  &.correct {
-    color: var(--color-success);
-    background: var(--color-success-soft);
-  }
-
-  &.wrong {
-    color: var(--color-error);
-    background: var(--color-error-soft);
-  }
-}
-
-.example {
-  max-width: 480px;
-  text-align: center;
-  font-style: italic;
-}
-
-.favoriteLarge {
-  font-size: 24px;
 }

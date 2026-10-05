@@ -1,1 +1,1 @@
-export { Blueprint, BlueprintCorners } from './Blueprint';
+export { Blueprint, BlueprintCorners, BlueprintMarks } from './Blueprint';

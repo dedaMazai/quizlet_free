@@ -12,15 +12,18 @@ import {
 } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { LearnSession } from '@/features/LearnSession';
+import { SessionResult } from '@/widgets/SessionResult';
 import { SectionPageHeader } from '@/widgets/SectionPage';
 import { VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
 import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { NavSectionKey } from '@/shared/const/menu';
+import { useSetFocusMode } from '@/shared/lib/focusMode';
 import { ReviewPreview } from './ReviewPreview';
 
 interface SessionSnapshot {
+  /** Новый запуск (в том числе «Повторить трудные») пересоздаёт сессию */
+  id: number;
   cards: Card[];
   reviews: CardReview[];
 }
@@ -37,6 +40,8 @@ const ReviewPage = () => {
   // инвалидирует кэш и getDueCards перезапрашивается, но карточки идущей
   // сессии от этого меняться не должны.
   const [snapshot, setSnapshot] = useState<SessionSnapshot | null>(null);
+  // Сессия идёт на том же URL — оболочку прячем, пока она открыта
+  useSetFocusMode(snapshot !== null);
 
   const freshCount = useMemo(
     () => (dueCards ?? []).filter((item) => item.review === null).length,
@@ -63,25 +68,42 @@ const ReviewPage = () => {
 
   const handleStart = () => {
     setSnapshot({
+      id: Date.now(),
       cards: (dueCards ?? []).map((item) => item.card),
       reviews: (dueCards ?? []).flatMap((item) => (item.review ? [item.review] : [])),
     });
   };
 
+  const handleRepeatHard = (cardUuids: string[]) => {
+    if (!snapshot) return;
+    const uuids = new Set(cardUuids);
+    setSnapshot({
+      id: Date.now(),
+      cards: snapshot.cards.filter((card) => uuids.has(card.uuid)),
+      reviews: snapshot.reviews.filter((review) => uuids.has(review.card_uuid)),
+    });
+  };
+
   if (snapshot) {
     return (
-      <VStack max fullHeight gap="24">
-        <MyTypography.Large strong>{t('К повторению')}</MyTypography.Large>
-        <LearnSession
-          cards={snapshot.cards}
-          reviews={snapshot.reviews}
-          deckKey={REVIEW_EVENTS_KEY}
-          deckName={t('К повторению')}
-          allowReset={false}
-          finishedTitle={t('Повторение завершено')}
-          finishedSubtitle={t('Повторено слов: {{count}}', { count: snapshot.cards.length })}
-        />
-      </VStack>
+      <LearnSession
+        key={snapshot.id}
+        cards={snapshot.cards}
+        reviews={snapshot.reviews}
+        deckKey={REVIEW_EVENTS_KEY}
+        deckName={t('К повторению')}
+        allowReset={false}
+        title={t('Повторение')}
+        onExit={() => setSnapshot(null)}
+        renderResult={(summary, restart) => (
+          <SessionResult
+            summary={summary}
+            words={snapshot.cards}
+            onRestart={restart}
+            onRepeatHard={handleRepeatHard}
+          />
+        )}
+      />
     );
   }
 

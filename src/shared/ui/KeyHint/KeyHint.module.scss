@@ -1,0 +1,15 @@
+.KeyHint {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.muted {
+    font-size: 10px;
+    color: var(--color-neutral-600);
+}
+
+.inherit {
+    font-size: 11px;
+    opacity: 0.8;
+}

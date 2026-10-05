@@ -1,8 +1,9 @@
 import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty, Switch } from 'antd';
+import { Empty, Switch } from 'antd';
 import { MyTypography } from '@/shared/ui/MyTypography';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { SessionButton } from '@/shared/ui/SessionButton';
+import cls from './ClozeSession.module.scss';
 
 interface ClozeSetupProps {
   /** Сколько карточек колоды годятся для режима. */
@@ -31,19 +32,19 @@ export const ClozeSetup: FC<ClozeSetupProps> = (props) => {
   }
 
   return (
-    <VStack max gap="24" align="center">
-      <MyTypography.Base type="secondary">
+    <>
+      <span className={cls.note}>
         {t('Подходит слов: {{fit}} из {{total}}', { fit: fitting, total })}
-      </MyTypography.Base>
+      </span>
 
-      <HStack gap="8" align="center">
+      <label className={cls.switchRow}>
         <Switch checked={typoTolerance} onChange={setTypoTolerance} />
-        <MyTypography.Base>{t('Засчитывать ответ с опечаткой')}</MyTypography.Base>
-      </HStack>
+        {t('Засчитывать ответ с опечаткой')}
+      </label>
 
-      <Button type="primary" size="large" onClick={() => onStart(typoTolerance)}>
+      <SessionButton onClick={() => onStart(typoTolerance)}>
         {t('Начать')}
-      </Button>
-    </VStack>
+      </SessionButton>
+    </>
   );
 };

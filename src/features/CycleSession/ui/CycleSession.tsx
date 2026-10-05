@@ -1,113 +1,96 @@
-import { FC, ReactNode } from 'react';
+import { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Button, Empty, List, Progress, Result,
-} from 'antd';
+import { Empty } from 'antd';
 import { CycleWord } from '@/entities/LearningCycle';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
+import { SessionTopBar } from '@/shared/ui/SessionTopBar';
+import {
+  buildSessionTicks,
+  SessionResultRenderer,
+  summarizeSession,
+} from '@/shared/lib/session';
 import { useCycleSession } from '../model/hooks/useCycleSession';
 import { CyclePrompt } from './CyclePrompt';
-import { CycleFeedback } from './CycleFeedback';
-import cls from './CycleSession.module.scss';
 
 interface CycleSessionProps {
   /** Слова сессии в порядке цикла. */
   words: CycleWord[];
   /** Ключ localStorage для восстановления незаконченной сессии. */
   storageKey: string;
-  finishedTitle: string;
-  /** Дополнительные действия на экране завершения (переходы дальше). */
-  finishedActions?: ReactNode;
+  /** Название в топбаре: «Цикл · Новые слова». */
+  title: string;
+  onExit: () => void;
+  renderResult: SessionResultRenderer;
 }
 
 export const CycleSession: FC<CycleSessionProps> = (props) => {
   const {
-    words, storageKey, finishedTitle, finishedActions,
+    words, storageKey, title, onExit, renderResult,
   } = props;
   const { t } = useTranslation();
   const session = useCycleSession(words, storageKey);
 
+  const finished = session.phase === 'finished';
+  // Ошибки до перезагрузки страницы журнал не видел — добираем их из состояния цикла
+  const summary = useMemo(() => {
+    if (!finished) return null;
+    const base = summarizeSession(session.answers, session.startedAt);
+    const hardUuids = Array.from(new Set([
+      ...session.mistakeWords.map((word) => word.uuid),
+      ...base.hardUuids,
+    ]));
+    return { ...base, hardUuids };
+  }, [finished, session.answers, session.startedAt, session.mistakeWords]);
+
+  const topBar = (
+    <SessionTopBar
+      title={title}
+      counter={`${t('Проход {{pass}} из {{passes}}', {
+        pass: Math.min(session.pass + 1, session.passesCount), passes: session.passesCount,
+      })} · ${session.direction === 'en-ru' ? 'EN → RU' : 'RU → EN'} · ${session.done} / ${session.total}`}
+      ticks={buildSessionTicks(session.answers, session.phase === 'question')}
+      onExit={onExit}
+    />
+  );
+
   if (!words.length) {
-    return <Empty description={t('Нет слов для заучивания')} />;
+    return (
+      <>
+        {topBar}
+        <SessionStage>
+          <Empty description={t('Нет слов для заучивания')} />
+        </SessionStage>
+      </>
+    );
   }
 
-  if (session.phase === 'finished') {
+  if (summary) {
     return (
-      <VStack max gap="16" align="center">
-        <Result
-          status="success"
-          title={finishedTitle}
-          subTitle={t('Слов: {{count}}, ошибок: {{wrong}}', {
-            count: session.total,
-            wrong: session.wrongCount,
-          })}
-          extra={(
-            <HStack gap="8" justify="center" wrap>
-              {finishedActions}
-              <Button onClick={session.restart}>
-                {t('Пройти заново')}
-              </Button>
-            </HStack>
-          )}
-        />
-        {session.mistakeWords.length > 0 && (
-          <List
-            className={cls.mistakes}
-            header={<MyTypography.Base strong>{t('Слова с ошибками')}</MyTypography.Base>}
-            bordered
-            dataSource={session.mistakeWords}
-            renderItem={(word) => (
-              <List.Item>
-                <MyTypography.Base strong>{word.term}</MyTypography.Base>
-                <MyTypography.Base type="secondary">{word.translation}</MyTypography.Base>
-              </List.Item>
-            )}
-          />
-        )}
-      </VStack>
+      <>
+        {topBar}
+        {renderResult(summary, session.restart)}
+      </>
     );
   }
 
   return (
-    <VStack max gap="24" align="center">
-      <VStack max gap="4" className={cls.progressRow}>
-        <HStack max justify="between" align="center">
-          <MyTypography.Small type="secondary">
-            {t('Проход {{pass}} из {{passes}}', { pass: session.pass + 1, passes: session.passesCount })}
-            {' · '}
-            {session.direction === 'en-ru' ? 'EN → RU' : 'RU → EN'}
-          </MyTypography.Small>
-          <MyTypography.Small type="secondary">
-            {session.done} / {session.total}
-            {' · '}
-            {t('ошибок: {{count}}', { count: session.wrongCount })}
-          </MyTypography.Small>
-        </HStack>
-        <Progress percent={(session.done / session.total) * 100} showInfo={false} />
-      </VStack>
-
-      <div className={cls.stage}>
-        {session.phase === 'feedback' && session.currentWord && session.lastGrade && (
-          <CycleFeedback
-            word={session.currentWord}
-            grade={session.lastGrade}
-            expected={session.expected}
-            userInput={session.lastInput}
-            onNext={session.next}
-          />
-        )}
-
-        {session.phase === 'question' && session.currentWord && (
+    <>
+      {topBar}
+      <SessionStage gap={SessionStageGap.MD}>
+        {session.currentWord && (
           <CyclePrompt
             questionKey={session.currentWord.uuid}
             prompt={session.prompt}
             expected={session.expected}
+            term={session.currentWord.term}
             direction={session.direction}
+            grade={session.phase === 'feedback' ? session.lastGrade : null}
+            userInput={session.lastInput}
             onAnswer={session.answer}
+            onNext={session.next}
           />
         )}
-      </div>
-    </VStack>
+      </SessionStage>
+    </>
   );
 };

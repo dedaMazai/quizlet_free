@@ -1,60 +1,83 @@
-.stage {
-  width: 100%;
-  max-width: 640px;
-  min-height: 280px;
+.prompt {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-}
-
-.progressRow {
-  max-width: 640px;
+  gap: 16px;
+  max-width: 900px;
+  text-align: center;
 }
 
 .sentence {
-  max-width: 600px;
-  text-align: center;
-  line-height: 1.8;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.3;
+  text-wrap: balance;
+
+  @media (width <= 650px) {
+    font-size: 28px;
+  }
 }
 
-.gap {
+// Пропуск в предложении: поле ввода, после проверки — ответ
+.gap,
+.gap:focus,
+.gap:hover {
   display: inline-block;
-  min-width: 96px;
-  border-bottom: 2px solid var(--color-primary);
-  vertical-align: baseline;
+  width: auto;
+  min-width: 200px;
+  padding: 0 10px;
+  border-bottom: 3px solid var(--color-accent);
+  border-radius: 0;
+  background: var(--color-accent-100);
+  color: var(--color-accent-900);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  field-sizing: content;
 }
 
-.answerRow {
-  max-width: 480px;
+.filled {
+  min-width: 0;
 }
 
-.feedbackIcon {
+.typo {
+  margin: 0 1px;
+  padding: 0 2px;
+  background: var(--color-accent-200);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.hint {
+  font-size: 15px;
+  color: var(--color-neutral-700);
+}
+
+.hintWord {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.reveal {
+  max-width: 680px;
+}
+
+.actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  font-size: 48px;
-
-  &.correct {
-    color: var(--color-success);
-    background: var(--color-success-soft);
-  }
-
-  &.almost {
-    color: var(--color-warning);
-    background: var(--color-warning-soft);
-  }
-
-  &.wrong {
-    color: var(--color-error);
-    background: var(--color-error-soft);
-  }
+  gap: 16px;
 }
 
-.example {
-  max-width: 560px;
-  text-align: center;
-  font-style: italic;
+.note {
+  font-size: 13px;
+  color: var(--color-neutral-700);
+}
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  cursor: pointer;
 }

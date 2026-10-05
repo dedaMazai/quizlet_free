@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Empty } from 'antd';
 import { useGetDeckQuery } from '@/entities/Deck';
 import {
   useGetCardsQuery,
@@ -10,10 +9,12 @@ import {
   getDeckFavoritesProgressKey,
 } from '@/entities/Card';
 import { LearnSession } from '@/features/LearnSession';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { Loader } from '@/shared/ui/Loader';
+import { PageLoader } from '@/widgets/PageLoader';
+import { SessionResult } from '@/widgets/SessionResult';
+import { SessionStage } from '@/shared/ui/SessionStage';
+import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { buildSessionTicks, useSessionCardFilter } from '@/shared/lib/session';
 
 const DeckFavoriteLearnPage = () => {
   const { t } = useTranslation();
@@ -28,32 +29,46 @@ const DeckFavoriteLearnPage = () => {
     () => (cards ?? []).filter((card) => favorites?.includes(card.uuid)),
     [cards, favorites],
   );
+  const { cards: sessionCards, sessionKey } = useSessionCardFilter(favCards);
 
   if (!deckId) return null;
   // !cards ловит смену deckId без кэша: isLoading уже false, а данных ещё нет.
-  if (isLoading || isDeckLoading || !cards) return <Loader />;
-  if (!deck) return <Empty description={t('Колода не найдена')} />;
+  if (isLoading || isDeckLoading || !cards) return <PageLoader />;
+  if (!deck) {
+    return (
+      <>
+        <SessionTopBar
+          title={t('Заучивание избранного')}
+          counter=""
+          ticks={buildSessionTicks([], false)}
+          onExit={() => navigate(RoutePath.DECKS())}
+        />
+        <SessionStage>
+          <Empty description={t('Колода не найдена')} />
+        </SessionStage>
+      </>
+    );
+  }
 
   return (
-    <VStack max fullHeight gap="24">
-      <HStack gap="8" align="center">
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate(RoutePath.DECK(deckId))}
+    <LearnSession
+      key={sessionKey}
+      cards={sessionCards ?? favCards}
+      deckKey={getDeckFavoritesProgressKey(deckId)}
+      deckName={deck.name}
+      reviewsDeckUuid={deckId}
+      title={`${deck.name} · ${t('Заучивание избранного')}`}
+      onExit={() => navigate(RoutePath.DECK(deckId))}
+      renderResult={(summary, restart) => (
+        <SessionResult
+          summary={summary}
+          words={sessionCards ?? favCards}
+          onRestart={restart}
+          deckId={deckId}
+          deckName={deck.name}
         />
-        <MyTypography.Large strong>
-          {t('Заучивание избранного')}: {deck.name}
-        </MyTypography.Large>
-      </HStack>
-      <LearnSession
-        cards={favCards}
-        deckKey={getDeckFavoritesProgressKey(deckId)}
-        reviewsDeckUuid={deckId}
-        deckName={deck.name}
-        finishedTitle={t('Избранное выучено!')}
-      />
-    </VStack>
+      )}
+    />
   );
 };
 

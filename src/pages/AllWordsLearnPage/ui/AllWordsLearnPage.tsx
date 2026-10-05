@@ -1,41 +1,38 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useGetCardsQuery, ALL_WORDS_PROGRESS_KEY } from '@/entities/Card';
 import { LearnSession } from '@/features/LearnSession';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { Loader } from '@/shared/ui/Loader';
+import { PageLoader } from '@/widgets/PageLoader';
+import { SessionResult } from '@/widgets/SessionResult';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { useSessionCardFilter } from '@/shared/lib/session';
 
 const AllWordsLearnPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { data: cards, isLoading } = useGetCardsQuery();
+  const { data: allCards, isLoading } = useGetCardsQuery();
+  // «Повторить трудные» запускает сессию по части карточек
+  const { cards, sessionKey } = useSessionCardFilter(allCards);
 
-  if (isLoading || !cards) return <Loader />;
+  if (isLoading || !cards) return <PageLoader />;
 
   return (
-    <VStack max fullHeight gap="24">
-      <HStack gap="8" align="center">
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate(RoutePath.ALL_WORDS())}
+    <LearnSession
+      key={sessionKey}
+      cards={cards}
+      deckKey={ALL_WORDS_PROGRESS_KEY}
+      deckName={ALL_WORDS_PROGRESS_KEY}
+      title={`${t('Все слова')} · ${t('Заучивание')}`}
+      onExit={() => navigate(RoutePath.ALL_WORDS())}
+      renderResult={(summary, restart) => (
+        <SessionResult
+          summary={summary}
+          words={cards}
+          onRestart={restart}
         />
-        <MyTypography.Large strong>
-          {t('Заучивание')}: {t('Все слова')}
-        </MyTypography.Large>
-      </HStack>
-      <LearnSession
-        cards={cards}
-        deckKey={ALL_WORDS_PROGRESS_KEY}
-        deckName={ALL_WORDS_PROGRESS_KEY}
-        finishedTitle={t('Все слова выучены!')}
-      />
-    </VStack>
+      )}
+    />
   );
 };
 

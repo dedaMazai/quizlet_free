@@ -1,15 +1,17 @@
 import {
-  useCallback, useEffect, useMemo, useReducer, useRef,
+  useCallback, useEffect, useMemo, useReducer, useRef, useState,
 } from 'react';
 import {
   Card,
   CardReview,
   applyReview,
   gradeFromAnswer,
+  MASTERED_LEVEL,
   levelOf,
   useSaveCardReviewsMutation,
 } from '@/entities/Card';
 import { StudyEventDraft, useLogStudyEventsMutation } from '@/entities/Statistics';
+import { SessionAnswer } from '@/shared/lib/session';
 import { AnswerGrade, checkAnswer } from '@/shared/lib/text';
 import {
   buildQueue,
@@ -162,8 +164,20 @@ export const useWriteSession = (
 
   useEffect(() => () => flushEvents(), [flushEvents]);
 
-  const start = (settings: WriteSettings) =>
+  // Журнал ответов — только для топбара и итога, на логику сессии не влияет.
+  const [answers, setAnswers] = useState<SessionAnswer[]>([]);
+  const [lastReview, setLastReview] = useState<CardReview | null>(null);
+  const [startedAt, setStartedAt] = useState(() => Date.now());
+  const clearLog = () => {
+    setAnswers([]);
+    setLastReview(null);
+    setStartedAt(Date.now());
+  };
+
+  const start = (settings: WriteSettings) => {
+    clearLog();
     dispatch({ type: 'START', settings, queue: buildQueue(cards) });
+  };
 
   const answer = (input: string) => {
     if (!currentCard) return;
@@ -183,13 +197,23 @@ export const useWriteSession = (
     });
     reviewsRef.current.push(review);
     if (eventsRef.current.length >= FLUSH_EVERY) flushEvents();
+    setAnswers((prev) => [...prev, {
+      cardUuid: uuid,
+      correct: grade !== 'wrong',
+      almost: grade === 'almost',
+      mastered: grade !== 'wrong' && review.level >= MASTERED_LEVEL,
+    }]);
+    setLastReview(review);
 
     dispatch({ type: 'ANSWER', grade, input });
   };
 
   const skip = () => dispatch({ type: 'SKIP' });
   const next = () => dispatch({ type: 'NEXT' });
-  const reset = () => dispatch({ type: 'RESET' });
+  const reset = () => {
+    clearLog();
+    dispatch({ type: 'RESET' });
+  };
 
   return {
     phase: state.phase,
@@ -201,6 +225,9 @@ export const useWriteSession = (
     lastInput: state.lastInput,
     counters: state.counters,
     done: cards.length - state.queue.length,
+    answers,
+    lastReview,
+    startedAt,
     total: cards.length,
     start,
     answer,

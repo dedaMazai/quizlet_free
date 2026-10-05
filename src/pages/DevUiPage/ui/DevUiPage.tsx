@@ -3,12 +3,18 @@ import { useTranslation } from 'react-i18next';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { STREAK_LEVEL_THRESHOLDS } from '@/shared/lib/streak';
 import { AccentPanel } from '@/shared/ui/AccentPanel';
+import { AnswerFeedback, AnswerFeedbackTone } from '@/shared/ui/AnswerFeedback';
+import { AnswerOption, AnswerOptionState } from '@/shared/ui/AnswerOption';
+import { AnswerReveal, getRevealParts } from '@/shared/ui/AnswerReveal';
 import { Blueprint, BlueprintCorners } from '@/shared/ui/Blueprint';
 import { DueBadge } from '@/shared/ui/DueBadge';
 import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
+import { KeyHint } from '@/shared/ui/KeyHint';
 import { MasteryBar, MasteryBarSize } from '@/shared/ui/MasteryBar';
 import { SectionHeader, SectionHeaderSize } from '@/shared/ui/SectionHeader';
 import { SectionTabs, SectionTabItem } from '@/shared/ui/SectionTabs';
+import { SessionButton, SessionButtonSize, SessionButtonVariant } from '@/shared/ui/SessionButton';
+import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { StatCell, StatCellTone } from '@/shared/ui/StatCell';
 import { StreakFlame } from '@/shared/ui/StreakFlame';
 import { TickProgress, TickProgressSize, TickState } from '@/shared/ui/TickProgress';
@@ -50,6 +56,10 @@ const Case = ({ caption, children }: CaseProps) => (
         {children}
     </div>
 );
+
+const noop = () => {};
+
+const TYPO_REVEAL = getRevealParts('travel light', 'travel litght', 'almost');
 
 const DevUiPage = () => {
     const { t } = useTranslation();
@@ -186,6 +196,59 @@ const DevUiPage = () => {
                     <Case caption="count=0">
                         <DueBadge count={0} />
                     </Case>
+                </div>
+            </Demo>
+
+            <Demo name="SessionTopBar">
+                <SessionTopBar
+                    title="Phrasal verbs · Заучивание"
+                    counter="РАУНД 2 · 5 / 14"
+                    ticks={SESSION_TICKS}
+                    onExit={noop}
+                    autoSpeak
+                    onToggleAutoSpeak={noop}
+                />
+            </Demo>
+
+            <Demo name="AnswerOption">
+                <div className={cls.grid}>
+                    {Object.values(AnswerOptionState).map((state, i) => (
+                        <Case key={state} caption={`state=${state}`}>
+                            <AnswerOption index={i + 1} label="put off" state={state} />
+                        </Case>
+                    ))}
+                </div>
+            </Demo>
+
+            <Demo name="AnswerFeedback">
+                <Case caption="tone=success autoAdvance (onNext — noop)">
+                    <AnswerFeedback tone={AnswerFeedbackTone.SUCCESS} title="Верно" subtitle="Интервал вырос: слово вернётся через 3 дня" onNext={noop} autoAdvance />
+                </Case>
+                <Case caption="tone=error">
+                    <AnswerFeedback tone={AnswerFeedbackTone.ERROR} title="Неверно — правильно «put off»" subtitle="«put up with» — терпеть. Слово вернётся в эту же сессию" onNext={noop} />
+                </Case>
+            </Demo>
+
+            <Demo name="AnswerReveal">
+                <Case caption="tone=almost">
+                    <AnswerReveal
+                        tone={TYPO_REVEAL.tone}
+                        label="Почти · одна опечатка"
+                        note="засчитано как «трудно»"
+                        answer={TYPO_REVEAL.answer}
+                        speakText="travel light"
+                        example="I always travel light — just a backpack."
+                        term="travel light"
+                    />
+                </Case>
+            </Demo>
+
+            <Demo name="SessionButton · KeyHint">
+                <div className={cls.row}>
+                    <SessionButton keyHint="ENTER">{t('Дальше')}</SessionButton>
+                    <SessionButton variant={SessionButtonVariant.SECONDARY} size={SessionButtonSize.MD}>{t('Сбросить')}</SessionButton>
+                    <SessionButton variant={SessionButtonVariant.GHOST}>{t('Не помню')}</SessionButton>
+                    <KeyHint>ESC</KeyHint>
                 </div>
             </Demo>
 

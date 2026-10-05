@@ -1,9 +1,10 @@
 import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Segmented, Switch } from 'antd';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { Segmented, Switch } from 'antd';
+import { Kicker } from '@/shared/ui/Kicker';
+import { SessionButton } from '@/shared/ui/SessionButton';
 import { WriteDirection, WriteSettings } from '../model/lib/writeEngine';
+import cls from './WriteSession.module.scss';
 
 interface WriteSetupProps {
   defaults: WriteSettings;
@@ -17,7 +18,8 @@ export const WriteSetup: FC<WriteSetupProps> = (props) => {
   const [typoTolerance, setTypoTolerance] = useState(defaults.typoTolerance);
 
   return (
-    <VStack max gap="24" align="center">
+    <>
+      <Kicker>{t('Направление')}</Kicker>
       <Segmented<WriteDirection>
         size="large"
         value={direction}
@@ -28,18 +30,14 @@ export const WriteSetup: FC<WriteSetupProps> = (props) => {
         ]}
       />
 
-      <HStack gap="8" align="center">
+      <label className={cls.switchRow}>
         <Switch checked={typoTolerance} onChange={setTypoTolerance} />
-        <MyTypography.Base>{t('Засчитывать ответ с опечаткой')}</MyTypography.Base>
-      </HStack>
+        {t('Засчитывать ответ с опечаткой')}
+      </label>
 
-      <Button
-        type="primary"
-        size="large"
-        onClick={() => onStart({ direction, typoTolerance })}
-      >
+      <SessionButton onClick={() => onStart({ direction, typoTolerance })}>
         {t('Начать')}
-      </Button>
-    </VStack>
+      </SessionButton>
+    </>
   );
 };

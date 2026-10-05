@@ -1,0 +1,85 @@
+.AnswerOption {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 20px 22px;
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard);
+
+    &:hover:not(.locked) {
+        background: var(--color-accent-100);
+    }
+
+    &.locked {
+        cursor: default;
+    }
+}
+
+.mark {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--color-divider);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-neutral-700);
+}
+
+.label {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 24px;
+    overflow-wrap: anywhere;
+}
+
+.active {
+    border-color: var(--color-accent);
+    background: var(--color-accent-100);
+
+    .mark {
+        border-color: var(--color-accent);
+        background: var(--color-accent);
+        color: var(--color-bg);
+    }
+}
+
+.correct,
+.correct:hover:not(.locked) {
+    border-color: var(--color-success);
+    background: var(--color-success-tint);
+
+    .mark {
+        border-color: var(--color-success);
+        background: var(--color-success);
+        color: var(--color-bg);
+    }
+}
+
+.wrong,
+.wrong:hover:not(.locked) {
+    border-color: var(--color-error);
+    background: var(--color-error-tint);
+
+    .mark {
+        border-color: var(--color-error);
+        background: var(--color-error);
+        color: var(--color-bg);
+    }
+}
+
+.dim {
+    .mark {
+        color: var(--color-neutral-500);
+    }
+}
+
+.dim:hover:not(.locked) {
+    background: transparent;
+}

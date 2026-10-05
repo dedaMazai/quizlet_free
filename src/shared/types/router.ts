@@ -10,6 +10,8 @@ export type AppRoutesProps = RouteObject & {
     withSidebar?: boolean;
     publicLayout?: boolean;
     withFooter?: boolean;
+    /** Фокус-режим занятий: без сайдбара и шапки */
+    focusLayout?: boolean;
     accesses?: Accesses[];
     forbiddenRoles?: RoleName[];
     children?: AppRoutesProps[];

@@ -1,4 +1,6 @@
-import { FC, memo, MouseEvent } from 'react';
+import {
+  FC, memo, MouseEvent, ReactNode,
+} from 'react';
 import { Button } from 'antd';
 import { SoundOutlined } from '@ant-design/icons';
 import { useSpeech } from '@/shared/lib/hooks/useSpeech';
@@ -7,10 +9,14 @@ interface SpeakButtonProps {
   text: string;
   lang?: 'en-US' | 'ru-RU';
   className?: string;
+  /** Своя иконка вместо SoundOutlined */
+  icon?: ReactNode;
 }
 
 export const SpeakButton: FC<SpeakButtonProps> = memo((props) => {
-  const { text, lang = 'en-US', className } = props;
+  const {
+    text, lang = 'en-US', className, icon,
+  } = props;
   const { speak, supported } = useSpeech();
 
   if (!supported) {
@@ -27,7 +33,7 @@ export const SpeakButton: FC<SpeakButtonProps> = memo((props) => {
       className={className}
       type="text"
       shape="circle"
-      icon={<SoundOutlined />}
+      icon={icon ?? <SoundOutlined />}
       onClick={handleClick}
     />
   );

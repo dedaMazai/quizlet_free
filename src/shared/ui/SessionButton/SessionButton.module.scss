@@ -1,0 +1,31 @@
+.SessionButton {
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.md {
+    height: 44px;
+    padding: 0 18px;
+    font-size: 15px;
+}
+
+.lg {
+    height: 48px;
+    padding: 0 20px;
+    font-size: 16px;
+}
+
+.primary {
+    padding: 0 26px;
+    font-size: 18px;
+}
+
+.primary.md {
+    padding: 0 24px;
+    font-size: 16px;
+}
+
+.ghost {
+    padding: 0 6px;
+    font-size: 15px;
+}

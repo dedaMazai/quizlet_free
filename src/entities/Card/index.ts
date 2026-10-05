@@ -37,6 +37,7 @@ export {
   isDue,
   levelFromReview,
   levelOf,
+  MASTERED_LEVEL,
 } from './model/lib/srs';
 export {
   FAVORITES_PROGRESS_KEY,

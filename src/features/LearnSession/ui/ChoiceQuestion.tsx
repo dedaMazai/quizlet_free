@@ -1,102 +1,101 @@
-import {
-  FC, FocusEvent, KeyboardEvent, useEffect, useRef, useState,
-} from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
 import { LearnQuestion } from '../model/lib/learnEngine';
 import { FavoriteToggle } from '@/entities/Card';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { classNames } from '@/shared/lib/classNames/classNames';
+import { AnswerOption, AnswerOptionState } from '@/shared/ui/AnswerOption';
+import { Kicker } from '@/shared/ui/Kicker';
+import { useKeyDown } from '@/shared/lib/hooks/useKeyDown';
+import { splitTranslation } from '@/shared/lib/session';
 import cls from './LearnSession.module.scss';
 
 interface ChoiceQuestionProps {
   question: LearnQuestion;
+  /** Выбранный вариант после ответа; null — вопрос ещё открыт */
+  chosen: string | null;
   onAnswer: (value: string) => void;
 }
 
 /** Число колонок в сетке вариантов — на столько шагает выбор по вертикали. */
 const COLUMNS = 2;
 
+const ARROW_DELTAS: Record<string, number> = {
+  ArrowLeft: -1,
+  ArrowRight: 1,
+  ArrowUp: -COLUMNS,
+  ArrowDown: COLUMNS,
+};
+
 export const ChoiceQuestion: FC<ChoiceQuestionProps> = (props) => {
-  const { question, onAnswer } = props;
+  const { question, chosen, onAnswer } = props;
   const { t } = useTranslation();
   const [active, setActive] = useState(0);
-  const btnRefs = useRef<(HTMLElement | null)[]>([]);
+  const answered = chosen !== null;
+  const [word, gloss] = splitTranslation(question.card.translation);
 
   // Новая карточка — снова первый вариант
   useEffect(() => {
     setActive(0);
   }, [question.card.uuid]);
 
-  // Выбранный вариант держим в фокусе: тогда Enter и пробел нажимают его штатно,
-  // без собственной обработки — и Enter с экрана результата не проскакивает вопрос
-  useEffect(() => {
-    btnRefs.current[active]?.focus({ preventScroll: true });
-  }, [active, question.card.uuid]);
-
-  // Клик по пустому месту уводит фокус в никуда, и хоткеи перестают работать —
-  // возвращаем его на выбранный вариант. Осознанный уход (Tab, клик по меню)
-  // приходит с relatedTarget и фокус не перехватывает
-  const handleBlur = (e: FocusEvent<HTMLDivElement>) => {
-    if (e.relatedTarget) return;
-    const root = e.currentTarget;
-    // focus() прямо в обработчике focusout браузер игнорирует — возвращаем следующим тиком,
-    // проверив, что фокус за это время не ушёл куда-то ещё и вопрос не сменился
-    setTimeout(() => {
-      const btn = btnRefs.current[active];
-      if (!btn?.isConnected || root.contains(document.activeElement)) return;
-      btn.focus({ preventScroll: true });
-    });
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+  // 1–4 — ответ, стрелки — выбор, Enter — подтвердить выбранный
+  useKeyDown((e) => {
     const count = question.choices.length;
-
     const digit = Number(e.key);
     if (digit >= 1 && digit <= count) {
       e.preventDefault();
       onAnswer(question.choices[digit - 1]);
       return;
     }
-
-    const deltas: Record<string, number> = {
-      ArrowLeft: -1,
-      ArrowRight: 1,
-      ArrowUp: -COLUMNS,
-      ArrowDown: COLUMNS,
-    };
-    const delta = deltas[e.key];
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onAnswer(question.choices[active]);
+      return;
+    }
+    const delta = ARROW_DELTAS[e.key];
     if (delta === undefined) return;
-
     // Иначе стрелки прокрутят страницу
     e.preventDefault();
     setActive((i) => (i + delta + count) % count);
+  }, { enabled: !answered });
+
+  const stateOf = (choice: string, index: number): AnswerOptionState => {
+    if (!answered) return index === active ? AnswerOptionState.ACTIVE : AnswerOptionState.IDLE;
+    if (choice === question.card.term) return AnswerOptionState.CORRECT;
+    if (choice === chosen) return AnswerOptionState.WRONG;
+    return AnswerOptionState.DIM;
   };
 
   return (
-    <VStack max gap="16" align="center" onKeyDown={handleKeyDown} onBlur={handleBlur}>
-      <MyTypography.Small type="secondary">{t('Выберите перевод')}</MyTypography.Small>
-      <HStack gap="8" align="center">
-        <MyTypography.ExtraLarge strong>{question.card.translation}</MyTypography.ExtraLarge>
-        <FavoriteToggle cardUuid={question.card.uuid} className={cls.favoriteLarge} />
-      </HStack>
+    <>
+      <div className={cls.prompt}>
+        <Kicker>{t('Выберите перевод')}</Kicker>
+        <div className={cls.wordRow}>
+          <span className={cls.word}>{word}</span>
+          <FavoriteToggle cardUuid={question.card.uuid} className={cls.favorite} />
+        </div>
+        {gloss && <span className={cls.gloss}>{gloss}</span>}
+      </div>
 
       <div className={cls.choices}>
         {question.choices.map((choice, index) => (
-          <Button
+          <AnswerOption
             key={choice}
-            ref={(node) => { btnRefs.current[index] = node; }}
-            size="large"
-            block
-            className={classNames(cls.choiceBtn, { [cls.choiceActive]: index === active })}
+            index={index + 1}
+            label={choice}
+            state={stateOf(choice, index)}
+            disabled={answered}
             onClick={() => onAnswer(choice)}
-          >
-            <span className={cls.choiceIndex}>{index + 1}</span>
-            {choice}
-          </Button>
+          />
         ))}
       </div>
-    </VStack>
+
+      {!answered && (
+        <div className={cls.hints}>
+          <span>{t('1–4 — ответ')}</span>
+          <span>{t('← → ↑ ↓ — выбор')}</span>
+          <span>{t('Enter — подтвердить')}</span>
+        </div>
+      )}
+    </>
   );
 };

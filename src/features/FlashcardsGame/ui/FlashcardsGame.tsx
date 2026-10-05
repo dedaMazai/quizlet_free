@@ -2,29 +2,57 @@ import {
   FC, useEffect, useMemo, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Empty, Segmented } from 'antd';
+import { Link } from 'react-router-dom';
 import {
-  LeftOutlined, RightOutlined, RetweetOutlined,
-} from '@ant-design/icons';
+  ConfigProvider, Empty, Segmented, theme,
+} from 'antd';
+import { ChevronLeft, ChevronRight, Repeat } from 'lucide-react';
 import { Card, FavoriteToggle, useGetFavoritesQuery } from '@/entities/Card';
-import { HStack, VStack } from '@/shared/ui/Stack';
-import { MyTypography } from '@/shared/ui/MyTypography';
+import { Blueprint } from '@/shared/ui/Blueprint';
+import { SessionButton, SessionButtonVariant } from '@/shared/ui/SessionButton';
+import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
+import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { SpeakButton } from '@/shared/ui/SpeakButton';
-import { classNames } from '@/shared/lib/classNames/classNames';
-import { useArrowPressed } from '@/shared/lib/hooks/useArrowPressed';
+import { useKeyDown } from '@/shared/lib/hooks/useKeyDown';
+import { buildPositionTicks, buildSessionTicks } from '@/shared/lib/session';
 import { shuffle } from '@/shared/lib/utils';
 import cls from './FlashcardsGame.module.scss';
 
 type FavoriteFilter = 'all' | 'favorite' | 'notFavorite';
 
+const NAV_ICON_SIZE = 20;
+const SHUFFLE_ICON_SIZE = 16;
+const ICON_STROKE = 1.5;
+
 interface FlashcardsGameProps {
   cards: Card[];
   withFavoriteFilter?: boolean;
+  /** Название в топбаре: «Колода · Карточки». */
+  title: string;
+  onExit: () => void;
+  /** Заучивание того же набора — ссылка «Перейти к заучиванию →». */
+  learnPath?: string;
 }
 
 export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
-  const { cards, withFavoriteFilter = true } = props;
+  const {
+    cards, withFavoriteFilter = true, title, onExit, learnPath,
+  } = props;
   const { t } = useTranslation();
+
+  const { token } = theme.useToken();
+  // Сегмент по макету: без подложки и отступов трека, выбранный — accent с текстом цвета фона
+  const segmentedTheme = useMemo(() => ({
+    components: {
+      Segmented: {
+        trackBg: 'transparent',
+        trackPadding: 0,
+        itemSelectedBg: token.colorPrimary,
+        itemSelectedColor: token.colorBgLayout,
+        itemHoverBg: token.colorPrimaryBg,
+      },
+    },
+  }), [token.colorPrimary, token.colorBgLayout, token.colorPrimaryBg]);
 
   const [filter, setFilter] = useState<FavoriteFilter>('all');
   const { data: favorites } = useGetFavoritesQuery(undefined, { skip: !withFavoriteFilter });
@@ -65,88 +93,117 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
     setFlipped(false);
   };
 
-  // Навигация стрелками клавиатуры
-  const { left, right } = useArrowPressed();
-  useEffect(() => {
-    if (left) goPrev();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [left]);
-  useEffect(() => {
-    if (right) goNext();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [right]);
+  // Стрелки листают, пробел переворачивает
+  useKeyDown((e) => {
+    if (e.key === 'ArrowLeft') goPrev();
+    if (e.key === 'ArrowRight') goNext();
+    if (e.key === ' ' && current) {
+      e.preventDefault();
+      setFlipped((f) => !f);
+    }
+  });
 
-  const progress = useMemo(
-    () => `${order.length ? index + 1 : 0} / ${order.length}`,
-    [index, order.length],
-  );
-
-  if (!cards.length) {
-    return <Empty description={t('В колоде нет слов')} />;
-  }
-
-  const filterControl = withFavoriteFilter && (
-    <Segmented<FavoriteFilter>
-      value={filter}
-      onChange={setFilter}
-      options={[
-        { label: t('Все'), value: 'all' },
-        { label: t('Избранные'), value: 'favorite' },
-        { label: t('Неизбранные'), value: 'notFavorite' },
-      ]}
+  const topBar = (
+    <SessionTopBar
+      title={title}
+      counter={`${order.length ? index + 1 : 0} / ${order.length}`}
+      ticks={order.length ? buildPositionTicks(index) : buildSessionTicks([], false)}
+      onExit={onExit}
     />
   );
 
-  if (!current) {
+  if (!cards.length) {
     return (
-      <VStack max gap="16" align="center">
-        {filterControl}
-        <Empty description={t('Нет карточек по выбранному фильтру')} />
-      </VStack>
+      <>
+        {topBar}
+        <SessionStage>
+          <Empty description={t('В колоде нет слов')} />
+        </SessionStage>
+      </>
     );
   }
 
+  const filterControl = withFavoriteFilter && (
+    <ConfigProvider theme={segmentedTheme}>
+      <Segmented<FavoriteFilter>
+        className={cls.filter}
+        value={filter}
+        onChange={setFilter}
+        options={[
+          { label: t('Все'), value: 'all' },
+          { label: t('Избранные'), value: 'favorite' },
+          { label: t('Неизбранные'), value: 'notFavorite' },
+        ]}
+      />
+    </ConfigProvider>
+  );
+
   return (
-    <VStack max gap="16" align="center">
-      {filterControl}
-      <MyTypography.Base type="secondary">{progress}</MyTypography.Base>
+    <>
+      {topBar}
+      <SessionStage gap={SessionStageGap.SM}>
+        {filterControl}
 
-      <div
-        className={classNames(cls.card, { [cls.flipped]: flipped })}
-        onClick={() => setFlipped((f) => !f)}
-      >
-        <div className={cls.inner}>
-          <div className={cls.front}>
-            <MyTypography.ExtraLarge strong>{current.term}</MyTypography.ExtraLarge>
-            <div className={cls.speak} onClick={(e) => e.stopPropagation()}>
-              <SpeakButton text={current.term} />
+        {current ? (
+          <>
+            <Blueprint
+              role="button"
+              tabIndex={0}
+              aria-pressed={flipped}
+              className={cls.card}
+              onClick={() => setFlipped((f) => !f)}
+            >
+              <span className={cls.side}>
+                {flipped ? t('RU · Перевод') : t('EN · Слово')}
+              </span>
+              <span className={cls.tools}>
+                <SpeakButton text={current.term} className={cls.tool} />
+                <FavoriteToggle cardUuid={current.uuid} className={cls.tool} />
+              </span>
+              <span className={cls.word}>{flipped ? current.translation : current.term}</span>
+              {!flipped && current.example && (
+                <span className={cls.example}>“{current.example}”</span>
+              )}
+              <span className={cls.flipHint}>{t('Нажмите или пробел — перевернуть')}</span>
+            </Blueprint>
+
+            <div className={cls.controls}>
+              <SessionButton
+                variant={SessionButtonVariant.SECONDARY}
+                className={cls.navBtn}
+                onClick={goPrev}
+              >
+                <ChevronLeft size={NAV_ICON_SIZE} strokeWidth={ICON_STROKE} aria-label={t('Назад')} />
+              </SessionButton>
+              <SessionButton variant={SessionButtonVariant.SECONDARY} onClick={handleShuffle}>
+                <Repeat size={SHUFFLE_ICON_SIZE} strokeWidth={ICON_STROKE} />
+                {t('Перемешать')}
+              </SessionButton>
+              <SessionButton
+                variant={SessionButtonVariant.SECONDARY}
+                className={cls.navBtn}
+                onClick={goNext}
+              >
+                <ChevronRight size={NAV_ICON_SIZE} strokeWidth={ICON_STROKE} aria-label={t('Далее')} />
+              </SessionButton>
             </div>
-          </div>
-          <div className={cls.back}>
-            <MyTypography.ExtraLarge strong>{current.translation}</MyTypography.ExtraLarge>
-            {current.example && (
-              <MyTypography.Small type="secondary">{current.example}</MyTypography.Small>
-            )}
-          </div>
-        </div>
-      </div>
+          </>
+        ) : (
+          <Empty description={t('Нет карточек по выбранному фильтру')} />
+        )}
 
-      <MyTypography.Small type="secondary">
-        {t('Нажмите на карточку, чтобы перевернуть')}
-      </MyTypography.Small>
-
-      <HStack gap="12" justify="center" wrap>
-        <FavoriteToggle cardUuid={current.uuid} />
-        <Button icon={<LeftOutlined />} onClick={goPrev}>
-          {t('Назад')}
-        </Button>
-        <Button icon={<RetweetOutlined />} onClick={handleShuffle}>
-          {t('Перемешать')}
-        </Button>
-        <Button type="primary" onClick={goNext}>
-          {t('Далее')} <RightOutlined />
-        </Button>
-      </HStack>
-    </VStack>
+        <span className={cls.note}>
+          {t('Ознакомительный режим — прогресс не записывается.')}
+          {learnPath && (
+            <>
+              {' '}
+              {t('Готовы?')}
+              {' '}
+              <Link to={learnPath} className={cls.learnLink}>{t('Перейти к заучиванию →')}</Link>
+            </>
+          )}
+        </span>
+      </SessionStage>
+    </>
   );
 };

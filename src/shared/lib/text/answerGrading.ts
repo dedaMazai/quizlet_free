@@ -76,3 +76,66 @@ export const checkAnswerVariants = (expected: string, input: string, typoToleran
   if (grades.includes('almost')) return 'almost';
   return 'wrong';
 };
+
+export interface DiffPart {
+  text: string;
+  /** Символы отличаются от другой строки */
+  changed: boolean;
+}
+
+export interface AnswerDiff {
+  expected: DiffPart[];
+  input: DiffPart[];
+}
+
+const toParts = (value: string, kept: boolean[]): DiffPart[] => {
+  const parts: DiffPart[] = [];
+  Array.from(value).forEach((char, i) => {
+    const changed = !kept[i];
+    const last = parts[parts.length - 1];
+    if (last && last.changed === changed) last.text += char;
+    else parts.push({ text: char, changed });
+  });
+  return parts;
+};
+
+/**
+ * Посимвольное сравнение ответа с эталоном (LCS, без учёта регистра) —
+ * для подсветки опечатки. На оценку ответа не влияет.
+ */
+export const diffAnswer = (expected: string, input: string): AnswerDiff => {
+  const a = Array.from(expected.trim());
+  const b = Array.from(input.trim());
+  const lower = (char: string) => char.toLowerCase();
+
+  const lcs: number[][] = Array.from({ length: a.length + 1 }, () => new Array<number>(b.length + 1).fill(0));
+  for (let i = a.length - 1; i >= 0; i -= 1) {
+    for (let j = b.length - 1; j >= 0; j -= 1) {
+      lcs[i][j] = lower(a[i]) === lower(b[j])
+        ? lcs[i + 1][j + 1] + 1
+        : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+    }
+  }
+
+  const keptA = new Array<boolean>(a.length).fill(false);
+  const keptB = new Array<boolean>(b.length).fill(false);
+  let i = 0;
+  let j = 0;
+  while (i < a.length && j < b.length) {
+    if (lower(a[i]) === lower(b[j])) {
+      keptA[i] = true;
+      keptB[j] = true;
+      i += 1;
+      j += 1;
+    } else if (lcs[i + 1][j] >= lcs[i][j + 1]) {
+      i += 1;
+    } else {
+      j += 1;
+    }
+  }
+
+  return {
+    expected: toParts(a.join(''), keptA),
+    input: toParts(b.join(''), keptB),
+  };
+};

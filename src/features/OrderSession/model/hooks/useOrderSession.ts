@@ -1,15 +1,17 @@
 import {
-  useCallback, useEffect, useMemo, useReducer, useRef,
+  useCallback, useEffect, useMemo, useReducer, useRef, useState,
 } from 'react';
 import {
   Card,
   CardReview,
   applyReview,
   gradeFromAnswer,
+  MASTERED_LEVEL,
   levelOf,
   useSaveCardReviewsMutation,
 } from '@/entities/Card';
 import { StudyEventDraft, useLogStudyEventsMutation } from '@/entities/Statistics';
+import { SessionAnswer } from '@/shared/lib/session';
 import { OrderItem, buildOrderItems, isOrderCorrect } from '../lib/orderEngine';
 
 type Phase = 'question' | 'feedback' | 'finished';
@@ -160,6 +162,16 @@ export const useOrderSession = (
 
   useEffect(() => () => flush(), [flush]);
 
+  // Журнал ответов — только для топбара и итога, на логику сессии не влияет.
+  const [answers, setAnswers] = useState<SessionAnswer[]>([]);
+  const [lastReview, setLastReview] = useState<CardReview | null>(null);
+  const [startedAt, setStartedAt] = useState(() => Date.now());
+  const clearLog = () => {
+    setAnswers([]);
+    setLastReview(null);
+    setStartedAt(Date.now());
+  };
+
   const check = () => {
     if (!current) return;
     const uuid = current.card.uuid;
@@ -178,6 +190,8 @@ export const useOrderSession = (
     });
     reviewsRef.current.push(review);
     if (eventsRef.current.length >= FLUSH_EVERY) flush();
+    setAnswers((prev) => [...prev, { cardUuid: uuid, correct, mastered: correct && review.level >= MASTERED_LEVEL }]);
+    setLastReview(review);
 
     dispatch({ type: 'CHECK', correct });
   };
@@ -191,10 +205,16 @@ export const useOrderSession = (
     wrong: state.wrong,
     done: state.total - state.queue.length,
     total: state.total,
+    answers,
+    lastReview,
+    startedAt,
     pick: (index: number) => dispatch({ type: 'PICK', index }),
     unpick: (index: number) => dispatch({ type: 'UNPICK', index }),
     check,
     next: () => dispatch({ type: 'NEXT' }),
-    reset: () => dispatch({ type: 'RESET', queue: buildOrderItems(cards) }),
+    reset: () => {
+      clearLog();
+      dispatch({ type: 'RESET', queue: buildOrderItems(cards) });
+    },
   };
 };

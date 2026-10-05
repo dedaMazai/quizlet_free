@@ -1,0 +1,42 @@
+.AnswerInput {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.field {
+    display: flex;
+    align-items: center;
+    height: 64px;
+    padding: 0 20px;
+    border: 1px solid var(--color-accent);
+    border-radius: 0;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 28px;
+    white-space: pre;
+    overflow: hidden;
+
+    @media (width <= 650px) {
+        font-size: 22px;
+    }
+}
+
+// Перебиваем фон и рамку темы AntD (в т. ч. в hover/focus)
+.AnswerInput .field,
+.AnswerInput .field:hover,
+.AnswerInput .field:focus,
+.AnswerInput .field:focus-within {
+    border-color: var(--color-accent);
+    background: transparent;
+}
+
+.typo {
+    margin: 0 1px;
+    padding: 0 2px;
+    background: var(--color-accent-200);
+    color: var(--color-accent-900);
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+}

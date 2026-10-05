@@ -1,8 +1,8 @@
-import { FC, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
-  Button, Empty, Progress, Result,
-} from 'antd';
+  FC, useEffect, useMemo, useState,
+} from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button, Empty } from 'antd';
 import {
   Card,
   CardReview,
@@ -10,33 +10,56 @@ import {
   useGetCardReviewsQuery,
   useResetCardReviewsMutation,
 } from '@/entities/Card';
-import { MyTypography } from '@/shared/ui/MyTypography';
-import { HStack, VStack } from '@/shared/ui/Stack';
+import { AnswerFeedback, AnswerFeedbackTone } from '@/shared/ui/AnswerFeedback';
+import { SessionStage, SessionStageGap } from '@/shared/ui/SessionStage';
+import { SessionTopBar } from '@/shared/ui/SessionTopBar';
 import { Loader } from '@/shared/ui/Loader';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
+import { useAutoSpeak } from '@/shared/lib/hooks/useAutoSpeak';
+import { useSpeech } from '@/shared/lib/hooks/useSpeech';
+import {
+  buildSessionTicks,
+  SessionResultRenderer,
+  summarizeSession,
+  useIntervalNote,
+} from '@/shared/lib/session';
 import { useLearnSession } from '../model/hooks/useLearnSession';
+import { LearnQuestion } from '../model/lib/learnEngine';
 import { ChoiceQuestion } from './ChoiceQuestion';
 import { WriteQuestion } from './WriteQuestion';
-import { AnswerFeedback } from './AnswerFeedback';
 import cls from './LearnSession.module.scss';
 
-interface LearnSessionInnerProps {
+/** Вопрос, на который уже ответили: варианты пересобираются после ANSWER, держим снимок. */
+interface AnsweredQuestion {
+  question: LearnQuestion;
+  input: string;
+}
+
+interface SessionChrome {
+  /** Название в топбаре: «Колода · Заучивание». */
+  title: string;
+  onExit: () => void;
+  renderResult: SessionResultRenderer;
+}
+
+interface LearnSessionInnerProps extends SessionChrome {
   deckKey: string;
   deckName: string;
   cards: Card[];
   savedReviews?: CardReview[];
   allowReset: boolean;
-  finishedTitle?: string;
-  finishedSubtitle?: string;
 }
 
 const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
   const {
-    deckKey, deckName, cards, savedReviews, allowReset, finishedTitle, finishedSubtitle,
+    deckKey, deckName, cards, savedReviews, allowReset, title, onExit, renderResult,
   } = props;
   const { t } = useTranslation();
   const { modal, message } = useAntdApp();
   const [resetReviews] = useResetCardReviewsMutation();
+  const { autoSpeak, toggleAutoSpeak } = useAutoSpeak();
+  const { speak } = useSpeech();
+  const [answered, setAnswered] = useState<AnsweredQuestion | null>(null);
 
   const session = useLearnSession(cards, savedReviews, { deckKey, deckName });
 
@@ -55,6 +78,29 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
     return acc;
   }, [cards, session.steps]);
 
+  // Автоозвучка правильного слова при показе фидбэка
+  const answeredTerm = answered?.question.card.term;
+  useEffect(() => {
+    if (answeredTerm && autoSpeak) speak(answeredTerm, 'en-US');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answered]);
+
+  const handleAnswer = (value: string) => {
+    if (!session.question) return;
+    setAnswered({ question: session.question, input: value });
+    session.answer(value);
+  };
+
+  const handleNext = () => {
+    setAnswered(null);
+    session.next();
+  };
+
+  const restart = () => {
+    setAnswered(null);
+    session.reset();
+  };
+
   // Сброс удаляет состояние повторения безвозвратно, поэтому спрашиваем подтверждение.
   const handleReset = () => {
     modal.confirm({
@@ -65,94 +111,124 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
       cancelText: t('Отмена'),
       onOk: async () => {
         await resetReviews(cards.map((card) => card.uuid)).unwrap();
-        session.reset();
+        restart();
         message.success(t('Прогресс сброшен'));
       },
     });
   };
 
-  if (session.phase === 'finished') {
-    return (
-      <Result
-        status="success"
-        title={finishedTitle ?? t('Колода выучена!')}
-        subTitle={finishedSubtitle
-          ?? t('Вы усвоили все {{count}} слов', { count: session.total })}
-        extra={(
-          <Button type="primary" onClick={session.reset}>
-            {t('Пройти заново')}
-          </Button>
-        )}
-      />
-    );
-  }
+  const correctSubtitle = useIntervalNote(session.lastReview?.interval_days);
 
-  return (
-    <VStack max gap="24" align="center">
-      <VStack max gap="10">
-        <HStack max justify="between" align="center">
-          <MyTypography.Small type="secondary">
-            {t('Раунд {{n}}', { n: session.round })}
-          </MyTypography.Small>
-          <MyTypography.Small type="secondary">
-            {t('Усвоено')}: {counts.mastered} / {session.total}
-          </MyTypography.Small>
-        </HStack>
+  const finished = session.phase === 'finished';
+  const summary = useMemo(
+    () => (finished ? summarizeSession(session.answers, session.startedAt) : null),
+    [finished, session.answers, session.startedAt],
+  );
 
-        <Progress
-          percent={(counts.mastered / session.total) * 100}
-          showInfo={false}
-          size="small"
-        />
-
-        <HStack max gap="16" wrap justify="center">
-          <span className={cls.legendItem}>
-            <i className={`${cls.dot} ${cls.dotFresh}`} />
-            {t('Новые')}: {counts.fresh}
-          </span>
-          <span className={cls.legendItem}>
-            <i className={`${cls.dot} ${cls.dotLearning}`} />
-            {t('Изучаю')}: {counts.learning}
-          </span>
-          <span className={cls.legendItem}>
-            <i className={`${cls.dot} ${cls.dotMastered}`} />
-            {t('Усвоено')}: {counts.mastered}
-          </span>
-        </HStack>
-      </VStack>
-
-      <div className={cls.stage}>
-        {session.phase === 'feedback' && session.question && session.lastCorrect !== null && (
-          <AnswerFeedback
-            card={session.question.card}
-            correct={session.lastCorrect}
-            userInput={session.lastInput}
-            onNext={session.next}
-          />
-        )}
-
-        {session.phase === 'question' && session.question?.type === 'choice' && (
-          <ChoiceQuestion question={session.question} onAnswer={session.answer} />
-        )}
-
-        {session.phase === 'question' && session.question?.type === 'write' && (
-          <WriteQuestion question={session.question} onAnswer={session.answer} />
-        )}
-
-        {/* Кадр между рефетчем карточек и PRUNE: вопроса ещё нет, тупика быть не должно. */}
-        {session.phase === 'question' && !session.question && <Loader />}
-      </div>
-
+  const settings = (
+    <div className={cls.settings}>
+      <span className={cls.legendItem}>
+        <i className={`${cls.dot} ${cls.dotFresh}`} />
+        {t('Новые')}: {counts.fresh}
+      </span>
+      <span className={cls.legendItem}>
+        <i className={`${cls.dot} ${cls.dotLearning}`} />
+        {t('Изучаю')}: {counts.learning}
+      </span>
+      <span className={cls.legendItem}>
+        <i className={`${cls.dot} ${cls.dotMastered}`} />
+        {t('Усвоено')}: {counts.mastered}
+      </span>
       {allowReset && (
-        <Button type="text" danger onClick={handleReset}>
+        <Button type="text" danger size="small" onClick={handleReset}>
           {t('Сбросить прогресс')}
         </Button>
       )}
-    </VStack>
+    </div>
+  );
+
+  const topBar = (
+    <SessionTopBar
+      title={title}
+      counter={t('Раунд {{n}} · {{done}} / {{total}}', {
+        n: session.round, done: counts.mastered, total: session.total,
+      })}
+      ticks={buildSessionTicks(session.answers, session.phase === 'question')}
+      onExit={onExit}
+      autoSpeak={autoSpeak}
+      onToggleAutoSpeak={toggleAutoSpeak}
+      settings={settings}
+    />
+  );
+
+  if (summary) {
+    return (
+      <>
+        {topBar}
+        {renderResult(summary, restart)}
+      </>
+    );
+  }
+
+  const feedback = session.phase === 'feedback' ? answered : null;
+  const question = feedback?.question ?? (session.phase === 'question' ? session.question : null);
+  const correct = feedback ? session.lastCorrect === true : false;
+
+
+  // Перевод ошибочно выбранного варианта — варианты это term'ы других карточек
+  const chosenCard = feedback && !correct
+    ? cards.find((card) => card.term === feedback.input)
+    : undefined;
+  const wrongSubtitle = chosenCard
+    ? `«${chosenCard.term}» — ${chosenCard.translation}. ${t('Слово вернётся в эту же сессию')}`
+    : t('Слово вернётся в эту же сессию');
+
+  return (
+    <>
+      {topBar}
+      {question?.type === 'choice' && (
+        <SessionStage gap={SessionStageGap.XL}>
+          <ChoiceQuestion
+            question={question}
+            chosen={feedback ? feedback.input : null}
+            onAnswer={handleAnswer}
+          />
+          {feedback && (
+            <AnswerFeedback
+              tone={correct ? AnswerFeedbackTone.SUCCESS : AnswerFeedbackTone.ERROR}
+              title={correct
+                ? t('Верно')
+                : t('Неверно — правильно «{{term}}»', { term: question.card.term })}
+              subtitle={correct ? correctSubtitle : wrongSubtitle}
+              onNext={handleNext}
+              autoAdvance={correct}
+            />
+          )}
+        </SessionStage>
+      )}
+
+      {question?.type === 'write' && (
+        <SessionStage gap={SessionStageGap.MD}>
+          <WriteQuestion
+            question={question}
+            answered={feedback ? { input: feedback.input, correct } : null}
+            onAnswer={handleAnswer}
+            onNext={handleNext}
+          />
+        </SessionStage>
+      )}
+
+      {/* Кадр между рефетчем карточек и PRUNE: вопроса ещё нет, тупика быть не должно. */}
+      {!question && (
+        <SessionStage>
+          <Loader />
+        </SessionStage>
+      )}
+    </>
   );
 };
 
-interface LearnSessionProps {
+interface LearnSessionProps extends SessionChrome {
   cards: Card[];
   /** Ключ журнала статистики: deck_uuid или синтетический ключ избранного/всех слов. */
   deckKey: string;
@@ -167,15 +243,12 @@ interface LearnSessionProps {
    * из разных колод (очередь повторов) — сброс стёр бы прогресс по всей библиотеке.
    */
   allowReset?: boolean;
-  /** Заголовок экрана завершения; по умолчанию — «Колода выучена!». */
-  finishedTitle?: string;
-  finishedSubtitle?: string;
 }
 
 export const LearnSession: FC<LearnSessionProps> = (props) => {
   const {
     cards, deckKey, deckName, reviewsDeckUuid, reviews: providedReviews, allowReset = true,
-    finishedTitle, finishedSubtitle,
+    title, onExit, renderResult,
   } = props;
   const { t } = useTranslation();
 
@@ -186,12 +259,20 @@ export const LearnSession: FC<LearnSessionProps> = (props) => {
   });
   const reviews = providedReviews ?? fetchedReviews;
 
-  if (isLoading) {
-    return <Loader />;
-  }
-
-  if (!cards.length) {
-    return <Empty description={t('Нет слов для заучивания')} />;
+  if (isLoading || !cards.length) {
+    return (
+      <>
+        <SessionTopBar
+          title={title}
+          counter=""
+          ticks={buildSessionTicks([], false)}
+          onExit={onExit}
+        />
+        <SessionStage>
+          {isLoading ? <Loader /> : <Empty description={t('Нет слов для заучивания')} />}
+        </SessionStage>
+      </>
+    );
   }
 
   return (
@@ -202,8 +283,9 @@ export const LearnSession: FC<LearnSessionProps> = (props) => {
       cards={cards}
       savedReviews={reviews}
       allowReset={allowReset}
-      finishedTitle={finishedTitle}
-      finishedSubtitle={finishedSubtitle}
+      title={title}
+      onExit={onExit}
+      renderResult={renderResult}
     />
   );
 };
