@@ -1,14 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Card, Typography } from 'antd';
+import { Card, Typography } from 'antd';
 import { useParams } from 'react-router';
 import { BackLink } from '@/shared/ui/BackLink';
 import { getSettingsUsersPath, RoutePath } from '@/shared/config/router/routePath';
 import { HStack, VStack } from '@/shared/ui/Stack';
-import { useGetUserQuery, useUserInfo, ROLE_NAMES } from '@/entities/User';
+import {
+    useGetUserQuery, useUserInfo, ROLE_NAMES, UserAvatar, UserAvatarSize,
+} from '@/entities/User';
 import { buildName } from '@/shared/lib/helpers/buildName';
 import { GENDER } from '@/shared/const/const';
-import { getAvatarSrc } from '@/shared/const/avatars';
 import { MyTypography } from '@/shared/ui/MyTypography';
 import { formatDateTime } from '@/shared/lib/formatters';
 
@@ -20,8 +20,6 @@ const UserPage = () => {
     const { data: user } = useGetUserQuery(userUuid!, {
         skip: !userUuid,
     });
-
-    const userPhoto = getAvatarSrc(user?.avatar);
 
     if (!userUuid) {
         return null;
@@ -54,25 +52,7 @@ const UserPage = () => {
                         justify='between'
                         align='start'
                     >
-                        {userPhoto ? (
-                            <img
-                                width={200}
-                                height={200}
-                                style={{
-                                    borderRadius: 6,
-                                    objectFit: 'cover',
-                                }}
-                                src={userPhoto}
-                                alt=""
-                            />
-                        ) : (
-                            <Avatar
-                                style={{ flexShrink: 0 }}
-                                shape="square"
-                                size={200}
-                                icon={<UserOutlined />}
-                            />
-                        )}
+                        <UserAvatar user={user} size={UserAvatarSize.LG} />
                     </HStack>
                     <VStack max gap="6">
                         <HStack max justify="between" wrap>

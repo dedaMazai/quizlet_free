@@ -5,13 +5,14 @@ import { Dropdown, MenuProps } from 'antd';
 import { ChevronDown } from 'lucide-react';
 import {
     checkRequireAccesses,
+    UserAvatar,
+    UserAvatarSize,
     useLogoutMutation,
     useUserAccesses,
     useUserInfo,
 } from '@/entities/User';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { getSettingsUsersPath, RoutePath } from '@/shared/config/router/routePath';
-import { getAvatarSrc } from '@/shared/const/avatars';
 import { Accesses } from '@/shared/types/accesses';
 import cls from './SidebarProfile.module.scss';
 
@@ -69,8 +70,6 @@ export const SidebarProfile = memo(({ collapsed }: SidebarProfileProps) => {
         return null;
     }
 
-    const avatarSrc = getAvatarSrc(userInfo.avatar);
-    const initials = `${userInfo.name?.[0] ?? ''}${userInfo.surname?.[0] ?? ''}`.toUpperCase();
     const shortName = userInfo.surname
         ? `${userInfo.name} ${userInfo.surname[0]}.`
         : userInfo.name || userInfo.email;
@@ -86,9 +85,7 @@ export const SidebarProfile = memo(({ collapsed }: SidebarProfileProps) => {
                 aria-label={t('Аккаунт')}
                 className={classNames(cls.SidebarProfile, [], { [cls.collapsed]: collapsed })}
             >
-                <span className={cls.avatar}>
-                    {avatarSrc ? <img src={avatarSrc} alt="" className={cls.avatarImg} /> : initials}
-                </span>
+                <UserAvatar user={userInfo} size={UserAvatarSize.PICK} />
                 {!collapsed && (
                     <>
                         <span className={cls.info}>

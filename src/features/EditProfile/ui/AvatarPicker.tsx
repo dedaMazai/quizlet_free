@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getUserInitials, UserInfo } from '@/entities/User';
+import { UserAvatar, UserAvatarSize, UserInfo } from '@/entities/User';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { AVATARS } from '@/shared/const/avatars';
 import cls from './AvatarPicker.module.scss';
@@ -22,10 +22,10 @@ export const AvatarPicker: FC<AvatarPickerProps> = (props) => {
         type="button"
         aria-label={t('Инициалы')}
         aria-pressed={!value}
-        className={classNames(cls.item, { [cls.selected]: !value }, [cls.initials])}
+        className={classNames(cls.item, { [cls.selected]: !value })}
         onClick={() => onChange?.(undefined)}
       >
-        {getUserInitials(user)}
+        {user && <UserAvatar user={{ ...user, avatar: undefined }} size={UserAvatarSize.PICK} />}
       </button>
       {AVATARS.map((avatar, index) => (
         <button
@@ -36,7 +36,7 @@ export const AvatarPicker: FC<AvatarPickerProps> = (props) => {
           className={classNames(cls.item, { [cls.selected]: value === avatar.key })}
           onClick={() => onChange?.(avatar.key)}
         >
-          <img className={cls.image} src={avatar.src} alt="" />
+          {user && <UserAvatar user={{ ...user, avatar: avatar.key }} size={UserAvatarSize.PICK} />}
         </button>
       ))}
     </div>

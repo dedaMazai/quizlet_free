@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { classNames } from '@/shared/lib/classNames/classNames';
-import { getAvatarSrc } from '@/shared/const/avatars';
+import { getAvatarPreset } from '@/shared/const/avatars';
 import { UserInfo } from '../../model/types/user';
 import cls from './UserAvatar.module.scss';
 
@@ -33,14 +33,14 @@ export const getUserInitials = (user?: UserAvatarUser): string => {
     return (letters || user.email.slice(0, 2)).toUpperCase();
 };
 
-/** Квадратный аватар: пресет из набора или инициалы на accent-200 */
+/** Квадратный аватар: буква-пресет на цвете рампы или инициалы на accent-200 */
 export const UserAvatar = memo((props: UserAvatarProps) => {
     const { user, size = UserAvatarSize.SM, className } = props;
-    const src = getAvatarSrc(user?.avatar);
+    const preset = getAvatarPreset(user?.avatar);
 
     return (
-        <span aria-hidden className={classNames(cls.UserAvatar, [className, cls[size]])}>
-            {src ? <img className={cls.image} src={src} alt="" /> : getUserInitials(user)}
+        <span aria-hidden className={classNames(cls.UserAvatar, [className, cls[size], preset && cls[preset.tone]])}>
+            {preset ? preset.letter : getUserInitials(user)}
         </span>
     );
 });
