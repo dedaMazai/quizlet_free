@@ -54,6 +54,7 @@ export const RoleSelectDefault = memo((props: RoleSelectProps) => {
             className={className}
             suffixIcon={suffixIcon}
             placeholder={placeholder || t('Роль')}
+            aria-label={placeholder || t('Роль')}
             disabled={disabled}
             allowClear={allowClear}
             options={roleOptions}

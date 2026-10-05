@@ -241,6 +241,12 @@ html .ant-btn:focus-visible {
     outline-offset: 2px;
 }
 
+/* Переключатель квадратный, как всё в макете (border-radius: 0) */
+.ant-switch.ant-switch,
+.ant-switch .ant-switch-handle::before {
+    border-radius: 0;
+}
+
 /* Disabled buttons: opacity per theme (light: 0.45) */
 .ant-btn:disabled,
 .ant-btn.ant-btn-disabled {

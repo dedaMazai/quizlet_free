@@ -119,6 +119,7 @@ export const ImportCycleWordsModal: FC<ImportCycleWordsModalProps> = (props) => 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           prefix={<SearchOutlined />}
+          aria-label={t('Поиск')}
           placeholder={t('Поиск')}
           className={cls.field}
         />

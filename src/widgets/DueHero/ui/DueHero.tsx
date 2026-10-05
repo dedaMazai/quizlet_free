@@ -18,6 +18,7 @@ import { useOncePerDay } from '@/shared/lib/hooks/useOncePerDay';
 import cls from './DueHero.module.scss';
 
 const ARROW_SIZE = 18;
+const ICON_STROKE = 1.5;
 const CHECK_SIZE = 96;
 const CHECK_STROKE = 1.5;
 
@@ -185,7 +186,7 @@ export const DueHero = memo((props: DueHeroProps) => {
                     onClick={start}
                 >
                     {hasDebt ? t('Начать повторение') : t('Учить новые')}
-                    <ArrowRight aria-hidden size={ARROW_SIZE} />
+                    <ArrowRight aria-hidden size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
                 </Blueprint>
                 {hasDebt && (
                     <button

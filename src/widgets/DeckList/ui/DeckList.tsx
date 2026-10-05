@@ -1,16 +1,13 @@
-import { FC, MouseEvent, useMemo, useState } from 'react';
+import {
+  FC, KeyboardEvent, MouseEvent, ReactNode, useMemo, useState,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Dropdown, Empty } from 'antd';
 import type { MenuProps } from 'antd';
 import {
-  EditOutlined,
-  DeleteOutlined,
-  ShareAltOutlined,
-  CopyOutlined,
-  UserDeleteOutlined,
-} from '@ant-design/icons';
-import { Ellipsis } from 'lucide-react';
+  Copy, Ellipsis, Pencil, Share2, Trash2, UserMinus,
+} from 'lucide-react';
 import {
   Deck,
   useGetDecksQuery,
@@ -36,6 +33,7 @@ import cls from './DeckList.module.scss';
 
 const MENU_ICON_SIZE = 18;
 const ICON_STROKE = 1.5;
+const MENU_ITEM_ICON_SIZE = 16;
 const PERCENT = 100;
 const SKELETON_CARDS = 6;
 
@@ -49,6 +47,8 @@ interface DeckListProps {
   filter?: 'all' | 'own' | 'shared';
   /** Поиск по названию колоды */
   search?: string;
+  /** Пустое состояние вместо AntD Empty */
+  empty?: ReactNode;
 }
 
 export const DeckList: FC<DeckListProps> = (props) => {
@@ -57,9 +57,17 @@ export const DeckList: FC<DeckListProps> = (props) => {
     sort = 'default',
     filter = 'all',
     search = '',
+    empty,
   } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // Карточка — не <button> (внутри меню «…»), поэтому Enter/Space обрабатываем сами
+  const handleCardKeyDown = (uuid: string) => (e: KeyboardEvent<HTMLElement>) => {
+    if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return;
+    e.preventDefault();
+    navigate(RoutePath.DECK(uuid));
+  };
   const { modal } = useAntdApp();
   const toast = useToast();
   const userInfo = useUserInfo();
@@ -153,7 +161,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
   const deckMenuItems = (deck: Deck): MenuProps['items'] => {
     const editItem: NonNullable<MenuProps['items']>[number] = {
       key: 'edit',
-      icon: <EditOutlined />,
+      icon: <Pencil aria-hidden size={MENU_ITEM_ICON_SIZE} strokeWidth={ICON_STROKE} />,
       label: t('Редактировать'),
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
@@ -167,7 +175,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
         editItem,
         {
           key: 'share',
-          icon: <ShareAltOutlined />,
+          icon: <Share2 aria-hidden size={MENU_ITEM_ICON_SIZE} strokeWidth={ICON_STROKE} />,
           label: t('Поделиться'),
           onClick: ({ domEvent }) => {
             domEvent.stopPropagation();
@@ -176,7 +184,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
         },
         {
           key: 'delete',
-          icon: <DeleteOutlined />,
+          icon: <Trash2 aria-hidden size={MENU_ITEM_ICON_SIZE} strokeWidth={ICON_STROKE} />,
           label: t('Удалить'),
           danger: true,
           onClick: ({ domEvent }) => {
@@ -192,7 +200,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
       ...(isAdmin ? [editItem] : []),
       {
         key: 'duplicate',
-        icon: <CopyOutlined />,
+        icon: <Copy aria-hidden size={MENU_ITEM_ICON_SIZE} strokeWidth={ICON_STROKE} />,
         label: t('Дублировать'),
         onClick: ({ domEvent }) => {
           domEvent.stopPropagation();
@@ -201,7 +209,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
       },
       {
         key: 'leave',
-        icon: <UserDeleteOutlined />,
+        icon: <UserMinus aria-hidden size={MENU_ITEM_ICON_SIZE} strokeWidth={ICON_STROKE} />,
         label: t('Убрать из своих'),
         danger: true,
         onClick: ({ domEvent }) => {
@@ -227,6 +235,7 @@ export const DeckList: FC<DeckListProps> = (props) => {
   }
 
   if (!visibleDecks.length) {
+    if (empty) return empty;
     return (
       <Empty
         description={search.trim() ? t('Ничего не найдено') : t('Пока нет ни одной колоды')}
@@ -267,7 +276,10 @@ export const DeckList: FC<DeckListProps> = (props) => {
               <Blueprint
                 key={deck.uuid}
                 className={cls.mobileCard}
+                role="link"
+                tabIndex={0}
                 onClick={() => navigate(RoutePath.DECK(deck.uuid))}
+                onKeyDown={handleCardKeyDown(deck.uuid)}
               >
                 <span className={cls.mobileHead}>
                   <span className={cls.mobileName}>{deck.name}</span>
@@ -293,7 +305,10 @@ export const DeckList: FC<DeckListProps> = (props) => {
             <Blueprint
               key={deck.uuid}
               className={cls.card}
+              role="link"
+              tabIndex={0}
               onClick={() => navigate(RoutePath.DECK(deck.uuid))}
+              onKeyDown={handleCardKeyDown(deck.uuid)}
             >
               <div className={cls.head}>
                 <div className={cls.titleBlock}>

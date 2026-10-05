@@ -142,6 +142,7 @@ export const LibraryHeader = memo(({ showCreateDeck }: LibraryHeaderProps) => {
           <span className={cls.pickerLabel}>{t('В какой колоде?')}</span>
           <Select
             className={cls.pickerSelect}
+            aria-label={t('Выберите колоду')}
             showSearch
             optionFilterProp="label"
             value={pickedDeck}

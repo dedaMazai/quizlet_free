@@ -4,7 +4,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Dropdown, Empty, Input, MenuProps, Segmented, Tooltip,
+  Button, Dropdown, Empty, Input, MenuProps, Tooltip,
 } from 'antd';
 import {
   ArrowRight,
@@ -20,6 +20,7 @@ import {
   Play,
   Plus,
   Search,
+  SearchX,
   Sparkles,
   Star,
   UserMinus,
@@ -66,6 +67,7 @@ import { classNames } from '@/shared/lib/classNames/classNames';
 import { useToast } from '@/shared/lib/toast';
 import { useDebounceState } from '@/shared/lib/hooks/useDebounceState';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { BoxSegmented } from '@/shared/ui/BoxSegmented';
 import { recommendMode, StudyMode, STUDY_MODES } from '../model/recommendMode';
 import cls from './DeckPage.module.scss';
 
@@ -162,7 +164,7 @@ const DeckPage = () => {
     };
   }, [items]);
 
-  const [search, debouncedSearch, , setSearchDebounced] = useDebounceState('');
+  const [search, debouncedSearch, setSearchImmediate, setSearchDebounced] = useDebounceState('');
   const [typeFilterState, setTypeFilter] = useState<CardType | 'all'>('all');
   const [onlyFavoritesState, setOnlyFavorites] = useState(false);
   // На мобильном переключателей фильтров нет — выбранные на широком экране не действуют
@@ -365,7 +367,25 @@ const DeckPage = () => {
       deckUuid={deckId}
       readOnly={!canEditCards}
       items={filtered}
-      emptyText={hasSearch || onlyFavorites || typeFilter !== 'all' ? t('Ничего не найдено') : undefined}
+      loading={cards === undefined}
+      empty={hasSearch || onlyFavorites || typeFilter !== 'all' ? (
+        <EmptyState
+          icon={SearchX}
+          kicker={t('Ничего не найдено')}
+          title={hasSearch
+            ? t('По «{{query}}» нет слов', { query: debouncedSearch.trim() })
+            : t('Нет слов по этим фильтрам')}
+          description={t('Проверьте написание или сбросьте фильтры.')}
+          primary={{
+            label: t('Сбросить фильтры'),
+            onClick: () => {
+              setSearchImmediate('');
+              setTypeFilter('all');
+              setOnlyFavorites(false);
+            },
+          }}
+        />
+      ) : undefined}
     />
   );
 
@@ -548,6 +568,7 @@ const DeckPage = () => {
                     prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
                     allowClear
                     value={search}
+                    aria-label={t('Поиск в колоде')}
                     placeholder={t('Поиск в колоде')}
                     onChange={(e) => setSearchDebounced(e.target.value)}
                   />
@@ -698,11 +719,11 @@ const DeckPage = () => {
                 prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
                 allowClear
                 value={search}
+                aria-label={t('Поиск в колоде')}
                 placeholder={t('Поиск в колоде')}
                 onChange={(e) => setSearchDebounced(e.target.value)}
               />
-              <Segmented<CardType | 'all'>
-                className={cls.segmented}
+              <BoxSegmented<CardType | 'all'>
                 value={typeFilter}
                 onChange={setTypeFilter}
                 options={[

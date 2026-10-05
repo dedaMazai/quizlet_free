@@ -2120,7 +2120,6 @@
   "Перевод · авто": "Translation · auto",
   "Строка · Enter": "Row · Enter",
   "Осталось {{count}}": "{{count}} left",
-  "Выбрано {{fixes}} правок и {{examples}} примеров": "Selected {{fixes}} fixes and {{examples}} examples",
   "Применить выбранное": "Apply selected",
   "ИИ проверит переводы {{count}} слов колоды и подберёт к ним примеры.": "AI will check translations of {{count}} words in the deck and add examples.",
   "ИИ проверит переводы {{count}} слов колоды и подберёт к ним примеры._one": "AI will check the translation of {{count}} word in the deck and add an example.",
@@ -2447,5 +2446,13 @@
   "Колода готова — {{words}}": "Deck is ready — {{words}}",
   "≈ {{count}} мин на первое знакомство: переворачивайте карточки и запоминайте перевод.": "≈ {{count}} min to get acquainted: flip the cards and remember the translations.",
   "Не удалось сохранить занятие": "Failed to save the session",
-  "Не удалось сохранить настройки": "Failed to save settings"
+  "Не удалось сохранить настройки": "Failed to save settings",
+  "Пользователь не найден": "User not found",
+  "Муж": "Male",
+  "Жен": "Female",
+  "Выбрано {{fixes}} и {{examples}}": "Selected {{fixes}} and {{examples}}",
+  "{{count}} правок_one": "{{count}} fix",
+  "{{count}} правок_other": "{{count}} fixes",
+  "По «{{query}}» нет колод": "No decks for “{{query}}”",
+  "Нет колод по этим фильтрам": "No decks match these filters"
 }

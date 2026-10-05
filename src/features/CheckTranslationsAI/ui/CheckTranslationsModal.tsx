@@ -155,9 +155,9 @@ export const CheckTranslationsModal: FC<CheckTranslationsModalProps> = (props) =
       title={t('Проверка переводов')}
       quota={t('Осталось {{count}}', { count: remaining ?? 0 })}
       footerNote={results
-        ? t('Выбрано {{fixes}} правок и {{examples}} примеров', {
-          fixes: selectedFixCount,
-          examples: selectedExampleCount,
+        ? t('Выбрано {{fixes}} и {{examples}}', {
+          fixes: t('{{count}} правок', { count: selectedFixCount }),
+          examples: t('{{count}} примеров', { count: selectedExampleCount }),
         })
         : undefined}
       onClose={onClose}

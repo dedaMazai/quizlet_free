@@ -223,8 +223,8 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--card-bg-secondary': '#FAFAFA',
 
     // Brand accent (indigo) + elevation
-    '--color-accent': '#5980a6',
-    '--color-accent-hover': '#597ea3',
+    '--color-accent': '#4b7095',
+    '--color-accent-hover': '#416180',
     '--color-accent-soft': '#eef6ff',
     '--color-success-soft': 'oklch(95% 0.03 170deg)',
     '--color-error-soft': 'oklch(95% 0.025 27deg)',
@@ -301,8 +301,8 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
 
     // Disabled primary button
     '--btn-primary-disabled-color': '#ffffff',
-    '--btn-primary-disabled-bg': '#5980a6',
-    '--btn-primary-disabled-border': '#5980a6',
+    '--btn-primary-disabled-bg': '#4b7095',
+    '--btn-primary-disabled-border': '#4b7095',
     '--btn-disabled-opacity': '0.45',
 
     // Design tokens (README §1): base
@@ -341,7 +341,7 @@ const globalCssVariables: Record<Theme, Record<string, string>> = {
     '--color-neutral-300': '#d4d4d7',
     '--color-neutral-400': '#b7b7ba',
     '--color-neutral-500': '#98989b',
-    '--color-neutral-600': '#7a7a7d',
+    '--color-neutral-600': '#6e6e71',
     '--color-neutral-700': '#5d5d60',
     '--color-neutral-800': '#424244',
     '--color-neutral-900': '#2b2b2d',
@@ -557,6 +557,9 @@ function getDarkComponentOverrides(): ThemeConfig['components'] {
       "algorithm": true
     },
     "Button": {
+      // .btn в макете: Fira Sans Condensed 600
+      "fontFamily": "'Fira Sans Condensed', system-ui, sans-serif",
+      "fontWeight": 600,
       "primaryShadow": "none",
       "defaultShadow": "none",
       "dangerShadow": "none",
@@ -864,8 +867,8 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "colorBgContainer": "#e9e9ea",
       "colorBorder": "rgba(29,31,32,0.16)",
       "colorText": "#1d1f20",
-      "colorTextPlaceholder": "#7a7a7d",
-      "activeBorderColor": "#5980a6",
+      "colorTextPlaceholder": "#5d5d60",
+      "activeBorderColor": "#4b7095",
       "activeShadow": "none",
       "colorTextDisabled": "rgba(0,0,0,0.25)",
       "colorBgContainerDisabled": "rgba(0,0,0,0.04)",
@@ -892,6 +895,9 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "algorithm": true
     },
     "Button": {
+      // .btn в макете: Fira Sans Condensed 600
+      "fontFamily": "'Fira Sans Condensed', system-ui, sans-serif",
+      "fontWeight": 600,
       "primaryShadow": "none",
       "defaultShadow": "none",
       "dangerShadow": "none",
@@ -901,7 +907,7 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "defaultBorderColor": "rgba(29,31,32,0.16)",
       "defaultColor": "#1d1f20",
       "defaultHoverBg": "#eef6ff",
-      "defaultHoverBorderColor": "#5980a6",
+      "defaultHoverBorderColor": "#4b7095",
       "colorTextDisabled": "#1d1f20",
       "colorBgContainerDisabled": "transparent",
       "borderColorDisabled": "rgba(29,31,32,0.16)",
@@ -917,7 +923,7 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "algorithm": true
     },
     "Segmented": {
-      "itemSelectedBg": "#5980a6",
+      "itemSelectedBg": "#4b7095",
       "itemSelectedColor": "#f2f2f3",
       "trackBg": "transparent",
       "itemColor": "#1d1f20",
@@ -931,9 +937,9 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
     },
     "Tabs": {
       "itemColor": "#5d5d60",
-      "itemSelectedColor": "#5980a6",
-      "itemHoverColor": "#597ea3",
-      "inkBarColor": "#5980a6",
+      "itemSelectedColor": "#4b7095",
+      "itemHoverColor": "#416180",
+      "inkBarColor": "#4b7095",
       "titleFontSize": 14,
       "cardBg": "transparent",
       "colorBorderSecondary": "rgba(29,31,32,0.16)",
@@ -949,10 +955,10 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "colorBgContainer": "#e9e9ea",
       "colorBorder": "rgba(29,31,32,0.16)",
       "colorText": "#1d1f20",
-      "colorTextPlaceholder": "#7a7a7d",
+      "colorTextPlaceholder": "#5d5d60",
       "colorIcon": "#7a7a7d",
       "colorIconHover": "#1d1f20",
-      "activeBorderColor": "#5980a6",
+      "activeBorderColor": "#4b7095",
       "activeShadow": "none",
       "colorBgElevated": "#f2f2f3",
       "colorTextDisabled": "rgba(0,0,0,0.25)",
@@ -963,8 +969,8 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "colorBgContainer": "#e9e9ea",
       "colorBorder": "rgba(29,31,32,0.16)",
       "colorText": "#1d1f20",
-      "colorTextPlaceholder": "#7a7a7d",
-      "activeBorderColor": "#5980a6",
+      "colorTextPlaceholder": "#5d5d60",
+      "activeBorderColor": "#4b7095",
       "activeOutlineColor": "transparent",
       "colorBgElevated": "#f2f2f3",
       "optionSelectedBg": "#eef6ff",
@@ -987,8 +993,8 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "colorBgContainer": "#e9e9ea",
       "colorBorder": "rgba(29,31,32,0.16)",
       "colorText": "#1d1f20",
-      "colorTextPlaceholder": "#7a7a7d",
-      "activeBorderColor": "#5980a6",
+      "colorTextPlaceholder": "#5d5d60",
+      "activeBorderColor": "#4b7095",
       "colorTextDisabled": "rgba(0,0,0,0.25)",
       "colorBgContainerDisabled": "rgba(0,0,0,0.04)",
       "handleBorderColor": "rgba(29,31,32,0.16)",
@@ -1009,7 +1015,7 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "colorBgContainer": "#e9e9ea",
       "colorBorder": "rgba(29,31,32,0.16)",
       "colorText": "#1d1f20",
-      "colorTextPlaceholder": "#7a7a7d",
+      "colorTextPlaceholder": "#5d5d60",
       "colorBgElevated": "#f2f2f3",
       "optionSelectedBg": "#eef6ff",
       "colorIcon": "#7a7a7d",
@@ -1021,7 +1027,7 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "colorBgContainer": "#e9e9ea",
       "colorBorder": "rgba(29,31,32,0.16)",
       "colorText": "#1d1f20",
-      "colorTextPlaceholder": "#7a7a7d",
+      "colorTextPlaceholder": "#5d5d60",
       "colorBgElevated": "#f2f2f3",
       "nodeSelectedBg": "#eef6ff",
       "colorIcon": "#7a7a7d",
@@ -1081,7 +1087,7 @@ function getLightComponentOverrides(): ThemeConfig['components'] {
       "colorIcon": "#7a7a7d",
       "colorIconHover": "#1d1f20",
       "colorBgElevated": "#f2f2f3",
-      "colorBgMask": "rgba(0,0,0,0.45)",
+      "colorBgMask": "rgba(43,43,45,0.5)",
       "boxShadow": "0 12px 32px rgba(43,43,45,0.22)",
       "algorithm": true
     },

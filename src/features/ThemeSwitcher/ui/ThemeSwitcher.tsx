@@ -21,6 +21,7 @@ export const ThemeSwitcher = memo(() => {
         <Tooltip title={t('Сменить тему')} placement="bottomLeft">
             <Button
                 className={cls.ThemeSwitcher}
+                aria-label={t('Сменить тему')}
                 onClick={() => toggleTheme()}
                 loading={isLoading}
                 icon={theme === Theme.LIGHT ? <MoonOutlined /> : <SunOutlined />}

@@ -115,7 +115,8 @@ $box-hit-inset: -13px;
 }
 
 .locked {
-    opacity: 0.75;
+    // В макете 0.75; 0.9 — минимум, при котором вторичный текст держит 4.5:1
+    opacity: 0.9;
 }
 
 .stageTop {
@@ -295,7 +296,7 @@ $box-hit-inset: -13px;
     }
 
     .rowLocked {
-        opacity: 0.6;
+        opacity: 0.9;
     }
 
     .stageRowText {

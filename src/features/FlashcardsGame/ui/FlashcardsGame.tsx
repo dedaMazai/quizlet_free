@@ -6,7 +6,9 @@ import { Link } from 'react-router-dom';
 import {
   ConfigProvider, Empty, Segmented, theme,
 } from 'antd';
-import { ChevronLeft, ChevronRight, Repeat } from 'lucide-react';
+import {
+  ChevronLeft, ChevronRight, Repeat, Volume2,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { Card, FavoriteToggle, useGetFavoritesQuery } from '@/entities/Card';
 import { Blueprint } from '@/shared/ui/Blueprint';
@@ -29,6 +31,7 @@ const NAV_ICON_SIZE = 20;
 const SHUFFLE_ICON_SIZE = 16;
 const MOBILE_NAV_ICON_SIZE = 22;
 const MOBILE_SHUFFLE_ICON_SIZE = 18;
+const TOOL_ICON_SIZE = 20;
 // Мобильный сегмент — 40px
 const MOBILE_FILTER_HEIGHT = 40;
 const ICON_STROKE = 1.5;
@@ -196,7 +199,11 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
                 >
                   <span className={cls.side}>{t('EN · Слово')}</span>
                   <span className={cls.tools}>
-                    <SpeakButton text={current.term} className={cls.tool} />
+                    <SpeakButton
+                      text={current.term}
+                      className={cls.tool}
+                      icon={<Volume2 aria-hidden size={TOOL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                    />
                     <FavoriteToggle cardUuid={current.uuid} className={cls.tool} />
                   </span>
                   <span className={cls.word}>{current.term}</span>
@@ -211,7 +218,11 @@ export const FlashcardsGame: FC<FlashcardsGameProps> = (props) => {
                 >
                   <span className={cls.side}>{t('RU · Перевод')}</span>
                   <span className={cls.tools}>
-                    <SpeakButton text={current.term} className={cls.tool} />
+                    <SpeakButton
+                      text={current.term}
+                      className={cls.tool}
+                      icon={<Volume2 aria-hidden size={TOOL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                    />
                     <FavoriteToggle cardUuid={current.uuid} className={cls.tool} />
                   </span>
                   <span className={cls.word}>{current.translation}</span>

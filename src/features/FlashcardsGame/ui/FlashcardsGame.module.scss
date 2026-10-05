@@ -205,11 +205,8 @@
   border: 1px solid var(--color-divider);
   font-size: 13px;
 
-  // Мобильный: разделители между сегментами
-  @media (width <= 650px) {
-    // Сегменты AntD — label внутри группы
-    label + label {
-      border-left: 1px solid var(--color-divider);
-    }
+  // Разделители между сегментами (AntD — label внутри группы)
+  label + label {
+    border-left: 1px solid var(--color-divider);
   }
 }

@@ -17,12 +17,12 @@ export const LightTheme: ThemeConfig['token'] = {
     "fontFamilyCode": "'JetBrains Mono', monospace",
 
     // Primary colors (steel accent)
-    "colorPrimary": "#5980a6",
-    "colorPrimaryHover": "#597ea3",
-    "colorPrimaryActive": "#416180",
+    "colorPrimary": "#4b7095",
+    "colorPrimaryHover": "#416180",
+    "colorPrimaryActive": "#2c455d",
     "colorPrimaryBg": "#eef6ff",
     "colorPrimaryBgHover": "#d6ebff",
-    "colorInfo": "#5980a6",
+    "colorInfo": "#4b7095",
 
     // Background tokens
     "colorBgElevated": "#FFFFFF",

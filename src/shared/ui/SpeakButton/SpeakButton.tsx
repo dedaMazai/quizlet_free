@@ -1,6 +1,7 @@
 import {
   FC, memo, MouseEvent, ReactNode,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { SoundOutlined } from '@ant-design/icons';
 import { useSpeech } from '@/shared/lib/hooks/useSpeech';
@@ -17,6 +18,7 @@ export const SpeakButton: FC<SpeakButtonProps> = memo((props) => {
   const {
     text, lang = 'en-US', className, icon,
   } = props;
+  const { t } = useTranslation();
   const { speak, supported } = useSpeech();
 
   if (!supported) {
@@ -33,6 +35,7 @@ export const SpeakButton: FC<SpeakButtonProps> = memo((props) => {
       className={className}
       type="text"
       shape="circle"
+      aria-label={t('Прослушать')}
       icon={icon ?? <SoundOutlined />}
       onClick={handleClick}
     />

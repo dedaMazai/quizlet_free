@@ -1,12 +1,15 @@
 import { FC, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Tooltip } from 'antd';
-import { StarFilled, StarOutlined } from '@ant-design/icons';
+import { Star } from 'lucide-react';
 import {
   useGetFavoritesQuery,
   useToggleFavoriteMutation,
 } from '../../model/api/cardApi';
 import cls from './FavoriteToggle.module.scss';
+
+const STAR_SIZE = 20;
+const ICON_STROKE = 1.5;
 
 interface FavoriteToggleProps {
   cardUuid: string;
@@ -34,11 +37,16 @@ export const FavoriteToggle: FC<FavoriteToggleProps> = (props) => {
       <Button
         className={className}
         type="text"
-        shape="circle"
         aria-label={actionLabel}
-        icon={isFavorite
-          ? <StarFilled className={cls.starActive} />
-          : <StarOutlined className={cls.star} />}
+        aria-pressed={isFavorite}
+        icon={(
+          <Star
+            aria-hidden
+            className={isFavorite ? cls.starActive : undefined}
+            size={STAR_SIZE}
+            strokeWidth={ICON_STROKE}
+          />
+        )}
         onClick={handleClick}
       />
     </Tooltip>

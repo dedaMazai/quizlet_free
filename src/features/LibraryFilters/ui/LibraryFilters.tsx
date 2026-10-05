@@ -1,12 +1,13 @@
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Button, Dropdown, Input, MenuProps, Segmented, Select,
+  Button, Dropdown, Input, MenuProps, Select,
 } from 'antd';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { CardStatus, CardType } from '@/entities/Card';
 import { useGetDecksQuery } from '@/entities/Deck';
 import { classNames } from '@/shared/lib/classNames/classNames';
+import { BoxSegmented } from '@/shared/ui/BoxSegmented';
 import { LibraryFiltersState } from '../model/useLibraryFilters';
 import cls from './LibraryFilters.module.scss';
 
@@ -49,11 +50,13 @@ export const LibraryFilters = memo(({ state, withStatus }: LibraryFiltersProps) 
         prefix={<Search aria-hidden size={SEARCH_ICON_SIZE} strokeWidth={ICON_STROKE} />}
         allowClear
         value={search}
+        aria-label={t('Слово, перевод или пример')}
         placeholder={t('Слово, перевод или пример')}
         onChange={(e) => setSearch(e.target.value)}
       />
       <Select
         className={cls.deckSelect}
+        aria-label={t('Колода')}
         allowClear
         showSearch
         optionFilterProp="label"
@@ -83,8 +86,7 @@ export const LibraryFilters = memo(({ state, withStatus }: LibraryFiltersProps) 
           </Button>
         </Dropdown>
       ))}
-      <Segmented<CardType | 'all'>
-        className={cls.segmented}
+      <BoxSegmented<CardType | 'all'>
         value={type}
         onChange={setType}
         options={[

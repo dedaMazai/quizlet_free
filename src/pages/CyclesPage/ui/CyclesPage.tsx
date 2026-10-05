@@ -111,11 +111,14 @@ const CyclesPage = () => {
     <div className={cls.CyclesPage}>
       <SectionPageHeader section={NavSectionKey.LEARN} extra={isMobile ? createIconButton : createButton} />
 
-      <p className={cls.lead}>
-        {isMobile
-          ? t('Слова по порядку, как в тетради: каждый день N новых, все прошлые — в повтор.')
-          : t('Записывайте слова по порядку, как в тетради. Каждый день открывается N новых, а все предыдущие идут в повтор.')}
-      </p>
+      {/* Без циклов то же самое говорит EmptyState — лид не дублируем */}
+      {(isLoading || Boolean(cycles?.length)) && (
+        <p className={cls.lead}>
+          {isMobile
+            ? t('Слова по порядку, как в тетради: каждый день N новых, все прошлые — в повтор.')
+            : t('Записывайте слова по порядку, как в тетради. Каждый день открывается N новых, а все предыдущие идут в повтор.')}
+        </p>
+      )}
 
       {isLoading && (
         <div className={cls.grid}>

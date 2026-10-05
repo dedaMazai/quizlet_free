@@ -14,6 +14,7 @@ import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
 import cls from './ReviewPreview.module.scss';
 
 const ARROW_SIZE = 18;
+const ICON_STROKE = 1.5;
 /** Подписи оси графика: сегодня, через неделю, через две */
 const WEEK_DAYS = 7;
 
@@ -96,7 +97,7 @@ export const ReviewPreview: FC<ReviewPreviewProps> = (props) => {
             onClick={onStart}
           >
             {t('Начать · ≈ {{count}} мин', { count: estimateReviewMinutes(sessionCount) })}
-            <ArrowRight aria-hidden size={ARROW_SIZE} />
+            <ArrowRight aria-hidden size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
           </Blueprint>
         </AccentPanel>
 
@@ -160,7 +161,7 @@ export const ReviewPreview: FC<ReviewPreviewProps> = (props) => {
               onClick={onStart}
             >
               {t('Начать · ≈ {{count}} мин', { count: estimateReviewMinutes(sessionCount) })}
-              <ArrowRight aria-hidden size={ARROW_SIZE} />
+              <ArrowRight aria-hidden size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
             </Blueprint>
           </div>
         </AccentPanel>

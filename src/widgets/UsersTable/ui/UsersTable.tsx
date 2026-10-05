@@ -109,6 +109,7 @@ export const UsersTable = () => {
                 <div className={cls.toolbar}>
                     <Input
                         className={cls.search}
+                        aria-label={t('Имя или почта')}
                         placeholder={t('Имя или почта')}
                         prefix={<Search aria-hidden size={ICON_SIZE} strokeWidth={ICON_STROKE} />}
                         value={search}
@@ -126,6 +127,7 @@ export const UsersTable = () => {
                     />
                     <Select<BlockStatusFilter>
                         className={cls.filter}
+                        aria-label={t('Статус')}
                         value={statusFilter}
                         onChange={setStatusFilter}
                         options={statusOptions}

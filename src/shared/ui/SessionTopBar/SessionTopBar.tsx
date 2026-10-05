@@ -24,6 +24,8 @@ const hasOpenOverlay = () => Boolean(document.querySelector(
 interface SessionTopBarProps {
     title: ReactNode;
     counter: ReactNode;
+    /** Короткий счётчик для мобильного (макет 6.43: только «5 / 14»), иначе — counter */
+    mobileCounter?: ReactNode;
     ticks: TickState[];
     onExit: () => void;
     /** Автопроизношение; без обработчика кнопка неактивна (пустые состояния) */
@@ -38,7 +40,7 @@ interface SessionTopBarProps {
 /** Топбар фокус-режима: «✕ Выйти ESC» · название, счётчик и 14 делений · озвучка и настройки */
 export const SessionTopBar = memo((props: SessionTopBarProps) => {
     const {
-        title, counter, ticks, onExit, autoSpeak, onToggleAutoSpeak, settings, exitLabel,
+        title, counter, mobileCounter, ticks, onExit, autoSpeak, onToggleAutoSpeak, settings, exitLabel,
     } = props;
     const { t } = useTranslation();
     const exitText = exitLabel ?? t('Выйти');
@@ -62,7 +64,7 @@ export const SessionTopBar = memo((props: SessionTopBarProps) => {
                     icon={<X size={MOBILE_EXIT_ICON_SIZE} strokeWidth={ICON_STROKE} />}
                 />
                 <TickProgress ticks={ticks} size={TickProgressSize.MD} className={cls.mobileTicks} />
-                <span className={cls.counter}>{counter}</span>
+                <span className={cls.counter}>{mobileCounter ?? counter}</span>
                 {/* Озвучки нет в макете, но без неё автопроизношение на мобильном не переключить */}
                 {onToggleAutoSpeak && (
                     <Button

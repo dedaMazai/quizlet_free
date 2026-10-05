@@ -18,6 +18,7 @@ import { LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY } from '@/shared/const/localstorag
 import cls from './RoadmapPage.module.scss';
 
 const ARROW_SIZE = 16;
+const ICON_STROKE = 1.5;
 const CHECK_SIZE = 12;
 const CHECK_STROKE = 2.2;
 const NO_STEPS: string[] = [];
@@ -236,7 +237,7 @@ const RoadmapPage = () => {
                     >
                         <BlueprintMarks />
                         {t('Продолжить: {{step}}', { step: t(hereStep.title) })}
-                        <ArrowRight aria-hidden size={ARROW_SIZE} />
+                        <ArrowRight aria-hidden size={ARROW_SIZE} strokeWidth={ICON_STROKE} />
                     </Button>
                 )}
             </Blueprint>

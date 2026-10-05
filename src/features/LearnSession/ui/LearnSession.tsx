@@ -157,6 +157,7 @@ const LearnSessionInner: FC<LearnSessionInnerProps> = (props) => {
       counter={t('Раунд {{n}} · {{done}} / {{total}}', {
         n: session.round, done: counts.mastered, total: session.total,
       })}
+      mobileCounter={`${counts.mastered} / ${session.total}`}
       ticks={buildSessionTicks(session.answers, session.phase === 'question')}
       onExit={onExit}
       autoSpeak={autoSpeak}

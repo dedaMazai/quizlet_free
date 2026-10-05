@@ -162,7 +162,7 @@ export const NextSteps = memo((props: NextStepsProps) => {
                                         <span className={cls.rowTitle}>{view.title}</span>
                                         <span className={cls.rowMeta}>{view.meta}</span>
                                     </span>
-                                    <ChevronRight aria-hidden className={cls.chevron} size={CHEVRON_SIZE} />
+                                    <ChevronRight aria-hidden className={cls.chevron} size={CHEVRON_SIZE} strokeWidth={ICON_STROKE} />
                                 </Blueprint>
                             </Link>
                         );

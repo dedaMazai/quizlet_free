@@ -86,11 +86,11 @@ $deck-mastery: 200px;
   transition: background var(--motion-fast) var(--ease-standard);
 
   &:hover:not(:disabled) {
-    background: var(--color-accent-100);
+    background: var(--color-field-button-hover);
   }
 
   &:disabled {
-    opacity: 0.45;
+    opacity: var(--btn-disabled-opacity);
     cursor: not-allowed;
   }
 }
