@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="ds/industry.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&family=Fira+Sans+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>:root{--font-heading:"Fira Sans Condensed",system-ui,sans-serif;--font-body:"Fira Sans",system-ui,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace}body{margin:0;background:var(--color-neutral-300)}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-900)}</style>
+<script src="_ds/industry-7f4751c8-ea7d-4eab-8fba-3f89d553a6bf/_ds_bundle.js"></script>
+</helmet>
+
+<section style="padding:64px;display:flex;flex-direction:column;gap:32px;font-family:var(--font-body);color:var(--color-text)">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:1100px">
+    <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;color:var(--color-neutral-800)">ХОД 6 · ФИНАЛЬНЫЙ ДИЗАЙН</div>
+    <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:48px;line-height:1">Zubrika — все экраны</h1>
+    <p style="margin:0;font-size:16px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">57 экранов: десктоп и мобильная версия. Сигнальные цвета ответов, скелетоны и motion-система из 6.0 применяются ко всем экранам.</p>
+  </div>
+  <div id="6-0" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+    <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.0</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px">Аудит, цвет и motion-система</span></div>
+    <div style="width:1280px;box-shadow:var(--shadow-lg)"><dc-import name="DesignAudit" hint-size="1280px,2600px"></dc-import></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Главная</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+    <div id="6-1" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.1</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Главная</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="home" streak="{{ streak }}" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+      <div style="font-size:14px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">«Что учить сейчас»: долг повторений, серия, цель дня, следующий шаг, колоды. Сайдбар сворачивается в rail 76px.</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Библиотека</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+    <div id="6-2" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.2</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Колода</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="deck" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+      <div style="font-size:14px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">Режимы вынесены из меню «…» в сетку «Как учить».</div>
+    </div>
+    <div id="6-3" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.3</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Колоды</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="library" sub="decks" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-4" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.4</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Все слова</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="library" sub="words" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+      <div style="font-size:14px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">Фильтр → «Заучивать выборку».</div>
+    </div>
+    <div id="6-5" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.5</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Избранное</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="library" sub="favorites" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Учить</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+    <div id="6-6" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.6</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">К повторению</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="review" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+      <div style="font-size:14px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">Колоды можно исключить из сессии; нагрузка на 2 недели.</div>
+    </div>
+    <div id="6-7" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.7</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Циклы заучивания</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="cycles" sub="list" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-8" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.8</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Цикл</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="cycles" sub="detail" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-9" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.9</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Дорожная карта</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="roadmap" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Занятия — фокус-режим</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+    <div id="6-10" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.10</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Заучивание · вопрос</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Session" mode="choice" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+    </div>
+    <div id="6-11" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.11</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Заучивание · верно</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Session" mode="correct" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+      <div style="font-size:14px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">Сигнальный зелёный + полоса автоперехода.</div>
+    </div>
+    <div id="6-12" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.12</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Заучивание · неверно</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Session" mode="wrong" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+      <div style="font-size:14px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">Объяснение ошибки, без автоперехода.</div>
+    </div>
+    <div id="6-13" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.13</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Письмо · опечатка</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Session" mode="write" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+    </div>
+    <div id="6-14" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.14</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Карточки</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Session" mode="cards" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+    </div>
+    <div id="6-15" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.15</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Пропуски</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Session" mode="cloze" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+    </div>
+    <div id="6-16" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.16</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Собери фразу</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Session" mode="order" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+    </div>
+    <div id="6-17" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.17</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Итог сессии</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Session" mode="done" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+      <div style="font-size:14px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">Серия растёт, трудные слова, следующий шаг.</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Грамматика</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+    <div id="6-18" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.18</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Времена</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="grammar" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-19" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.19</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Группа времён · Perfect</span></div>
+      <div style="width:1280px;height:1100px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="gx" sub="group" style="width:100%;height:100%" hint-size="1280px,1100px"></dc-import></div>
+    </div>
+    <div id="6-20" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.20</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Практика времён</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="gx" sub="practice" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-21" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.21</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Неправильные глаголы</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="gx" sub="irregular" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-22" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.22</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Тема · Артикли</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="gx" sub="topic" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Прогресс</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+    <div id="6-23" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.23</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Прогресс</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="progress" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Аккаунт</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+    <div id="6-24" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.24</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Профиль</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="account" sub="profile" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-25" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.25</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Настройки</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="account" sub="settings" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-26" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.26</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Пользователи · админ</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Shell" screen="account" sub="users" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Модальные окна</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+    <div id="6-27" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.27</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Добавить слова</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Modals" kind="add" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-28" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.28</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Проверка переводов ИИ</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Modals" kind="aicheck" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-29" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.29</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Подобрать фразы ИИ</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Modals" kind="chunks" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+    <div id="6-30" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.30</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Доступ к колоде</span></div>
+      <div style="width:1280px;height:1040px;box-shadow:var(--shadow-lg)"><dc-import name="Modals" kind="share" style="width:100%;height:100%" hint-size="1280px,1040px"></dc-import></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Вход и служебные</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+    <div id="6-31" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.31</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Вход</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Public" view="login" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+    </div>
+    <div id="6-32" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.32</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Регистрация</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Public" view="register" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+    </div>
+    <div id="6-33" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.33</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">404 / 403</span></div>
+      <div style="width:1280px;height:820px;box-shadow:var(--shadow-lg)"><dc-import name="Public" view="notfound" style="width:100%;height:100%" hint-size="1280px,820px"></dc-import></div>
+    </div>
+    <div id="6-34" style="display:flex;flex-direction:column;gap:12px;width:1280px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.34</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">О сервисе</span></div>
+      <div style="width:1280px;height:1320px;box-shadow:var(--shadow-lg)"><dc-import name="Public" view="about" style="width:100%;height:100%" hint-size="1280px,1320px"></dc-import></div>
+      <div style="font-size:14px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">«О сервисе», «Возможности» и FAQ — одна страница.</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;margin-top:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:34px;white-space:nowrap">Мобильная версия</h2><div style="flex:1;height:1px;background:var(--color-neutral-500)"></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:48px 36px;align-items:flex-start">
+    <div id="6-35" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.35</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Главная</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="home" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-36" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.36</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Колода</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="deck" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-37" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.37</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Добавить слова · шторка</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="sheet" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-38" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.38</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Библиотека</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="library" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-39" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.39</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">К повторению</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="review" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-40" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.40</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Циклы</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="cycles" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-41" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.41</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Цикл</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="cycle" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-42" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.42</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Дорожная карта</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="roadmap" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-43" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.43</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Заучивание</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="learn" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-44" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.44</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Верно</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="correct" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-45" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.45</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Неверно</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="wrong" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-46" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.46</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Письмо</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="write" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-47" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.47</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Карточки</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="cards" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-48" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.48</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Пропуски</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="cloze" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-49" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.49</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Собери фразу</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="order" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-50" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.50</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Итог сессии</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="done" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-51" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.51</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Грамматика</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="grammar" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-52" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.52</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Группа времён</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="tense" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-53" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.53</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Практика</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="practice" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-54" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.54</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Неправ. глаголы</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="irregular" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-55" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.55</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Прогресс</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="progress" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-56" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.56</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Аккаунт</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="account" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+    <div id="6-57" style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--font-mono);font-size:13px;padding:4px 10px;background:var(--color-accent-900);color:var(--color-bg)">6.57</span><span style="font-family:var(--font-heading);font-weight:600;font-size:19px;white-space:nowrap">Вход</span></div>
+      <div style="width:390px;height:844px;box-shadow:var(--shadow-lg)"><dc-import name="Mobile" screen="login" style="width:100%;height:100%" hint-size="390px,844px"></dc-import></div>
+    </div>
+  </div>
+</section>
+
+
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;streak&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:60,&quot;step&quot;:1,&quot;default&quot;:12,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Серия на главной&quot;}}">
+class Component extends DCLogic {
+  renderVals() { return { streak: this.props.streak ?? 12 }; }
+}
+</script>
+</body>
+</html>

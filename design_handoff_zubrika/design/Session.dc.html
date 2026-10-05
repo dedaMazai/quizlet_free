@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-7f4751c8-ea7d-4eab-8fba-3f89d553a6bf/styles.css">
+<script src="_ds/industry-7f4751c8-ea7d-4eab-8fba-3f89d553a6bf/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&family=Fira+Sans+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>:root{--font-heading:"Fira Sans Condensed",system-ui,sans-serif;--font-body:"Fira Sans",system-ui,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace}</style>
+</helmet>
+<div style="width:100%;height:100%;display:flex;flex-direction:column;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);overflow:hidden">
+  <div style="height:72px;flex:none;display:grid;grid-template-columns:1fr minmax(0,560px) 1fr;align-items:center;gap:24px;padding:0 32px;border-bottom:1px solid var(--color-divider)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-secondary" style="height:36px;gap:8px;font-family:var(--font-body);font-weight:400;font-size:13px;white-space:nowrap"><dc-import name="Icon" n="x" size="16" hint-size="16px,16px"></dc-import>Выйти<span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;color:var(--color-neutral-600)">ESC</span></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:16px">{{ title }}</span><span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;color:var(--color-neutral-700)">{{ counter }}</span></div>
+      <div style="display:grid;grid-template-columns:repeat(14,1fr);gap:3px"><sc-for list="{{ bar }}" as="b" hint-placeholder-count="14"><i style="height:8px;background:{{ b }}"></i></sc-for></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn btn-secondary btn-icon" style="width:36px;height:36px;white-space:nowrap"><dc-import name="Icon" n="volume" size="18" hint-size="18px,18px"></dc-import></button>
+      <button class="btn btn-secondary btn-icon" style="width:36px;height:36px;white-space:nowrap"><dc-import name="Icon" n="settings" size="18" hint-size="18px,18px"></dc-import></button>
+    </div>
+  </div>
+
+  <sc-if value="{{ isChoice }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;padding:40px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+        <span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--color-neutral-700)">ВЫБЕРИТЕ ПЕРЕВОД</span>
+        <div style="display:flex;align-items:center;gap:14px"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:72px;line-height:1;letter-spacing:-.02em">откладывать</span><span style="color:var(--color-neutral-500)"><dc-import name="Icon" n="star" size="26" hint-size="26px,26px"></dc-import></span></div>
+        <span style="font-size:15px;color:var(--color-neutral-700);white-space:nowrap">на потом, переносить</span>
+      </div>
+      <div style="width:100%;max-width:760px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <sc-for list="{{ choices }}" as="c" hint-placeholder-count="4">
+          <div class="blueprint" style="display:flex;align-items:center;gap:16px;padding:20px 22px;cursor:pointer;border-color:{{ c.bc }};background:{{ c.bg }}" style-hover="background:var(--color-accent-100)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <span style="width:28px;height:28px;flex:none;display:grid;place-items:center;font-family:var(--font-mono);font-size:13px;border:1px solid {{ c.kc }};color:{{ c.kf }};background:{{ c.kb }}">{{ c.k }}</span>
+            <span style="white-space:nowrap;font-family:var(--font-heading);font-weight:500;font-size:24px">{{ c.t }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ noFb }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:24px;font-family:var(--font-mono);font-size:11px;color:var(--color-neutral-700)"><span>1–4 — ОТВЕТ</span><span>← → ↑ ↓ — ВЫБОР</span><span>ENTER — ПОДТВЕРДИТЬ</span></div></sc-if>
+      <sc-if value="{{ fb }}" hint-placeholder-val="{{ false }}">
+        <div style="width:100%;max-width:760px;display:flex;align-items:center;gap:16px;padding:16px 20px;border:1px solid {{ fb.c }};background:{{ fb.bg }}">
+          <span style="width:32px;height:32px;flex:none;display:grid;place-items:center;background:{{ fb.c }};color:var(--color-bg)"><dc-import name="Icon" n="{{ fb.icon }}" size="18" sw="2" hint-size="18px,18px"></dc-import></span>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-family:var(--font-heading);font-weight:600;font-size:20px;color:{{ fb.ink }}">{{ fb.title }}</span><span style="font-size:14px;color:var(--color-neutral-800)">{{ fb.sub }}</span></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span style="white-space:nowrap;padding:10px 16px;background:var(--color-text);color:var(--color-bg);font-family:var(--font-heading);font-weight:600;font-size:15px">Дальше · ENTER</span><sc-if value="{{ fb.auto }}" hint-placeholder-val="{{ false }}"><div style="width:100%;height:2px;background:var(--color-neutral-300);position:relative"><i style="position:absolute;left:0;top:0;bottom:0;width:60%;background:{{ fb.c }}"></i></div></sc-if></div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isWrite }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding:40px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+        <span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--color-neutral-700)">НАПИШИТЕ ПО-АНГЛИЙСКИ</span>
+        <span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:64px;line-height:1;letter-spacing:-.02em">путешествовать налегке</span>
+      </div>
+      <div style="width:100%;max-width:680px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-neutral-700)">ВАШ ОТВЕТ</span><div style="height:64px;display:flex;align-items:center;padding:0 20px;border:1px solid var(--color-accent);font-family:var(--font-heading);font-weight:500;font-size:28px;white-space:nowrap">travel li<span style="padding:0 2px;margin:0 1px;background:var(--color-accent-200);color:var(--color-accent-900);text-decoration:line-through;text-decoration-thickness:2px">tg</span>ht</div></div>
+        <div class="blueprint" style="display:flex;flex-direction:column;gap:12px;padding:20px 22px">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;color:var(--color-accent-700)">ПОЧТИ · ОДНА ОПЕЧАТКА</span><span style="font-size:12px;color:var(--color-neutral-700)">засчитано как «трудно»</span></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:30px">travel li<span style="padding:0 2px;margin:0 1px;background:var(--color-accent-700);color:var(--color-bg)">gh</span>t</span><span style="color:var(--color-neutral-600)"><dc-import name="Icon" n="volume" size="20" hint-size="20px,20px"></dc-import></span></div>
+          <div style="font-size:15px;font-style:italic;color:var(--color-neutral-800)">“I always <b style="font-style:normal;font-weight:600;color:var(--color-accent-800)">travel light</b> — just a backpack.”</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="btn btn-primary blueprint" style="height:48px;padding:0 26px;gap:10px;font-size:18px;white-space:nowrap"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Дальше<span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;opacity:.8">ENTER</span></button>
+        <button class="btn btn-ghost" style="height:48px;font-size:15px;white-space:nowrap">Я ответил верно</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCards }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:40px">
+      <div style="display:flex;border:1px solid var(--color-divider);font-size:13px"><span style="padding:7px 14px;background:var(--color-accent);color:var(--color-bg)">Все</span><span style="padding:7px 14px;border-left:1px solid var(--color-divider)">Избранные</span><span style="padding:7px 14px;border-left:1px solid var(--color-divider)">Неизбранные</span></div>
+      <div class="blueprint" style="width:100%;max-width:720px;height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:pointer;position:relative" style-hover="background:var(--color-accent-100)">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span style="position:absolute;top:18px;left:20px;white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--color-neutral-700)">EN · СЛОВО</span>
+        <span style="position:absolute;top:16px;right:18px;display:flex;gap:12px;color:var(--color-neutral-600)"><dc-import name="Icon" n="volume" size="20" hint-size="20px,20px"></dc-import><dc-import name="Icon" n="star" size="20" hint-size="20px,20px"></dc-import></span>
+        <span style="font-family:var(--font-heading);font-weight:600;font-size:80px;line-height:1;letter-spacing:-.02em;white-space:nowrap">look forward to</span>
+        <span style="font-size:15px;font-style:italic;color:var(--color-neutral-700)">“I'm looking forward to the weekend.”</span>
+        <span style="position:absolute;bottom:18px;white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--color-neutral-600)">НАЖМИТЕ ИЛИ ПРОБЕЛ — ПЕРЕВЕРНУТЬ</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn btn-secondary btn-icon" style="width:48px;height:48px;white-space:nowrap"><dc-import name="Icon" n="left" size="20" hint-size="20px,20px"></dc-import></button>
+        <button class="btn btn-secondary" style="height:48px;gap:8px;padding:0 18px;font-family:var(--font-body);font-weight:400;font-size:14px;white-space:nowrap"><dc-import name="Icon" n="repeat" size="16" hint-size="16px,16px"></dc-import>Перемешать</button>
+        <button class="btn btn-secondary btn-icon" style="width:48px;height:48px;white-space:nowrap"><dc-import name="Icon" n="right" size="20" hint-size="20px,20px"></dc-import></button>
+      </div>
+      <span style="font-size:13px;color:var(--color-neutral-700)">Ознакомительный режим — прогресс не записывается. Готовы? <a href="#" style="text-decoration:none;font-weight:500">Перейти к заучиванию →</a></span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCloze }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;padding:40px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px;max-width:900px;text-align:center">
+        <span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--color-neutral-700)">ВСТАВЬТЕ СЛОВО ПО СМЫСЛУ</span>
+        <div style="font-family:var(--font-heading);font-weight:500;font-size:44px;line-height:1.3;text-wrap:balance">Don't <span style="display:inline-block;min-width:200px;padding:0 10px;border-bottom:3px solid var(--color-accent);background:var(--color-accent-100);color:var(--color-accent-900);font-weight:600">put o<span style="display:inline-block;width:2px;height:40px;vertical-align:-6px;background:var(--color-accent-900)"></span></span> till tomorrow what you can do today.</div>
+        <span style="font-size:15px;color:var(--color-neutral-700)">Подсказка: <b style="font-weight:600;color:var(--color-text)">откладывать</b></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="btn btn-primary blueprint" style="height:48px;padding:0 26px;gap:10px;font-size:18px;white-space:nowrap"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Проверить<span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;opacity:.8">ENTER</span></button>
+        <button class="btn btn-ghost" style="height:48px;font-size:15px;white-space:nowrap">Не помню</button>
+      </div>
+      <span style="font-size:13px;color:var(--color-neutral-700)">Одна опечатка засчитывается — с пометкой «трудно».</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isOrder }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;padding:40px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+        <span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--color-neutral-700)">СОБЕРИТЕ ФРАЗУ</span>
+        <span style="font-family:var(--font-heading);font-weight:600;font-size:56px;line-height:1;white-space:nowrap">с нетерпением ждать выходных</span>
+      </div>
+      <div style="width:100%;max-width:820px;min-height:80px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:2px solid var(--color-accent)">
+        <sc-for list="{{ picked }}" as="p" hint-placeholder-count="2"><span class="blueprint" style="padding:10px 18px;background:var(--color-accent-900);border-color:var(--color-accent-900);color:var(--color-bg);font-family:var(--font-heading);font-weight:500;font-size:26px;white-space:nowrap"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>{{ p }}</span></sc-for>
+        <span style="width:2px;height:36px;background:var(--color-accent)"></span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;max-width:820px">
+        <sc-for list="{{ bank }}" as="b" hint-placeholder-count="5"><span class="blueprint" style="padding:10px 18px;font-family:var(--font-heading);font-weight:500;font-size:26px;cursor:pointer;white-space:nowrap;opacity:{{ b.op }};border-style:{{ b.bs }}" style-hover="background:var(--color-accent-100)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>{{ b.t }}</span></sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="btn btn-secondary" style="height:44px;padding:0 18px;font-size:15px;white-space:nowrap">Сбросить</button>
+        <button class="btn btn-primary blueprint" style="height:44px;padding:0 24px;font-size:16px;white-space:nowrap" disabled><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Проверить</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;justify-content:center;padding:56px 40px">
+      <div style="width:100%;max-width:960px;display:flex;flex-direction:column;gap:32px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--color-accent-700)">СЕССИЯ ЗАВЕРШЕНА</span>
+          <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:64px;line-height:1;letter-spacing:-.02em">Долг закрыт. День засчитан.</h1>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px">
+          <div class="blueprint" style="background:var(--color-accent-900);border-color:var(--color-accent-900);color:var(--color-bg);padding:28px;display:flex;flex-direction:column;gap:20px">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="color:oklch(0.76 0.14 60)"><dc-import name="Icon" n="flame" size="48" sw="1.25" hint-size="48px,48px"></dc-import></span>
+              <span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:112px;line-height:.8;letter-spacing:-.04em">13</span>
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:500;font-size:26px;line-height:1">дней подряд</span><span style="font-size:13px;color:var(--color-accent-300)">+1 · уровень «Пламя» · до рекорда 18</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">
+              <sc-for list="{{ week }}" as="w" hint-placeholder-count="7">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:100%;height:28px;background:{{ w.bg }};border:1px solid var(--color-accent-700)"></div><span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;color:var(--color-accent-300)">{{ w.d }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+          <div class="blueprint" style="display:grid;grid-template-columns:1fr 1fr">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+              <div style="padding:20px;display:flex;flex-direction:column;gap:6px;border-left:1px solid {{ s.bl }};border-top:1px solid {{ s.bt }}">
+                <span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-neutral-700)">{{ s.l }}</span>
+                <span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:40px;line-height:1;color:{{ s.c }}">{{ s.v }}</span><sc-if value="{{ s.tag }}" hint-placeholder-val="{{ false }}"><span style="align-self:flex-start;white-space:nowrap;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;padding:2px 6px;background:oklch(0.95 0.03 155);color:oklch(0.42 0.08 155)">{{ s.tag }}</span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:16px"><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;white-space:nowrap">Трудные слова этой сессии</span><div style="flex:1;height:1px;background:var(--color-divider)"></div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ hard }}" as="h" hint-placeholder-count="5"><span style="padding:6px 12px;border:1px solid var(--color-divider);font-size:14px;white-space:nowrap">{{ h }}</span></sc-for>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <button class="btn btn-primary blueprint" style="height:48px;padding:0 24px;gap:10px;font-size:17px;white-space:nowrap"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Ещё 7 новых из «Travel»<dc-import name="Icon" n="arrow" size="16" hint-size="16px,16px"></dc-import></button>
+          <button class="btn btn-secondary" style="height:48px;padding:0 20px;font-size:16px;white-space:nowrap">Повторить трудные</button>
+          <button class="btn btn-ghost" style="height:48px;font-size:16px;white-space:nowrap">На главную</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:820},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;choice&quot;,&quot;correct&quot;,&quot;wrong&quot;,&quot;write&quot;,&quot;done&quot;,&quot;cards&quot;,&quot;cloze&quot;,&quot;order&quot;],&quot;default&quot;:&quot;choice&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const mode = this.props.mode ?? 'choice';
+    const A7 = 'var(--color-accent-700)', A4 = 'var(--color-accent-400)', N = 'var(--color-neutral-300)';
+    const WR = [2, 7, 11]; const bar = n => Array.from({ length: 14 }, (_, i) => i < n ? (WR.includes(i) ? 'repeating-linear-gradient(135deg, oklch(0.5 0.16 35) 0 2px, oklch(0.9 0.04 35) 2px 4px)' : 'oklch(0.62 0.11 170)') : i === n ? A4 : N);
+    const head = {
+      choice: { title: 'Phrasal verbs · Заучивание', counter: 'РАУНД 2 · 5 / 14', bar: bar(5) },
+      write: { title: 'Travel · Письмо RU → EN', counter: '9 / 14', bar: bar(9) },
+      done: { title: 'Повторение', counter: '44 / 44', bar: bar(14) },
+      correct: { title: 'Phrasal verbs · Заучивание', counter: 'РАУНД 2 · 5 / 14', bar: bar(5) },
+      wrong: { title: 'Phrasal verbs · Заучивание', counter: 'РАУНД 2 · 5 / 14', bar: bar(5) },
+      cards: { title: 'Phrasal verbs · Карточки', counter: '23 / 128', bar: bar(3) },
+      cloze: { title: 'Phrasal verbs · Пропуски', counter: '6 / 14', bar: bar(6) },
+      order: { title: 'Phrasal verbs · Собери фразу', counter: '4 / 14', bar: bar(4) }
+    }[mode];
+    const SU = 'oklch(0.6 0.11 170)', SU1 = 'oklch(0.95 0.03 170)', ER = 'oklch(0.5 0.16 35)', ER1 = 'oklch(0.95 0.025 27)';
+    const ch = ['put off', 'put up with', 'take off', 'give in'];
+    return {
+      ...head,
+      isChoice: ['choice','correct','wrong'].includes(mode), noFb: !['correct','wrong'].includes(mode), fb: mode === 'correct' ? { c: SU, bg: SU1, ink: 'oklch(0.42 0.08 155)', icon: 'check', title: 'Верно', sub: 'Интервал вырос: слово вернётся через 3 дня', auto: true } : mode === 'wrong' ? { c: ER, bg: ER1, ink: 'oklch(0.45 0.11 27)', icon: 'x', title: 'Неверно — правильно «put off»', sub: '«put up with» — терпеть. Слово вернётся в эту же сессию', auto: false } : null, isWrite: mode === 'write', isDone: mode === 'done', isCards: mode === 'cards', isCloze: mode === 'cloze', isOrder: mode === 'order',
+      picked: ['look', 'forward'],
+      bank: [['the', 0], ['forward', 1], ['weekend', 0], ['look', 1], ['to', 0]].map(([t, used]) => ({ t, op: used ? 0.3 : 1, bs: used ? 'dashed' : 'solid' })),
+      choices: ch.map((t, i) => {
+        if (mode === 'correct' || mode === 'wrong') {
+          const ok = i === 0, bad = mode === 'wrong' && i === 1, dim = !ok && !bad;
+          const c = ok ? SU : bad ? ER : 'var(--color-divider)';
+          return { t, k: i + 1, bc: c, bg: ok ? SU1 : bad ? ER1 : 'transparent', kc: c, kb: ok || bad ? c : 'transparent', kf: ok || bad ? 'var(--color-bg)' : 'var(--color-neutral-500)' };
+        }
+        const a = i === 0;
+        return { t, k: i + 1, bc: a ? 'var(--color-accent)' : 'var(--color-divider)', bg: a ? 'var(--color-accent-100)' : 'transparent', kc: a ? 'var(--color-accent)' : 'var(--color-divider)', kb: a ? 'var(--color-accent)' : 'transparent', kf: a ? 'var(--color-bg)' : 'var(--color-neutral-700)' };
+      }),
+      week: ['ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС', 'ПН'].map((d, i) => ({ d, bg: i === 6 ? 'oklch(0.8 0.1 60)' : 'oklch(0.66 0.15 55)' })),
+      stats: [
+        { l: 'КАРТОЧЕК', v: '44', bl: 'transparent', bt: 'transparent', c: 'var(--color-text)', tag: '' },
+        { l: 'ТОЧНОСТЬ', v: '91%', bl: 'var(--color-divider)', bt: 'transparent', c: 'oklch(0.48 0.09 155)', tag: 'ЛИЧНЫЙ РЕКОРД' },
+        { l: 'ВРЕМЯ', v: '7:40', bl: 'transparent', bt: 'var(--color-divider)', c: 'var(--color-text)', tag: '' },
+        { l: 'УСВОЕНО', v: '+9', bl: 'var(--color-divider)', bt: 'var(--color-divider)', c: 'oklch(0.48 0.09 155)', tag: '' }
+      ],
+      hard: ['put up with', 'layover', 'come up with', 'to be honest', 'simmer']
+    };
+  }
+}
+</script>
+</body>
+</html>

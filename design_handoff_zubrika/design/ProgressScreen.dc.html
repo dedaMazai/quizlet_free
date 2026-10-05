@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-7f4751c8-ea7d-4eab-8fba-3f89d553a6bf/styles.css">
+<script src="_ds/industry-7f4751c8-ea7d-4eab-8fba-3f89d553a6bf/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&family=Fira+Sans+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>:root{--font-heading:"Fira Sans Condensed",system-ui,sans-serif;--font-body:"Fira Sans",system-ui,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:28px;width:100%;font-family:var(--font-body);color:var(--color-text)">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px">
+    <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;letter-spacing:-.02em">Прогресс</h1>
+    <div style="display:flex;border:1px solid var(--color-divider);font-size:13px">
+      <span style="padding:7px 14px">Неделя</span>
+      <span style="padding:7px 14px;border-left:1px solid var(--color-divider)">Месяц</span>
+      <span style="padding:7px 14px;border-left:1px solid var(--color-divider);background:var(--color-accent);color:var(--color-bg)">Год</span>
+    </div>
+  </div>
+
+  <div class="blueprint" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr))">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="padding:22px 22px 18px;display:flex;flex-direction:column;gap:10px;border-left:1px solid {{ k.bl }}">
+        <span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--color-neutral-700)">{{ k.label }}</span>
+        <div style="display:flex;align-items:baseline;gap:6px"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:56px;line-height:.85;letter-spacing:-.03em;color:{{ k.vc }}">{{ k.v }}</span><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:500;font-size:20px;color:var(--color-neutral-700)">{{ k.u }}</span></div>
+        <span style="font-size:12px;color:{{ k.dc }}">{{ k.d }}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;white-space:nowrap">Активность за год</h2><div style="flex:1;height:1px;background:var(--color-divider)"></div><span style="font-size:13px;color:var(--color-neutral-700);white-space:nowrap">214 дней с занятиями</span></div>
+    <div style="display:flex;gap:3px">
+      <sc-for list="{{ heat }}" as="col" hint-placeholder-count="52">
+        <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+          <sc-for list="{{ col }}" as="c"><div style="aspect-ratio:1;background:{{ c }}"></div></sc-for>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:10px;color:var(--color-neutral-700)">
+      <div style="display:flex;gap:0;flex:1;justify-content:space-between;max-width:88%"><span>ОКТ</span><span>НОЯ</span><span>ДЕК</span><span>ЯНВ</span><span>ФЕВ</span><span>МАР</span><span>АПР</span><span>МАЙ</span><span>ИЮН</span><span>ИЮЛ</span><span>АВГ</span><span>СЕН</span></div>
+      <div style="display:flex;align-items:center;gap:4px">МЕНЬШЕ<i style="width:10px;height:10px;background:var(--color-neutral-200)"></i><i style="width:10px;height:10px;background:var(--color-accent-300)"></i><i style="width:10px;height:10px;background:var(--color-accent-500)"></i><i style="width:10px;height:10px;background:var(--color-accent-700)"></i><i style="width:10px;height:10px;background:var(--color-accent-900)"></i>БОЛЬШЕ</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px">
+    <div class="blueprint" style="padding:22px;display:flex;flex-direction:column;gap:18px">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:22px">Освоение слов</span><span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;color:var(--color-neutral-700)">1 240 ВСЕГО</span></div>
+      <div style="display:flex;height:28px;gap:2px"><div style="width:41%;background:var(--color-accent-700)"></div><div style="width:34%;background:var(--color-accent-400)"></div><div style="flex:1;background:var(--color-neutral-300)"></div></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <sc-for list="{{ mastery }}" as="m" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--color-neutral-800)"><i style="width:10px;height:10px;background:{{ m.c }}"></i>{{ m.l }}</span>
+            <span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:34px;line-height:1">{{ m.v }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div class="blueprint" style="padding:22px;display:flex;flex-direction:column;gap:12px">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:600;font-size:22px">По колодам</span><a href="#" style="font-size:13px;text-decoration:none">Все 14</a></div>
+      <sc-for list="{{ decks }}" as="d" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 150px 44px;gap:14px;align-items:center;font-size:14px">
+          <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.n }}</span>
+          <div style="height:6px;background:var(--color-neutral-200);position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ d.p }};background:{{ d.c }}"></div></div>
+          <span style="white-space:nowrap;font-family:var(--font-mono);font-size:12px;text-align:right">{{ d.p }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const steps = ['var(--color-neutral-200)', 'var(--color-accent-300)', 'var(--color-accent-500)', 'var(--color-accent-700)', 'var(--color-accent-900)'];
+    let seed = 7;
+    const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    const heat = Array.from({ length: 52 }, (_, w) => Array.from({ length: 7 }, (_, d) => {
+      const ramp = w / 52;
+      const r = rnd();
+      const lvl = r < 0.4 - ramp * 0.25 ? 0 : Math.min(4, Math.floor(r * 3 + ramp * 2));
+      return steps[lvl];
+    }));
+    return {
+      heat,
+      kpis: [
+        { label: 'ТОЧНОСТЬ', v: '88', u: '%', d: '▲ 4% к прошлому году', bl: 'transparent', dc: 'oklch(0.42 0.08 155)', vc: 'var(--color-text)' },
+        { label: 'ОТВЕТОВ', v: '3 412', u: '', d: '▲ 12% за месяц', bl: 'var(--color-divider)', dc: 'oklch(0.42 0.08 155)', vc: 'var(--color-text)' },
+        { label: 'ВРЕМЯ', v: '26', u: 'ч', d: '7 мин в среднем за сессию', bl: 'var(--color-divider)', dc: 'var(--color-neutral-700)', vc: 'var(--color-text)' },
+        { label: 'СЕРИЯ · ПЛАМЯ', v: '12', u: 'дн', d: 'ещё 2 дня до «Жар»', bl: 'var(--color-divider)', dc: 'oklch(0.66 0.15 55)', vc: 'oklch(0.66 0.15 55)' }
+      ],
+      mastery: [
+        { l: 'Усвоено', v: 510, c: 'var(--color-accent-700)' },
+        { l: 'Изучаю', v: 418, c: 'var(--color-accent-400)' },
+        { l: 'Новые', v: 312, c: 'var(--color-neutral-300)' }
+      ],
+      decks: [
+        { n: 'Работа', p: '80%', c: 'oklch(0.56 0.09 155)' }, { n: 'Food & Cooking', p: '71%', c: 'var(--color-accent-700)' }, { n: 'Phrasal verbs', p: '62%', c: 'var(--color-accent-700)' },
+        { n: 'Business English', p: '48%', c: 'var(--color-accent-700)' }, { n: 'Travel', p: '35%', c: 'var(--color-accent-700)' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

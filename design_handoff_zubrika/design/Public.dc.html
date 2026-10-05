@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-7f4751c8-ea7d-4eab-8fba-3f89d553a6bf/styles.css">
+<script src="_ds/industry-7f4751c8-ea7d-4eab-8fba-3f89d553a6bf/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&family=Fira+Sans+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>:root{--font-heading:"Fira Sans Condensed",system-ui,sans-serif;--font-body:"Fira Sans",system-ui,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace}</style>
+</helmet>
+<div style="width:100%;height:100%;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);overflow:hidden;display:flex;flex-direction:column">
+  <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr">
+      <div style="background:var(--color-accent-900);color:var(--color-bg);padding:48px 56px;display:flex;flex-direction:column;gap:40px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg width="22" height="28" viewBox="0 0 24 36" fill="none"><rect x="2" y="9" width="20" height="23" stroke="currentColor" stroke-width="2.4"></rect><line x1="6" y1="16" x2="18" y2="16" stroke="currentColor" stroke-width="2.4"></line><line x1="6" y1="21" x2="18" y2="21" stroke="currentColor" stroke-width="2.4"></line><line x1="6" y1="26" x2="14" y2="26" stroke="currentColor" stroke-width="2.4"></line></svg>
+          <span style="font-family:var(--font-heading);font-weight:700;font-size:24px">Zubrika</span>
+        </div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:20px">
+          <span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--color-accent-300)">АНГЛИЙСКИЙ ПО КАРТОЧКАМ</span>
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:64px;line-height:.98;letter-spacing:-.02em;text-wrap:balance">Учите фразами. Не забывайте через месяц.</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--color-accent-700)">
+          <sc-for list="{{ pillars }}" as="p" hint-placeholder-count="3">
+            <div style="padding:18px 16px 0 0;display:flex;flex-direction:column;gap:6px"><span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;color:var(--color-accent-300)">{{ p.n }}</span><span style="font-family:var(--font-heading);font-weight:600;font-size:18px;line-height:1.1">{{ p.t }}</span><span style="font-size:13px;line-height:1.4;color:var(--color-accent-200)">{{ p.d }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;padding:48px">
+        <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-family:var(--font-heading);font-weight:600;font-size:36px;line-height:1">{{ authTitle }}</span><span style="font-size:14px;color:var(--color-neutral-700)">{{ authSub }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}"><div class="field"><label>Имя · необязательно</label><div class="input" style="height:44px;display:flex;align-items:center;color:var(--color-neutral-600)">Как к вам обращаться</div></div></sc-if>
+            <div class="field"><label>Почта</label><div class="input" style="height:44px;display:flex;align-items:center">ilya.k@gmail.com</div></div>
+            <div class="field"><label>Пароль</label><div class="input" style="height:44px;display:flex;align-items:center;justify-content:space-between;border-color:var(--color-accent)">••••••••••<span style="font-size:12px;color:var(--color-accent-700)">Показать</span></div></div>
+          </div>
+          <button class="btn btn-primary blueprint" style="height:48px;font-size:17px;white-space:nowrap"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>{{ authCta }}</button>
+          <div style="display:flex;justify-content:space-between;font-size:14px"><a href="#" style="text-decoration:none">{{ authSwitch }}</a><a href="#" style="text-decoration:none;color:var(--color-neutral-700)">О сервисе</a></div>
+          <span style="font-size:12px;line-height:1.5;color:var(--color-neutral-700)">Продолжая, вы принимаете <a href="#">пользовательское соглашение и политику конфиденциальности</a>.</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isNotFound }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;text-align:center">
+      <div class="blueprint" style="padding:12px 40px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span style="font-family:var(--font-heading);font-weight:600;font-size:200px;line-height:1;letter-spacing:-.04em;color:var(--color-accent-800)">404</span></div>
+      <span style="font-family:var(--font-heading);font-weight:600;font-size:36px">Такой страницы нет</span>
+      <span style="font-size:15px;color:var(--color-neutral-700);max-width:420px">Возможно, колоду удалили или ссылка устарела. 42 карточки тем временем ждут повторения.</span>
+      <div style="display:flex;gap:10px"><button class="btn btn-primary blueprint" style="height:44px;padding:0 20px;font-size:16px;white-space:nowrap"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Повторить 42</button><button class="btn btn-secondary" style="height:44px;padding:0 18px;font-size:16px;white-space:nowrap">На главную</button></div>
+      <span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;color:var(--color-neutral-600)">403 «НЕТ ДОСТУПА» — ТОТ ЖЕ МАКЕТ С ДРУГИМ ТЕКСТОМ</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
+    <div style="height:72px;flex:none;display:flex;align-items:center;gap:32px;padding:0 56px;border-bottom:1px solid var(--color-divider)">
+      <div style="display:flex;align-items:center;gap:10px;color:var(--color-accent-900)"><svg width="20" height="26" viewBox="0 0 24 36" fill="none"><rect x="2" y="9" width="20" height="23" stroke="currentColor" stroke-width="2.4"></rect><line x1="6" y1="16" x2="18" y2="16" stroke="currentColor" stroke-width="2.4"></line><line x1="6" y1="21" x2="18" y2="21" stroke="currentColor" stroke-width="2.4"></line><line x1="6" y1="26" x2="14" y2="26" stroke="currentColor" stroke-width="2.4"></line></svg><span style="font-family:var(--font-heading);font-weight:700;font-size:22px">Zubrika</span></div>
+      <div style="display:flex;gap:24px;font-size:15px"><span>Возможности</span><span>Сравнение</span><span>Вопросы</span></div>
+      <div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-secondary" style="height:40px;padding:0 16px;font-size:15px;white-space:nowrap">Войти</button><button class="btn btn-primary blueprint" style="height:40px;padding:0 18px;font-size:15px;white-space:nowrap"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Начать бесплатно</button></div>
+    </div>
+    <div style="padding:72px 56px 56px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:48px;align-items:end">
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <span style="white-space:nowrap;font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;color:var(--color-accent-700)">ГИБКОСТЬ QUIZLET · ПАМЯТЬ ANKI · КОНТЕКСТ И ИИ</span>
+        <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:88px;line-height:.95;letter-spacing:-.03em">Учите фразами. Не забывайте через месяц.</h1>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <span style="font-size:18px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">Колоды слов и фраз, шесть режимов занятий и расписание повторений, которое само решает, что показать сегодня.</span>
+        <div style="display:flex;gap:10px"><button class="btn btn-primary blueprint" style="height:52px;padding:0 24px;font-size:18px;white-space:nowrap"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Создать первую колоду</button></div>
+      </div>
+    </div>
+    <div style="padding:0 56px 56px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--color-divider)">
+      <sc-for list="{{ features }}" as="f" hint-placeholder-count="6">
+        <div style="padding:28px 28px 28px 0;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--color-divider)">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;color:var(--color-neutral-700)">{{ f.n }}</span><span style="color:var(--color-accent-700)"><dc-import name="Icon" n="{{ f.icon }}" size="22" hint-size="22px,22px"></dc-import></span></div>
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:26px">{{ f.t }}</span>
+          <span style="font-size:14px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">{{ f.d }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="padding:0 56px 64px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:36px">Чем отличается</h2>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--color-divider)">
+          <div style="display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,1fr);padding:10px 0;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--color-neutral-700);border-bottom:1px solid var(--color-divider);white-space:nowrap"><span></span><span>ANKI</span><span>QUIZLET</span><span style="color:var(--color-accent-800)">ZUBRIKA</span></div>
+          <sc-for list="{{ compare }}" as="c" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,1fr);padding:11px 0;border-bottom:1px solid color-mix(in srgb,var(--color-text) 8%,transparent);font-size:14px"><span>{{ c.r }}</span><span style="color:var(--color-neutral-700)">{{ c.a }}</span><span style="color:var(--color-neutral-700)">{{ c.q }}</span><span style="font-weight:600;color:var(--color-accent-800)">{{ c.z }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:36px">Вопросы</h2>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--color-divider)">
+          <sc-for list="{{ faq }}" as="q" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:6px;padding:14px 0;border-bottom:1px solid color-mix(in srgb,var(--color-text) 8%,transparent)">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="font-size:16px;font-weight:500">{{ q.q }}</span><span style="color:var(--color-neutral-600)"><dc-import name="Icon" n="{{ q.icon }}" size="16" hint-size="16px,16px"></dc-import></span></div>
+              <sc-if value="{{ q.a }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;line-height:1.5;color:var(--color-neutral-800)">{{ q.a }}</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:820},&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;login&quot;,&quot;register&quot;,&quot;notfound&quot;,&quot;about&quot;],&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const view = this.props.view ?? 'login';
+    const reg = view === 'register';
+    return {
+      isAuth: view === 'login' || reg, isRegister: reg, isNotFound: view === 'notfound', isAbout: view === 'about',
+      authTitle: reg ? 'Регистрация' : 'Вход',
+      authSub: reg ? 'Пара полей — и можно создавать первую колоду' : 'С возвращением. Повторения ждут.',
+      authCta: reg ? 'Зарегистрироваться' : 'Войти',
+      authSwitch: reg ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Регистрация',
+      pillars: [
+        { n: '01', t: 'Интервальные повторения', d: 'Слово возвращается ровно тогда, когда начинает забываться.' },
+        { n: '02', t: 'Слово в контексте', d: 'Режим «Пропуски» — вставить слово в свой пример.' },
+        { n: '03', t: 'Фразы с ИИ', d: 'К каждому слову — 2–3 частотные коллокации.' }
+      ],
+      features: [
+        { n: '01', icon: 'grid', t: 'Карточки', d: 'Первое знакомство: переворот, озвучка, перемешивание.' },
+        { n: '02', icon: 'bulb', t: 'Заучивание', d: 'Раунды по 7 слов: сначала выбор из 4, затем ввод с клавиатуры.' },
+        { n: '03', icon: 'pen', t: 'Письмо', d: 'Перевод в обе стороны, одна опечатка допускается.' },
+        { n: '04', icon: 'sparkles', t: 'Пропуски', d: 'Слово скрыто в своём примере — самый сильный формат для памяти.' },
+        { n: '05', icon: 'layers', t: 'Собери фразу', d: 'Порядок слов на чанках — для беглой речи.' },
+        { n: '06', icon: 'history', t: 'К повторению', d: 'Единая очередь просроченных карточек из всех колод.' }
+      ],
+      compare: [
+        { r: 'Интервальные повторения', a: 'да', q: 'нет', z: 'да' },
+        { r: 'Слово в контексте', a: 'вручную', q: 'нет', z: 'отдельный режим' },
+        { r: 'Чанки и коллокации', a: 'вручную', q: 'нет', z: 'с ИИ' },
+        { r: 'Порог входа', a: 'высокий', q: 'низкий', z: 'низкий' }
+      ],
+      faq: [
+        { q: 'Сколько запросов к ИИ доступно?', icon: 'x', a: 'У каждого аккаунта месячный лимит. Остаток виден в профиле и рядом с ИИ-кнопками.' },
+        { q: 'Можно перенести слова из Quizlet или Excel?', icon: 'plus', a: '' },
+        { q: 'Как работает расписание повторений?', icon: 'plus', a: '' },
+        { q: 'Можно учить вместе с кем-то?', icon: 'plus', a: '' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

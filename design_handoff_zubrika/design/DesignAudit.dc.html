@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-7f4751c8-ea7d-4eab-8fba-3f89d553a6bf/styles.css">
+<script src="_ds/industry-7f4751c8-ea7d-4eab-8fba-3f89d553a6bf/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&family=Fira+Sans+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>:root{--font-heading:"Fira Sans Condensed",system-ui,sans-serif;--font-body:"Fira Sans",system-ui,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace}@keyframes zbShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}</style>
+</helmet>
+<div style="width:100%;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);padding:56px;display:flex;flex-direction:column;gap:56px">
+
+  <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:48px;align-items:end">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <span style="white-space:nowrap;font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;color:var(--color-accent-700)">ФИНАЛЬНЫЙ АУДИТ · АУДИТОРИЯ 19–40+</span>
+      <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:64px;line-height:.98;letter-spacing:-.02em">Спокойный инструмент, а не игра</h1>
+    </div>
+    <p style="margin:0;font-size:17px;line-height:1.55;color:var(--color-neutral-800);text-wrap:pretty">Для 19–25 продукт должен ощущаться быстрым и живым, для 30–40+ — серьёзным и не инфантильным. Общий знаменатель — интерфейсы уровня Linear, Notion, Raycast: сдержанная палитра, крупная типографика цифр, клавиатура, фокус-режим и движение, которое объясняет, а не развлекает.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
+    <div class="blueprint" style="padding:24px;display:flex;flex-direction:column;gap:14px">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <span style="font-family:var(--font-heading);font-weight:600;font-size:24px">Что уже соответствует</span>
+      <sc-for list="{{ good }}" as="g" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;font-size:14px;line-height:1.45"><span style="width:20px;height:20px;display:grid;place-items:center;background:var(--color-accent-700);color:var(--color-bg)"><dc-import name="Icon" n="check" size="12" sw="2.2" hint-size="12px,12px"></dc-import></span><span><b style="font-weight:600">{{ g.t }}</b> — {{ g.d }}</span></div>
+      </sc-for>
+    </div>
+    <div class="blueprint" style="padding:24px;display:flex;flex-direction:column;gap:14px;background:var(--color-accent-100);border-color:var(--color-accent-300)">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <span style="font-family:var(--font-heading);font-weight:600;font-size:24px">Что исправлено в этом проходе</span>
+      <sc-for list="{{ fixed }}" as="g" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;font-size:14px;line-height:1.45"><span style="width:20px;height:20px;display:grid;place-items:center;border:1px solid var(--color-accent-700);color:var(--color-accent-800);font-family:var(--font-mono);font-size:10px">{{ g.n }}</span><span><b style="font-weight:600">{{ g.t }}</b> — {{ g.d }}</span></div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:center;gap:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:36px;white-space:nowrap">Цвет: деловая база + смысловые сигналы</h2><div style="flex:1;height:1px;background:var(--color-divider)"></div></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr;height:150px">
+      <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="7">
+        <div style="background:{{ s.c }};color:{{ s.fg }};padding:14px;display:flex;flex-direction:column;justify-content:space-between"><span style="font-family:var(--font-heading);font-weight:600;font-size:18px">{{ s.n }}</span><span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em">{{ s.v }}</span></div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;font-size:14px;line-height:1.5;color:var(--color-neutral-800)">
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-neutral-700)">ПРОПОРЦИЯ 80 / 15 / 5</span><span>80% — бумага и графит, 15% — сталь (действия, активное), 5% — тёмное поле accent-900 на одном главном блоке экрана.</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-neutral-700)">СИГНАЛЫ — ТОЛЬКО ДЛЯ СМЫСЛА</span><span>Зелёный, красный и янтарный — одинаковой светлоты и приглушённой насыщенности. Только для ответа «верно/неверно», ошибок и предупреждений лимита. Никогда — для декора.</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-neutral-700)">ПОЧЕМУ ДЕЛОВОЙ</span><span>Холодный синий с серым — язык банков, SaaS и B2B-инструментов: вызывает доверие у 30–40+, при этом не «школьный» для 19–25. Без неона и градиентов.</span></div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:center;gap:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:36px;white-space:nowrap">Motion-система — заложена под следующую итерацию</h2><div style="flex:1;height:1px;background:var(--color-divider)"></div></div>
+    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--color-divider)">
+      <sc-for list="{{ durations }}" as="d" hint-placeholder-count="5">
+        <div style="padding:16px;display:flex;flex-direction:column;gap:8px;border-left:1px solid {{ d.bl }}">
+          <span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--color-neutral-700)">{{ d.token }}</span>
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:40px;line-height:1">{{ d.ms }}<span style="font-size:18px;color:var(--color-neutral-600)">мс</span></span>
+          <div style="height:4px;background:var(--color-neutral-200);position:relative"><i style="position:absolute;left:0;top:0;bottom:0;width:{{ d.w }};background:var(--color-accent)"></i></div>
+          <span style="font-size:12px;color:var(--color-neutral-800);line-height:1.4">{{ d.use }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+      <sc-for list="{{ easings }}" as="e" hint-placeholder-count="3">
+        <div class="blueprint" style="padding:16px;display:flex;flex-direction:column;gap:6px">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:18px">{{ e.n }}</span>
+          <span style="white-space:nowrap;font-family:var(--font-mono);font-size:12px;color:var(--color-accent-800)">{{ e.v }}</span>
+          <span style="font-size:12px;color:var(--color-neutral-700)">{{ e.use }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;border-top:1px solid var(--color-divider)">
+      <div style="display:grid;grid-template-columns:200px 160px minmax(0,1fr) 150px;gap:16px;padding:10px 0;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--color-neutral-700);border-bottom:1px solid var(--color-divider);white-space:nowrap"><span>ЭЛЕМЕНТ</span><span>ТРИГГЕР</span><span>ДВИЖЕНИЕ</span><span>ТОКЕН</span></div>
+      <sc-for list="{{ choreo }}" as="c" hint-placeholder-count="14">
+        <div style="display:grid;grid-template-columns:200px 160px minmax(0,1fr) 150px;gap:16px;padding:10px 0;border-bottom:1px solid color-mix(in srgb,var(--color-text) 8%,transparent);font-size:13px;line-height:1.4">
+          <span style="font-weight:600">{{ c.el }}</span><span style="color:var(--color-neutral-800)">{{ c.tr }}</span><span>{{ c.mv }}</span><span style="white-space:nowrap;font-family:var(--font-mono);font-size:11px;color:var(--color-accent-800)">{{ c.tk }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+      <sc-for list="{{ rules }}" as="r" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:2px solid var(--color-accent)"><span style="font-family:var(--font-heading);font-weight:600;font-size:17px">{{ r.t }}</span><span style="font-size:13px;line-height:1.45;color:var(--color-neutral-800)">{{ r.d }}</span></div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:center;gap:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:36px;white-space:nowrap">Загрузка: скелетоны той же геометрии</h2><div style="flex:1;height:1px;background:var(--color-divider)"></div></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px">
+      <div style="height:220px;background:var(--color-accent-900);padding:28px;display:flex;flex-direction:column;gap:16px">
+        <i style="width:180px;height:10px;background:linear-gradient(90deg,var(--color-accent-800) 0,var(--color-accent-700) 50%,var(--color-accent-800) 100%);background-size:800px 100%;animation:zbShimmer 1.4s linear infinite"></i>
+        <i style="width:160px;height:96px;background:linear-gradient(90deg,var(--color-accent-800) 0,var(--color-accent-700) 50%,var(--color-accent-800) 100%);background-size:800px 100%;animation:zbShimmer 1.4s linear infinite"></i>
+        <i style="margin-top:auto;width:220px;height:48px;background:linear-gradient(90deg,var(--color-accent-800) 0,var(--color-accent-700) 50%,var(--color-accent-800) 100%);background-size:800px 100%;animation:zbShimmer 1.4s linear infinite"></i>
+      </div>
+      <div style="height:220px;border:1px solid var(--color-divider);padding:24px;display:flex;flex-direction:column;gap:14px">
+        <i style="width:80px;height:10px;background:linear-gradient(90deg,var(--color-neutral-200) 0,var(--color-neutral-100) 50%,var(--color-neutral-200) 100%);background-size:800px 100%;animation:zbShimmer 1.4s linear infinite"></i>
+        <i style="width:140px;height:56px;background:linear-gradient(90deg,var(--color-neutral-200) 0,var(--color-neutral-100) 50%,var(--color-neutral-200) 100%);background-size:800px 100%;animation:zbShimmer 1.4s linear infinite"></i>
+        <i style="margin-top:auto;width:100%;height:28px;background:linear-gradient(90deg,var(--color-neutral-200) 0,var(--color-neutral-100) 50%,var(--color-neutral-200) 100%);background-size:800px 100%;animation:zbShimmer 1.4s linear infinite"></i>
+      </div>
+    </div>
+    <span style="font-size:14px;color:var(--color-neutral-800)">Скелетон повторяет размеры итогового блока — при появлении данных ничего не прыгает, контент проявляется opacity 0→1 за base (220 мс).</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:36px;white-space:nowrap">Бэклог до релиза</h2><div style="flex:1;height:1px;background:var(--color-divider)"></div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+      <sc-for list="{{ backlog }}" as="b" hint-placeholder-count="6">
+        <div class="blueprint" style="padding:16px;display:flex;flex-direction:column;gap:6px">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-heading);font-weight:600;font-size:18px">{{ b.t }}</span><span style="white-space:nowrap;font-family:var(--font-mono);font-size:10px;padding:2px 6px;background:{{ b.bg }};color:{{ b.fg }}">{{ b.p }}</span></div>
+          <span style="font-size:13px;line-height:1.45;color:var(--color-neutral-800)">{{ b.d }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:2600}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      good: [
+        { t: 'Одно главное действие', d: '«К повторению» видно с любого экрана: hero на главной, карточка в сайдбаре, бейдж в табах.' },
+        { t: '5 разделов вместо 16', d: 'IA уровня современных SaaS; подразделы — вкладки.' },
+        { t: 'Фокус-режим и клавиатура', d: 'Esc, Enter, 1–4, ⌘K — то, что ценят 19–25 и экономит время 30–40+.' },
+        { t: 'Крупные цифры', d: 'серия, долг, точность читаются за секунду — мотивация без мультяшности.' },
+        { t: 'Плотность и сетка', d: 'модульная сетка, ровные ритмы, читаемые таблицы — серьёзный инструмент.' },
+        { t: 'Взрослая геймификация', d: 'серия, цель дня, итог сессии — без маскотов, конфетти и звёздочек за всё.' }
+      ],
+      fixed: [
+        { n: '01', t: 'Сигнальные цвета', d: 'добавлены приглушённые «верно / неверно / внимание» — раньше обратная связь в занятиях была только оттенками синего.' },
+        { n: '02', t: 'Состояния ответа', d: 'нарисованы «Верно» и «Неверно» для выбора (6b, 6c) с полосой автоперехода.' },
+        { n: '03', t: 'Motion-токены', d: '5 длительностей, 3 кривые и хореография 14 ключевых элементов.' },
+        { n: '04', t: 'Скелетоны', d: 'загрузка повторяет геометрию — основа для плавного появления.' },
+        { n: '06', t: 'Уровни серии', d: 'огонь теплеет с длиной серии: Искра 0+ → Огонёк 3+ → Пламя 7+ → Жар 14+ → Пожар 30+; шкала и «ещё N дней до следующего уровня».' },
+        { n: '07', t: 'Цвет вовлечённости', d: 'зелёный = результат (верные ответы в прогрессе сессии, освоенные времена и этапы, рост метрик, личный рекорд); янтарь = срочность (много к повторению, новые слова цикла); огонь = серия.' },
+        { n: '08', t: 'Доступность цвета', d: '«верно / неверно» различаются не только цветом: бирюзово-зелёный светлее, красно-оранжевый темнее и со штриховкой, у вариантов ответа — иконки ✓ / ✕. Читается при дейтеранопии (≈8% мужчин).' },
+        { n: '05', t: 'Без сдвигов', d: 'размеры блоков фиксированы, все будущие анимации — только transform и opacity.' }
+      ],
+      swatches: [
+        { n: 'Ink', v: 'ACCENT-900 #1D2D3D', c: 'var(--color-accent-900)', fg: 'var(--color-bg)' },
+        { n: 'Steel', v: '#5980A6', c: 'var(--color-accent)', fg: 'var(--color-bg)' },
+        { n: 'Paper', v: '#F2F2F3', c: 'var(--color-bg)', fg: 'var(--color-text)' },
+        { n: 'Graphite', v: '#1D1F20', c: 'var(--color-text)', fg: 'var(--color-bg)' },
+        { n: 'Верно', v: 'OKLCH .60 .11 170', c: 'oklch(0.6 0.11 170)', fg: 'var(--color-bg)' },
+        { n: 'Неверно', v: 'OKLCH .50 .16 35 + ШТРИХ', c: 'repeating-linear-gradient(135deg, oklch(0.5 0.16 35) 0 6px, oklch(0.44 0.15 35) 6px 12px)', fg: 'var(--color-bg)' },
+        { n: 'Внимание', v: 'OKLCH .70 .11 75', c: 'oklch(0.70 0.11 75)', fg: 'var(--color-text)' }
+      ],
+      durations: [
+        { token: '--motion-instant', ms: 80, w: '10%', use: 'hover, нажатие, смена цвета', bl: 'transparent' },
+        { token: '--motion-fast', ms: 140, w: '22%', use: 'чекбоксы, табы, тултипы', bl: 'var(--color-divider)' },
+        { token: '--motion-base', ms: 220, w: '40%', use: 'появление контента, модалки, дропдауны', bl: 'var(--color-divider)' },
+        { token: '--motion-slow', ms: 360, w: '65%', use: 'сайдбар, переход страниц, переворот карточки', bl: 'var(--color-divider)' },
+        { token: '--motion-deliberate', ms: 600, w: '100%', use: 'заполнение полос, счётчики, итог сессии', bl: 'var(--color-divider)' }
+      ],
+      easings: [
+        { n: 'Standard', v: 'cubic-bezier(.2, 0, 0, 1)', use: 'по умолчанию для всего' },
+        { n: 'Enter', v: 'cubic-bezier(0, 0, 0, 1)', use: 'появление: быстро стартует, мягко садится' },
+        { n: 'Exit', v: 'cubic-bezier(.3, 0, 1, 1)', use: 'исчезновение: в 0.7× длительности' }
+      ],
+      choreo: [
+        { el: 'Смена страницы', tr: 'навигация', mv: 'контент: opacity 0→1, translateY 8→0; сайдбар и шапка неподвижны', tk: 'base · enter' },
+        { el: 'Вкладки раздела', tr: 'клик', mv: 'подчёркивание скользит к новой вкладке (ширина + x)', tk: 'fast · standard' },
+        { el: 'Сайдбар 236 ↔ 76', tr: 'стрелка', mv: 'ширина + подписи fade 0 за первые 40%', tk: 'slow · standard' },
+        { el: 'Hero «42»', tr: 'первый показ за день', mv: 'счётчик 0→42, прогноз — столбики растут снизу со сдвигом 30 мс', tk: 'deliberate · enter' },
+        { el: 'Полосы освоения', tr: 'появление в viewport', mv: 'scaleX 0→1 от левого края, сегменты по очереди', tk: 'deliberate · enter' },
+        { el: 'Неделя серии', tr: 'загрузка главной', mv: 'ячейки заливаются слева направо, stagger 40 мс; сегодня — пунктир «дышит» 1 раз', tk: 'base · enter' },
+        { el: 'Карточки «Следующий шаг»', tr: 'появление', mv: 'opacity + translateY 12→0, stagger 40 мс, максимум 6 элементов', tk: 'base · enter' },
+        { el: 'Вариант ответа', tr: 'выбор', mv: 'верно: заливка из точки клика + галочка рисуется stroke; неверно: сдвиг ±6 px × 2', tk: 'fast / base' },
+        { el: 'Прогресс сессии', tr: 'ответ', mv: 'текущее деление заполняется, следующее подсвечивается', tk: 'base · standard' },
+        { el: 'Автопереход', tr: 'верный ответ', mv: 'линия под «Дальше» заполняется 1.2 с, Enter — сразу', tk: 'linear 1200' },
+        { el: 'Переворот карточки', tr: 'клик / пробел', mv: 'rotateY 0→180 c perspective 1200, лицо скрыто backface', tk: 'slow · standard' },
+        { el: 'Собери фразу', tr: 'клик по слову', mv: 'слово перелетает в строку ответа (FLIP), место остаётся пунктиром', tk: 'base · standard' },
+        { el: 'Итог сессии', tr: 'конец сессии', mv: 'серия: 12 → 13 с перелистыванием цифры; flame scale 1→1.08→1; статистика по очереди', tk: 'deliberate' },
+        { el: 'Новый уровень серии', tr: 'переход порога 3/7/14/30', mv: 'плашка уровня перекрашивается, огонь scale 1→1.15→1 и цвет перетекает в новый; деление шкалы заполняется', tk: 'deliberate · enter' },
+        { el: 'Модалка', tr: 'открытие', mv: 'фон opacity 0→1; окно scale .98→1 + opacity; закрытие быстрее', tk: 'base / exit' }
+      ],
+      rules: [
+        { t: 'Только transform и opacity', d: 'никаких анимаций width/top в списках — 60 fps даже на слабых ноутбуках.' },
+        { t: 'prefers-reduced-motion', d: 'все движения сводятся к opacity за 80 мс, счётчики показывают итог сразу.' },
+        { t: 'Не повторять праздник', d: 'счётчики и заливки — один раз за день или по событию, не при каждом заходе.' },
+        { t: 'Движение = причина', d: 'анимируется то, что изменилось из-за действия пользователя. Декоративных петель нет.' }
+      ],
+      backlog: [
+        { t: 'Тёмная тема', p: 'ВЫСОКИЙ', d: 'Для 19–30 — ожидаемый стандарт. Выводится из ramp’ов: фон accent-900, линии 16% бумаги.', bg: 'var(--color-accent-900)', fg: 'var(--color-bg)' },
+        { t: 'Пустые состояния', p: 'ВЫСОКИЙ', d: 'Нет колод / нет повторений / нет статистики — с одним действием и без иллюстраций-мультиков.', bg: 'var(--color-accent-900)', fg: 'var(--color-bg)' },
+        { t: 'Тосты и ошибки сети', p: 'СРЕДНИЙ', d: 'Плашка снизу слева, 4 с, сигнальные цвета по смыслу.', bg: 'var(--color-accent-100)', fg: 'var(--color-accent-800)' },
+        { t: 'Онбординг', p: 'СРЕДНИЙ', d: 'Первый вход: цель дня → первая колода (импорт / шаблон) → первая сессия за 2 минуты.', bg: 'var(--color-accent-100)', fg: 'var(--color-accent-800)' },
+        { t: 'Палитра ⌘K', p: 'СРЕДНИЙ', d: 'Поиск + команды: «Повторить», «Новая колода», «Перейти к…».', bg: 'var(--color-accent-100)', fg: 'var(--color-accent-800)' },
+        { t: 'Мобильные для хода 5', p: 'НИЗКИЙ', d: 'Циклы, грамматика-детали, аккаунт, модалки как bottom-sheet.', bg: 'var(--color-neutral-200)', fg: 'var(--color-neutral-800)' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
