@@ -5,8 +5,11 @@
     align-items: start;
 
     @media (width <= 900px) {
+        gap: 28px;
+    }
+
+    @media (width <= 650px) {
         grid-template-columns: minmax(0, 1fr);
-        gap: 32px;
     }
 }
 
@@ -27,6 +30,11 @@
     line-height: 1.5;
     border-bottom: 1px solid var(--color-divider);
     text-wrap: pretty;
+
+    @media (width <= 900px) {
+        padding: 14px 0;
+        font-size: 15px;
+    }
 }
 
 .pointIndex {

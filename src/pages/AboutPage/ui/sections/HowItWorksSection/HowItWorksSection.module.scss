@@ -22,9 +22,23 @@ $chart-height: 72px;
     background: var(--color-bg);
     border: 1px solid var(--color-divider);
 
+    // Планшет: шаги друг под другом, внутри — текст слева, иллюстрация справа
+    @media (width > 650px) and (width <= 1100px) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 32px;
+        align-items: start;
+    }
+
     @media (width <= 650px) {
         padding: 20px 16px;
     }
+}
+
+.stepIntro {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .stepTitle {
@@ -32,6 +46,7 @@ $chart-height: 72px;
     font-family: var(--font-heading);
     font-weight: 600;
     font-size: $step-title-size;
+    line-height: 1.1;
 }
 
 .stepText {
@@ -48,6 +63,11 @@ $chart-height: 72px;
     gap: 14px;
     margin-top: auto;
     padding-top: 16px;
+
+    @media (width > 650px) and (width <= 1100px) {
+        margin-top: 0;
+        padding-top: 0;
+    }
 }
 
 .editor {

@@ -1,5 +1,5 @@
 import {
-    KeyboardEvent, memo, MouseEvent, useCallback, useState,
+    KeyboardEvent, memo, MouseEvent, TouchEvent, useCallback, useRef, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -15,6 +15,8 @@ const NAV_ICON_SIZE = 18;
 const NAV_ICON_STROKE = 1.5;
 /** Стрелки — символы клавиш, не переводятся */
 const ARROWS_HINT = '← →';
+/** Горизонтальный сдвиг пальца, после которого жест — свайп, а не тап */
+const SWIPE_THRESHOLD = 40;
 
 interface FlipCardDemoProps {
     className?: string;
@@ -26,6 +28,9 @@ export const FlipCardDemo = memo(({ className }: FlipCardDemoProps) => {
     const [index, setIndex] = useState(0);
     const [flipped, setFlipped] = useState(false);
     const card = DEMO_CARDS[index];
+
+    const touchStartX = useRef<number | null>(null);
+    const swiped = useRef(false);
 
     const flip = useCallback(() => setFlipped((prev) => !prev), []);
     const go = useCallback((step: number) => {
@@ -47,6 +52,30 @@ export const FlipCardDemo = memo(({ className }: FlipCardDemoProps) => {
         }
     };
 
+    // Свайп влево-вправо листает карточки на тач-экране, тап — переворачивает
+    const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+        touchStartX.current = e.touches[0].clientX;
+        swiped.current = false;
+    };
+
+    const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
+        if (touchStartX.current === null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX.current;
+        touchStartX.current = null;
+        if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+        swiped.current = true;
+        go(dx < 0 ? 1 : -1);
+    };
+
+    const handleClick = () => {
+        // Клик, порождённый свайпом, не переворачивает новую карточку
+        if (swiped.current) {
+            swiped.current = false;
+            return;
+        }
+        flip();
+    };
+
     // Кнопки внутри карточки не должны её переворачивать
     const stop = (e: MouseEvent) => e.stopPropagation();
 
@@ -58,8 +87,10 @@ export const FlipCardDemo = memo(({ className }: FlipCardDemoProps) => {
                 aria-pressed={flipped}
                 aria-label={t('Перевернуть карточку')}
                 className={cls.scene}
-                onClick={flip}
+                onClick={handleClick}
                 onKeyDown={handleKeyDown}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
             >
                 <div className={classNames(cls.flipper, { [cls.flipped]: flipped })}>
                     <div className={classNames(cls.side, [cls.front])} aria-hidden={flipped}>
@@ -71,6 +102,7 @@ export const FlipCardDemo = memo(({ className }: FlipCardDemoProps) => {
                         <span className={cls.term}>{card.term}</span>
                         <span className={cls.example}>{card.example}</span>
                         <span className={cls.hint}>{t('Нажмите, чтобы перевернуть')}</span>
+                        <span className={cls.hintTouch}>{t('Тап — перевернуть, свайп — следующая')}</span>
                     </div>
                     <div className={classNames(cls.side, [cls.back])} aria-hidden={!flipped}>
                         <BlueprintMarks />

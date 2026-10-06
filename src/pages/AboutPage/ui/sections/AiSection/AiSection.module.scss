@@ -16,9 +16,30 @@
     background: var(--color-surface);
     border: 1px solid var(--color-divider);
 
+    // Планшет: карточки друг под другом, внутри — описание слева, демо справа
+    @media (width > 650px) and (width <= 1100px) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+        gap: 32px;
+        align-items: start;
+    }
+
     @media (width <= 650px) {
         padding: 20px 16px;
     }
+}
+
+.cardIntro {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 12px;
 }
 
 .cardTitle {
@@ -40,6 +61,11 @@
 .cardAction {
     align-self: flex-start;
     margin-top: auto;
+
+    @media (width <= 650px) {
+        align-self: stretch;
+        height: 44px;
+    }
 }
 
 .diff {
@@ -47,6 +73,10 @@
     flex-direction: column;
     gap: 12px;
     margin: 8px 0 4px;
+
+    @media (width > 650px) and (width <= 1100px) {
+        margin-top: 0;
+    }
 }
 
 .diffRow {
@@ -101,12 +131,24 @@
     flex-direction: column;
     gap: 8px;
     margin: 8px 0 4px;
+
+    @media (width > 650px) and (width <= 1100px) {
+        margin-top: 0;
+    }
 }
 
 .chunkWord {
     font-family: var(--font-heading);
     font-weight: 600;
     font-size: 32px;
+}
+
+.chunksPlaceholder {
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-neutral-700);
+    border: 1px dashed var(--color-neutral-400);
 }
 
 .chunk {
@@ -163,6 +205,10 @@
     flex-direction: column;
     gap: 14px;
     margin: 8px 0 4px;
+
+    @media (width > 650px) and (width <= 1100px) {
+        margin-top: 0;
+    }
 }
 
 .sentence {

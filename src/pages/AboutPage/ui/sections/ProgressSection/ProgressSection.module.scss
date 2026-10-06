@@ -11,6 +11,10 @@ $ring-width: 10px;
     gap: 24px;
 
     @media (width <= 900px) {
+        gap: 16px;
+    }
+
+    @media (width <= 650px) {
         grid-template-columns: minmax(0, 1fr);
     }
 }
@@ -23,6 +27,10 @@ $ring-width: 10px;
     padding: 28px;
     background: var(--color-bg);
     border: 1px solid var(--color-divider);
+
+    @media (width <= 900px) {
+        padding: 20px;
+    }
 
     @media (width <= 650px) {
         padding: 20px 16px;
@@ -111,7 +119,9 @@ $ring-width: 10px;
 }
 
 .levelBtn {
-    height: 32px;
+    // Ряды кнопок заполняют ширину — без «висящего» хвоста на телефоне
+    flex: 1 0 auto;
+    min-height: 36px;
     padding: 0 10px;
     font: inherit;
     font-size: 13px;
@@ -146,6 +156,10 @@ $ring-width: 10px;
     display: flex;
     align-items: center;
     gap: 20px;
+
+    @media (width <= 900px) {
+        gap: 14px;
+    }
 }
 
 // Кольцо на conic-gradient: доля из --share
@@ -201,6 +215,10 @@ $ring-width: 10px;
         font-family: var(--font-heading);
         font-weight: 600;
         font-size: 26px;
+
+        @media (width <= 900px) {
+            font-size: 22px;
+        }
     }
 }
 

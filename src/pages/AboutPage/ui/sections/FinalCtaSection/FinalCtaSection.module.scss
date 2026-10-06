@@ -1,5 +1,6 @@
 $title-size: 52px;
 $title-size-mobile: 32px;
+$title-size-narrow: 28px;
 $title-max-width: 900px;
 
 .FinalCtaSection {
@@ -40,6 +41,10 @@ $title-max-width: 900px;
     @media (width <= 900px) {
         font-size: $title-size-mobile;
     }
+
+    @media (width <= 374px) {
+        font-size: $title-size-narrow;
+    }
 }
 
 .steps {
@@ -49,6 +54,10 @@ $title-max-width: 900px;
     margin: 0;
     padding: 0;
     list-style: none;
+
+    @media (width <= 900px) {
+        flex-direction: column;
+    }
 }
 
 .step {
@@ -87,5 +96,11 @@ $title-max-width: 900px;
     &:focus-visible {
         outline: 2px solid var(--color-on-field);
         outline-offset: 4px;
+    }
+
+    // Телефон: кнопка во всю ширину под палец
+    @media (width <= 650px) {
+        justify-content: center;
+        align-self: stretch;
     }
 }

@@ -28,20 +28,33 @@
     border-right: 1px solid var(--color-divider);
     border-bottom: 1px solid var(--color-divider);
 
+    // Телефон: компактная строка — иконка слева, заголовок и текст справа
     @media (width <= 650px) {
-        padding: 18px 16px;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 4px 14px;
+        padding: 16px;
     }
 }
 
 .icon {
     margin-bottom: 4px;
     color: var(--color-accent-700);
+
+    @media (width <= 650px) {
+        grid-row: span 2;
+        margin: 2px 0 0;
+    }
 }
 
 .title {
     font-family: var(--font-heading);
     font-weight: 600;
     font-size: 19px;
+
+    @media (width <= 650px) {
+        font-size: 17px;
+    }
 }
 
 .text {

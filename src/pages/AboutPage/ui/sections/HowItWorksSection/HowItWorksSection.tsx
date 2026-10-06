@@ -52,11 +52,13 @@ export const HowItWorksSection = memo(() => {
         >
             <ol className={cls.steps}>
                 <li className={cls.step}>
-                    <Kicker size={KickerSize.SM} tone={KickerTone.ACCENT}>{t('Шаг 1')}</Kicker>
-                    <h3 className={cls.stepTitle}>{t('Соберите колоду')}</h3>
-                    <p className={cls.stepText}>
-                        {t('Вводите слова списком — перевод подставится сам. Или загрузите Excel, или возьмите готовый набор неправильных глаголов.')}
-                    </p>
+                    <div className={cls.stepIntro}>
+                        <Kicker size={KickerSize.SM} tone={KickerTone.ACCENT}>{t('Шаг 1')}</Kicker>
+                        <h3 className={cls.stepTitle}>{t('Соберите колоду')}</h3>
+                        <p className={cls.stepText}>
+                            {t('Вводите слова списком — перевод подставится сам. Или загрузите Excel, или возьмите готовый набор неправильных глаголов.')}
+                        </p>
+                    </div>
                     <div className={cls.visual} aria-hidden>
                         <div className={cls.editor}>
                             {EDITOR_DEMO_ROWS.map((row) => (
@@ -79,11 +81,13 @@ export const HowItWorksSection = memo(() => {
                 </li>
 
                 <li className={cls.step}>
-                    <Kicker size={KickerSize.SM} tone={KickerTone.ACCENT}>{t('Шаг 2')}</Kicker>
-                    <h3 className={cls.stepTitle}>{t('Учите в режимах')}</h3>
-                    <p className={cls.stepText}>
-                        {t('От знакомства с карточкой до ввода по памяти и слова внутри фразы. Приложение подсказывает, с какого режима начать.')}
-                    </p>
+                    <div className={cls.stepIntro}>
+                        <Kicker size={KickerSize.SM} tone={KickerTone.ACCENT}>{t('Шаг 2')}</Kicker>
+                        <h3 className={cls.stepTitle}>{t('Учите в режимах')}</h3>
+                        <p className={cls.stepText}>
+                            {t('От знакомства с карточкой до ввода по памяти и слова внутри фразы. Приложение подсказывает, с какого режима начать.')}
+                        </p>
+                    </div>
                     <div className={cls.visual}>
                         <ul className={cls.modes} aria-hidden>
                             {modes.map((mode, i) => (
@@ -102,11 +106,13 @@ export const HowItWorksSection = memo(() => {
                 </li>
 
                 <li className={cls.step}>
-                    <Kicker size={KickerSize.SM} tone={KickerTone.ACCENT}>{t('Шаг 3')}</Kicker>
-                    <h3 className={cls.stepTitle}>{t('Повторяйте по расписанию')}</h3>
-                    <p className={cls.stepText}>
-                        {t('Каждый день на главной ждёт очередь «К повторению» из всех колод. Слово возвращается ровно тогда, когда начинает забываться.')}
-                    </p>
+                    <div className={cls.stepIntro}>
+                        <Kicker size={KickerSize.SM} tone={KickerTone.ACCENT}>{t('Шаг 3')}</Kicker>
+                        <h3 className={cls.stepTitle}>{t('Повторяйте по расписанию')}</h3>
+                        <p className={cls.stepText}>
+                            {t('Каждый день на главной ждёт очередь «К повторению» из всех колод. Слово возвращается ровно тогда, когда начинает забываться.')}
+                        </p>
+                    </div>
                     <div className={cls.visual} aria-hidden>
                         <div className={cls.due}>
                             <span className={cls.dueCount}>{today}</span>

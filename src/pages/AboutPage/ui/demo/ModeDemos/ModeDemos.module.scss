@@ -77,6 +77,13 @@ $sentence-size-mobile: 19px;
         color: var(--color-neutral-500);
     }
 
+    .row & {
+        @media (width <= 650px) {
+            justify-content: center;
+            min-height: 40px;
+        }
+    }
+
     &:focus-visible {
         outline: 2px solid var(--color-accent);
         outline-offset: 2px;
@@ -98,6 +105,12 @@ $sentence-size-mobile: 19px;
     display: flex;
     align-items: center;
     gap: 20px;
+
+    @media (width <= 650px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
 }
 
 .action {
@@ -105,6 +118,11 @@ $sentence-size-mobile: 19px;
     height: 44px;
     padding: 0 20px;
     font-size: 15px;
+
+    // Телефон: кнопка во всю ширину, как «Дальше» в полосе результата
+    @media (width <= 650px) {
+        align-self: stretch;
+    }
 }
 
 .answerLine {
@@ -133,7 +151,7 @@ $sentence-size-mobile: 19px;
 }
 
 .chunk {
-    height: 40px;
+    min-height: 44px;
     padding: 0 14px;
     font: inherit;
     font-size: 16px;

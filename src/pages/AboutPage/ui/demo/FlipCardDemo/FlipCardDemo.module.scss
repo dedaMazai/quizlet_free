@@ -15,6 +15,10 @@ $term-size-mobile: 32px;
     cursor: pointer;
     perspective: 1200px;
 
+    // Вертикальная прокрутка страницы остаётся за браузером, горизонтальный жест — наш
+    touch-action: pan-y;
+    user-select: none;
+
     &:focus-visible {
         outline: 2px solid var(--color-accent);
         outline-offset: 4px;
@@ -124,7 +128,8 @@ $term-size-mobile: 32px;
     color: var(--color-neutral-700);
 }
 
-.hint {
+.hint,
+.hintTouch {
     position: absolute;
     bottom: 16px;
     font-family: var(--font-mono);
@@ -132,6 +137,21 @@ $term-size-mobile: 32px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-neutral-600);
+}
+
+// На тач-экране подсказка про жесты вместо «нажмите»
+.hintTouch {
+    display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .hint {
+        display: none;
+    }
+
+    .hintTouch {
+        display: inline;
+    }
 }
 
 .footer {

@@ -1,5 +1,6 @@
 $title-size: 52px;
 $title-size-mobile: 34px;
+$title-size-narrow: 30px;
 $lead-max-width: 640px;
 
 .LandingSection {
@@ -45,6 +46,10 @@ $lead-max-width: 640px;
 
     @media (width <= 900px) {
         font-size: $title-size-mobile;
+    }
+
+    @media (width <= 374px) {
+        font-size: $title-size-narrow;
     }
 }
 

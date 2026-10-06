@@ -1,4 +1,6 @@
-import { CSSProperties, memo, useMemo, useState } from 'react';
+import {
+    CSSProperties, memo, useLayoutEffect, useMemo, useRef, useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trophy } from 'lucide-react';
 import { AboutAnchor } from '@/shared/config/router/routePath';
@@ -30,6 +32,13 @@ export const ProgressSection = memo(() => {
     const [streak, setStreak] = useState(DEMO_STREAK_DAYS);
     const [goal, setGoal] = useState(DEFAULT_DAILY_GOAL);
     const heatmap = useMemo(buildHeatmap, []);
+    const heatmapRef = useRef<HTMLDivElement>(null);
+
+    // На узком экране лента скроллится — показываем свежие недели, а не самые старые
+    useLayoutEffect(() => {
+        const el = heatmapRef.current;
+        if (el) el.scrollLeft = el.scrollWidth;
+    }, []);
     const level = getStreakLevel(streak);
     const goalShare = Math.min(DONE_TODAY / goal, 1) * 100;
 
@@ -52,7 +61,7 @@ export const ProgressSection = memo(() => {
                             {t('больше')}
                         </span>
                     </div>
-                    <div className={cls.heatmap} aria-hidden>
+                    <div ref={heatmapRef} className={cls.heatmap} aria-hidden>
                         {heatmap.map((value, i) => (
                             // Ячейки статичны — индекс стабилен
                             <i key={i} className={classNames(cls.heatCell, [HEAT_CLASSES[value]])} />

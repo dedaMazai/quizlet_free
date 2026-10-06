@@ -1,5 +1,6 @@
 $group-col: 150px;
 $group-col-mobile: 92px;
+$group-col-narrow: 70px;
 
 .layout {
     display: grid;
@@ -26,6 +27,11 @@ $group-col-mobile: 92px;
 
     @media (width <= 650px) {
         grid-template-columns: $group-col-mobile repeat(3, minmax(0, 1fr));
+    }
+
+    @media (width <= 400px) {
+        grid-template-columns: $group-col-narrow repeat(3, minmax(0, 1fr));
+        gap: 3px;
     }
 }
 
@@ -60,6 +66,10 @@ $group-col-mobile: 92px;
 
     @media (width <= 650px) {
         font-size: 14px;
+    }
+
+    @media (width <= 400px) {
+        font-size: 12px;
     }
 }
 
@@ -98,6 +108,12 @@ $group-col-mobile: 92px;
         min-height: 48px;
         padding: 6px 4px;
         font-size: 12px;
+        line-height: 1.25;
+    }
+
+    @media (width <= 400px) {
+        padding: 4px 2px;
+        font-size: 11px;
     }
 }
 
@@ -114,6 +130,10 @@ $group-col-mobile: 92px;
     padding: 20px;
     background: var(--color-bg);
     border-left: 3px solid var(--color-accent-700);
+
+    @media (width <= 650px) {
+        padding: 16px;
+    }
 }
 
 .detailHead {
@@ -161,6 +181,13 @@ $group-col-mobile: 92px;
     display: flex;
     flex-direction: column;
     gap: 28px;
+
+    // Планшет: дорожная карта и темы рядом, глаголы — строкой ниже
+    @media (width > 650px) and (width <= 1100px) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 28px 40px;
+    }
 }
 
 .block {
@@ -261,6 +288,7 @@ $group-col-mobile: 92px;
 }
 
 .verbs {
+    grid-column: 1 / -1;
     display: flex;
     gap: 14px;
     padding: 18px;

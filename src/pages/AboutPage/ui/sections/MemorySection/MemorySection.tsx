@@ -25,6 +25,15 @@ interface HistoryItem {
     interval: number;
 }
 
+interface DemoState {
+    review: CardReview | null;
+    history: HistoryItem[];
+    /** Счётчик ответов — ключ ленты, не сбрасывается обрезкой истории */
+    answers: number;
+}
+
+const INITIAL_STATE: DemoState = { review: null, history: [], answers: 0 };
+
 const GRADE_CLASSES: Record<AnswerGrade, string> = {
     correct: cls.correct,
     almost: cls.almost,
@@ -34,22 +43,22 @@ const GRADE_CLASSES: Record<AnswerGrade, string> = {
 /** «Повторения без самооценки»: ответ сам двигает интервал — настоящий applyReview из приложения */
 export const MemorySection = memo(() => {
     const { t } = useTranslation();
-    const [review, setReview] = useState<CardReview | null>(null);
-    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [{ review, history }, setState] = useState<DemoState>(INITIAL_STATE);
 
-    const answer = (grade: AnswerGrade) => {
-        const next = applyReview(review, DEMO_CARD_UUID, gradeFromAnswer(grade));
-        setReview(next);
-        setHistory((prev) => [
-            ...prev,
-            { id: prev.length, grade, interval: Math.round(next.interval_days) },
-        ].slice(-HISTORY_LIMIT));
-    };
+    // Функциональное обновление: быстрые нажатия подряд не теряют предыдущий ответ
+    const answer = (grade: AnswerGrade) => setState((prev) => {
+        const next = applyReview(prev.review, DEMO_CARD_UUID, gradeFromAnswer(grade));
+        return {
+            review: next,
+            history: [
+                ...prev.history,
+                { id: prev.answers, grade, interval: Math.round(next.interval_days) },
+            ].slice(-HISTORY_LIMIT),
+            answers: prev.answers + 1,
+        };
+    });
 
-    const reset = () => {
-        setReview(null);
-        setHistory([]);
-    };
+    const reset = () => setState(INITIAL_STATE);
 
     const interval = review ? Math.round(review.interval_days) : null;
     const isMastered = review?.level === 2;
@@ -97,7 +106,18 @@ export const MemorySection = memo(() => {
                 <div className={cls.demo}>
                     <div className={cls.cardHead}>
                         <span className={cls.term}>{DEMO_TERM}</span>
-                        <span className={classNames(cls.status, { [cls.statusMastered]: isMastered })}>{status}</span>
+                        <div className={cls.headSide}>
+                            <span className={classNames(cls.status, { [cls.statusMastered]: isMastered })}>{status}</span>
+                            <button
+                                type="button"
+                                className={cls.reset}
+                                onClick={reset}
+                                disabled={!review}
+                                aria-label={t('Сбросить')}
+                            >
+                                <RotateCcw size={ICON_SIZE} aria-hidden />
+                            </button>
+                        </div>
                     </div>
                     <span className={cls.next} aria-live="polite">{nextShow}</span>
 
@@ -133,15 +153,6 @@ export const MemorySection = memo(() => {
                         </button>
                         <button type="button" className={classNames(cls.answer, [cls.wrong])} onClick={() => answer('wrong')}>
                             {t('Ошибся')}
-                        </button>
-                        <button
-                            type="button"
-                            className={cls.reset}
-                            onClick={reset}
-                            disabled={!review}
-                            aria-label={t('Сбросить')}
-                        >
-                            <RotateCcw size={ICON_SIZE} aria-hidden />
                         </button>
                     </div>
                 </div>

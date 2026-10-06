@@ -8,8 +8,11 @@ $term-size-mobile: 32px;
     align-items: start;
 
     @media (width <= 900px) {
-        grid-template-columns: minmax(0, 1fr);
         gap: 32px;
+    }
+
+    @media (width <= 719px) {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
@@ -43,6 +46,12 @@ $term-size-mobile: 32px;
     @media (width <= 650px) {
         font-size: $term-size-mobile;
     }
+}
+
+.headSide {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .status {
@@ -117,10 +126,17 @@ $term-size-mobile: 32px;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+
+    // Телефон: три ответа ровной сеткой под палец
+    @media (width <= 650px) {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
 }
 
 .answer {
-    height: 40px;
+    min-height: 44px;
     padding: 0 16px;
     font: inherit;
     font-size: 15px;
@@ -135,6 +151,12 @@ $term-size-mobile: 32px;
     &:focus-visible {
         outline: 2px solid var(--color-accent);
         outline-offset: 2px;
+    }
+
+    @media (width <= 650px) {
+        padding: 6px 4px;
+        font-size: 14px;
+        line-height: 1.2;
     }
 }
 
@@ -158,9 +180,8 @@ $term-size-mobile: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    margin-left: auto;
+    width: 36px;
+    height: 36px;
     padding: 0;
     color: var(--color-neutral-700);
     cursor: pointer;

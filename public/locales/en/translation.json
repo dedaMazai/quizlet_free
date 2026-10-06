@@ -2621,5 +2621,7 @@
   "{{count}} дн. подряд_one": "{{count}} day in a row",
   "{{count}} дн. подряд_other": "{{count}} days in a row",
   "До следующего уровня — {{count}} дн._one": "{{count}} day to the next level",
-  "До следующего уровня — {{count}} дн._other": "{{count}} days to the next level"
+  "До следующего уровня — {{count}} дн._other": "{{count}} days to the next level",
+  "Тап — перевернуть, свайп — следующая": "Tap to flip, swipe for next",
+  "Нажмите «Подобрать фразы» — ИИ предложит частотные сочетания с этим словом": "Press “Find phrases” — AI will suggest common combinations with this word"
 }
