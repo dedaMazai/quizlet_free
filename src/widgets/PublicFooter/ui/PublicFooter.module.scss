@@ -57,3 +57,46 @@
     color: var(--color-neutral-600);
     overflow-wrap: anywhere;
 }
+
+// Фирменные цвета Gainad: знак проявляется в них при наведении
+$gainad-ink: #0b0b0c;
+$gainad-lime: #d4ff3f;
+$gainad-icon-size: 18px;
+
+.developer {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-neutral-600);
+    white-space: nowrap;
+
+    &:hover {
+        color: var(--color-neutral-700);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+}
+
+.developerIcon {
+    width: $gainad-icon-size;
+    height: $gainad-icon-size;
+    padding: 2px;
+    border-radius: 4px;
+    color: var(--color-neutral-700);
+    transition: color 0.2s, background-color 0.2s;
+
+    .developer:hover &,
+    .developer:focus-visible & {
+        color: $gainad-lime;
+        background-color: $gainad-ink;
+    }
+}
+
+.developerName {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}

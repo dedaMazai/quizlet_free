@@ -2,7 +2,9 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { ReactComponent as GainadIcon } from '@/shared/assets/icons/Gainad.svg';
 import { ReactComponent as TelegramIcon } from '@/shared/assets/icons/Telegram.svg';
+import { DEVELOPER_NAME, DEVELOPER_URL } from '@/shared/const/developer';
 import { OPERATOR } from '@/shared/const/legal';
 import { TELEGRAM_APP_URL, TELEGRAM_BOT_USERNAME } from '@/shared/const/telegram';
 import { classNames } from '@/shared/lib/classNames/classNames';
@@ -48,10 +50,18 @@ export const PublicFooter = memo(() => {
                     </Link>
                 </nav>
             </div>
-            <span className={cls.operator}>
-                {`${OPERATOR.shortName} · ${t('ИНН')} ${OPERATOR.inn} · ${t('ОГРНИП')} ${OPERATOR.ogrnip} · `}
-                <a href={`mailto:${OPERATOR.email}`} className={cls.link}>{OPERATOR.email}</a>
-            </span>
+            <div className={cls.row}>
+                <span className={cls.operator}>
+                    {`${OPERATOR.shortName} · ${t('ИНН')} ${OPERATOR.inn} · ${t('ОГРНИП')} ${OPERATOR.ogrnip} · `}
+                    <a href={`mailto:${OPERATOR.email}`} className={cls.link}>{OPERATOR.email}</a>
+                </span>
+                {/* Подпись студии; без noreferrer — чтобы переходы были видны в аналитике лендинга */}
+                <a href={DEVELOPER_URL} target="_blank" rel="noopener" className={cls.developer}>
+                    {`${t('Сделано в')} `}
+                    <GainadIcon className={cls.developerIcon} aria-hidden />
+                    <span className={cls.developerName}>{DEVELOPER_NAME}</span>
+                </a>
+            </div>
         </footer>
     );
 });
