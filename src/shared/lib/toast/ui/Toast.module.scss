@@ -6,11 +6,13 @@ $enter-shift: 8px;
 
 .ToastStack {
     position: fixed;
-    bottom: $stack-offset;
-    left: $stack-offset;
+    top: $stack-offset;
+    right: $stack-offset;
     z-index: var(--toast-z-index);
     display: flex;
-    flex-direction: column;
+
+    // Новый тост — ближе к углу
+    flex-direction: column-reverse;
     gap: 8px;
     width: $toast-width;
     pointer-events: none;
@@ -96,7 +98,7 @@ $enter-shift: 8px;
 @keyframes toast-enter {
     from {
         opacity: 0;
-        transform: translateY($enter-shift);
+        transform: translateY(-$enter-shift);
     }
 }
 
@@ -108,9 +110,11 @@ $enter-shift: 8px;
 
 @media (width <= 650px) {
     .ToastStack {
+        top: auto;
         right: $stack-offset-mobile;
         bottom: calc(var(--tabbar-height) + #{$stack-offset-mobile});
         left: $stack-offset-mobile;
+        flex-direction: column;
         width: auto;
     }
 }
