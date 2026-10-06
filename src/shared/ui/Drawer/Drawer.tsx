@@ -1,5 +1,5 @@
 import {
-    memo, ReactNode, useCallback, useEffect, useRef,
+    memo, PointerEvent, ReactNode, useCallback, useEffect, useRef,
 } from 'react';
 import { MOTION_MS } from '@/shared/const/motion';
 import { classNames } from '@/shared/lib/classNames/classNames';
@@ -47,6 +47,8 @@ export const DrawerContent = memo((props: DrawerProps) => {
     const heightRef = useRef(getSheetHeight());
     const closingRef = useRef(false);
     const sheetRef = useRef<HTMLDivElement>(null);
+    // Нажатие началось на скриме, а не в шторке
+    const pressOnScrimRef = useRef(false);
     const [{ y }, api] = Spring.useSpring(() => ({ y: heightRef.current }));
     // Reduced motion: шторка не едет, а проявляется opacity за motion-instant
     const reduced = useReducedMotion();
@@ -167,11 +169,19 @@ export const DrawerContent = memo((props: DrawerProps) => {
         return null;
     }
 
-    const handleOverlayClick = () => close();
+    // Клик по скриму закрывает, только если и нажатие было на скриме: тап по инпуту поднимает
+    // клавиатуру, шторка съезжает, и click может прилететь уже в скрим
+    const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+        pressOnScrimRef.current = !sheetRef.current?.contains(event.target as Node);
+    };
+
+    const handleOverlayClick = () => {
+        if (pressOnScrimRef.current) close();
+    };
 
     return (
         <Portal element={document.getElementById('app') ?? document.body}>
-            <div className={classNames(cls.Drawer, [className])}>
+            <div className={classNames(cls.Drawer, [className])} onPointerDown={handlePointerDown}>
                 <Spring.a.div style={{ opacity: scrimOpacity }}>
                     <Overlay className={cls.scrim} onClick={handleOverlayClick} />
                 </Spring.a.div>
