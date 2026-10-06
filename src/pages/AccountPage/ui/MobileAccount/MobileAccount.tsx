@@ -2,6 +2,7 @@ import {
     ComponentPropsWithRef, FC, memo, ReactNode, useCallback, useMemo, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { Dropdown, MenuProps } from 'antd';
 import { ChevronRight } from 'lucide-react';
 import { ChangePasswordModal, ProfileForm } from '@/features/EditProfile';
@@ -9,10 +10,12 @@ import { DailyGoalSwitcher } from '@/features/DailyGoalSwitcher';
 import { useVoiceOptions } from '@/features/VoiceSwitcher';
 import { DeleteAccountButton } from '@/features/DeleteAccount';
 import { useGetAiUsageQuery } from '@/entities/Card';
+import { useGetContactRequestsQuery } from '@/entities/Contact';
 import {
     UserAvatar, useGetTelegramLinkQuery, useLogoutMutation, useUserInfo,
 } from '@/entities/User';
 import { ThemeMode } from '@/shared/const/theme';
+import { RoutePath } from '@/shared/config/router/routePath';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useTheme } from '@/shared/lib/hooks/useTheme';
 import { isTelegramMiniApp } from '@/shared/lib/telegram';
@@ -84,6 +87,8 @@ export const MobileAccount = memo(() => {
     const { data: remainingRaw, isLoading } = useGetAiUsageQuery();
     const [profileOpen, setProfileOpen] = useState(false);
     const [passwordOpen, setPasswordOpen] = useState(false);
+    const navigate = useNavigate();
+    const { data: contactRequests } = useGetContactRequestsQuery();
 
     const lang = i18n.language === InterfaceLang.EN ? InterfaceLang.EN : InterfaceLang.RU;
     const fullName = [user?.name, user?.surname].filter(Boolean).join(' ') || user?.email;
@@ -187,6 +192,11 @@ export const MobileAccount = memo(() => {
                         <TelegramButton size="small">{t('Открыть бота')}</TelegramButton>
                     )}
                 </SettingRow>
+                <LinkRow
+                    label={t('Контакты')}
+                    value={contactRequests?.length ? t('Запросы · {{count}}', { count: contactRequests.length }) : undefined}
+                    onClick={() => navigate(RoutePath.CONTACTS())}
+                />
                 <LinkRow label={t('Профиль и аватар')} onClick={openProfile} />
                 <LinkRow label={t('Сменить пароль')} onClick={openPassword} />
             </div>

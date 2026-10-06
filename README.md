@@ -132,6 +132,8 @@ sharing.sql → shared_edit.sql → roles.sql → block.sql
 → statistics.sql → ai.sql → cards.sql → chunks.sql → srs.sql
 ```
 
+`contacts.sql` (контакты, уведомления, шаринг колод контактам) выполняется после `privacy.sql`.
+
 `srs_cleanup.sql` выполняется отдельно, через 1–2 недели после `srs.sql`, когда подтвердится, что новая таблица повторений наполняется.
 
 Edge Functions:

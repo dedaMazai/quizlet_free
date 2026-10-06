@@ -58,7 +58,9 @@ export function RequireAuth({ children, accesses, forbiddenRoles }: RequireAuthP
     );
   }
 
-  if (needsOnboarding && location.pathname !== RoutePath.ONBOARDING()) {
+  // Приглашение в контакты открывается и до онбординга: иначе новичок потеряет ссылку
+  const isInvite = location.pathname.startsWith(RoutePath.INVITE(''));
+  if (needsOnboarding && location.pathname !== RoutePath.ONBOARDING() && !isInvite) {
     return <Navigate to={RoutePath.ONBOARDING()} replace />;
   }
 

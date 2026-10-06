@@ -1,19 +1,10 @@
-export { useNotificationWebsocket } from './model/hooks/useNotificationWebsocket';
+export { useNotificationsRealtime } from './model/hooks/useNotificationsRealtime';
 export { getNotificationLink } from './model/lib/getNotificationLink';
+export { getNotificationText } from './model/lib/getNotificationText';
+export { NotificationType } from './model/types/notification';
+export type { AppNotification, NotificationPayload } from './model/types/notification';
 export {
     useGetNotificationsQuery,
-    useGetNotificationQuery,
     useMarkReadNotificationsMutation,
     useDeleteNotificationsMutation,
-} from './model/api/notificationsApi';
-export type {
-    NotificationsForm,
-    NotificationReadSchema,
-    NotificationEntityEnum,
-    NotificationsFilters,
-    NotificationMarkReadSchema,
-    NotificationDeleteSchema,
-    WsNotification,
-    EventType,
-    NotificationExtra,
 } from './model/api/notificationsApi';

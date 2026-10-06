@@ -66,8 +66,7 @@ const mapDecks = async (rows: DeckRow[], currentUserId: string | null): Promise<
 
 // Понятные сообщения для ошибок RPC share_deck_by_email.
 const shareErrorMessage = (raw: string): string => {
-  if (raw.includes('USER_NOT_FOUND')) return 'Пользователь не найден';
-  if (raw.includes('CANNOT_SHARE_WITH_SELF')) return 'Нельзя поделиться с собой';
+  if (raw.includes('NOT_CONTACT')) return 'Делиться можно только с контактами';
   if (raw.includes('NOT_OWNER')) return 'Только автор может поделиться колодой';
   return raw;
 };
@@ -201,11 +200,12 @@ const deckApi = rtkApi.injectEndpoints({
         (result ? [ApiTag.Decks, { type: ApiTag.Deck, id: result.uuid }] : [ApiTag.Decks]),
     }),
     // Поделиться колодой по email (только владелец, проверка в RPC).
-    shareDeck: build.mutation<void, { deckUuid: string; email: string }>({
-      queryFn: async ({ deckUuid, email }) => {
-        const { error } = await supabase.rpc('share_deck_by_email', {
+    // Только контактам (supabase/contacts.sql): чужой email больше не вводится.
+    shareDeck: build.mutation<void, { deckUuid: string; userIds: string[] }>({
+      queryFn: async ({ deckUuid, userIds }) => {
+        const { error } = await supabase.rpc('share_deck_with_contacts', {
           p_deck_id: deckUuid,
-          p_email: email.trim().toLowerCase(),
+          p_user_ids: userIds,
         });
         if (error) return supabaseError(shareErrorMessage(error.message));
         return { data: undefined };

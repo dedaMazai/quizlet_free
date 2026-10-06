@@ -137,7 +137,6 @@
     "react-router": "^7.11.0",
     "react-router-dom": "^7.11.0",
     "react-virtuoso": "^4.18.1",
-    "socket.io-client": "^4.8.3",
     "typescript-cookie": "^1.0.6",
     "zxcvbn": "^4.4.2"
   },

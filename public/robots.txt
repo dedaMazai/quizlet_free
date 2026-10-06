@@ -5,6 +5,8 @@ Allow: /
 Disallow: /welcome
 Disallow: /profile
 Disallow: /settings
+Disallow: /contacts
+Disallow: /invite/
 Disallow: /users/
 Disallow: /decks
 Disallow: /words

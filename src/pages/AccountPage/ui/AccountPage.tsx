@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import { checkRequireAccesses, useUserAccesses } from '@/entities/User';
 import { UsersTable } from '@/widgets/UsersTable';
+import { ContactsPanel } from '@/features/ManageContacts';
+import { useGetContactRequestsQuery } from '@/entities/Contact';
 import {
     getSettingsUsersPath,
     RoutePath,
@@ -21,15 +23,17 @@ import { SettingsTab } from './SettingsTab/SettingsTab';
 import cls from './AccountPage.module.scss';
 
 interface AccountPageProps {
-    tab: AccountTab.PROFILE | AccountTab.SETTINGS;
+    tab: AccountTab.PROFILE | AccountTab.SETTINGS | AccountTab.CONTACTS;
 }
 
-/** Аккаунт: Профиль · Настройки · Пользователи (6.24–6.26). Вкладки — маршруты PROFILE и SETTINGS. */
+/** Аккаунт: Профиль · Настройки · Контакты · Пользователи (6.24–6.26). Вкладки — маршруты PROFILE, SETTINGS и CONTACTS. */
 const AccountPage = ({ tab }: AccountPageProps) => {
     const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const userAccesses = useUserAccesses();
     const { isMobile } = useMatchMedia();
+    const { data: contactRequests } = useGetContactRequestsQuery();
+    const requestsCount = contactRequests?.length ?? 0;
 
     const canReadUsers = useMemo(
         () => checkRequireAccesses({ accesses: [Accesses.users_can_read], userAccesses }),
@@ -51,6 +55,11 @@ const AccountPage = ({ tab }: AccountPageProps) => {
             label: t('Настройки'),
             active: activeTab === AccountTab.SETTINGS,
         },
+        {
+            to: RoutePath.CONTACTS(),
+            label: requestsCount ? t('Контакты · {{count}}', { count: requestsCount }) : t('Контакты'),
+            active: activeTab === AccountTab.CONTACTS,
+        },
         ...(canReadUsers ? [{
             to: getSettingsUsersPath(),
             label: (
@@ -61,11 +70,20 @@ const AccountPage = ({ tab }: AccountPageProps) => {
             ),
             active: activeTab === AccountTab.USERS,
         }] : []),
-    ], [t, activeTab, canReadUsers]);
+    ], [t, activeTab, canReadUsers, requestsCount]);
 
     // Мобильная (6.56): один экран без вкладок, «Пользователи» скрыты
-    if (isMobile) {
+    if (isMobile && activeTab !== AccountTab.CONTACTS) {
         return <MobileAccount />;
+    }
+
+    if (isMobile) {
+        return (
+            <VStack max gap="24">
+                <PageHeader title={t('Контакты')} />
+                <ContactsPanel />
+            </VStack>
+        );
     }
 
     return (
@@ -73,6 +91,7 @@ const AccountPage = ({ tab }: AccountPageProps) => {
             <PageHeader title={t('Аккаунт')} tabs={tabs} />
             {activeTab === AccountTab.PROFILE && <ProfileTab />}
             {activeTab === AccountTab.SETTINGS && <SettingsTab />}
+            {activeTab === AccountTab.CONTACTS && <ContactsPanel />}
             {activeTab === AccountTab.USERS && <UsersTable />}
         </VStack>
     );

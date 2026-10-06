@@ -1,95 +1,65 @@
 import { ApiTag, rtkApi } from '@/shared/api/rtkApi';
-import { BaseEntityFields, PaginationResult } from '@/shared/types/types';
+import { supabase, supabaseError } from '@/shared/api/supabaseClient';
+import { AppNotification, NotificationPayload, NotificationType } from '../types/notification';
 
-export type NotificationEntityEnum =
-    | 'user'
-    | 'document'
-    | 'collection'
-    | 'group'
-    | 'comment';
+// Таблица notifications (supabase/contacts.sql): RLS отдаёт только свои строки,
+// создают их только RPC контактов и шаринга.
+const NOTIFICATIONS_LIMIT = 50;
 
-export type EventType =
-    | 'comment_reply'
-    | 'user_added_to_group'
-    | 'user_removed_from_group'
-    | 'user_membership_access_granted'
-    | 'user_membership_access_revoked'
-    | 'user_mentioned';
-
-export interface NotificationExtra {
-    event_type: EventType;
-    actor_uuid: string;
-    actor_name: string;
-    [key: string]: string;
-}
-
-export interface NotificationReadSchema extends Omit<BaseEntityFields, 'deleted_at'> {
-    read_at?: string;
-    entity: NotificationEntityEnum;
-    entity_uuid: string;
-    text: string;
-    extra?: NotificationExtra;
-    user_uuid_to: string;
-}
-
-/** @deprecated Use NotificationReadSchema instead */
-export type NotificationsForm = NotificationReadSchema;
-
-export interface WsNotification {
-    event_uuid: string;
-    entity: NotificationEntityEnum;
-    entity_uuid: string;
-    text: string;
+interface NotificationRow {
+    id: string;
+    type: NotificationType;
+    actor_id: string | null;
+    entity_id: string | null;
+    payload: NotificationPayload | null;
     created_at: string;
-    extra: NotificationExtra;
+    read_at: string | null;
 }
 
-export interface NotificationsFilters {
-    limit?: number;
-    page?: number;
-    order_by?: 'created_at' | 'updated_at' | 'read_at';
-    order?: 'asc' | 'desc';
-    uuid__in?: string[];
-    read_at__isnull?: boolean;
-}
-
-export interface NotificationMarkReadSchema {
-    notification_uuids: string[];
-}
-
-export type NotificationDeleteSchema = NotificationMarkReadSchema;
+export const mapNotification = (row: NotificationRow): AppNotification => ({
+    id: row.id,
+    type: row.type,
+    actor_id: row.actor_id ?? undefined,
+    entity_id: row.entity_id ?? undefined,
+    payload: row.payload ?? {},
+    created_at: row.created_at,
+    read_at: row.read_at ?? undefined,
+});
 
 export const notificationsApi = rtkApi.injectEndpoints({
     endpoints: (build) => ({
-        getNotifications: build.query<PaginationResult<NotificationReadSchema>, NotificationsFilters | void>({
-            query: (params) => ({
-                url: '/notifications/me',
-                params: params || undefined,
-            }),
+        getNotifications: build.query<AppNotification[], void>({
+            queryFn: async () => {
+                const { data, error } = await supabase
+                    .from('notifications')
+                    .select('id, type, actor_id, entity_id, payload, created_at, read_at')
+                    .order('created_at', { ascending: false })
+                    .limit(NOTIFICATIONS_LIMIT);
+                if (error) return supabaseError(error.message);
+                return { data: (data as NotificationRow[]).map(mapNotification) };
+            },
             providesTags: [ApiTag.Notifications],
         }),
-        getNotification: build.query<NotificationReadSchema, string>({
-            query: (notificationUuid) => ({
-                url: `/notifications/${notificationUuid}`,
-            }),
-            providesTags: (_result, _error, notificationUuid) => [
-                { type: ApiTag.Notification, id: notificationUuid },
-            ],
-        }),
-        markReadNotifications: build.mutation<void, NotificationMarkReadSchema>({
-            query: (body) => ({
-                url: '/notifications/mark-read',
-                method: 'POST',
-                body,
-            }),
+        markReadNotifications: build.mutation<void, string[]>({
+            queryFn: async (ids) => {
+                if (!ids.length) return { data: undefined };
+                const { error } = await supabase
+                    .from('notifications')
+                    .update({ read_at: new Date().toISOString() })
+                    .in('id', ids)
+                    .is('read_at', null);
+                if (error) return supabaseError(error.message);
+                return { data: undefined };
+            },
             invalidatesTags: [ApiTag.Notifications],
         }),
-        deleteNotifications: build.mutation<void, NotificationDeleteSchema>({
-            query: (body) => ({
-                url: '/notifications',
-                method: 'DELETE',
-                body,
-            }),
+        deleteNotifications: build.mutation<void, string[]>({
+            queryFn: async (ids) => {
+                if (!ids.length) return { data: undefined };
+                const { error } = await supabase.from('notifications').delete().in('id', ids);
+                if (error) return supabaseError(error.message);
+                return { data: undefined };
+            },
             invalidatesTags: [ApiTag.Notifications],
         }),
     }),
@@ -97,7 +67,6 @@ export const notificationsApi = rtkApi.injectEndpoints({
 
 export const {
     useGetNotificationsQuery,
-    useGetNotificationQuery,
     useMarkReadNotificationsMutation,
     useDeleteNotificationsMutation,
 } = notificationsApi;

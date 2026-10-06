@@ -23,6 +23,7 @@ import { formatDateTime } from '@/shared/lib/formatters';
 import { useDebounce } from '@/shared/lib/hooks/useDebounce';
 import { useUserInfo } from '@/entities/User';
 import { getNotificationLink } from '../model/lib/getNotificationLink';
+import { getNotificationText } from '../model/lib/getNotificationText';
 import cls from './UserNotification.module.scss';
 
 type TypeTab = 'all' | 'unread';
@@ -41,9 +42,7 @@ const CardNotification = memo(({
     created_at: string
     path?: string
     isRead?: boolean
-    onDelete: (value: {
-        notification_uuids: string[];
-    }) => void
+    onDelete: (ids: string[]) => void
     onRead: (value: string) => void
 }) => {
     const { t } = useTranslation();
@@ -70,9 +69,7 @@ const CardNotification = memo(({
                         type="text"
                         className={cls.closeBtn}
                         size='small'
-                        onClick={() => onDelete({
-                            notification_uuids: [uuid],
-                        })}
+                        onClick={() => onDelete([uuid])}
                     />
                     {!isRead && (
                         <div
@@ -121,19 +118,19 @@ export const UserNotificationDefault = memo(() => {
         const all: string[] = [];
         const notRead: string[] = [];
 
-        notifications?.objects.forEach(({ uuid, read_at }) => {
+        notifications?.forEach(({ id, read_at }) => {
             if (!read_at) {
-                notRead.push(uuid);
+                notRead.push(id);
             }
 
-            all.push(uuid);
+            all.push(id);
         })
 
         return ({
             all,
             notRead,
         })
-    }, [notifications?.objects])
+    }, [notifications])
 
     const addToNeedRead = useCallback((value: string) => {
         setNeedRead((prev) => [...prev, value])
@@ -141,9 +138,7 @@ export const UserNotificationDefault = memo(() => {
 
     const debouncedRead = useDebounce((value: string[]) => {
         setNeedRead([]);
-        markReadNotifications({
-            notification_uuids: Array.from(new Set(value)),
-        });
+        markReadNotifications(Array.from(new Set(value)));
     });
 
     const onClose = useCallback(() => {
@@ -196,7 +191,7 @@ export const UserNotificationDefault = memo(() => {
                         size="small"
                         className={cls.textBtn}
                         // disabled={!notificationIds.notRead.length}
-                        onClick={() => markReadNotifications({ notification_uuids: notificationIds.notRead })}
+                        onClick={() => markReadNotifications(notificationIds.notRead)}
                     >
                         {t('Пометить все как прочитанное')}
                     </Button>
@@ -206,7 +201,7 @@ export const UserNotificationDefault = memo(() => {
                         size="small"
                         className={cls.textBtn}
                         // disabled={!notificationIds.all.length}
-                        onClick={() => deleteNotifications({ notification_uuids: notificationIds.all })}
+                        onClick={() => deleteNotifications(notificationIds.all)}
                     >
                         {t('Удалить все')}
                     </Button>
@@ -219,32 +214,24 @@ export const UserNotificationDefault = memo(() => {
                     }}
                 >
                     {
-                        notifications?.objects
-                        .filter(({ read_at }) => {
+                        notifications
+                        ?.filter(({ read_at }) => {
                             if (tab === 'unread' && read_at) {
                                 return false;
                             }
 
                             return true;
                         })
-                        .map(({
-                            created_at,
-                            text,
-                            uuid,
-                            read_at,
-                            entity,
-                            entity_uuid,
-                            extra,
-                        }) => (
+                        .map((notification) => (
                             <CardNotification
-                                key={uuid}
-                                uuid={uuid}
-                                text={text}
-                                created_at={created_at}
-                                isRead={!!read_at}
+                                key={notification.id}
+                                uuid={notification.id}
+                                text={getNotificationText(t, notification)}
+                                created_at={notification.created_at}
+                                isRead={!!notification.read_at}
                                 onDelete={deleteNotifications}
                                 onRead={addToNeedRead}
-                                path={getNotificationLink({ entity, entity_uuid, extra }) ?? undefined}
+                                path={getNotificationLink(notification) ?? undefined}
                             />
                         ))
                     }

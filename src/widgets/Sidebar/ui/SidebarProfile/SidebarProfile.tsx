@@ -19,6 +19,7 @@ import cls from './SidebarProfile.module.scss';
 enum ProfileMenuKey {
     PROFILE = 'profile',
     SETTINGS = 'settings',
+    CONTACTS = 'contacts',
     USERS = 'users',
     LOGOUT = 'logout',
 }
@@ -43,6 +44,7 @@ export const SidebarProfile = memo(({ collapsed }: SidebarProfileProps) => {
     const items = useMemo<MenuProps['items']>(() => [
         { key: ProfileMenuKey.PROFILE, label: t('Профиль') },
         { key: ProfileMenuKey.SETTINGS, label: t('Настройки') },
+        { key: ProfileMenuKey.CONTACTS, label: t('Контакты') },
         ...(canReadUsers ? [{ key: ProfileMenuKey.USERS, label: t('Пользователи') }] : []),
         { type: 'divider' as const },
         { key: ProfileMenuKey.LOGOUT, label: t('Выйти'), danger: true },
@@ -55,6 +57,9 @@ export const SidebarProfile = memo(({ collapsed }: SidebarProfileProps) => {
             break;
         case ProfileMenuKey.SETTINGS:
             navigate(RoutePath.SETTINGS());
+            break;
+        case ProfileMenuKey.CONTACTS:
+            navigate(RoutePath.CONTACTS());
             break;
         case ProfileMenuKey.USERS:
             navigate(getSettingsUsersPath());

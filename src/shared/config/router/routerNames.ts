@@ -6,6 +6,8 @@ export const RouteNames = {
   USER: 'USER',
   LOGIN: 'LOGIN',
   SETTINGS: 'SETTINGS',
+  CONTACTS: 'CONTACTS',
+  INVITE: 'INVITE',
   PRIVACY: 'PRIVACY',
   TERMS: 'TERMS',
   PD_CONSENT: 'PD_CONSENT',

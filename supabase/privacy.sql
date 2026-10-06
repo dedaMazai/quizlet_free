@@ -49,25 +49,11 @@ as $$
   );
 $$;
 
--- Имя и email участников общих колод: автор видит гостей, гость — автора.
--- Только эти два поля; телефон, «о себе» и прочее соавторам недоступны.
-create or replace function public.get_profiles_brief(p_ids uuid[])
-returns table (id uuid, email text, name text)
-language sql
-security definer
-set search_path = public
-stable
-as $$
-  select p.id, p.email, p.name
-  from public.profiles p
-  where p.id = any (p_ids)
-    and (p.id = auth.uid() or public.is_admin() or public.shares_deck_with(p.id));
-$$;
+-- get_profiles_brief ПЕРЕЕХАЛА в contacts.sql (имя и email видят ещё и контакты).
+-- Здесь намеренно удалена, иначе повторный прогон этого скрипта откатил бы новую версию.
 
 revoke execute on function public.shares_deck_with(uuid) from public, anon;
-revoke execute on function public.get_profiles_brief(uuid[]) from public, anon;
 grant execute on function public.shares_deck_with(uuid) to authenticated;
-grant execute on function public.get_profiles_brief(uuid[]) to authenticated;
 
 
 -- ============================================================================

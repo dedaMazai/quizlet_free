@@ -47,6 +47,7 @@ export const EN_DOCUMENTS: LegalDocuments = {
                     '3.2. The User grants the Owner a free, non-exclusive right to store, process and display the Materials to the extent needed to operate the Service: to show them to the User and to shared-deck members and to send them to the AI service at the User\'s request. The right lasts while the Materials are stored in the Service.',
                     '3.3. The User does not post Materials that violate the laws of the Russian Federation or the rights of third parties, or personal data of other people without their consent.',
                     '3.4. By sharing a deck with another user, the User understands that this user will see the deck content and the deck owner\'s name and email address, and, if editing is allowed, will be able to change the cards.',
+                    '3.5. A deck can be shared only with a contact. Users become contacts mutually: via an invitation link or via a request that the other side accepts. Contacts see each other\'s name, email address and avatar. A request by email address does not reveal whether that address is registered in the Service.',
                 ],
             },
             {
@@ -166,6 +167,7 @@ export const EN_DOCUMENTS: LegalDocuments = {
                             'Registration, sign-in, access recovery, service emails — account data; grounds: performance of the Terms of Use and the User\'s consent.',
                             'Learning features: storing decks and progress, spaced repetition, statistics — learning data; grounds: performance of the Terms of Use.',
                             'Shared decks: showing deck members the owner\'s and guests\' name and email — grounds: the action of the User who shared the deck, and consent.',
+                            'Contacts and notifications: showing contacts each other\'s name, email and avatar; notifications about contact requests and shared decks — grounds: the actions of both sides (invitation and its acceptance), and consent.',
                             'AI features at the User\'s request: sending card text and exercise answers to the AI service — grounds: the User\'s consent.',
                             'Auto-translation when adding words: sending the typed word to the translation service — grounds: the User\'s consent.',
                             'Security and support: abuse prevention, limits, handling requests and technical errors, administrator action log — grounds: performance of the Terms and the Operator\'s legitimate interest in running the Service securely.',
@@ -189,7 +191,7 @@ export const EN_DOCUMENTS: LegalDocuments = {
                             'The website hosting provider — technical request data in web server logs.',
                         ],
                     },
-                    'Other users see the User\'s data only in shared decks: the deck owner sees guests\' name and email, guests see the owner\'s name and email. The list of all users and their profiles is not available to other users.',
+                    'Other users see the User\'s data only in shared decks and in contacts: the deck owner sees guests\' name and email, guests see the owner\'s name and email; contacts see each other\'s name, email and avatar. The recipient of a contact request sees the sender\'s name, email and avatar; whoever opens an invitation link sees the inviter\'s name (or a partially hidden email if there is no name). The list of all users and their profiles is not available to other users.',
                     'The Operator discloses data to government authorities only in cases expressly provided for by the laws of the Russian Federation.',
                 ],
             },
@@ -248,7 +250,7 @@ export const EN_DOCUMENTS: LegalDocuments = {
                         list: [
                             'Data between the browser and servers is encrypted (HTTPS).',
                             'Passwords are stored as hashes.',
-                            'Database-level access rules: each user reads and changes only their own data; shared-deck data is available only to its members.',
+                            'Database-level access rules: each user reads and changes only their own data; shared-deck data is available only to its members, the contact list and notifications only to their owner.',
                             'Administrative access is restricted, and administrator actions on other accounts (signing in to an account, blocking, changing role and limits, deletion) are logged.',
                             'Email, name and other profile data are not sent to the AI service.',
                             'Secret service keys are stored only on the server and are not included in the website code.',
@@ -307,7 +309,7 @@ export const EN_DOCUMENTS: LegalDocuments = {
                 id: 'purposes',
                 title: '2. Purposes',
                 blocks: [
-                    'Registration and sign-in, access recovery; learning features and statistics; shared decks; AI features and auto-translation at my request; security and support; proof of consents given.',
+                    'Registration and sign-in, access recovery; learning features and statistics; shared decks, contacts and notifications; AI features and auto-translation at my request; security and support; proof of consents given.',
                 ],
             },
             {
@@ -329,7 +331,7 @@ export const EN_DOCUMENTS: LegalDocuments = {
                             'Translated S.r.l. (Italy), MyMemory service — typed words, IP address and browser information for auto-translation.',
                         ],
                     },
-                    'I understand that members of shared decks that I share or that are shared with me will see my name and email address.',
+                    'I understand that members of shared decks that I share or that are shared with me will see my name and email address, and my contacts and those I send a contact request to will see my name, email address and avatar.',
                 ],
             },
             {

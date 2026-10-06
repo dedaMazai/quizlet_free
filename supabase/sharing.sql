@@ -103,36 +103,10 @@ create policy "delete own or owned deck shares" on public.deck_shares
   for delete to authenticated
   using (user_id = auth.uid() or public.owns_deck(deck_id));
 
--- INSERT напрямую запрещён — только через RPC share_deck_by_email ниже.
+-- INSERT напрямую запрещён — только через RPC share_deck_with_contacts (contacts.sql).
 
--- 3. RPC: поделиться колодой по email.
-create or replace function public.share_deck_by_email(p_deck_id uuid, p_email text)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  target_id uuid;
-begin
-  if not exists (select 1 from public.decks where id = p_deck_id and user_id = auth.uid()) then
-    raise exception 'NOT_OWNER';
-  end if;
-
-  select id into target_id from public.profiles where email = lower(p_email);
-  if target_id is null then
-    raise exception 'USER_NOT_FOUND';
-  end if;
-
-  if target_id = auth.uid() then
-    raise exception 'CANNOT_SHARE_WITH_SELF';
-  end if;
-
-  insert into public.deck_shares (deck_id, user_id)
-  values (p_deck_id, target_id)
-  on conflict do nothing;
-end;
-$$;
+-- 3. RPC share_deck_by_email УДАЛЕНА: ответ USER_NOT_FOUND раскрывал, зарегистрирован ли
+-- адрес. Делиться теперь можно только с контактом — см. contacts.sql (там же drop function).
 
 -- 4. RLS decks: видеть колоду может владелец ИЛИ тот, кому открыт доступ.
 drop policy if exists "read own or shared decks" on public.decks;

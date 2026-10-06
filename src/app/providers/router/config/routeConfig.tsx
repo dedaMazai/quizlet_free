@@ -38,6 +38,7 @@ import { CyclesPage } from '@/pages/CyclesPage';
 import { CyclePage } from '@/pages/CyclePage';
 import { CycleStudyPage } from '@/pages/CycleStudyPage';
 import { DevUiPage } from '@/pages/DevUiPage';
+import { InvitePage } from '@/pages/InvitePage';
 
 export const routeConfig: AppRoutesProps[] = [
     {
@@ -79,6 +80,18 @@ export const routeConfig: AppRoutesProps[] = [
         element: <AccountPage tab={AccountTab.SETTINGS} />,
         authOnly: true,
         withSidebar: true,
+    },
+    {
+        path: RoutePath.CONTACTS(),
+        element: <AccountPage tab={AccountTab.CONTACTS} />,
+        authOnly: true,
+        withSidebar: true,
+    },
+    {
+        path: RoutePath.INVITE(':token'),
+        element: <InvitePage />,
+        authOnly: true,
+        focusLayout: true,
     },
     {
         path: RoutePath.DECKS(),
