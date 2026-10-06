@@ -26,6 +26,18 @@ const FLICK_VELOCITY = 2;
 /** CSS-переменная: на сколько клавиатура iOS перекрывает низ экрана */
 const KEYBOARD_VAR = '--sheet-keyboard-offset';
 
+// DEBUG: временная диагностика закрытия шторки на iOS — удалить
+export const dbgLog = (msg: string) => {
+    try {
+        const prev = sessionStorage.getItem('dbg-drawer') ?? '';
+        const line = `${new Date().toISOString().slice(14, 23)} ${msg}`;
+        sessionStorage.setItem('dbg-drawer', `${prev}\n${line}`.split('\n').slice(-12).join('\n'));
+        window.dispatchEvent(new Event('dbg-drawer'));
+    } catch { /* noop */ }
+};
+
+dbgLog('page load');
+
 const getSheetHeight = () => window.innerHeight - SHEET_TOP;
 
 /** Открытые шторки по порядку открытия: Esc закрывает только верхнюю */
@@ -78,6 +90,7 @@ export const DrawerContent = memo((props: DrawerProps) => {
 
     const close = useCallback((velocity = 0) => {
         // Повторный тап по скриму или ✕ во время анимации не должен вызвать onClose дважды
+        dbgLog('drawer: close() анимация');
         if (closingRef.current) return;
         closingRef.current = true;
         if (reduced) {
@@ -104,6 +117,7 @@ export const DrawerContent = memo((props: DrawerProps) => {
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key !== 'Escape' || hasOpenPopup()) return;
             if (openSheets[openSheets.length - 1] === id) {
+                dbgLog('drawer: escape');
                 close();
             }
         };
@@ -126,6 +140,7 @@ export const DrawerContent = memo((props: DrawerProps) => {
 
         const update = () => {
             const offset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+            dbgLog(`vv h=${Math.round(viewport.height)} top=${Math.round(viewport.offsetTop)} ih=${window.innerHeight} off=${Math.round(offset)}`);
             sheetRef.current?.style.setProperty(KEYBOARD_VAR, `${offset}px`);
         };
 
@@ -149,6 +164,7 @@ export const DrawerContent = memo((props: DrawerProps) => {
         }) => {
             if (last) {
                 if (my > heightRef.current * CLOSE_THRESHOLD || (vy > FLICK_VELOCITY && dy > 0)) {
+                    dbgLog(`drawer: drag my=${Math.round(my)} vy=${vy.toFixed(1)}`);
                     close();
                 } else {
                     openDrawer();
@@ -173,9 +189,11 @@ export const DrawerContent = memo((props: DrawerProps) => {
     // клавиатуру, шторка съезжает, и click может прилететь уже в скрим
     const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
         pressOnScrimRef.current = !sheetRef.current?.contains(event.target as Node);
+        dbgLog(`drawer: pointerdown ${(event.target as HTMLElement).tagName} onScrim=${pressOnScrimRef.current}`);
     };
 
     const handleOverlayClick = () => {
+        dbgLog(`drawer: scrim click, pressOnScrim=${pressOnScrimRef.current}`);
         if (pressOnScrimRef.current) close();
     };
 
