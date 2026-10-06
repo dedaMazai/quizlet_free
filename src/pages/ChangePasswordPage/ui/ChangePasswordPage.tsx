@@ -29,8 +29,9 @@ interface ChangePasswordValues {
 const ChangePasswordPage = () => {
     const { t } = useTranslation();
     const toast = useToast();
-    const [searchParams] = useSearchParams();
-    const tokenHash = searchParams.get('token_hash');
+    const [searchParams, setSearchParams] = useSearchParams();
+    // Запоминаем токен при первом рендере: из адреса его сразу убираем
+    const [tokenHash] = useState(() => searchParams.get('token_hash'));
     const [form] = Form.useForm<ChangePasswordValues>();
     const [verifyPasswordReset] = useVerifyPasswordResetMutation();
     const [changePassword, { isLoading }] = useChangePasswordMutation();
@@ -41,10 +42,12 @@ const ChangePasswordPage = () => {
     useEffect(() => {
         if (!tokenHash || isVerifyStarted.current) return;
         isVerifyStarted.current = true;
+        // Не оставляем токен в адресной строке и истории браузера
+        setSearchParams({}, { replace: true });
         verifyPasswordReset(tokenHash).then((result) => {
             setStatus('error' in result ? LinkStatus.INVALID : LinkStatus.VALID);
         });
-    }, [tokenHash, verifyPasswordReset]);
+    }, [tokenHash, verifyPasswordReset, setSearchParams]);
 
     const onFinish = async ({ password }: ChangePasswordValues) => {
         try {
