@@ -11,6 +11,7 @@ import { RouterErrorBoundary } from './RouterErrorBoundary';
 import { AuthLayout } from './AuthLayout';
 import { FocusLayout } from './FocusLayout';
 import { PublicLayout } from './PublicLayout';
+import { AdaptiveLayout } from './AdaptiveLayout';
 
 const toRouteObject = (route: AppRoutesProps): RouteObject => {
     let { element } = route;
@@ -43,6 +44,7 @@ export const AppRouter = () => {
         const sidebarRoutes: AppRoutesProps[] = [];
         const authNoSidebarRoutes: AppRoutesProps[] = [];
         const publicLayoutRoutes: AppRoutesProps[] = [];
+        const adaptiveLayoutRoutes: AppRoutesProps[] = [];
         const publicRoutes: AppRoutesProps[] = [];
 
         for (const route of routeConfig) {
@@ -52,6 +54,8 @@ export const AppRouter = () => {
                 sidebarRoutes.push(route);
             } else if (route.authOnly) {
                 authNoSidebarRoutes.push(route);
+            } else if (route.adaptiveLayout) {
+                adaptiveLayoutRoutes.push(route);
             } else if (route.publicLayout) {
                 publicLayoutRoutes.push(route);
             } else {
@@ -78,6 +82,10 @@ export const AppRouter = () => {
                     {
                         element: <PublicLayout />,
                         children: publicLayoutRoutes.map(toRouteObject),
+                    },
+                    {
+                        element: <AdaptiveLayout />,
+                        children: adaptiveLayoutRoutes.map(toRouteObject),
                     },
                     {
                         element: (

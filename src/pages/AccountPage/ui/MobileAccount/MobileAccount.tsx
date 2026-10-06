@@ -7,6 +7,7 @@ import { ChevronRight } from 'lucide-react';
 import { ChangePasswordModal, ProfileForm } from '@/features/EditProfile';
 import { DailyGoalSwitcher } from '@/features/DailyGoalSwitcher';
 import { useVoiceOptions } from '@/features/VoiceSwitcher';
+import { DeleteAccountButton } from '@/features/DeleteAccount';
 import { useGetAiUsageQuery } from '@/entities/Card';
 import { UserAvatar, useLogoutMutation, useUserInfo } from '@/entities/User';
 import { ThemeMode } from '@/shared/const/theme';
@@ -179,6 +180,7 @@ export const MobileAccount = memo(() => {
             <button type="button" className={cls.logout} onClick={() => logout()}>
                 {t('Выйти')}
             </button>
+            <DeleteAccountButton className={cls.deleteAccount} />
 
             <ModalFrame
                 open={profileOpen}

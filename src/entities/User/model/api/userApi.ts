@@ -10,6 +10,10 @@ import { mapProfile, ProfileRow } from '../lib/mapProfile';
 import { OrderingType, PaginationResult } from '@/shared/types/types';
 import { GenderUser } from '@/shared/const/const';
 import { RoutePath } from '@/shared/config/router/routePath';
+import { isTelegramMiniApp } from '@/shared/lib/telegram';
+import { getFunctionErrorCode } from '../lib/getFunctionErrorCode';
+import { invokeTelegramAuth } from '../lib/telegramAuth';
+import { getUserLoggedOut } from '../selectors/getUserData';
 
 interface RequestLogin {
   password: string
@@ -20,6 +24,8 @@ interface RequestRegister {
   email: string
   password: string
   name?: string
+  /** Редакция принятых документов: триггер record_signup_consent пишет её в user_consents */
+  legalVersion: string
 }
 
 /** Сводка по пользователю для админа (admin_user_stats). */
@@ -27,6 +33,11 @@ export interface AdminUserStats {
   decks: number
   words: number
   streak: number
+}
+
+/** Привязанный к аккаунту Telegram (строка telegram_accounts). */
+export interface TelegramLink {
+  username: string | null
 }
 
 export type OrderUsers = 'created_at' | 'updated_at' | 'name' | 'email';
@@ -86,11 +97,13 @@ const userApi = rtkApi.injectEndpoints({
       },
     }),
     register: build.mutation<UserInfo | null, RequestRegister>({
-      queryFn: async ({ email, password, name }) => {
+      queryFn: async ({
+        email, password, name, legalVersion,
+      }) => {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: name ? { data: { name } } : undefined,
+          options: { data: { ...(name ? { name } : {}), legal_version: legalVersion } },
         });
         if (error) return supabaseError(error.message);
         // Если в проекте включено подтверждение email — сессии ещё нет (data.session === null).
@@ -144,8 +157,15 @@ const userApi = rtkApi.injectEndpoints({
     }),
     userInfo: build.query<UserInfo, void>({
       // Восстанавливаем пользователя из сессии Supabase (хранится в localStorage).
-      queryFn: async () => {
-        const { data, error } = await supabase.auth.getSession();
+      // В Telegram Mini App без сессии пробуем войти по привязанному Telegram — кроме случая явного выхода.
+      queryFn: async (_arg, { getState }) => {
+        let { data, error } = await supabase.auth.getSession();
+        if (error) return supabaseError(error.message);
+        const loggedOut = getUserLoggedOut(getState() as Parameters<typeof getUserLoggedOut>[0]);
+        if (!data.session && isTelegramMiniApp() && !loggedOut) {
+          const { signedIn } = await invokeTelegramAuth('login');
+          if (signedIn) ({ data, error } = await supabase.auth.getSession());
+        }
         if (error) return supabaseError(error.message);
         if (!data.session) return { error: { status: 401, data: 'No session' } };
         const userInfo = await fetchUserInfo(data.session.user);
@@ -388,17 +408,7 @@ const userApi = rtkApi.injectEndpoints({
         });
         if (error) {
           // Достаём код ошибки из тела ответа функции (например, CANNOT_IMPERSONATE_ADMIN).
-          let code = error.message;
-          const ctx = (error as { context?: Response }).context;
-          if (ctx && typeof ctx.json === 'function') {
-            try {
-              const body = await ctx.json();
-              if (body?.error) code = body.error;
-            } catch {
-              // Тело не JSON — оставляем исходное сообщение.
-            }
-          }
-          return supabaseError(code);
+          return supabaseError(await getFunctionErrorCode(error));
         }
         const tokenHash = (data as { token_hash?: string } | null)?.token_hash;
         if (!tokenHash) return supabaseError('LINK_FAILED');
@@ -409,6 +419,45 @@ const userApi = rtkApi.injectEndpoints({
         if (verifyError) return supabaseError(verifyError.message);
         return { data: undefined };
       },
+    }),
+    telegramCreateAccount: build.mutation<UserInfo, void>({
+      // Mini App: новый аккаунт для Telegram-пользователя (или вход, если он уже привязан).
+      queryFn: async () => {
+        const { signedIn, error } = await invokeTelegramAuth('create');
+        if (!signedIn) return supabaseError(error ?? 'CREATE_FAILED');
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) return supabaseError('NOT_AUTHENTICATED');
+        return { data: await fetchUserInfo(data.session.user) };
+      },
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(userActions.setUserData(data));
+        } catch (err) {
+          console.error('Telegram account error:', err);
+        }
+      },
+    }),
+    linkTelegram: build.mutation<void, void>({
+      // Привязать Telegram из Mini App к текущему (вошедшему по email) пользователю.
+      queryFn: async () => {
+        const { error } = await invokeTelegramAuth('link');
+        if (error) return supabaseError(error);
+        return { data: undefined };
+      },
+      invalidatesTags: [ApiTag.TelegramAccount],
+    }),
+    getTelegramLink: build.query<TelegramLink | null, void>({
+      // RLS отдаёт только собственную строку.
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('telegram_accounts')
+          .select('username')
+          .maybeSingle<TelegramLink>();
+        if (error) return supabaseError(error.message);
+        return { data };
+      },
+      providesTags: [ApiTag.TelegramAccount],
     }),
     deleteUser: build.mutation<void, string>({
       queryFn: async (uuid) => {
@@ -440,4 +489,7 @@ export const {
   useGetUsersAiUsageQuery,
   useGetAdminUserStatsQuery,
   useImpersonateUserMutation,
+  useTelegramCreateAccountMutation,
+  useLinkTelegramMutation,
+  useGetTelegramLinkQuery,
 } = userApi;

@@ -7,14 +7,90 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Zubrika</title>
 
+    <!-- SEO и превью ссылок. Публичные страницы переопределяют title/description/url
+         через usePageMeta, пререндер (scripts/prerender.ts) запекает их в HTML -->
+    <meta name="description" content="Zubrika — бесплатный тренажёр английских слов: колоды карточек, интервальные повторения, пять режимов тренировки, проверка переводов ИИ, грамматика и статистика прогресса.">
+    <meta name="theme-color" content="#f2f2f3" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#141b23" media="(prefers-color-scheme: dark)">
+    <link rel="canonical" href="https://www.zubrika.ru">
 
+    <!-- OpenGraph: Telegram, VK, WhatsApp, Facebook, LinkedIn, Slack, Discord, Viber, iMessage -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Zubrika">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:title" content="Zubrika">
+    <meta property="og:description" content="Zubrika — бесплатный тренажёр английских слов: колоды карточек, интервальные повторения, пять режимов тренировки, проверка переводов ИИ, грамматика и статистика прогресса.">
+    <meta property="og:url" content="https://www.zubrika.ru">
+    <meta property="og:image" content="https://www.zubrika.ru/og-image.png">
+    <meta property="og:image:secure_url" content="https://www.zubrika.ru/og-image.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Zubrika — английские слова по карточкам">
+    <!-- X (Twitter) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Zubrika">
+    <meta name="twitter:description" content="Zubrika — бесплатный тренажёр английских слов: колоды карточек, интервальные повторения, пять режимов тренировки, проверка переводов ИИ, грамматика и статистика прогресса.">
+    <meta name="twitter:image" content="https://www.zubrika.ru/og-image.png">
+    <meta name="twitter:image:alt" content="Zubrika — английские слова по карточкам">
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                    "@type": "WebSite",
+                    "name": "Zubrika",
+                    "url": "https://www.zubrika.ru",
+                    "inLanguage": ["ru", "en"]
+                },
+                {
+                    "@type": "WebApplication",
+                    "name": "Zubrika",
+                    "url": "https://www.zubrika.ru",
+                    "applicationCategory": "EducationalApplication",
+                    "operatingSystem": "Web",
+                    "description": "Тренажёр английских слов: колоды карточек, интервальные повторения, режимы тренировки, грамматика и статистика.",
+                    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" }
+                }
+            ]
+        }
+    </script>
+
+    <script>
+        // Telegram Mini App: SDK грузим только при запуске из Telegram — на сайте telegram.org
+        // не нужен и может тормозить. Данные запуска приходят в hash, после перезагрузки SDK
+        // берёт их из sessionStorage. Синхронно — чтобы window.Telegram был до бандла.
+        (function () {
+            var inTelegram = location.hash.indexOf('tgWebAppData') !== -1;
+            try {
+                inTelegram = inTelegram || Boolean(sessionStorage.getItem('__telegram__initParams'));
+            } catch (e) {
+                // sessionStorage недоступен — решаем только по hash
+            }
+            if (inTelegram) {
+                document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
+            }
+        })();
+    </script>
     <script>
         // Тёмная тема до загрузки бандла — без белой вспышки (BACKLOG §6).
         // Ключи и значения — как в ThemeProvider (LOCAL_STORAGE_THEME_*), фон — --color-bg тёмной темы
         (function () {
             try {
-                var dark = localStorage.getItem('theme_follow_system') === 'true'
-                    ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                // В Telegram «системная» тема — тема Telegram, и следование ей включено по умолчанию
+                var webApp = window.Telegram && window.Telegram.WebApp;
+                var tg = webApp && webApp.initData ? webApp : null;
+                var followKey = localStorage.getItem('theme_follow_system');
+                var follow = followKey === null ? Boolean(tg) : followKey === 'true';
+                var dark = follow
+                    ? (tg ? tg.colorScheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches)
                     : localStorage.getItem('theme') === '"app_dark_theme"';
                 if (dark) {
                     document.documentElement.style.background = '#141b23';
@@ -28,5 +104,30 @@
 </head>
 <body>
     <div id="root"></div>
+    <script>
+        // Пререндеренная разметка снята для гостя: русский язык, светлая тема.
+        // Вошедшим, англоязычным и тёмной теме она бы мигнула чужим видом — убираем до первой отрисовки.
+        // Логика языка — как в i18n.ts (i18nextLng, затем язык браузера; роботам — ru)
+        (function () {
+            var root = document.getElementById('root');
+            if (!root || !root.firstChild || /bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent)) return;
+            try {
+                var session = false;
+                for (var i = 0; i < localStorage.length; i++) {
+                    if (/^sb-.*-auth-token$/.test(localStorage.key(i) || '')) session = true;
+                }
+                var lng = localStorage.getItem('i18nextLng') || navigator.language || 'ru';
+                // Грамматика на телефоне — другая разметка (useMatchMedia), снимок сделан на десктопе
+                var mobileMarkup = window.matchMedia('(max-width: 650px)').matches
+                    && /^\/(grammar|roadmap)/.test(location.pathname);
+                if (session || window.Telegram || mobileMarkup || lng.indexOf('ru') !== 0
+                    || document.documentElement.style.colorScheme === 'dark') {
+                    root.innerHTML = '';
+                }
+            } catch (e) {
+                root.innerHTML = '';
+            }
+        })();
+    </script>
 </body>
 </html>

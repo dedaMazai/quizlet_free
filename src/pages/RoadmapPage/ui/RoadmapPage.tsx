@@ -8,6 +8,7 @@ import { NavSectionKey } from '@/shared/const/menu';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { usePageMeta } from '@/shared/lib/hooks/usePageMeta';
 import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import {
@@ -66,6 +67,10 @@ const RoadmapPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { isMobile } = useMatchMedia();
+    usePageMeta({
+        title: t('Дорожная карта английской грамматики'),
+        description: t('Пошаговый план изучения английской грамматики от A1 до B1: темы по порядку, правила с примерами, типичные ошибки и отметки о пройденном.'),
+    });
     const [doneSteps, setDoneSteps] = useLocalStorage<string[]>(LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY, NO_STEPS);
 
     const statuses = getStageStatuses(doneSteps);

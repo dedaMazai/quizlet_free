@@ -4,14 +4,16 @@ import { useNavigate } from 'react-router';
 import { Button, ButtonProps, Input } from 'antd';
 import { Search } from 'lucide-react';
 import { useGetMasteryQuery } from '@/entities/Statistics';
+import { useUserInfo } from '@/entities/User';
 import { SectionPageHeader } from '@/widgets/SectionPage';
 import { NavSectionKey } from '@/shared/const/menu';
-import { RoutePath } from '@/shared/config/router/routePath';
+import { RoutePath, getRegisterPath } from '@/shared/config/router/routePath';
 import {
     IRREGULAR_VERBS, IrregularVerb, VerbBand, VERB_BANDS,
 } from '@/shared/const/grammar';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { usePageMeta } from '@/shared/lib/hooks/usePageMeta';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import { MasteryBar, MasteryBarSize } from '@/shared/ui/MasteryBar';
@@ -37,8 +39,13 @@ const IrregularVerbsPage = () => {
     const [search, setSearch] = useState('');
     const [openBands, setOpenBands] = useState<number[]>([FIRST_BAND]);
     const { importBand, importingBand, findExistingDeck } = useImportVerbsDeck();
-    const { data: mastery } = useGetMasteryQuery();
+    const userInfo = useUserInfo();
+    const { data: mastery } = useGetMasteryQuery(undefined, { skip: !userInfo });
     const { isMobile } = useMatchMedia();
+    usePageMeta({
+        title: t('Неправильные глаголы английского языка'),
+        description: t('Таблица неправильных глаголов английского: три формы с переводом, поиск и группы по частотности. Каждую группу можно превратить в колоду и выучить по карточкам.'),
+    });
 
     const normalizedSearch = search.trim().toLowerCase();
     const matchesSearch = (verb: IrregularVerb): boolean => (
@@ -50,6 +57,11 @@ const IrregularVerbsPage = () => {
     );
 
     const importAndOpen = async (band: VerbBand) => {
+        // Страница открыта для поиска: гость сначала регистрируется
+        if (!userInfo) {
+            navigate(getRegisterPath());
+            return;
+        }
         const deck = await importBand(band);
         if (deck) navigate(RoutePath.DECK(deck.uuid));
     };

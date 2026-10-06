@@ -95,6 +95,21 @@ $enter-shift: 8px;
     }
 }
 
+// Специфичность 0,2,0 — иначе CSS-in-JS AntD перебивает размер и цвет icon-only кнопки
+.Toast .close {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
+    margin: -2px -4px 0 0;
+    color: var(--color-neutral-700);
+
+    &:hover {
+        color: var(--color-text);
+    }
+}
+
 @keyframes toast-enter {
     from {
         opacity: 0;

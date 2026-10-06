@@ -52,6 +52,13 @@ declare const __MYMEMORY_EMAIL__: string;
 declare const __PROJECT__: 'frontend';
 declare const __APP_VERSION__: string;
 declare const __SENTRY_DSN__: string;
+/** Русские переводы, отличающиеся от ключа (config/build/buildPlugins.ts) */
+declare const __RU_TRANSLATIONS__: Record<string, string>;
+
+interface Window {
+    /** Страницу снимает пререндер при сборке (scripts/prerender.ts) */
+    __PRERENDER__?: boolean;
+}
 
 type DeepPartial<T> = T extends object
     ? {

@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import { LegalConsentGate } from '@/widgets/LegalConsentGate';
 import { NetworkBanner } from '@/widgets/NetworkBanner';
 import { PageLoader } from '@/widgets/PageLoader';
 import cls from './FocusLayout.module.scss';
@@ -11,6 +12,7 @@ export const FocusLayout = () => {
     return (
         <main className={cls.FocusLayout}>
             <NetworkBanner />
+            <LegalConsentGate />
             <Suspense key={pathname} fallback={<PageLoader />}>
                 {/* Анимируется только контент: оболочка неподвижна */}
                 <div className={cls.page}>

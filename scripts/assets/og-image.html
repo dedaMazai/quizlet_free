@@ -1,0 +1,85 @@
+<!doctype html>
+<!-- Шаблон OG-картинки 1200×630: снимает scripts/generate-assets.mjs -->
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<style>
+    @font-face { font-family: "Fira Sans"; font-weight: 400; src: url("../../src/app/styles/fonts/FiraSans-Regular.woff2"); }
+    @font-face { font-family: "Fira Sans"; font-weight: 500; src: url("../../src/app/styles/fonts/FiraSans-Medium.woff2"); }
+    @font-face { font-family: "Fira Sans Condensed"; font-weight: 600; src: url("../../src/app/styles/fonts/FiraSansCondensed-SemiBold.woff2"); }
+    @font-face { font-family: "Fira Sans Condensed"; font-weight: 700; src: url("../../src/app/styles/fonts/FiraSansCondensed-Bold.woff2"); }
+    @font-face { font-family: "JetBrains Mono"; font-weight: 400; src: url("../../src/app/styles/fonts/JetBrainsMono-Regular.woff2"); }
+
+    :root {
+        --bg: #f2f2f3;
+        --card: #ffffff;
+        --ink: #1d1f20;
+        --muted: #5c6166;
+        --accent: #4b7095;
+        --accent-bg: #eef6ff;
+        --line: rgba(29, 31, 32, 0.16);
+        --grid: rgba(75, 112, 149, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; }
+    html, body { width: 1200px; height: 630px; }
+    body {
+        position: relative;
+        overflow: hidden;
+        background:
+            linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 40px 40px,
+            linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 40px 40px,
+            var(--bg);
+        color: var(--ink);
+        font-family: "Fira Sans", sans-serif;
+    }
+    .left { position: absolute; left: 72px; top: 64px; bottom: 64px; width: 640px; display: flex; flex-direction: column; }
+    .brand { display: flex; align-items: center; gap: 14px; font: 700 40px/1 "Fira Sans Condensed"; letter-spacing: 0.01em; }
+    .brand svg { width: 30px; height: 46px; }
+    h1 { margin-top: 72px; font: 600 74px/1.04 "Fira Sans Condensed"; letter-spacing: -0.01em; }
+    h1 span { color: var(--accent); }
+    .sub { margin-top: 28px; font: 400 28px/1.35 "Fira Sans"; color: var(--muted); }
+    .foot { margin-top: auto; display: flex; gap: 12px; align-items: center; font: 500 24px/1 "Fira Sans"; }
+    .pill { padding: 10px 18px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); }
+
+    .stack { position: absolute; right: 72px; top: 118px; width: 400px; height: 400px; }
+    .card {
+        position: absolute; inset: 0; border: 1px solid var(--line); border-radius: 24px; background: var(--card);
+        box-shadow: 0 24px 48px rgba(29, 31, 32, 0.10);
+    }
+    .card.back1 { transform: rotate(7deg) translate(18px, 6px); }
+    .card.back2 { transform: rotate(-5deg) translate(-14px, 10px); }
+    .card.front { display: flex; flex-direction: column; padding: 36px; }
+    .kicker { font: 400 18px/1 "JetBrains Mono"; color: var(--accent); letter-spacing: 0.08em; }
+    .term { margin-top: 56px; font: 600 54px/1 "Fira Sans Condensed"; }
+    .ipa { margin-top: 14px; font: 400 22px/1 "JetBrains Mono"; color: var(--muted); }
+    .divider { margin: 34px 0 28px; height: 1px; background: var(--line); }
+    .tr { font: 500 30px/1.2 "Fira Sans"; }
+    .ticks { margin-top: auto; display: flex; gap: 8px; }
+    .ticks i { flex: 1; height: 8px; border-radius: 4px; background: var(--line); }
+    .ticks i.on { background: var(--accent); }
+</style>
+</head>
+<body>
+    <div class="left">
+        <div class="brand">
+            <svg viewBox="0 0 24 36" fill="none"><rect x="2" y="9" width="20" height="23" stroke="#1d1f20" stroke-width="2.4"/><line x1="6" y1="16" x2="18" y2="16" stroke="#1d1f20" stroke-width="2.4"/><line x1="6" y1="21" x2="18" y2="21" stroke="#1d1f20" stroke-width="2.4"/><line x1="6" y1="26" x2="14" y2="26" stroke="#1d1f20" stroke-width="2.4"/></svg>
+            Zubrika
+        </div>
+        <h1>Английские&nbsp;слова <span>по&nbsp;карточкам</span></h1>
+        <p class="sub">Колоды, интервальные повторения, пять режимов тренировки, грамматика и&nbsp;проверка переводов ИИ</p>
+        <div class="foot"><span class="pill">Бесплатно</span><span>zubrika.ru</span></div>
+    </div>
+    <div class="stack">
+        <div class="card back1"></div>
+        <div class="card back2"></div>
+        <div class="card front">
+            <span class="kicker">EN → RU</span>
+            <span class="term">serendipity</span>
+            <span class="ipa">/ˌser.ənˈdɪp.ə.ti/</span>
+            <div class="divider"></div>
+            <span class="tr">счастливая случайность</span>
+            <div class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+        </div>
+    </div>
+</body>
+</html>

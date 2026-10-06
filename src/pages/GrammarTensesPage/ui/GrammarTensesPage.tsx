@@ -6,10 +6,12 @@ import { ArrowRight } from 'lucide-react';
 import {
     TENSE_MASTERY_TICKS, getCurrentGroup, isGroupMastered, useGetTenseMasteryQuery,
 } from '@/entities/GrammarPractice';
+import { useUserInfo } from '@/entities/User';
 import { SectionPageHeader } from '@/widgets/SectionPage';
 import { NavSectionKey } from '@/shared/const/menu';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { usePageMeta } from '@/shared/lib/hooks/usePageMeta';
 import { RoutePath, TENSE_TIME_PARAM } from '@/shared/config/router/routePath';
 import {
     ASPECT_GROUP_ORDER, ASPECT_GROUPS, TENSES, TENSE_TIME_ORDER, AspectGroupId, TenseTime,
@@ -66,8 +68,14 @@ const toTicks = (score: number): TickState[] => Array.from(
 const GrammarTensesPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { data: mastery = {} } = useGetTenseMasteryQuery();
+    const userInfo = useUserInfo();
+    // Страница открыта гостям — прогресс только у вошедших
+    const { data: mastery = {} } = useGetTenseMasteryQuery(undefined, { skip: !userInfo });
     const { isMobile } = useMatchMedia();
+    usePageMeta({
+        title: t('Времена английского языка'),
+        description: t('Все 12 времён английского в одной таблице: формулы, слова-маркеры, примеры с переводом и типичные ошибки. Группы Simple, Continuous, Perfect и Perfect Continuous.'),
+    });
     // Выбранный на мобильном аспект; по умолчанию — текущая группа плана
     const [selectedAspect, setSelectedAspect] = useState<AspectGroupId | null>(null);
 

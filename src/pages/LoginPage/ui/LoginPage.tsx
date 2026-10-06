@@ -4,21 +4,30 @@ import { Link, useSearchParams } from 'react-router';
 import { useEffect, useState } from 'react';
 import { LOGIN_MODE_PARAM, LOGIN_MODE_REGISTER, RoutePath } from '@/shared/config/router/routePath';
 import {
+    useLinkTelegramMutation,
     useLoginMutation,
     useRegisterMutation,
     useRequestPasswordResetMutation,
+    useTelegramCreateAccountMutation,
     useUserInfoQuery,
 } from '@/entities/User';
 import { Loader } from '@/shared/ui/Loader';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerTone } from '@/shared/ui/Kicker';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
+import { usePageMeta } from '@/shared/lib/hooks/usePageMeta';
 import { useToast } from '@/shared/lib/toast';
+import { isTelegramMiniApp } from '@/shared/lib/telegram';
+import { LEGAL_VERSION } from '@/shared/const/legal';
+import {
+    isLegalConsentComplete, LegalConsentChecks, LegalConsentValue,
+} from '@/features/LegalConsent';
 import { ReactComponent as Logo } from '@/shared/assets/icons/LogoZubrika.svg';
 import cls from './LoginPage.module.scss';
 
 /** Название продукта не переводится. */
 const APP_NAME = 'Zubrika';
+const RESET_TOAST_DURATION_MS = 7000;
 
 enum LoginMode {
     LOGIN = 'login',
@@ -35,9 +44,13 @@ interface LoginForm {
 /** Вход и регистрация (Public 6.31/6.32): слева тёмное поле со слоганом, справа форма */
 const LoginPage = () => {
     const { t } = useTranslation();
+    usePageMeta({ title: t('Вход') });
     const [login, { isLoading: isLoginLoading }] = useLoginMutation();
     const [register, { isLoading: isRegisterLoading }] = useRegisterMutation();
     const [requestPasswordReset, { isLoading: isResetLoading }] = useRequestPasswordResetMutation();
+    const [telegramCreateAccount, { isLoading: isTelegramLoading }] = useTelegramCreateAccountMutation();
+    const [linkTelegram] = useLinkTelegramMutation();
+    const inTelegram = isTelegramMiniApp();
     const toast = useToast();
     const [form] = Form.useForm<LoginForm>();
     const [searchParams] = useSearchParams();
@@ -47,6 +60,9 @@ const LoginPage = () => {
     );
     const isRegisterMode = mode === LoginMode.REGISTER;
     const isResetMode = mode === LoginMode.RESET;
+    // Галочки не ставятся заранее: согласие должно быть активным действием
+    const [legalConsent, setLegalConsent] = useState<LegalConsentValue>({ terms: false, consent: false });
+    const [showLegalErrors, setShowLegalErrors] = useState(false);
     const [
         storageFields,
     ] = useLocalStorage<{
@@ -73,30 +89,67 @@ const LoginPage = () => {
         },
     ];
 
+    // Mini App: вход по привязанному Telegram или новый аккаунт без почты и пароля
+    const onTelegramStart = async () => {
+        const result = await telegramCreateAccount();
+        if ('error' in result) {
+            toast.error(t('Не удалось войти через Telegram'));
+        }
+    };
+
+    // Mini App: после входа по почте привязываем Telegram, чтобы дальше входить автоматически.
+    // Ошибка привязки вход не отменяет.
+    const linkTelegramAfterAuth = async () => {
+        if (!inTelegram) return;
+        const result = await linkTelegram();
+        if ('error' in result) {
+            toast.warning(t('Не удалось привязать Telegram — возможно, он уже привязан к другому аккаунту'));
+        }
+    };
+
     const onFinish = async (values: LoginForm) => {
         if (isResetMode) {
             const result = await requestPasswordReset(values.email);
             if ('error' in result) {
                 toast.error(t('Не удалось отправить письмо, попробуйте позже'));
             } else {
-                toast.success(t('Если аккаунт с этой почтой есть, мы отправили ссылку для сброса пароля'));
+                // Письма часто попадают в «Спам» — тост заметный, держится дольше обычного и закрывается крестиком
+                toast.warning(
+                    <>
+                        <strong>{t('Обязательно проверьте «Спам»')}</strong>
+                        {' '}
+                        {t('— ссылка придёт, если аккаунт с этой почтой есть')}
+                    </>,
+                    { duration: RESET_TOAST_DURATION_MS, closable: true },
+                );
                 setMode(LoginMode.LOGIN);
             }
         } else if (isRegisterMode) {
+            // Без обеих галочек аккаунт не создаём: согласие на обработку ПДн — условие регистрации
+            if (!isLegalConsentComplete(legalConsent)) {
+                setShowLegalErrors(true);
+                toast.error(t('Отметьте согласие с документами'));
+                return;
+            }
             const result = await register({
                 email: values.email,
                 password: values.password,
                 name: values.name,
+                legalVersion: LEGAL_VERSION,
             });
             if ('error' in result) {
                 toast.error(t('Не удалось зарегистрироваться'));
             } else if (result.data === null) {
                 toast.info(t('Подтвердите регистрацию по ссылке в письме'));
+            } else {
+                await linkTelegramAfterAuth();
             }
         } else {
             const result = await login(values);
             if ('error' in result) {
                 toast.error(t('Неверный логин или пароль'));
+            } else {
+                await linkTelegramAfterAuth();
             }
         }
     };
@@ -109,7 +162,7 @@ const LoginPage = () => {
         }
     }, [form, storageFields]);
 
-    const isLoading = isLoginLoading || isRegisterLoading || isResetLoading;
+    const isLoading = isLoginLoading || isRegisterLoading || isResetLoading || isTelegramLoading;
 
     const titles: Record<LoginMode, string> = {
         [LoginMode.LOGIN]: t('Вход'),
@@ -172,6 +225,23 @@ const LoginPage = () => {
                         <h1 className={cls.title}>{titles[mode]}</h1>
                         <span className={cls.subtitle}>{subtitles[mode]}</span>
                     </div>
+
+                    {inTelegram && !isResetMode && (
+                        <div className={cls.telegram}>
+                            <Button
+                                size="large"
+                                block
+                                className={cls.telegramButton}
+                                disabled={isLoading}
+                                onClick={onTelegramStart}
+                            >
+                                {t('Продолжить через Telegram')}
+                            </Button>
+                            <span className={cls.telegramHint}>
+                                {t('Уже есть аккаунт на сайте? Войдите ниже — Telegram привяжется к нему')}
+                            </span>
+                        </div>
+                    )}
 
                     <Form
                         form={form}
@@ -243,6 +313,15 @@ const LoginPage = () => {
                             )}
                         </div>
 
+                        {isRegisterMode && (
+                            <LegalConsentChecks
+                                value={legalConsent}
+                                onChange={setLegalConsent}
+                                showErrors={showLegalErrors}
+                                className={cls.legal}
+                            />
+                        )}
+
                         <Button type="primary" htmlType="submit" block className={cls.submit} disabled={isLoading}>
                             <BlueprintMarks />
                             {isLoading
@@ -266,13 +345,13 @@ const LoginPage = () => {
                         </Link>
                     </div>
 
-                    <span className={cls.terms}>
-                        {t('Продолжая, вы принимаете')}{' '}
-                        <Link to={RoutePath.PRIVACY()}>
-                            {t('пользовательское соглашение и политику конфиденциальности')}
-                        </Link>
-                        .
-                    </span>
+                    {!isRegisterMode && (
+                        <span className={cls.terms}>
+                            <Link to={RoutePath.TERMS()}>{t('Пользовательское соглашение')}</Link>
+                            {' · '}
+                            <Link to={RoutePath.PRIVACY()}>{t('Политика конфиденциальности')}</Link>
+                        </span>
+                    )}
                 </div>
             </section>
         </div>

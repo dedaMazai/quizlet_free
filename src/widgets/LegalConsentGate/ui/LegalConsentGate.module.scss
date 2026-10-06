@@ -1,0 +1,38 @@
+.LegalConsentGate {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 1.15;
+}
+
+.text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-neutral-800);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+
+    @media (width <= 650px) {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+}
+
+.note {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--color-neutral-700);
+}

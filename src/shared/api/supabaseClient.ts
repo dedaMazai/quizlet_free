@@ -10,6 +10,18 @@ export const supabase = createClient(__SUPABASE_URL__, __SUPABASE_ANON_KEY__, {
   },
 });
 
+// Ключ, под которым supabase-js по умолчанию хранит сессию в localStorage
+const SESSION_STORAGE_KEY = `sb-${new URL(__SUPABASE_URL__ || 'http://localhost').hostname.split('.')[0]}-auth-token`;
+
+// Есть ли сохранённая сессия — синхронно, до её проверки: гостю незачем ждать запрос к Supabase.
+export const hasStoredSession = (): boolean => {
+  try {
+    return Boolean(localStorage.getItem(SESSION_STORAGE_KEY));
+  } catch {
+    return false;
+  }
+};
+
 // id текущего пользователя из локальной сессии (без сетевого запроса).
 export const getCurrentUserId = async (): Promise<string | null> => {
   const { data } = await supabase.auth.getSession();

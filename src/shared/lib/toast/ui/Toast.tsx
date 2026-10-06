@@ -2,8 +2,9 @@ import {
     memo, useCallback, useEffect, useRef, useState,
 } from 'react';
 import { Button } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
-    CircleAlert, CircleCheck, Info, TriangleAlert,
+    CircleAlert, CircleCheck, Info, TriangleAlert, X,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { classNames } from '@/shared/lib/classNames/classNames';
@@ -15,6 +16,7 @@ const ACTION_DURATION_MS = 6000;
 /** Запас на анимацию ухода: в фоновой вкладке animationend может не прийти */
 const EXIT_FALLBACK_MS = 300;
 const ICON_SIZE = 18;
+const CLOSE_ICON_SIZE = 16;
 const ICON_STROKE = 1.5;
 
 const ICONS: Record<ToastTone, LucideIcon> = {
@@ -32,10 +34,11 @@ interface ToastProps {
 /** Один тост: полоса цвета смысла, иконка, текст, опц. ghost-действие; пауза таймера при наведении */
 export const Toast = memo(({ toast, onRemove }: ToastProps) => {
     const {
-        id, tone, content, action,
+        id, tone, content, action, closable,
     } = toast;
+    const { t } = useTranslation();
     const [leaving, setLeaving] = useState(false);
-    const remainingRef = useRef(action ? ACTION_DURATION_MS : DURATION_MS);
+    const remainingRef = useRef(toast.duration ?? (action ? ACTION_DURATION_MS : DURATION_MS));
     const startedAtRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     // Идёт ли отсчёт: парные события наведения могут прийти не по порядку
@@ -79,6 +82,11 @@ export const Toast = memo(({ toast, onRemove }: ToastProps) => {
         setLeaving(true);
     };
 
+    const handleClose = () => {
+        clearTimeout(timerRef.current);
+        setLeaving(true);
+    };
+
     const Icon = ICONS[tone];
 
     return (
@@ -95,6 +103,15 @@ export const Toast = memo(({ toast, onRemove }: ToastProps) => {
                 <Button type="text" className={cls.action} onClick={handleAction}>
                     {action.label}
                 </Button>
+            )}
+            {closable && (
+                <Button
+                    type="text"
+                    className={cls.close}
+                    aria-label={t('Закрыть')}
+                    icon={<X aria-hidden size={CLOSE_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                    onClick={handleClose}
+                />
             )}
         </div>
     );

@@ -10,7 +10,6 @@ export {
   useDuplicateDeckMutation,
   useSetDeckSharedEditMutation,
   useShareDeckMutation,
-  useGetShareableUsersQuery,
   useGetDeckSharesQuery,
   useRemoveDeckShareMutation,
 } from './model/api/deckApi';

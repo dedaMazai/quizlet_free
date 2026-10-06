@@ -1,4 +1,4 @@
-$faq-title-size: 32px;
+$column-title-size: 28px;
 $compare-criterion-width: calc(100% * 1.6 / 4.6);
 $row-divider: color-mix(in srgb, var(--color-text) 8%, transparent);
 
@@ -20,11 +20,13 @@ $row-divider: color-mix(in srgb, var(--color-text) 8%, transparent);
     scroll-margin-top: var(--public-header-height);
 }
 
-.faqTitle {
+// Подзаголовки обеих колонок одинаковой высоты — верх таблицы и FAQ на одной линии
+.columnTitle {
     margin: 0;
     font-family: var(--font-heading);
     font-weight: 600;
-    font-size: $faq-title-size;
+    font-size: $column-title-size;
+    line-height: 1.2;
 }
 
 .compare {
@@ -37,8 +39,12 @@ $row-divider: color-mix(in srgb, var(--color-text) 8%, transparent);
 
     th,
     td {
-        padding: 11px 8px 11px 0;
+        padding: 14px 8px 14px 0;
         font-weight: 400;
+        line-height: 1.4;
+
+        // Двухстрочная ячейка («бесплатно, iOS — платно») не сдвигает соседей вниз
+        vertical-align: top;
         color: var(--color-neutral-700);
         border-bottom: 1px solid $row-divider;
 
@@ -48,7 +54,8 @@ $row-divider: color-mix(in srgb, var(--color-text) 8%, transparent);
     }
 
     thead th {
-        padding: 10px 0;
+        padding: 12px 0;
+        vertical-align: bottom;
         font-family: var(--font-mono);
         font-size: 10px;
         letter-spacing: 0.1em;

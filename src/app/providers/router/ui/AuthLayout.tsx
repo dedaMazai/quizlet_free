@@ -1,5 +1,6 @@
 import { Suspense, useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import { LegalConsentGate } from '@/widgets/LegalConsentGate';
 import { NetworkBanner } from '@/widgets/NetworkBanner';
 import { PageLoader } from '@/widgets/PageLoader';
 import { Sidebar } from '@/widgets/Sidebar';
@@ -31,6 +32,7 @@ const AuthLayoutContent = ({ withSidebar = true }: AuthLayoutProps) => {
             <div className={cls.column}>
                 {!focus && !isMobile && <Topbar />}
                 <NetworkBanner />
+                <LegalConsentGate />
                 <main className={classNames(cls.main, { [cls.focus]: focus })}>
                     <Suspense key={stableKey} fallback={<PageLoader />}>
                         {/* Анимируется только контент: оболочка неподвижна */}

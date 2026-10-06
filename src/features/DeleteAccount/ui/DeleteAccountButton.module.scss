@@ -1,0 +1,35 @@
+.trigger {
+    flex: none;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-neutral-800);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding-left: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--color-neutral-700);
+}

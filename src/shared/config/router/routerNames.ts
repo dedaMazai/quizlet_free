@@ -7,6 +7,8 @@ export const RouteNames = {
   LOGIN: 'LOGIN',
   SETTINGS: 'SETTINGS',
   PRIVACY: 'PRIVACY',
+  TERMS: 'TERMS',
+  PD_CONSENT: 'PD_CONSENT',
   FORBIDDEN: 'FORBIDDEN',
   DECKS: 'DECKS',
   DECK: 'DECK',

@@ -1,11 +1,8 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Select, Switch } from 'antd';
-import type { DefaultOptionType } from 'antd/es/select';
-import { ChevronDown } from 'lucide-react';
+import { Button, Input, Switch } from 'antd';
 import {
   useShareDeckMutation,
-  useGetShareableUsersQuery,
   useGetDeckQuery,
   useGetDeckSharesQuery,
   useRemoveDeckShareMutation,
@@ -20,14 +17,8 @@ import { UserAvatar } from './UserAvatar';
 import cls from './ShareDeckModal.module.scss';
 
 const MODAL_WIDTH = 520;
-const CHEVRON_SIZE = 14;
-const ICON_STROKE = 1.5;
-
-interface ShareOption extends DefaultOptionType {
-  value: string;
-  name?: string;
-  email: string;
-}
+// Достаточная проверка формата: остальное (есть ли такой аккаунт) решает RPC share_deck_by_email
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface ShareDeckModalProps {
   open: boolean;
@@ -40,33 +31,24 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
   const { t } = useTranslation();
   const toast = useToast();
 
-  const [email, setEmail] = useState<string | undefined>(undefined);
+  const [email, setEmail] = useState('');
   const [shareDeck, { isLoading: isSharing }] = useShareDeckMutation();
   const [removeShare] = useRemoveDeckShareMutation();
   const { data: shares, isLoading } = useGetDeckSharesQuery(deckUuid, { skip: !open });
-  const { data: users, isLoading: isUsersLoading } = useGetShareableUsersQuery(undefined, { skip: !open });
   const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
   const [setSharedEdit, { isLoading: isToggling }] = useSetDeckSharedEditMutation();
 
-  // Кандидаты на доступ — все пользователи, кроме тех, у кого доступ уже есть.
-  const options = useMemo<ShareOption[]>(() => {
-    const sharedIds = new Set((shares ?? []).map((s) => s.user_id));
-    return (users ?? [])
-      .filter((u) => !sharedIds.has(u.user_id))
-      .map((u) => ({
-        value: u.email,
-        label: u.name ? `${u.name} (${u.email})` : u.email,
-        name: u.name,
-        email: u.email,
-      }));
-  }, [users, shares]);
+  // Список всех пользователей не показываем: чужие email — персональные данные.
+  // Доступ открывается по точному адресу, который владелец колоды уже знает.
+  const trimmedEmail = email.trim();
+  const isEmailValid = EMAIL_PATTERN.test(trimmedEmail);
 
   const handleShare = async () => {
-    if (!email) return;
+    if (!isEmailValid) return;
     try {
-      await shareDeck({ deckUuid, email }).unwrap();
+      await shareDeck({ deckUuid, email: trimmedEmail }).unwrap();
       toast.success(t('Доступ открыт'));
-      setEmail(undefined);
+      setEmail('');
     } catch (err) {
       const text = (err as { error?: string })?.error;
       toast.error(text ? t(text) : t('Не удалось открыть доступ'));
@@ -102,48 +84,32 @@ export const ShareDeckModal: FC<ShareDeckModalProps> = (props) => {
     >
       <div className={cls.content}>
         <div className={cls.shareRow}>
-          <Select<string, ShareOption>
-            className={cls.select}
+          <Input
+            className={cls.emailInput}
+            type="email"
+            inputMode="email"
+            autoComplete="off"
             value={email}
-            onChange={setEmail}
-            options={options}
-            loading={isUsersLoading}
-            showSearch
+            onChange={(e) => setEmail(e.target.value)}
+            onPressEnter={handleShare}
+            placeholder={t('Почта пользователя Zubrika')}
             allowClear
-            suffixIcon={<ChevronDown aria-hidden size={CHEVRON_SIZE} strokeWidth={ICON_STROKE} />}
-            placeholder={t('Почта или имя пользователя')}
-            notFoundContent={t('Нет доступных пользователей')}
-            filterOption={(input, option) => {
-              const query = input.trim().toLowerCase();
-              return Boolean(
-                option?.name?.toLowerCase().includes(query)
-                || option?.email.toLowerCase().includes(query),
-              );
-            }}
-            optionRender={(option) => {
-              const data = option.data as ShareOption;
-              return (
-                <div className={cls.person}>
-                  <UserAvatar email={data.email} name={data.name} />
-                  <div className={cls.personText}>
-                    <span className={cls.name}>{data.name ?? data.email}</span>
-                    {data.name && <span className={cls.email}>{data.email}</span>}
-                  </div>
-                </div>
-              );
-            }}
           />
           <Button
             type="primary"
             className={cls.shareButton}
             loading={isSharing}
-            disabled={!email}
+            disabled={!isEmailValid}
             onClick={handleShare}
           >
             <BlueprintMarks />
             {t('Поделиться')}
           </Button>
         </div>
+
+        <span className={cls.note}>
+          {t('Введите email, с которым человек зарегистрирован. Мы не показываем список пользователей.')}
+        </span>
 
         <div className={cls.shared}>
           <Kicker size={KickerSize.SM} className={cls.sharedTitle}>

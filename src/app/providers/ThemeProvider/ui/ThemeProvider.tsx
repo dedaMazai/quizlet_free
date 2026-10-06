@@ -6,8 +6,14 @@ import { Theme, ThemeMode } from '@/shared/const/theme';
 import { ThemeContext } from '@/shared/lib/context/ThemeContext';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
 import { useUserSettingsTheme } from '@/entities/UserSettings';
+import { getTelegramWebApp, isTelegramMiniApp } from '@/shared/lib/telegram';
 
 const DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';
+
+// В Telegram Mini App «системная» тема — тема Telegram, prefers-color-scheme там не совпадает с ней
+const isSystemDark = () => (isTelegramMiniApp()
+    ? getTelegramWebApp()?.colorScheme === 'dark'
+    : window.matchMedia(DARK_SCHEME_QUERY).matches);
 
 interface ThemeProviderProps {
     initialTheme?: Theme;
@@ -19,8 +25,12 @@ const ThemeProvider = (props: ThemeProviderProps) => {
     const { initialTheme = Theme.LIGHT, children, useApiIntegration = true } = props;
     const [localTheme, setLocalTheme] = useLocalStorage<Theme>(LOCAL_STORAGE_THEME_KEY, initialTheme);
     // «Как в системе» (Настройки 6.25): тема следует prefers-color-scheme
-    const [followSystem, setFollowSystem] = useLocalStorage<boolean>(LOCAL_STORAGE_THEME_FOLLOW_SYSTEM_KEY, false);
-    const [systemDark, setSystemDark] = useState(() => window.matchMedia(DARK_SCHEME_QUERY).matches);
+    // В Telegram по умолчанию следуем его теме
+    const [followSystem, setFollowSystem] = useLocalStorage<boolean>(
+        LOCAL_STORAGE_THEME_FOLLOW_SYSTEM_KEY,
+        isTelegramMiniApp(),
+    );
+    const [systemDark, setSystemDark] = useState(isSystemDark);
 
     const {
         theme: apiTheme,
@@ -34,6 +44,13 @@ const ThemeProvider = (props: ThemeProviderProps) => {
     const applyTheme = useApiIntegration ? setApiTheme : setLocalTheme;
 
     useEffect(() => {
+        const webApp = getTelegramWebApp();
+        if (webApp && isTelegramMiniApp()) {
+            const tgHandler = () => setSystemDark(webApp.colorScheme === 'dark');
+            webApp.onEvent('themeChanged', tgHandler);
+            return () => webApp.offEvent('themeChanged', tgHandler);
+        }
+
         const media = window.matchMedia(DARK_SCHEME_QUERY);
         const handler = (event: MediaQueryListEvent) => setSystemDark(event.matches);
         media.addEventListener('change', handler);

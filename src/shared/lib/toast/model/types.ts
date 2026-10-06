@@ -18,6 +18,10 @@ export interface ToastAction {
 export interface ToastOptions {
     /** Ghost-действие справа, например «Отменить» */
     action?: ToastAction;
+    /** Время показа, мс — для важных тостов, которые нельзя пропустить */
+    duration?: number;
+    /** Крестик для ручного закрытия */
+    closable?: boolean;
 }
 
 export interface ToastItem extends ToastOptions {

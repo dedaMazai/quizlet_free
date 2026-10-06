@@ -2,13 +2,16 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Deck, useCreateDeckMutation, useGetDecksQuery } from '@/entities/Deck';
 import { useCreateCardsMutation } from '@/entities/Card';
+import { useUserInfo } from '@/entities/User';
 import { VerbBand, verbToTerm } from '@/shared/const/grammar';
 import { useToast } from '@/shared/lib/toast';
 
 export const useImportVerbsDeck = () => {
     const { t } = useTranslation();
     const toast = useToast();
-    const { data: decks } = useGetDecksQuery();
+    const userInfo = useUserInfo();
+    // Страница глаголов открыта и гостям — у них колод нет
+    const { data: decks } = useGetDecksQuery(undefined, { skip: !userInfo });
     const [createDeck] = useCreateDeckMutation();
     const [createCards] = useCreateCardsMutation();
     const [importingBand, setImportingBand] = useState<number | null>(null);

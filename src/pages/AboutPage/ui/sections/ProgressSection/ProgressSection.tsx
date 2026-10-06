@@ -12,13 +12,18 @@ import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import { StreakFlame } from '@/shared/ui/StreakFlame';
 
 import { LandingSection, LandingSectionTone } from '../../LandingSection';
-import { buildHeatmap, HARD_WORDS } from '../../demo/demoData';
+import {
+    buildHeatmap, DAYS_IN_WEEK, HARD_WORDS, HEATMAP_WEEKS,
+} from '../../demo/demoData';
 import cls from './ProgressSection.module.scss';
 
 const TROPHY_SIZE = 14;
 /** Сколько карточек «уже пройдено сегодня» в моке кольца цели */
 const DONE_TODAY = 14;
 const DEMO_STREAK_DAYS = 9;
+/** Минимальная сторона ячейки heatmap: недель показываем столько, сколько влезает при ней */
+const HEAT_CELL_MIN = 12;
+const DEFAULT_WEEKS = 52;
 const HEAT_CLASSES = [cls.heat0, cls.heat1, cls.heat2, cls.heat3, cls.heat4];
 /** Мок итога сессии и освоенности колоды */
 const SESSION = {
@@ -26,19 +31,32 @@ const SESSION = {
 };
 const MASTERY = { mastered: 46, learning: 32 };
 
-/** Прогресс и мотивация: серия, активность за год, дневная цель, итог сессии */
+/** Прогресс и мотивация: серия, карта активности, дневная цель, итог сессии */
 export const ProgressSection = memo(() => {
     const { t } = useTranslation();
     const [streak, setStreak] = useState(DEMO_STREAK_DAYS);
     const [goal, setGoal] = useState(DEFAULT_DAILY_GOAL);
     const heatmap = useMemo(buildHeatmap, []);
     const heatmapRef = useRef<HTMLDivElement>(null);
+    const [weeks, setWeeks] = useState(DEFAULT_WEEKS);
 
-    // На узком экране лента скроллится — показываем свежие недели, а не самые старые
+    // Сетка заполняет карточку от края до края: число недель — по ширине, ячейки тянутся до целой колонки
     useLayoutEffect(() => {
         const el = heatmapRef.current;
-        if (el) el.scrollLeft = el.scrollWidth;
+        if (!el) return undefined;
+        const measure = () => {
+            const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
+            const fit = Math.floor((el.clientWidth + gap) / (HEAT_CELL_MIN + gap));
+            setWeeks(Math.max(1, Math.min(HEATMAP_WEEKS, fit)));
+        };
+        measure();
+        const observer = new ResizeObserver(measure);
+        observer.observe(el);
+        return () => observer.disconnect();
     }, []);
+
+    // Последние недели истории — свежие дни всегда справа
+    const visibleDays = heatmap.slice(-weeks * DAYS_IN_WEEK);
     const level = getStreakLevel(streak);
     const goalShare = Math.min(DONE_TODAY / goal, 1) * 100;
 
@@ -54,15 +72,21 @@ export const ProgressSection = memo(() => {
             <div className={cls.grid}>
                 <article className={classNames(cls.card, [cls.wide])}>
                     <div className={cls.cardHead}>
-                        <Kicker size={KickerSize.SM}>{t('Активность за год')}</Kicker>
+                        <Kicker size={KickerSize.SM}>{t('Активность')}</Kicker>
                         <span className={cls.legend} aria-hidden>
                             {t('меньше')}
                             {HEAT_CLASSES.map((heat) => <i key={heat} className={classNames(cls.heatCell, [heat])} />)}
                             {t('больше')}
                         </span>
                     </div>
-                    <div ref={heatmapRef} className={cls.heatmap} aria-hidden>
-                        {heatmap.map((value, i) => (
+                    <div
+                        ref={heatmapRef}
+                        className={cls.heatmap}
+                        // Число колонок — данные (сколько недель влезло), а не оформление
+                        style={{ '--weeks': weeks } as CSSProperties}
+                        aria-hidden
+                    >
+                        {visibleDays.map((value, i) => (
                             // Ячейки статичны — индекс стабилен
                             <i key={i} className={classNames(cls.heatCell, [HEAT_CLASSES[value]])} />
                         ))}

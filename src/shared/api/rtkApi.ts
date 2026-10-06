@@ -31,6 +31,7 @@ export enum ApiTag {
     LearningCycleWords = 'LearningCycleWords',
     UserPreferences = 'UserPreferences',
     GrammarResults = 'GrammarResults',
+    TelegramAccount = 'TelegramAccount',
 }
 
 const mutex = new Mutex();

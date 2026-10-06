@@ -8,6 +8,7 @@ export type Styles = {
   formSide: string;
   heading: string;
   input: string;
+  legal: string;
   links: string;
   loader: string;
   LoginPage: string;
@@ -28,6 +29,9 @@ export type Styles = {
   submit: string;
   subtitle: string;
   switch: string;
+  telegram: string;
+  telegramButton: string;
+  telegramHint: string;
   terms: string;
   title: string;
   toggle: string;

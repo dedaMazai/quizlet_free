@@ -18,16 +18,17 @@ import { NotificationProvider } from './app/providers/NotificationProvider';
 import '@/app/styles/index.scss';
 import './shared/config/i18n/i18n';
 import { AppRouter } from './app/providers/router';
-import 'core-js/actual';
 import { ThemeProvider } from './app/providers/ThemeProvider';
 import { useTheme } from './shared/lib/hooks/useTheme';
+import { initTelegramWebApp, useTelegramThemeColors } from './shared/lib/telegram';
 import 'dayjs/locale/ru';
 
-if (!__IS_DEV__) {
+// При пререндере (scripts/prerender.ts) ошибки и трейсы сборки слать некуда
+if (!__IS_DEV__ && !window.__PRERENDER__) {
   Sentry.init({
     dsn: __SENTRY_DSN__,
     integrations: [Sentry.browserTracingIntegration()],
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 0.1,
     sendDefaultPii: false,
   });
 }
@@ -64,6 +65,8 @@ dayjs.updateLocale('ru', {
   ],
 });
 
+initTelegramWebApp();
+
 const container = document.getElementById('root');
 
 if (!container) {
@@ -78,6 +81,8 @@ const AppWrapper = () => {
   const { theme } = useTheme();
   const config = useMemo(() => themeConfig(theme), [theme]);
   const { i18n } = useTranslation();
+
+  useTelegramThemeColors(theme);
 
   useLayoutEffect(() => {
     dayjs.locale(i18n.language === 'ru' ? 'ru' : 'en');

@@ -5,10 +5,15 @@ import {
   Deck, DeckCreateDto, DeckUpdateDto, DeckShareUser,
 } from '../types/deck';
 
-// Встроенный профиль автора (PostgREST embed по FK decks_owner_profile_fkey).
+// Имя и email участника общей колоды. Чужие профили напрямую не читаются (RLS profiles —
+// только свой и админ), их отдаёт RPC get_profiles_brief (supabase/privacy.sql).
 interface OwnerProfile {
   email: string;
   name: string | null;
+}
+
+interface BriefProfileRow extends OwnerProfile {
+  id: string;
 }
 
 // Строка таблицы decks в Supabase (RLS отдаёт колоды владельца и расшаренные ему).
@@ -18,18 +23,22 @@ interface DeckRow {
   description: string | null;
   user_id: string;
   allow_shared_edit: boolean;
-  owner: OwnerProfile | OwnerProfile[] | null;
   cards: { count: number }[] | null;
   created_at: string;
   updated_at: string;
 }
 
-// PostgREST может отдать встроенную связь как объект или как массив из одного элемента.
-const firstProfile = (profile: OwnerProfile | OwnerProfile[] | null): OwnerProfile | null =>
-  (Array.isArray(profile) ? profile[0] ?? null : profile);
+// Профили участников общих колод одним запросом; RPC вернёт только тех, с кем есть общая колода.
+const fetchProfilesBrief = async (ids: string[]): Promise<Map<string, OwnerProfile>> => {
+  const unique = [...new Set(ids)];
+  if (!unique.length) return new Map();
+  const { data, error } = await supabase.rpc('get_profiles_brief', { p_ids: unique });
+  // Без имени автора колода остаётся рабочей — ошибку не пробрасываем.
+  if (error || !data) return new Map();
+  return new Map((data as BriefProfileRow[]).map((row) => [row.id, { email: row.email, name: row.name }]));
+};
 
-const mapDeck = (row: DeckRow, currentUserId: string | null): Deck => {
-  const owner = firstProfile(row.owner);
+const mapDeck = (row: DeckRow, currentUserId: string | null, owner?: OwnerProfile): Deck => {
   return {
     uuid: row.id,
     name: row.name,
@@ -45,7 +54,15 @@ const mapDeck = (row: DeckRow, currentUserId: string | null): Deck => {
   };
 };
 
-const DECK_SELECT = '*, owner:profiles!decks_owner_profile_fkey(email, name), cards(count)';
+const DECK_SELECT = '*, cards(count)';
+
+// Колоды с именами авторов: свои — без запроса, чужие (расшаренные) — через get_profiles_brief.
+const mapDecks = async (rows: DeckRow[], currentUserId: string | null): Promise<Deck[]> => {
+  const owners = await fetchProfilesBrief(
+    rows.filter((row) => row.user_id !== currentUserId).map((row) => row.user_id),
+  );
+  return rows.map((row) => mapDeck(row, currentUserId, owners.get(row.user_id)));
+};
 
 // Понятные сообщения для ошибок RPC share_deck_by_email.
 const shareErrorMessage = (raw: string): string => {
@@ -57,7 +74,6 @@ const shareErrorMessage = (raw: string): string => {
 
 interface ShareRow {
   user_id: string;
-  profiles: OwnerProfile | OwnerProfile[] | null;
 }
 
 const deckApi = rtkApi.injectEndpoints({
@@ -70,7 +86,7 @@ const deckApi = rtkApi.injectEndpoints({
           .select(DECK_SELECT)
           .order('created_at', { ascending: true });
         if (error) return supabaseError(error.message);
-        return { data: (data as DeckRow[]).map((row) => mapDeck(row, currentUserId)) };
+        return { data: await mapDecks(data as DeckRow[], currentUserId) };
       },
       // Cards — чтобы счётчики слов обновлялись после мутаций карточек.
       providesTags: [ApiTag.Decks, ApiTag.Cards],
@@ -84,7 +100,9 @@ const deckApi = rtkApi.injectEndpoints({
           .eq('id', uuid)
           .maybeSingle();
         if (error) return supabaseError(error.message);
-        return { data: data ? mapDeck(data as DeckRow, currentUserId) : undefined };
+        if (!data) return { data: undefined };
+        const [deck] = await mapDecks([data as DeckRow], currentUserId);
+        return { data: deck };
       },
       providesTags: (result) =>
         (result ? [{ type: ApiTag.Deck, id: result.uuid }, ApiTag.Cards] : [ApiTag.Cards]),
@@ -113,7 +131,8 @@ const deckApi = rtkApi.injectEndpoints({
           .select(DECK_SELECT)
           .single();
         if (error) return supabaseError(error.message);
-        return { data: mapDeck(data as DeckRow, currentUserId) };
+        const [deck] = await mapDecks([data as DeckRow], currentUserId);
+        return { data: deck };
       },
       invalidatesTags: (result) =>
         result ? [ApiTag.Decks, { type: ApiTag.Deck, id: result.uuid }] : [ApiTag.Decks],
@@ -193,36 +212,18 @@ const deckApi = rtkApi.injectEndpoints({
       },
       invalidatesTags: [ApiTag.DeckShares],
     }),
-    // Список пользователей, которым можно открыть доступ (все профили, кроме себя).
-    getShareableUsers: build.query<DeckShareUser[], void>({
-      queryFn: async () => {
-        const currentUserId = await getCurrentUserId();
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, email, name')
-          .order('email', { ascending: true });
-        if (error) return supabaseError(error.message);
-        return {
-          data: (data as { id: string; email: string; name: string | null }[])
-            .filter((row) => row.id !== currentUserId)
-            .map((row) => ({
-              user_id: row.id,
-              email: row.email,
-              name: row.name ?? undefined,
-            })),
-        };
-      },
-    }),
     getDeckShares: build.query<DeckShareUser[], string>({
       queryFn: async (deckUuid) => {
         const { data, error } = await supabase
           .from('deck_shares')
-          .select('user_id, profiles(email, name)')
+          .select('user_id')
           .eq('deck_id', deckUuid);
         if (error) return supabaseError(error.message);
+        const rows = data as ShareRow[];
+        const profiles = await fetchProfilesBrief(rows.map((row) => row.user_id));
         return {
-          data: (data as unknown as ShareRow[]).map((row) => {
-            const profile = firstProfile(row.profiles);
+          data: rows.map((row) => {
+            const profile = profiles.get(row.user_id);
             return {
               user_id: row.user_id,
               email: profile?.email ?? '',
@@ -267,7 +268,6 @@ export const {
   useDuplicateDeckMutation,
   useSetDeckSharedEditMutation,
   useShareDeckMutation,
-  useGetShareableUsersQuery,
   useGetDeckSharesQuery,
   useRemoveDeckShareMutation,
 } = deckApi;

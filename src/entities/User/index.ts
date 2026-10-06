@@ -37,6 +37,7 @@ export type {
   UserFiltersSearch,
   UpdateMeInfo,
   AdminUserStats,
+  TelegramLink,
 } from './model/api/userApi';
 
 export {
@@ -58,4 +59,7 @@ export {
   useGetUsersAiUsageQuery,
   useGetAdminUserStatsQuery,
   useImpersonateUserMutation,
+  useTelegramCreateAccountMutation,
+  useLinkTelegramMutation,
+  useGetTelegramLinkQuery,
 } from './model/api/userApi';

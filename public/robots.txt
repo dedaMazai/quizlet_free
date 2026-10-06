@@ -1,0 +1,20 @@
+# Для индексации открыты лендинг, грамматика и документы — см. sitemap.xml.
+# Личный кабинет гостю всё равно не виден (редирект на /login)
+User-agent: *
+Allow: /
+Disallow: /welcome
+Disallow: /profile
+Disallow: /settings
+Disallow: /users/
+Disallow: /decks
+Disallow: /words
+Disallow: /favorites
+Disallow: /progress
+Disallow: /review
+Disallow: /cycles
+Disallow: /grammar/practice
+Disallow: /change_password
+Disallow: /forbidden
+Disallow: /dev/
+
+Sitemap: https://www.zubrika.ru/sitemap.xml

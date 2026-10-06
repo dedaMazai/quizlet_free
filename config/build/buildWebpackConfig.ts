@@ -16,9 +16,10 @@ export function buildWebpackConfig(options: BuildOptions): webpack.Configuration
       main: paths.entry,
     },
     output: {
-      filename: '[name].[contenthash:8].js',
-      chunkFilename: '[name].[contenthash:8].chunk.js',
-      assetModuleFilename: 'assets/[name].[contenthash:8][ext]',
+      // Всё хешированное — в static/: там immutable-кеш (vercel.json)
+      filename: 'static/js/[name].[contenthash:8].js',
+      chunkFilename: 'static/js/[name].[contenthash:8].chunk.js',
+      assetModuleFilename: 'static/assets/[name].[contenthash:8][ext]',
       path: paths.build,
       clean: true,
       publicPath: '/',
@@ -69,10 +70,12 @@ export function buildWebpackConfig(options: BuildOptions): webpack.Configuration
             maxAsyncRequests: 25,
             minSize: 20000,
             cacheGroups: {
+              // Только то, что нужно на старте. Библиотеки ленивых страниц и import()
+              // (exceljs, zxcvbn, chart.js, motion…) остаются в своих async-чанках
               vendor: {
                 test: /[\\/]node_modules[\\/]/,
                 name: 'vendors',
-                chunks: 'all',
+                chunks: 'initial',
                 priority: 10,
               },
               antd: {
@@ -103,7 +106,8 @@ export function buildWebpackConfig(options: BuildOptions): webpack.Configuration
           runtimeChunk: 'single',
         },
     resolve: buildResolvers(options),
-    devtool: isDev ? 'eval-cheap-module-source-map' : 'source-map',
+    // Карты в проде никуда не загружаются, а публично раскрывают исходники
+    devtool: isDev ? 'eval-cheap-module-source-map' : false,
     devServer: isDev ? buildDevServer(options) : undefined,
     cache: {
       type: 'filesystem',

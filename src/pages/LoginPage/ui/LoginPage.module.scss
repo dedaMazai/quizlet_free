@@ -145,6 +145,24 @@ $submit-height: 48px;
     color: var(--color-neutral-700);
 }
 
+.telegram {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.telegramButton {
+    height: $submit-height;
+}
+
+.telegramHint {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--color-neutral-700);
+}
+
 .form {
     display: flex;
     flex-direction: column;
@@ -180,6 +198,11 @@ $submit-height: 48px;
     color: var(--color-accent-700);
     cursor: pointer;
     user-select: none;
+}
+
+// Галочки согласий при регистрации — между полями и кнопкой
+.legal {
+    margin-bottom: 16px;
 }
 
 .submit {

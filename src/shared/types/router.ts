@@ -9,6 +9,8 @@ export type AppRoutesProps = RouteObject & {
     notAuthOnly?: boolean;
     withSidebar?: boolean;
     publicLayout?: boolean;
+    /** Публичная страница: гостю — PublicLayout, пользователю — AuthLayout с сайдбаром */
+    adaptiveLayout?: boolean;
     withFooter?: boolean;
     /** Фокус-режим занятий: без сайдбара и шапки */
     focusLayout?: boolean;

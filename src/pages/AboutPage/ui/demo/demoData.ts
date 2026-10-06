@@ -106,8 +106,9 @@ export const HARD_WORDS = ['eventually', 'reluctant', 'take for granted'];
  * Активность для мока heatmap: детерминированный псевдослучайный ряд,
  * чтобы картинка не прыгала между рендерами и совпадала в обеих темах.
  */
-export const HEATMAP_WEEKS = 52;
-const DAYS_IN_WEEK = 7;
+/** Запас истории: на широком экране показывается столько недель, сколько помещается */
+export const HEATMAP_WEEKS = 156;
+export const DAYS_IN_WEEK = 7;
 const HEAT_LEVELS = 5;
 
 export const buildHeatmap = (): number[] => {
@@ -120,7 +121,7 @@ export const buildHeatmap = (): number[] => {
     return Array.from({ length: HEATMAP_WEEKS * DAYS_IN_WEEK }, (_, i) => {
         // Ближе к концу периода занятия регулярнее — так выглядит набравшая силу серия
         const warmup = i / (HEATMAP_WEEKS * DAYS_IN_WEEK);
-        const value = next() * 0.6 + warmup * 0.35;
+        const value = next() * 0.6 + warmup * 0.3;
         return Math.min(HEAT_LEVELS - 1, Math.floor(value * HEAT_LEVELS));
     });
 };

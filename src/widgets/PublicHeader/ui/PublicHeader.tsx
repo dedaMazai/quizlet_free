@@ -50,6 +50,9 @@ export const PublicHeader = memo(() => {
                 <Link to={getAboutAnchorPath(AboutAnchor.FAQ)} className={cls.link}>
                     {t('Вопросы')}
                 </Link>
+                <Link to={RoutePath.GRAMMAR_TENSES()} className={cls.link}>
+                    {t('Грамматика')}
+                </Link>
             </nav>
 
             <div className={cls.actions}>

@@ -7,7 +7,7 @@ import { ForbiddenPage } from '@/pages/ForbiddenPage';
 import { UserPage } from '@/pages/UserPage';
 import { Accesses } from '@/shared/types/accesses';
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage';
-import { PrivacyPage } from '@/pages/PrivacyPage';
+import { LegalDocumentId, LegalPage } from '@/pages/LegalPage';
 import { AccountPage, AccountTab } from '@/pages/AccountPage';
 import { ProgressPage } from '@/pages/ProgressPage';
 import { ReviewPage } from '@/pages/ReviewPage';
@@ -197,14 +197,12 @@ export const routeConfig: AppRoutesProps[] = [
     {
         path: RoutePath.GRAMMAR_TENSES(),
         element: <GrammarTensesPage />,
-        authOnly: true,
-        withSidebar: true,
+        adaptiveLayout: true,
     },
     {
         path: RoutePath.GRAMMAR_TENSE_GROUP(':group'),
         element: <TenseGroupPage />,
-        authOnly: true,
-        withSidebar: true,
+        adaptiveLayout: true,
     },
     {
         path: RoutePath.GRAMMAR_PRACTICE(),
@@ -215,24 +213,32 @@ export const routeConfig: AppRoutesProps[] = [
     {
         path: RoutePath.IRREGULAR_VERBS(),
         element: <IrregularVerbsPage />,
-        authOnly: true,
-        withSidebar: true,
+        adaptiveLayout: true,
     },
     {
         path: RoutePath.GRAMMAR_TOPIC(':topic'),
         element: <GrammarTopicPage />,
-        authOnly: true,
-        withSidebar: true,
+        adaptiveLayout: true,
     },
     {
         path: RoutePath.ROADMAP(),
         element: <RoadmapPage />,
-        authOnly: true,
-        withSidebar: true,
+        adaptiveLayout: true,
     },
     {
         path: RoutePath.PRIVACY(),
-        element: <PrivacyPage />,
+        element: <LegalPage document={LegalDocumentId.PRIVACY} />,
+        publicLayout: true,
+    },
+    {
+        path: RoutePath.TERMS(),
+        element: <LegalPage document={LegalDocumentId.TERMS} />,
+        publicLayout: true,
+    },
+    {
+        path: RoutePath.PD_CONSENT(),
+        element: <LegalPage document={LegalDocumentId.CONSENT} />,
+        publicLayout: true,
     },
     {
         path: RoutePath.ABOUT(),

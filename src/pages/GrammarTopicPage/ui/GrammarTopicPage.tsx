@@ -10,6 +10,7 @@ import { LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY } from '@/shared/const/localstorag
 import { ROADMAP_STAGES, ROADMAP_STEPS_TOTAL } from '@/shared/const/roadmap';
 import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { usePageMeta } from '@/shared/lib/hooks/usePageMeta';
 import { Blueprint, BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker } from '@/shared/ui/Kicker';
 import { SectionHeader } from '@/shared/ui/SectionHeader';
@@ -31,6 +32,12 @@ const GrammarTopicPage = () => {
     const { topic } = useParams<{ topic: string }>();
     const { isMobile } = useMatchMedia();
     const [doneSteps, setDoneSteps] = useLocalStorage<string[]>(LOCAL_STORAGE_ROADMAP_DONE_STEPS_KEY, NO_STEPS);
+    const metaTopic = isGrammarTopicId(topic) ? GRAMMAR_TOPICS[topic] : undefined;
+    usePageMeta({
+        title: metaTopic && `${t(metaTopic.name)} (${metaTopic.enName})`,
+        description: metaTopic && t(metaTopic.intro),
+        skip: !metaTopic,
+    });
 
     if (!isGrammarTopicId(topic)) {
         return <Navigate to={RoutePath.ROADMAP()} replace />;

@@ -8,12 +8,33 @@
     <title>Zubrika</title>
 
     <script>
+        // Telegram Mini App: SDK грузим только при запуске из Telegram — на сайте telegram.org
+        // не нужен и может тормозить. Данные запуска приходят в hash, после перезагрузки SDK
+        // берёт их из sessionStorage. Синхронно — чтобы window.Telegram был до бандла.
+        (function () {
+            var inTelegram = location.hash.indexOf('tgWebAppData') !== -1;
+            try {
+                inTelegram = inTelegram || Boolean(sessionStorage.getItem('__telegram__initParams'));
+            } catch (e) {
+                // sessionStorage недоступен — решаем только по hash
+            }
+            if (inTelegram) {
+                document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
+            }
+        })();
+    </script>
+    <script>
         // Тёмная тема до загрузки бандла — без белой вспышки (BACKLOG §6).
         // Ключи и значения — как в ThemeProvider (LOCAL_STORAGE_THEME_*), фон — --color-bg тёмной темы
         (function () {
             try {
-                var dark = localStorage.getItem('theme_follow_system') === 'true'
-                    ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                // В Telegram «системная» тема — тема Telegram, и следование ей включено по умолчанию
+                var webApp = window.Telegram && window.Telegram.WebApp;
+                var tg = webApp && webApp.initData ? webApp : null;
+                var followKey = localStorage.getItem('theme_follow_system');
+                var follow = followKey === null ? Boolean(tg) : followKey === 'true';
+                var dark = follow
+                    ? (tg ? tg.colorScheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches)
                     : localStorage.getItem('theme') === '"app_dark_theme"';
                 if (dark) {
                     document.documentElement.style.background = '#141b23';

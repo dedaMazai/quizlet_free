@@ -1,0 +1,36 @@
+.LegalConsentChecks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.check {
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-neutral-800);
+
+    // Квадрат галочки — по первой строке текста
+    :global(.ant-checkbox) {
+        align-self: flex-start;
+        margin-top: 2px;
+    }
+}
+
+.error {
+    color: var(--color-error-text);
+
+    :global(.ant-checkbox-inner) {
+        border-color: var(--color-error);
+    }
+}
+
+.link {
+    color: var(--color-accent-700);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+        color: var(--color-accent-800);
+    }
+}

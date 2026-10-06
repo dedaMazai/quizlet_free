@@ -37,10 +37,8 @@ export default () => {
         entry: path.resolve(__dirname, 'src', 'index.tsx'),
         build: path.resolve(__dirname, 'build'),
         html: path.resolve(__dirname, 'public', isDev ? 'indexDev.html' : 'index.html'),
-        icon: path.resolve(__dirname, 'public', 'Logo.svg'),
         src: path.resolve(__dirname, 'src'),
-        locales: path.resolve(__dirname, 'public', 'locales'),
-        buildLocales: path.resolve(__dirname, 'build', 'locales'),
+        public: path.resolve(__dirname, 'public'),
     };
 
     const config: webpack.Configuration = buildWebpackConfig({

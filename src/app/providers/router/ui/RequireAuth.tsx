@@ -7,6 +7,7 @@ import {
 import { useGetUserPreferencesQuery } from '@/entities/UserSettings';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from '@/shared/types/accesses';
+import { isTelegramMiniApp } from '@/shared/lib/telegram';
 
 interface RequireAuthProps {
   children: ReactNode;
@@ -32,8 +33,9 @@ export function RequireAuth({ children, accesses, forbiddenRoles }: RequireAuthP
 
   if (!userInfo) {
     // Гость на главной и только что вышедший пользователь видят лендинг;
-    // остальные защищённые ссылки ведут на вход с возвратом обратно
-    if (location.pathname === RoutePath.MAIN() || loggedOut) {
+    // остальные защищённые ссылки ведут на вход с возвратом обратно.
+    // В Telegram лендинг не нужен — сразу вход (там же «Продолжить через Telegram»)
+    if (!isTelegramMiniApp() && (location.pathname === RoutePath.MAIN() || loggedOut)) {
       return <Navigate to={RoutePath.ABOUT()} replace />;
     }
 

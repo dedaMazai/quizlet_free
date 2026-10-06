@@ -9,6 +9,7 @@ import { BackBar } from '@/shared/ui/BackBar';
 import { BackLink } from '@/shared/ui/BackLink';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { usePageMeta } from '@/shared/lib/hooks/usePageMeta';
 import { RoutePath, TENSE_TIME_PARAM } from '@/shared/config/router/routePath';
 import {
     ASPECT_GROUP_ORDER, ASPECT_GROUPS, TENSES, TENSE_COMPARISONS, TENSE_TIME_ORDER, AspectGroupId, TenseTime,
@@ -48,6 +49,12 @@ const TenseGroupPage = () => {
     const [time, setTime] = useState<TenseTime>(
         TENSE_TIME_ORDER.find((item) => item === timeParam) ?? TENSE_TIME_ORDER[0],
     );
+    const metaGroup = isAspectGroupId(group) ? ASPECT_GROUPS[group] : undefined;
+    usePageMeta({
+        title: metaGroup && t('Времена {{group}}: правила и примеры', { group: metaGroup.name }),
+        description: metaGroup && t(metaGroup.idea),
+        skip: !metaGroup,
+    });
 
     if (!isAspectGroupId(group)) {
         return <Navigate to={RoutePath.GRAMMAR_TENSES()} replace />;

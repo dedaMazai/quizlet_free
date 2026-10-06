@@ -120,10 +120,11 @@ export const CompareFaqSection = memo(() => {
             tone={LandingSectionTone.SURFACE}
             index={9}
             kicker={t('Сравнение и вопросы')}
-            title={t('Чем отличается')}
+            title={t('Чем отличается от Anki и Quizlet')}
         >
             <div className={cls.columns}>
                 <div className={cls.column}>
+                    <h3 className={cls.columnTitle}>{t('Сравнение')}</h3>
                     <table className={cls.compare}>
                         <thead>
                             <tr>
@@ -147,7 +148,7 @@ export const CompareFaqSection = memo(() => {
                 </div>
 
                 <div id={AboutAnchor.FAQ} className={cls.column}>
-                    <h3 className={cls.faqTitle}>{t('Вопросы')}</h3>
+                    <h3 className={cls.columnTitle}>{t('Вопросы')}</h3>
                     <div className={cls.faq}>
                         {questions.map((item) => {
                             const isOpen = openFaq === item.key;
