@@ -45,9 +45,33 @@ $bars-width: 168px;
     letter-spacing: -0.04em;
 }
 
+// Долг 0: вместо числа — ✓ и жирный заголовок той же весомости
+.done {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.doneRow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
 .check {
     flex: none;
+
+    // Внутренние поля иконки lucide — прижимаем галочку к заголовку
+    margin: -12px -8px;
     color: var(--color-success);
+}
+
+.doneTitle {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 64px;
+    line-height: 1;
+    letter-spacing: -0.02em;
 }
 
 .countText {
@@ -251,6 +275,18 @@ $bars-width: 168px;
 
     .unit {
         font-size: 22px;
+    }
+
+    .doneRow {
+        gap: 10px;
+    }
+
+    .check {
+        margin: -8px -5px;
+    }
+
+    .doneTitle {
+        font-size: 40px;
     }
 
     .meta {

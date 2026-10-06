@@ -20,7 +20,9 @@ import cls from './DueHero.module.scss';
 const ARROW_SIZE = 18;
 const ICON_STROKE = 1.5;
 const CHECK_SIZE = 96;
-const CHECK_STROKE = 1.5;
+const CHECK_SIZE_MOBILE = 64;
+// Толщина под жирный заголовок «Долг закрыт»
+const CHECK_STROKE = 3.25;
 
 interface DueCountProps {
     value: number;
@@ -133,33 +135,37 @@ export const DueHero = memo((props: DueHeroProps) => {
                     <Kicker tone={KickerTone.ON_DARK} className={cls.kicker}>
                         {t('К повторению сегодня')}
                     </Kicker>
-                    <div className={cls.countRow}>
-                        {hasDebt ? (
+                    {hasDebt ? (
+                        <div className={cls.countRow}>
                             <DueCount value={count} celebrate={celebrate} />
-                        ) : (
-                            <Check
-                                aria-hidden
-                                className={cls.check}
-                                size={CHECK_SIZE}
-                                strokeWidth={CHECK_STROKE}
-                            />
-                        )}
-                        <div className={cls.countText}>
-                            <span className={cls.unit}>
-                                {hasDebt ? t('карточки', { count }) : t('Долг закрыт')}
-                            </span>
-                            {hasDebt && (
+                            <div className={cls.countText}>
+                                <span className={cls.unit}>{t('карточки', { count })}</span>
                                 <span className={cls.meta}>
                                     {`${t('из {{count}} колод', { count: decksInDebt })} · ${minutes}`}
                                 </span>
-                            )}
-                            {!hasDebt && tomorrowCount > 0 && (
-                                <span className={cls.meta}>
-                                    {t('Следующие {{count}} — завтра', { count: tomorrowCount })}
-                                </span>
-                            )}
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className={cls.done}>
+                            <div className={cls.doneRow}>
+                                <Check
+                                    aria-hidden
+                                    className={cls.check}
+                                    size={isMobile ? CHECK_SIZE_MOBILE : CHECK_SIZE}
+                                    strokeWidth={CHECK_STROKE}
+                                    // Прямые концы и угол — как у штрихов заголовка
+                                    strokeLinecap="butt"
+                                    strokeLinejoin="miter"
+                                />
+                                <span className={cls.doneTitle}>{t('Долг закрыт')}</span>
+                            </div>
+                            <span className={cls.meta}>
+                                {tomorrowCount > 0
+                                    ? t('Следующие {{count}} — завтра', { count: tomorrowCount })
+                                    : t('На сегодня всё')}
+                            </span>
+                        </div>
+                    )}
                 </div>
                 <div className={cls.forecast}>
                     <Kicker size={KickerSize.SM} tone={KickerTone.ON_DARK}>
