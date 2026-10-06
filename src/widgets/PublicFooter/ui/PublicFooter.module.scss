@@ -40,6 +40,18 @@
     }
 }
 
+.telegram {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.telegramIcon {
+    width: 16px;
+    height: 16px;
+    color: var(--color-telegram);
+}
+
 .operator {
     font-size: 12px;
     color: var(--color-neutral-600);

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 import { useUserInfo } from '@/entities/User';
 import { getRegisterPath, RoutePath } from '@/shared/config/router/routePath';
+import { isTelegramMiniApp } from '@/shared/lib/telegram';
 
 import { HeroSection } from './sections/HeroSection';
 import { HowItWorksSection } from './sections/HowItWorksSection';
@@ -12,6 +13,7 @@ import { AiSection } from './sections/AiSection';
 import { GrammarSection } from './sections/GrammarSection';
 import { CyclesSection } from './sections/CyclesSection';
 import { ProgressSection } from './sections/ProgressSection';
+import { TelegramSection } from './sections/TelegramSection';
 import { DetailsSection } from './sections/DetailsSection';
 import { CompareFaqSection } from './sections/CompareFaqSection';
 import { FinalCtaSection } from './sections/FinalCtaSection';
@@ -37,10 +39,12 @@ const AboutPage = () => {
         [navigate, userInfo],
     );
     const ctaLabel = userInfo ? t('В приложение') : t('Начать бесплатно');
+    // Внутри Mini App звать «открыть в Telegram» незачем
+    const showTelegram = !isTelegramMiniApp();
 
     return (
         <div className={cls.AboutPage}>
-            <HeroSection ctaLabel={ctaLabel} onStart={handleStart} />
+            <HeroSection ctaLabel={ctaLabel} onStart={handleStart} showTelegram={showTelegram} />
             <HowItWorksSection />
             <ModesSection />
             <MemorySection />
@@ -48,9 +52,10 @@ const AboutPage = () => {
             <GrammarSection />
             <CyclesSection />
             <ProgressSection />
+            {showTelegram && <TelegramSection />}
             <DetailsSection />
             <CompareFaqSection />
-            <FinalCtaSection ctaLabel={ctaLabel} onStart={handleStart} />
+            <FinalCtaSection ctaLabel={ctaLabel} onStart={handleStart} showTelegram={showTelegram} />
         </div>
     );
 };

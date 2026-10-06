@@ -17,6 +17,7 @@ import { QuickSettingsButton } from '@/features/QuickSettings';
 import { DueHero } from '@/widgets/DueHero';
 import { NextSteps } from '@/widgets/NextSteps';
 import { StreakCard } from '@/widgets/StreakCard';
+import { TelegramPromo } from '@/widgets/TelegramPromo';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import { FadeIn } from '@/shared/ui/Skeleton';
@@ -189,6 +190,7 @@ const MainPage: FC = () => {
                         </div>
 
                         <NextSteps tz={tz} />
+                        <TelegramPromo />
                     </>
                 )}
                 {deckModals}
@@ -221,6 +223,8 @@ const MainPage: FC = () => {
                     </div>
 
                     <NextSteps tz={tz} />
+
+                    <TelegramPromo />
 
                     <section className={cls.decks}>
                         <SectionHeader

@@ -8,7 +8,9 @@ import { DeleteAccountButton } from '@/features/DeleteAccount';
 import { useDailyGoal } from '@/entities/UserSettings';
 import { useGetTelegramLinkQuery } from '@/entities/User';
 import { estimateReviewMinutes } from '@/shared/const/const';
+import { isTelegramMiniApp } from '@/shared/lib/telegram';
 import { SectionHeader, SectionHeaderSize } from '@/shared/ui/SectionHeader';
+import { TelegramButton } from '@/shared/ui/TelegramButton';
 import cls from './SettingsTab.module.scss';
 
 interface SettingRowProps {
@@ -83,9 +85,9 @@ export const SettingsTab = memo(() => {
                     description={telegramLink
                         ? t('Из Telegram-бота вход без пароля')
                         : t('Откройте Zubrika в Telegram-боте и войдите — аккаунт привяжется')}
-                    control={telegramLink?.username && (
-                        <span className={cls.rowLabel}>@{telegramLink.username}</span>
-                    )}
+                    control={telegramLink
+                        ? telegramLink.username && <span className={cls.rowLabel}>@{telegramLink.username}</span>
+                        : !isTelegramMiniApp() && <TelegramButton>{t('Открыть бота')}</TelegramButton>}
                 />
             </SettingSection>
 

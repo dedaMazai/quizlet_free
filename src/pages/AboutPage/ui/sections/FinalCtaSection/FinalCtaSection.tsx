@@ -2,6 +2,8 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight } from 'lucide-react';
 import { Blueprint, BlueprintCorners } from '@/shared/ui/Blueprint';
+import { ReactComponent as TelegramIcon } from '@/shared/assets/icons/Telegram.svg';
+import { TELEGRAM_APP_URL } from '@/shared/const/telegram';
 import { Kicker, KickerTone } from '@/shared/ui/Kicker';
 
 import cls from './FinalCtaSection.module.scss';
@@ -11,10 +13,11 @@ const ARROW_SIZE = 18;
 interface FinalCtaSectionProps {
     ctaLabel: string;
     onStart: () => void;
+    showTelegram: boolean;
 }
 
 /** Финальный призыв на тёмном поле */
-export const FinalCtaSection = memo(({ ctaLabel, onStart }: FinalCtaSectionProps) => {
+export const FinalCtaSection = memo(({ ctaLabel, onStart, showTelegram }: FinalCtaSectionProps) => {
     const { t } = useTranslation();
 
     const steps = [
@@ -37,10 +40,18 @@ export const FinalCtaSection = memo(({ ctaLabel, onStart }: FinalCtaSectionProps
                     ))}
                 </ol>
             </div>
-            <Blueprint as="button" type="button" corners={BlueprintCorners.LIGHT} className={cls.cta} onClick={onStart}>
-                {ctaLabel}
-                <ArrowRight size={ARROW_SIZE} aria-hidden />
-            </Blueprint>
+            <div className={cls.actions}>
+                <Blueprint as="button" type="button" corners={BlueprintCorners.LIGHT} className={cls.cta} onClick={onStart}>
+                    {ctaLabel}
+                    <ArrowRight size={ARROW_SIZE} aria-hidden />
+                </Blueprint>
+                {showTelegram && (
+                    <a href={TELEGRAM_APP_URL} target="_blank" rel="noopener noreferrer" className={cls.telegram}>
+                        <TelegramIcon className={cls.telegramIcon} aria-hidden />
+                        {t('или откройте в Telegram')}
+                    </a>
+                )}
+            </div>
         </section>
     );
 });

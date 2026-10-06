@@ -74,6 +74,17 @@ $title-max-width: 900px;
     color: var(--color-accent-300);
 }
 
+.actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+
+    @media (width <= 650px) {
+        align-self: stretch;
+    }
+}
+
 .cta {
     display: inline-flex;
     align-items: center;
@@ -103,4 +114,27 @@ $title-max-width: 900px;
         justify-content: center;
         align-self: stretch;
     }
+}
+
+.telegram {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    font-size: 15px;
+    color: var(--color-on-field-soft);
+
+    &:hover {
+        color: var(--color-on-field);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-on-field);
+        outline-offset: 2px;
+    }
+}
+
+.telegramIcon {
+    width: 18px;
+    height: 18px;
 }

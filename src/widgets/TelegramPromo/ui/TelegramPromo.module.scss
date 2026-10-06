@@ -1,0 +1,106 @@
+$badge-size: 48px;
+$badge-icon-size: 26px;
+$close-offset: 8px;
+
+.TelegramPromo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 48px 20px 20px;
+    animation: promo-enter var(--motion-base) var(--ease-enter) backwards;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: promo-fade var(--motion-instant) linear;
+    }
+
+    // Телефон: в столбик, кнопка во всю ширину, QR не нужен
+    @media (width <= 650px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        padding: 18px 16px;
+    }
+}
+
+.badge {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: $badge-size;
+    height: $badge-size;
+    color: var(--color-on-telegram);
+    background: var(--color-telegram);
+    border-radius: 50%;
+
+    @media (width <= 650px) {
+        display: none;
+    }
+}
+
+.badgeIcon {
+    width: $badge-icon-size;
+    height: $badge-icon-size;
+}
+
+.text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+
+    @media (width <= 650px) {
+        padding-right: 28px;
+    }
+}
+
+.title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.1;
+}
+
+.body {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-neutral-700);
+    text-wrap: pretty;
+}
+
+.cta {
+    flex-shrink: 0;
+}
+
+.qr {
+    flex-shrink: 0;
+    padding: 4px;
+    background: var(--color-field-button-bg);
+
+    @media (width <= 900px) {
+        display: none;
+    }
+}
+
+.close {
+    position: absolute;
+    top: $close-offset;
+    right: $close-offset;
+    color: var(--color-neutral-700);
+}
+
+@keyframes promo-enter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+@keyframes promo-fade {
+    from {
+        opacity: 0;
+    }
+}

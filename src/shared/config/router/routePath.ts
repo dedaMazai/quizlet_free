@@ -63,6 +63,7 @@ export enum AboutAnchor {
   PROGRESS = 'progress',
   COMPARE = 'compare',
   FAQ = 'faq',
+  TELEGRAM = 'telegram',
 }
 export const getAboutAnchorPath = (anchor: AboutAnchor) => `${RoutePath.ABOUT()}#${anchor}`;
 

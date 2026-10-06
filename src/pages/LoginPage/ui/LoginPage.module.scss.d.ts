@@ -32,6 +32,7 @@ export type Styles = {
   telegram: string;
   telegramButton: string;
   telegramHint: string;
+  telegramPromo: string;
   terms: string;
   title: string;
   toggle: string;

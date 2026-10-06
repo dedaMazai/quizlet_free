@@ -6,6 +6,7 @@ import { ArrowDown } from 'lucide-react';
 import { AboutAnchor, getAboutAnchorPath } from '@/shared/config/router/routePath';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { Kicker, KickerTone } from '@/shared/ui/Kicker';
+import { TelegramButton } from '@/shared/ui/TelegramButton';
 
 import { FlipCardDemo } from '../../demo/FlipCardDemo';
 import cls from './HeroSection.module.scss';
@@ -15,10 +16,11 @@ const ARROW_SIZE = 16;
 interface HeroSectionProps {
     ctaLabel: string;
     onStart: () => void;
+    showTelegram: boolean;
 }
 
 /** Первый экран: обещание, CTA и живая карточка, которую можно перевернуть */
-export const HeroSection = memo(({ ctaLabel, onStart }: HeroSectionProps) => {
+export const HeroSection = memo(({ ctaLabel, onStart, showTelegram }: HeroSectionProps) => {
     const { t } = useTranslation();
 
     const facts = [
@@ -40,6 +42,7 @@ export const HeroSection = memo(({ ctaLabel, onStart }: HeroSectionProps) => {
                         <BlueprintMarks />
                         {ctaLabel}
                     </Button>
+                    {showTelegram && <TelegramButton className={cls.telegram} />}
                     <Link to={getAboutAnchorPath(AboutAnchor.HOW)} className={cls.secondary}>
                         {t('Как это работает')}
                         <ArrowDown size={ARROW_SIZE} aria-hidden />

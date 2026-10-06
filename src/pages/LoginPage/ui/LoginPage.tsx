@@ -18,6 +18,7 @@ import { useLocalStorage } from '@/shared/lib/hooks/useLocalStorage';
 import { usePageMeta } from '@/shared/lib/hooks/usePageMeta';
 import { useToast } from '@/shared/lib/toast';
 import { isTelegramMiniApp } from '@/shared/lib/telegram';
+import { TelegramButton } from '@/shared/ui/TelegramButton';
 import { LEGAL_VERSION } from '@/shared/const/legal';
 import {
     isLegalConsentComplete, LegalConsentChecks, LegalConsentValue,
@@ -344,6 +345,13 @@ const LoginPage = () => {
                             {t('О сервисе')}
                         </Link>
                     </div>
+
+                    {!inTelegram && !isResetMode && (
+                        <div className={cls.telegramPromo}>
+                            <span className={cls.telegramHint}>{t('Удобнее с телефона? Zubrika есть в Telegram — вход в один клик')}</span>
+                            <TelegramButton block className={cls.telegramButton} />
+                        </div>
+                    )}
 
                     {!isRegisterMode && (
                         <span className={cls.terms}>

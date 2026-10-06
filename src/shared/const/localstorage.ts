@@ -10,3 +10,4 @@ export const LOCAL_STORAGE_REVIEW_EXCLUDED_DECKS_KEY = 'ReviewExcludedDecks';
 export const LOCAL_STORAGE_RECENT_DECKS_KEY = 'RecentDecks';
 /** Префикс дат «праздничных» анимаций: `motion-day:<key>` → YYYY-MM-DD последнего показа */
 export const LOCAL_STORAGE_MOTION_DAY_PREFIX = 'motion-day:';
+export const LOCAL_STORAGE_TELEGRAM_PROMO_DISMISSED_KEY = 'TelegramPromoDismissed';

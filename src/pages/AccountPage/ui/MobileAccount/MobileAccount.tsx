@@ -9,14 +9,18 @@ import { DailyGoalSwitcher } from '@/features/DailyGoalSwitcher';
 import { useVoiceOptions } from '@/features/VoiceSwitcher';
 import { DeleteAccountButton } from '@/features/DeleteAccount';
 import { useGetAiUsageQuery } from '@/entities/Card';
-import { UserAvatar, useLogoutMutation, useUserInfo } from '@/entities/User';
+import {
+    UserAvatar, useGetTelegramLinkQuery, useLogoutMutation, useUserInfo,
+} from '@/entities/User';
 import { ThemeMode } from '@/shared/const/theme';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useTheme } from '@/shared/lib/hooks/useTheme';
+import { isTelegramMiniApp } from '@/shared/lib/telegram';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import { BoxSegmented } from '@/shared/ui/BoxSegmented';
 import { Kicker, KickerSize } from '@/shared/ui/Kicker';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
+import { TelegramButton } from '@/shared/ui/TelegramButton';
 import cls from './MobileAccount.module.scss';
 
 const CHEVRON_SIZE = 16;
@@ -74,6 +78,7 @@ export const MobileAccount = memo(() => {
     const { t, i18n } = useTranslation();
     const user = useUserInfo();
     const [logout] = useLogoutMutation();
+    const { data: telegramLink } = useGetTelegramLinkQuery();
     const { mode, setMode } = useTheme();
     const voice = useVoiceOptions();
     const { data: remainingRaw, isLoading } = useGetAiUsageQuery();
@@ -172,6 +177,15 @@ export const MobileAccount = memo(() => {
                     <div className={cls.compact}>
                         <DailyGoalSwitcher />
                     </div>
+                </SettingRow>
+                <SettingRow label={t('Telegram')}>
+                    {telegramLink ? (
+                        <span className={cls.rowValue}>
+                            {telegramLink.username ? `@${telegramLink.username}` : t('Привязан')}
+                        </span>
+                    ) : !isTelegramMiniApp() && (
+                        <TelegramButton size="small">{t('Открыть бота')}</TelegramButton>
+                    )}
                 </SettingRow>
                 <LinkRow label={t('Профиль и аватар')} onClick={openProfile} />
                 <LinkRow label={t('Сменить пароль')} onClick={openPassword} />

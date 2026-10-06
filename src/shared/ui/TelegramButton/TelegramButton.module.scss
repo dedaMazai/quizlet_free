@@ -1,0 +1,29 @@
+$icon-size: 1.15em;
+
+.TelegramButton {
+    position: relative;
+}
+
+.icon {
+    width: $icon-size;
+    height: $icon-size;
+}
+
+// AntD ставит svg иконки color: inherit — красим обёртку, svg наследует
+.plain :global(.ant-btn-icon) {
+    color: var(--color-telegram);
+}
+
+.brand {
+    &:global(.ant-btn) {
+        color: var(--color-on-telegram);
+        background: var(--color-telegram);
+        border-color: var(--color-telegram);
+    }
+
+    &:global(.ant-btn):hover {
+        color: var(--color-on-telegram);
+        background: var(--color-telegram-hover);
+        border-color: var(--color-telegram-hover);
+    }
+}

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, X } from 'lucide-react';
 import { AboutAnchor } from '@/shared/config/router/routePath';
 import { IRREGULAR_VERBS } from '@/shared/const/grammar';
+import { TELEGRAM_BOT_USERNAME } from '@/shared/const/telegram';
 
 import { LandingSection, LandingSectionTone } from '../../LandingSection';
 import cls from './CompareFaqSection.module.scss';
@@ -37,6 +38,9 @@ export const CompareFaqSection = memo(() => {
             key: 'grammar', criterion: t('Грамматика и путь к B1'), anki: t('нет'), quizlet: t('нет'), app: t('да'),
         },
         {
+            key: 'telegram', criterion: t('Приложение в Telegram'), anki: t('нет'), quizlet: t('нет'), app: t('да'),
+        },
+        {
             key: 'entry', criterion: t('Порог входа'), anki: t('высокий'), quizlet: t('низкий'), app: t('низкий'),
         },
         {
@@ -49,6 +53,11 @@ export const CompareFaqSection = memo(() => {
             key: 'price',
             label: t('Это бесплатно?'),
             answer: t('Да. Регистрация по email, все режимы занятий и статистика доступны сразу. Ограничен только объём запросов к ИИ — на каждого пользователя действует лимит.'),
+        },
+        {
+            key: 'telegram',
+            label: t('Есть ли приложение для телефона?'),
+            answer: t('Да: Zubrika работает прямо в Telegram — откройте @{{bot}} и нажмите «Учить слова». Ничего устанавливать не нужно, вход в один клик. Сайт тоже удобен с телефона.', { bot: TELEGRAM_BOT_USERNAME }),
         },
         {
             key: 'ai-quota',
