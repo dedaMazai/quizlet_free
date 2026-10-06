@@ -1,1 +1,1 @@
-export { DrawerContent, Drawer, dbgLog } from './Drawer';
+export { DrawerContent, Drawer } from './Drawer';

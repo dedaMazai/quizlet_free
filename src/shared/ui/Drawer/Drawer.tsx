@@ -1,5 +1,5 @@
 import {
-    memo, PointerEvent, ReactNode, useCallback, useEffect, useRef,
+    memo, ReactNode, useCallback, useEffect, useRef,
 } from 'react';
 import { MOTION_MS } from '@/shared/const/motion';
 import { classNames } from '@/shared/lib/classNames/classNames';
@@ -26,18 +26,6 @@ const FLICK_VELOCITY = 2;
 /** CSS-переменная: на сколько клавиатура iOS перекрывает низ экрана */
 const KEYBOARD_VAR = '--sheet-keyboard-offset';
 
-// DEBUG: временная диагностика закрытия шторки на iOS — удалить
-export const dbgLog = (msg: string) => {
-    try {
-        const prev = sessionStorage.getItem('dbg-drawer') ?? '';
-        const line = `${new Date().toISOString().slice(14, 23)} ${msg}`;
-        sessionStorage.setItem('dbg-drawer', `${prev}\n${line}`.split('\n').slice(-12).join('\n'));
-        window.dispatchEvent(new Event('dbg-drawer'));
-    } catch { /* noop */ }
-};
-
-dbgLog('page load');
-
 const getSheetHeight = () => window.innerHeight - SHEET_TOP;
 
 /** Открытые шторки по порядку открытия: Esc закрывает только верхнюю */
@@ -59,52 +47,49 @@ export const DrawerContent = memo((props: DrawerProps) => {
     const heightRef = useRef(getSheetHeight());
     const closingRef = useRef(false);
     const sheetRef = useRef<HTMLDivElement>(null);
-    // Нажатие началось на скриме, а не в шторке
-    const pressOnScrimRef = useRef(false);
-    const [{ y }, api] = Spring.useSpring(() => ({ y: heightRef.current }));
+    // useSpringValue, а не useSpring: useSpring на каждом рендере родителя снова ставит
+    // в очередь стартовое значение — шторка уезжала вниз при вводе в поле внутри неё
+    const y = Spring.useSpringValue(heightRef.current);
     // Reduced motion: шторка не едет, а проявляется opacity за motion-instant
     const reduced = useReducedMotion();
-    const [{ opacity }, fadeApi] = Spring.useSpring(() => ({ opacity: 1 }));
+    const opacity = Spring.useSpringValue(1);
     // Скрим проявляется вместе с выездом шторки
     const scrimOpacity = Spring.to([y, opacity], (value: number, alpha: number) => (
         (1 - value / heightRef.current) * alpha
     ));
 
     const openDrawer = useCallback(() => {
-        api.start({ y: 0, immediate: reduced });
-    }, [api, reduced]);
+        y.start(0, { immediate: reduced });
+    }, [y, reduced]);
 
     useEffect(() => {
         if (isOpen) {
             heightRef.current = getSheetHeight();
             closingRef.current = false;
             // Старт всегда снизу — даже если прошлый раз шторку закрыли снаружи без анимации
-            api.set({ y: heightRef.current });
+            y.set(heightRef.current);
             if (reduced) {
-                fadeApi.set({ opacity: 0 });
-                fadeApi.start({ opacity: 1, config: { duration: MOTION_MS.instant } });
+                opacity.set(0);
+                opacity.start(1, { config: { duration: MOTION_MS.instant } });
             }
             openDrawer();
         }
-    }, [isOpen, openDrawer, api, fadeApi, reduced]);
+    }, [isOpen, openDrawer, y, opacity, reduced]);
 
     const close = useCallback((velocity = 0) => {
         // Повторный тап по скриму или ✕ во время анимации не должен вызвать onClose дважды
-        dbgLog('drawer: close() анимация');
         if (closingRef.current) return;
         closingRef.current = true;
         if (reduced) {
-            fadeApi.start({ opacity: 0, config: { duration: MOTION_MS.instant }, onResolve: onClose });
+            opacity.start(0, { config: { duration: MOTION_MS.instant } }).then(() => onClose?.());
 
             return;
         }
-        api.start({
-            y: heightRef.current,
+        y.start(heightRef.current, {
             immediate: false,
             config: { ...Spring.config.stiff, velocity },
-            onResolve: onClose,
-        });
-    }, [api, fadeApi, reduced, Spring.config.stiff, onClose]);
+        }).then(() => onClose?.());
+    }, [y, opacity, reduced, Spring.config.stiff, onClose]);
 
     useEffect(() => {
         if (!isOpen) {
@@ -117,7 +102,6 @@ export const DrawerContent = memo((props: DrawerProps) => {
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key !== 'Escape' || hasOpenPopup()) return;
             if (openSheets[openSheets.length - 1] === id) {
-                dbgLog('drawer: escape');
                 close();
             }
         };
@@ -140,7 +124,6 @@ export const DrawerContent = memo((props: DrawerProps) => {
 
         const update = () => {
             const offset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
-            dbgLog(`vv h=${Math.round(viewport.height)} top=${Math.round(viewport.offsetTop)} ih=${window.innerHeight} off=${Math.round(offset)}`);
             sheetRef.current?.style.setProperty(KEYBOARD_VAR, `${offset}px`);
         };
 
@@ -164,13 +147,12 @@ export const DrawerContent = memo((props: DrawerProps) => {
         }) => {
             if (last) {
                 if (my > heightRef.current * CLOSE_THRESHOLD || (vy > FLICK_VELOCITY && dy > 0)) {
-                    dbgLog(`drawer: drag my=${Math.round(my)} vy=${vy.toFixed(1)}`);
                     close();
                 } else {
                     openDrawer();
                 }
             } else {
-                api.start({ y: my, immediate: true });
+                y.start(my, { immediate: true });
             }
         },
         {
@@ -185,21 +167,11 @@ export const DrawerContent = memo((props: DrawerProps) => {
         return null;
     }
 
-    // Клик по скриму закрывает, только если и нажатие было на скриме: тап по инпуту поднимает
-    // клавиатуру, шторка съезжает, и click может прилететь уже в скрим
-    const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-        pressOnScrimRef.current = !sheetRef.current?.contains(event.target as Node);
-        dbgLog(`drawer: pointerdown ${(event.target as HTMLElement).tagName} onScrim=${pressOnScrimRef.current}`);
-    };
-
-    const handleOverlayClick = () => {
-        dbgLog(`drawer: scrim click, pressOnScrim=${pressOnScrimRef.current}`);
-        if (pressOnScrimRef.current) close();
-    };
+    const handleOverlayClick = () => close();
 
     return (
         <Portal element={document.getElementById('app') ?? document.body}>
-            <div className={classNames(cls.Drawer, [className])} onPointerDown={handlePointerDown}>
+            <div className={classNames(cls.Drawer, [className])}>
                 <Spring.a.div style={{ opacity: scrimOpacity }}>
                     <Overlay className={cls.scrim} onClick={handleOverlayClick} />
                 </Spring.a.div>

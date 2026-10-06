@@ -1,11 +1,10 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Input } from 'antd';
 import { useLogoutMutation } from '@/entities/User';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { useToast } from '@/shared/lib/toast';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
-import { dbgLog } from '@/shared/ui/Drawer';
 
 import { useDeleteMyAccountMutation } from '../model/api/deleteAccountApi';
 import cls from './DeleteAccountButton.module.scss';
@@ -27,23 +26,6 @@ export const DeleteAccountButton = memo(({ className }: DeleteAccountButtonProps
 
     const confirmWord = t('удалить');
     const isConfirmed = confirmText.trim().toLowerCase() === confirmWord.toLowerCase();
-
-    // DEBUG: временная диагностика — удалить
-    const [dbg, setDbg] = useState(() => sessionStorage.getItem('dbg-drawer') ?? '');
-    useEffect(() => {
-        dbgLog('button: mount');
-        const onDbg = () => setDbg(sessionStorage.getItem('dbg-drawer') ?? '');
-        window.addEventListener('dbg-drawer', onDbg);
-        return () => {
-            dbgLog('button: unmount');
-            window.removeEventListener('dbg-drawer', onDbg);
-        };
-    }, []);
-
-    const closeFrom = (source: string) => () => {
-        dbgLog(`button: close from ${source}`);
-        close();
-    };
 
     const close = () => {
         setOpen(false);
@@ -75,11 +57,11 @@ export const DeleteAccountButton = memo(({ className }: DeleteAccountButtonProps
                 open={open}
                 width={MODAL_WIDTH}
                 title={t('Удалить аккаунт?')}
-                onClose={closeFrom('ModalFrame onClose (X или шторка)')}
+                onClose={close}
                 destroyOnHidden
                 actions={(
                     <>
-                        <Button onClick={closeFrom('Отмена')}>{t('Отмена')}</Button>
+                        <Button onClick={close}>{t('Отмена')}</Button>
                         <Button danger type="primary" loading={isLoading} disabled={!isConfirmed} onClick={handleDelete}>
                             {t('Удалить навсегда')}
                         </Button>
@@ -103,15 +85,13 @@ export const DeleteAccountButton = memo(({ className }: DeleteAccountButtonProps
                         <span>{t('Чтобы подтвердить, введите слово «{{word}}»', { word: confirmWord })}</span>
                         <Input
                             value={confirmText}
-                            onChange={(e) => { dbgLog(`input: ${e.target.value.length}`); setConfirmText(e.target.value); }}
+                            onChange={(e) => setConfirmText(e.target.value)}
                             onPressEnter={handleDelete}
                             autoComplete="off"
                         />
                     </label>
                 </div>
             </ModalFrame>
-            {/* DEBUG */}
-            {dbg && <pre style={{ whiteSpace: 'pre-wrap', fontSize: 10, margin: 0 }}>{dbg}</pre>}
         </>
     );
 });
