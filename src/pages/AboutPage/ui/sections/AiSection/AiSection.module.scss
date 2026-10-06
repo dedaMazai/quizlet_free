@@ -1,0 +1,214 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+
+    @media (width <= 1100px) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+
+    @media (width <= 650px) {
+        padding: 20px 16px;
+    }
+}
+
+.cardTitle {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 1.1;
+}
+
+.cardText {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-neutral-800);
+    text-wrap: pretty;
+}
+
+.cardAction {
+    align-self: flex-start;
+    margin-top: auto;
+}
+
+.diff {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 8px 0 4px;
+}
+
+.diffRow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    background: var(--color-bg);
+}
+
+.diffTerm {
+    font-weight: 600;
+}
+
+.diffCols {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 4px 12px;
+    font-size: 14px;
+}
+
+.diffLabel {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: var(--color-neutral-700);
+}
+
+.diffValue {
+    transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.diffOld {
+    color: var(--color-neutral-600);
+    text-decoration: line-through;
+}
+
+.diffNew {
+    font-weight: 500;
+    color: var(--color-success-text);
+}
+
+.diffExample {
+    font-style: italic;
+    color: var(--color-neutral-700);
+}
+
+.chunks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 8px 0 4px;
+}
+
+.chunkWord {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 32px;
+}
+
+.chunk {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 14px;
+    background: var(--color-bg);
+    border-left: 3px solid var(--color-accent-500);
+    animation: chunk-in var(--motion-slow) var(--ease-enter) both;
+    animation-delay: calc(var(--i) * var(--motion-base));
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}
+
+@keyframes chunk-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.chunkHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.chunkPhrase {
+    font-weight: 600;
+}
+
+.chunkTranslation {
+    font-size: 14px;
+    color: var(--color-neutral-800);
+}
+
+.chunkExample {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--color-neutral-700);
+}
+
+.practice {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 8px 0 4px;
+}
+
+.sentence {
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+.wrongAnswer {
+    color: var(--color-error-text);
+    text-decoration: line-through;
+}
+
+.rightAnswer {
+    padding: 0 4px;
+    font-weight: 600;
+    color: var(--color-success-text);
+    background: var(--color-success-tint);
+}
+
+.verb {
+    color: var(--color-neutral-700);
+}
+
+.advice {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    background: var(--color-bg);
+    border-left: 3px solid var(--color-accent-500);
+}
+
+.quota {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 760px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-neutral-700);
+
+    svg {
+        flex: none;
+        margin-top: 2px;
+    }
+}

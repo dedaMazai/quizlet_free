@@ -1,0 +1,62 @@
+$title-size: 52px;
+$title-size-mobile: 34px;
+$lead-max-width: 640px;
+
+.LandingSection {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 88px 56px;
+    scroll-margin-top: var(--public-header-height);
+
+    @media (width <= 900px) {
+        gap: 28px;
+        padding: 56px 16px;
+    }
+}
+
+.plain {
+    background: var(--color-bg);
+}
+
+.surface {
+    background: var(--color-surface);
+}
+
+.intro {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+// Кикер переносится на узком экране (особенно в en)
+.intro > .kicker {
+    white-space: normal;
+}
+
+.title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: $title-size;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+
+    @media (width <= 900px) {
+        font-size: $title-size-mobile;
+    }
+}
+
+.lead {
+    max-width: $lead-max-width;
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--color-neutral-800);
+    text-wrap: pretty;
+
+    @media (width <= 900px) {
+        font-size: 16px;
+    }
+}

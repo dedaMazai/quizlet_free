@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Button, Form, Input } from 'antd';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { useEffect, useState } from 'react';
-import { RoutePath } from '@/shared/config/router/routePath';
+import { LOGIN_MODE_PARAM, LOGIN_MODE_REGISTER, RoutePath } from '@/shared/config/router/routePath';
 import {
     useLoginMutation,
     useRegisterMutation,
@@ -40,7 +40,11 @@ const LoginPage = () => {
     const [requestPasswordReset, { isLoading: isResetLoading }] = useRequestPasswordResetMutation();
     const toast = useToast();
     const [form] = Form.useForm<LoginForm>();
-    const [mode, setMode] = useState(LoginMode.LOGIN);
+    const [searchParams] = useSearchParams();
+    // CTA лендинга открывают форму сразу на регистрации
+    const [mode, setMode] = useState(
+        searchParams.get(LOGIN_MODE_PARAM) === LOGIN_MODE_REGISTER ? LoginMode.REGISTER : LoginMode.LOGIN,
+    );
     const isRegisterMode = mode === LoginMode.REGISTER;
     const isResetMode = mode === LoginMode.RESET;
     const [

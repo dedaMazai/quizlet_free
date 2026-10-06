@@ -6,7 +6,9 @@ import { ReactComponent as Logo } from '@/shared/assets/icons/LogoZubrika.svg';
 import { useUserInfo } from '@/entities/User';
 import { LangSwitcher } from '@/features/LangSwitcher';
 import { ThemeSwitcher } from '@/features/ThemeSwitcher';
-import { AboutAnchor, getAboutAnchorPath, RoutePath } from '@/shared/config/router/routePath';
+import {
+    AboutAnchor, getAboutAnchorPath, getRegisterPath, RoutePath,
+} from '@/shared/config/router/routePath';
 import { classNames } from '@/shared/lib/classNames/classNames';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 
@@ -22,6 +24,7 @@ export const PublicHeader = memo(() => {
     const userInfo = useUserInfo();
 
     const goToLogin = useCallback(() => navigate(RoutePath.LOGIN()), [navigate]);
+    const goToRegister = useCallback(() => navigate(getRegisterPath()), [navigate]);
     const goToApp = useCallback(() => navigate(RoutePath.MAIN()), [navigate]);
 
     return (
@@ -32,8 +35,14 @@ export const PublicHeader = memo(() => {
             </Link>
 
             <nav className={cls.nav} aria-label={t('Навигация')}>
+                <Link to={getAboutAnchorPath(AboutAnchor.HOW)} className={cls.link}>
+                    {t('Как это работает')}
+                </Link>
                 <Link to={getAboutAnchorPath(AboutAnchor.FEATURES)} className={cls.link}>
-                    {t('Возможности')}
+                    {t('Режимы')}
+                </Link>
+                <Link to={getAboutAnchorPath(AboutAnchor.AI)} className={cls.link}>
+                    {t('ИИ')}
                 </Link>
                 <Link to={getAboutAnchorPath(AboutAnchor.COMPARE)} className={cls.link}>
                     {t('Сравнение')}
@@ -56,7 +65,7 @@ export const PublicHeader = memo(() => {
                         <Button className={cls.button} onClick={goToLogin}>
                             {t('Войти')}
                         </Button>
-                        <Button type="primary" className={classNames(cls.button, [cls.primary])} onClick={goToLogin}>
+                        <Button type="primary" className={classNames(cls.button, [cls.primary])} onClick={goToRegister}>
                             <BlueprintMarks />
                             {t('Начать бесплатно')}
                         </Button>

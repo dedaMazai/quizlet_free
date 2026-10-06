@@ -1,0 +1,168 @@
+$stage-min-height: 380px;
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    gap: 40px;
+
+    @media (width <= 900px) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+    }
+}
+
+.tabs {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-divider);
+
+    // На телефоне вкладки — горизонтальная лента
+    @media (width <= 900px) {
+        flex-direction: row;
+        overflow-x: auto;
+        border-top: none;
+        border-bottom: 1px solid var(--color-divider);
+        scrollbar-width: none;
+    }
+}
+
+.tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px 18px 0;
+    font: inherit;
+    color: var(--color-text);
+    text-align: left;
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--color-divider);
+    transition: color var(--motion-fast) var(--ease-standard);
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: -1px;
+        bottom: -1px;
+        left: -16px;
+        width: 3px;
+        background: transparent;
+        transition: background var(--motion-fast) var(--ease-standard);
+    }
+
+    &:hover {
+        color: var(--color-accent-700);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: -2px;
+    }
+
+    @media (width <= 900px) {
+        flex: none;
+        gap: 8px;
+        padding: 12px 14px;
+        border-bottom: none;
+
+        &::before {
+            inset: auto 0 -1px;
+            width: auto;
+            height: 2px;
+        }
+    }
+}
+
+.tabActive {
+    color: var(--color-accent-800);
+
+    &::before {
+        background: var(--color-accent-700);
+    }
+}
+
+.tabIndex {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-neutral-700);
+
+    @media (width <= 900px) {
+        display: none;
+    }
+}
+
+.tabIcon {
+    flex: none;
+    color: var(--color-accent-700);
+}
+
+.tabText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tabTitle {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 22px;
+    white-space: nowrap;
+
+    @media (width <= 900px) {
+        font-size: 17px;
+    }
+}
+
+.tabSummary {
+    font-size: 13px;
+    color: var(--color-neutral-700);
+
+    @media (width <= 900px) {
+        display: none;
+    }
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
+.stage {
+    display: flex;
+    align-items: flex-start;
+    min-height: $stage-min-height;
+    padding: 32px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+
+    @media (width <= 650px) {
+        min-height: 0;
+        padding: 20px 16px;
+    }
+}
+
+.caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px 24px;
+}
+
+.why {
+    max-width: 560px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-neutral-800);
+    text-wrap: pretty;
+}
+
+.keys {
+    display: flex;
+    gap: 16px;
+}

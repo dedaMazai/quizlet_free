@@ -52,7 +52,8 @@
     gap: 24px;
     font-size: 15px;
 
-    @media (width <= 767px) {
+    // Пять якорей не помещаются рядом с кнопками входа
+    @media (width <= 1199px) {
         display: none;
     }
 }
@@ -94,4 +95,9 @@
 
 .primary {
     padding: 0 18px;
+
+    // На телефоне не помещается рядом с «Войти»; тот же CTA — первым экраном лендинга
+    @media (width <= 650px) {
+        display: none;
+    }
 }

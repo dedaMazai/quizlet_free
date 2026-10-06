@@ -1,0 +1,1 @@
+export { CompareFaqSection } from './CompareFaqSection';

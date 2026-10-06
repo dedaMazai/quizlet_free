@@ -53,11 +53,21 @@ export const TENSE_TIME_PARAM = 'time';
 
 /** Якоря секций страницы «О сервисе»: бывшие страницы FEATURES и FAQ ведут сюда */
 export enum AboutAnchor {
+  HOW = 'how',
   FEATURES = 'features',
+  MEMORY = 'memory',
+  AI = 'ai',
+  GRAMMAR = 'grammar',
+  PROGRESS = 'progress',
   COMPARE = 'compare',
   FAQ = 'faq',
 }
 export const getAboutAnchorPath = (anchor: AboutAnchor) => `${RoutePath.ABOUT()}#${anchor}`;
+
+/** Форма входа сразу в режиме регистрации — для CTA лендинга */
+export const LOGIN_MODE_PARAM = 'mode';
+export const LOGIN_MODE_REGISTER = 'register';
+export const getRegisterPath = () => `${RoutePath.LOGIN()}?${LOGIN_MODE_PARAM}=${LOGIN_MODE_REGISTER}`;
 
 export const PUBLIC_PAGES = [
   RoutePath.LOGIN(),

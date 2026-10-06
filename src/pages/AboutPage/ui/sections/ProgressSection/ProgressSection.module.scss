@@ -1,0 +1,288 @@
+$heat-cell: 12px;
+$heat-cell-min: 8px;
+$heat-cell-max: 16px;
+$heat-gap: 3px;
+$ring-size: 96px;
+$ring-width: 10px;
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+
+    @media (width <= 900px) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    padding: 28px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-divider);
+
+    @media (width <= 650px) {
+        padding: 20px 16px;
+    }
+}
+
+.wide {
+    grid-column: 1 / -1;
+}
+
+.cardHead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--color-neutral-700);
+}
+
+// Недели — колонки, дни — строки; ячейки тянутся на ширину карточки, на узком экране лента скроллится
+.heatmap {
+    display: grid;
+    grid-template-rows: repeat(7, auto);
+    grid-auto-columns: minmax($heat-cell-min, $heat-cell-max);
+    grid-auto-flow: column;
+    gap: $heat-gap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.heatCell {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+
+    // Ячейки легенды — фиксированного размера
+    .legend & {
+        width: $heat-cell;
+    }
+}
+
+@for $i from 0 through 4 {
+    .heat#{$i} {
+        background: var(--color-heat-#{$i});
+    }
+}
+
+.goalSwitch {
+    align-self: flex-start;
+}
+
+.streak {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.streakText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.streakDays {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 28px;
+}
+
+.streakLevel {
+    font-size: 14px;
+    color: var(--color-neutral-700);
+}
+
+.levels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.levelBtn {
+    height: 32px;
+    padding: 0 10px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--color-text);
+    cursor: pointer;
+    background: none;
+    border: 1px solid var(--color-divider);
+
+    &:hover {
+        border-color: var(--color-accent-500);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+}
+
+.levelActive {
+    color: var(--color-accent-800);
+    background: var(--color-accent-100);
+    border-color: var(--color-accent-500);
+}
+
+.note {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--color-neutral-700);
+}
+
+.goal {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+// Кольцо на conic-gradient: доля из --share
+.ring {
+    position: relative;
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: $ring-size;
+    height: $ring-size;
+    border-radius: 50%;
+    background: conic-gradient(var(--color-accent-700) var(--share), var(--color-neutral-200) 0);
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: $ring-width;
+        border-radius: 50%;
+        background: var(--color-bg);
+    }
+}
+
+.ringValue {
+    position: relative;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 24px;
+    margin: 0;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    dt {
+        font-size: 13px;
+        color: var(--color-neutral-700);
+    }
+
+    dd {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 10px;
+        margin: 0;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 26px;
+    }
+}
+
+.record {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--color-success-text);
+    background: var(--color-success-tint);
+}
+
+.hard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-divider);
+}
+
+.hardList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.hardWord {
+    padding: 4px 10px;
+    font-size: 14px;
+    background: var(--color-surface);
+}
+
+.masteryValue {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1;
+}
+
+.mastery {
+    display: flex;
+    height: 12px;
+    background: var(--color-neutral-300);
+}
+
+.masteryMastered {
+    width: var(--mastered);
+    background: var(--color-accent-700);
+}
+
+.masteryLearning {
+    width: var(--learning);
+    background: var(--color-accent-400);
+}
+
+.masteryLegend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--color-neutral-700);
+
+    span::before {
+        content: "";
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 6px;
+    }
+}
+
+.legendMastered::before {
+    background: var(--color-accent-700);
+}
+
+.legendLearning::before {
+    background: var(--color-accent-400);
+}
+
+.legendNew::before {
+    background: var(--color-neutral-300);
+}

@@ -1,0 +1,170 @@
+$prompt-size: 36px;
+$prompt-size-mobile: 26px;
+$sentence-size: 24px;
+$sentence-size-mobile: 19px;
+
+.demo {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 6px;
+    }
+}
+
+.prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.promptText {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: $prompt-size;
+    line-height: 1.1;
+
+    @media (width <= 650px) {
+        font-size: $prompt-size-mobile;
+    }
+}
+
+.sentence {
+    font-size: $sentence-size;
+    line-height: 1.4;
+
+    @media (width <= 650px) {
+        font-size: $sentence-size-mobile;
+    }
+}
+
+.gap {
+    padding: 0 4px;
+    font-weight: 600;
+    color: var(--color-accent-800);
+    border-bottom: 2px solid var(--color-accent-500);
+}
+
+.hintText {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--color-neutral-700);
+}
+
+.link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    font: inherit;
+    font-size: 14px;
+    color: var(--color-accent-700);
+    cursor: pointer;
+    background: none;
+    border: none;
+
+    &:hover:not(:disabled) {
+        color: var(--color-accent-800);
+        text-decoration: underline;
+    }
+
+    &:disabled {
+        cursor: default;
+        color: var(--color-neutral-500);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+}
+
+.options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+
+    @media (width <= 650px) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.action {
+    align-self: flex-start;
+    height: 44px;
+    padding: 0 20px;
+    font-size: 15px;
+}
+
+.answerLine {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: 56px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-text);
+}
+
+.answerLineEmpty {
+    border-bottom-color: var(--color-divider);
+}
+
+.placeholder {
+    font-size: 14px;
+    color: var(--color-neutral-700);
+}
+
+.chunks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chunk {
+    height: 40px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 16px;
+    color: var(--color-text);
+    cursor: pointer;
+    background: var(--color-bg);
+    border: 1px solid var(--color-divider);
+    transition:
+        background var(--motion-fast) var(--ease-standard),
+        border-color var(--motion-fast) var(--ease-standard);
+
+    &:hover:not(:disabled) {
+        background: var(--color-accent-100);
+        border-color: var(--color-accent-500);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+}
+
+.chunkPicked {
+    background: var(--color-accent-100);
+    border-color: var(--color-accent-500);
+}
+
+// Место чанка остаётся — раскладка не прыгает
+.chunkUsed {
+    color: transparent;
+    cursor: default;
+    background: none;
+    border-style: dashed;
+}

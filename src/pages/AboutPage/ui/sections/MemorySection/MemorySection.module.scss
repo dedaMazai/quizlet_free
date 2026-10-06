@@ -1,0 +1,209 @@
+$term-size: 44px;
+$term-size-mobile: 32px;
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+
+    @media (width <= 900px) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+    }
+}
+
+.demo {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 32px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-divider);
+
+    @media (width <= 650px) {
+        padding: 20px 16px;
+    }
+}
+
+.cardHead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.term {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: $term-size;
+    line-height: 1;
+
+    @media (width <= 650px) {
+        font-size: $term-size-mobile;
+    }
+}
+
+.status {
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent-800);
+    background: var(--color-accent-100);
+}
+
+.statusMastered {
+    color: var(--color-success-text);
+    background: var(--color-success-tint);
+}
+
+.next {
+    font-size: 17px;
+    color: var(--color-neutral-800);
+}
+
+.meter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.meterTrack {
+    height: 8px;
+    background: var(--color-neutral-200);
+}
+
+.meterFill {
+    display: block;
+    width: var(--share);
+    height: 100%;
+    background: var(--color-accent-500);
+    transition: width var(--motion-slow) var(--ease-standard);
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.meterDone {
+    background: var(--color-success);
+}
+
+.timeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 30px;
+}
+
+.empty {
+    font-size: 14px;
+    color: var(--color-neutral-700);
+}
+
+.step {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.answer {
+    height: 40px;
+    padding: 0 16px;
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: filter var(--motion-fast) var(--ease-standard);
+
+    &:hover {
+        filter: brightness(0.96);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+}
+
+// Сигнальные цвета ответа — общие для кнопок и ленты
+.correct {
+    color: var(--color-success-text);
+    background: var(--color-success-tint);
+}
+
+.almost {
+    color: var(--color-warning-text);
+    background: var(--color-warning-tint);
+}
+
+.wrong {
+    color: var(--color-error-text);
+    background: var(--color-error-tint);
+}
+
+.reset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    padding: 0;
+    color: var(--color-neutral-700);
+    cursor: pointer;
+    background: none;
+    border: 1px solid var(--color-divider);
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.4;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+}
+
+.points {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-divider);
+}
+
+.point {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.pointTitle {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 22px;
+}
+
+.pointText {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-neutral-800);
+    text-wrap: pretty;
+}

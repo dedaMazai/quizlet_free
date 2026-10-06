@@ -1,0 +1,182 @@
+$scene-height: 300px;
+$scene-height-mobile: 240px;
+$term-size: 44px;
+$term-size-mobile: 32px;
+
+.FlipCardDemo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.scene {
+    height: $scene-height;
+    cursor: pointer;
+    perspective: 1200px;
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 4px;
+    }
+
+    @media (width <= 650px) {
+        height: $scene-height-mobile;
+    }
+}
+
+.flipper {
+    position: relative;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform var(--motion-slow) var(--ease-standard);
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.flipped {
+    transform: rotateY(180deg);
+
+    // Без поворота стороны сменяются мгновенно — смотри .back
+    @media (prefers-reduced-motion: reduce) {
+        transform: none;
+    }
+}
+
+.side {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 24px;
+    text-align: center;
+    background: var(--color-bg);
+    border: 1px solid var(--color-divider);
+    backface-visibility: hidden;
+    transition: background var(--motion-fast) var(--ease-standard);
+
+    .scene:hover & {
+        background: var(--color-accent-100);
+    }
+}
+
+.back {
+    transform: rotateY(180deg);
+
+    @media (prefers-reduced-motion: reduce) {
+        transform: none;
+        visibility: hidden;
+
+        .flipped & {
+            visibility: visible;
+        }
+    }
+}
+
+.front {
+    @media (prefers-reduced-motion: reduce) {
+        .flipped & {
+            visibility: hidden;
+        }
+    }
+}
+
+.label {
+    position: absolute;
+    top: 16px;
+    left: 18px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-neutral-700);
+}
+
+.tools {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: var(--color-neutral-600);
+}
+
+.term,
+.translation {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: $term-size;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+
+    @media (width <= 650px) {
+        font-size: $term-size-mobile;
+    }
+}
+
+.example {
+    font-size: 15px;
+    font-style: italic;
+    color: var(--color-neutral-700);
+}
+
+.hint {
+    position: absolute;
+    bottom: 16px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-neutral-600);
+}
+
+.footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--color-text);
+    cursor: pointer;
+    background: none;
+    border: 1px solid var(--color-divider);
+    transition: background var(--motion-fast) var(--ease-standard);
+
+    &:hover {
+        background: var(--color-accent-100);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+}
+
+.counter {
+    min-width: 48px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: center;
+    color: var(--color-neutral-700);
+}
+
+.keys {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+
+    @media (width <= 650px) {
+        display: none;
+    }
+}

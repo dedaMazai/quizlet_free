@@ -1,0 +1,143 @@
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+
+    @media (width <= 900px) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+    }
+}
+
+.points {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-divider);
+}
+
+.point {
+    display: flex;
+    gap: 16px;
+    padding: 18px 0;
+    font-size: 17px;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--color-divider);
+    text-wrap: pretty;
+}
+
+.pointIndex {
+    flex: none;
+    padding-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-accent-700);
+}
+
+.notebook {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 28px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+
+    @media (width <= 650px) {
+        padding: 20px 16px;
+    }
+}
+
+.head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.day {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 28px;
+}
+
+.words {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.word {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 15px;
+    border-bottom: 1px solid var(--color-divider);
+    transition: opacity var(--motion-base) var(--ease-standard);
+}
+
+.wordIndex {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-neutral-700);
+}
+
+.wordText {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.important {
+    color: var(--color-warning);
+}
+
+.status {
+    padding: 2px 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.today {
+    font-weight: 600;
+
+    .status {
+        color: var(--color-field-button-ink);
+        background: var(--color-accent-300);
+    }
+}
+
+.review .status {
+    color: var(--color-accent-800);
+    background: var(--color-accent-100);
+}
+
+.skip {
+    opacity: 0.55;
+
+    .status {
+        color: var(--color-neutral-700);
+        border: 1px dashed var(--color-neutral-500);
+    }
+}
+
+.queue {
+    color: var(--color-neutral-700);
+
+    .status {
+        color: var(--color-neutral-700);
+    }
+}
+
+.action {
+    align-self: flex-start;
+}
