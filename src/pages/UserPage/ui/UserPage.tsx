@@ -8,12 +8,12 @@ import { AccuracyTimeCards } from '@/widgets/AccuracyTimeCards';
 import { StreakHeatmap } from '@/widgets/StreakHeatmap';
 import { MasteryChart } from '@/widgets/MasteryChart';
 import { DeckProgressList } from '@/widgets/DeckProgressList';
+import { PageLoader } from '@/widgets/PageLoader';
 import { BackBar } from '@/shared/ui/BackBar';
 import { BackLink } from '@/shared/ui/BackLink';
 import { BoxSegmented } from '@/shared/ui/BoxSegmented';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Kicker } from '@/shared/ui/Kicker';
-import { Loader } from '@/shared/ui/Loader';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { getSettingsUsersPath, RoutePath } from '@/shared/config/router/routePath';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
@@ -36,7 +36,7 @@ const UserPage = () => {
     // Пока сводка грузится, виджеты показывают скелетоны — пустое состояние не мелькает
     const showStats = isLoading || (overview?.totalAnswers ?? 0) > 0;
 
-    if (isUserLoading) return <Loader />;
+    if (isUserLoading) return <PageLoader />;
 
     if (!user || !userId) {
         return (

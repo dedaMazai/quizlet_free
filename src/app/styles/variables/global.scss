@@ -57,6 +57,10 @@
     // Мобильный таб-бар: 50 + отступы 6/24 + рамка — тосты встают над ним
     --tabbar-height: 81px;
 
+    // Telegram Mini App на весь экран: системная шапка и кнопки Telegram поверх контента.
+    // Переменные выставляет telegram-web-app.js, вне Telegram — 0
+    --tg-top-inset: calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px));
+
     // z-indexes
     --modal-z-index: 1000;
     --overlay-z-index: 100;

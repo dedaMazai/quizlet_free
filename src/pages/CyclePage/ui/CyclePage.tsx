@@ -20,6 +20,7 @@ import {
   useSyncCyclePortionMutation,
 } from '@/entities/LearningCycle';
 import { CycleWordList } from '@/widgets/CycleWordList';
+import { PageLoader } from '@/widgets/PageLoader';
 import { CycleForm } from '@/features/CycleForm';
 import { AddCycleWords } from '@/features/AddCycleWords';
 import { clearCycleSessions } from '@/features/CycleSession';
@@ -29,7 +30,6 @@ import { BackLink } from '@/shared/ui/BackLink';
 import { Blueprint } from '@/shared/ui/Blueprint';
 import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import { SectionHeader } from '@/shared/ui/SectionHeader';
-import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useToast } from '@/shared/lib/toast';
@@ -71,7 +71,7 @@ const CyclePage = () => {
   }, [cycleId, newWords]);
 
   if (!cycleId) return null;
-  if (isLoading || isWordsLoading) return <Loader />;
+  if (isLoading || isWordsLoading) return <PageLoader />;
   if (!cycle || !plan) return <Empty description={t('Цикл не найден')} />;
 
   const total = words?.length ?? 0;

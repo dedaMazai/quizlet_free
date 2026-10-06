@@ -1,6 +1,7 @@
 
 export { createAsyncComponent } from './createAsyncComponent';
 export { generateUserColor } from './generateUserColor';
+export { randomUUID } from './randomUUID';
 
 export function determinateString(value: string[] | string) {
   return Array.isArray(value)

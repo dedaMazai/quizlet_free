@@ -13,6 +13,7 @@ import {
 import { StudyEventDraft, useLogStudyEventsMutation } from '@/entities/Statistics';
 import { SessionAnswer } from '@/shared/lib/session';
 import { AnswerGrade } from '@/shared/lib/text';
+import { randomUUID } from '@/shared/lib/utils';
 import { ClozeItem, buildClozeItems, gradeCloze } from '../lib/clozeEngine';
 
 type Phase = 'setup' | 'question' | 'feedback' | 'finished';
@@ -120,7 +121,7 @@ export const useClozeSession = (
   const reviewsRef = useRef<CardReview[]>([]);
   const questionStartRef = useRef(0);
   // Сессия для статистики — сколько раз садились заниматься
-  const sessionIdRef = useRef(crypto.randomUUID());
+  const sessionIdRef = useRef(randomUUID());
 
   // Актуальное состояние повторения по карточкам сессии; обновляется на каждый ответ.
   const reviewsByUuid = useRef(new Map<string, CardReview | null>());
@@ -169,7 +170,7 @@ export const useClozeSession = (
     setAnswers([]);
     setLastReview(null);
     setStartedAt(Date.now());
-    sessionIdRef.current = crypto.randomUUID();
+    sessionIdRef.current = randomUUID();
   };
 
   const start = (typoTolerance: boolean) => {

@@ -27,6 +27,7 @@ import { VStack } from '@/shared/ui/Stack';
 import { useAntdApp } from '@/shared/lib/hooks/useAntdApp';
 import { useToast } from '@/shared/lib/toast';
 import { useMatchMedia } from '@/shared/lib/hooks/useMatchMedia';
+import { randomUUID } from '@/shared/lib/utils';
 import { useAutoTranslate } from '../model/useAutoTranslate';
 import { downloadCardsTemplate, parseCardsFromExcel } from '../model/cardsExcel';
 import cls from './CardEditor.module.scss';
@@ -72,7 +73,7 @@ interface CardEditorProps {
 }
 
 const makeEmptyRow = (): CardRow => ({
-  id: crypto.randomUUID(),
+  id: randomUUID(),
   term: '',
   translation: '',
   example: '',

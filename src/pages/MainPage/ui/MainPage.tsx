@@ -13,6 +13,7 @@ import { UserAvatar, useUserInfo } from '@/entities/User';
 import { useDailyGoal } from '@/entities/UserSettings';
 import { CardEditor } from '@/features/CardEditor';
 import { DeckForm } from '@/features/DeckForm';
+import { QuickSettingsButton } from '@/features/QuickSettings';
 import { DueHero } from '@/widgets/DueHero';
 import { NextSteps } from '@/widgets/NextSteps';
 import { StreakCard } from '@/widgets/StreakCard';
@@ -166,6 +167,7 @@ const MainPage: FC = () => {
                             />
                             <span className={cls.streakDays}>{streakDays}</span>
                         </span>
+                        <QuickSettingsButton />
                         <Link to={RoutePath.PROFILE()} aria-label={t('Аккаунт')} className={cls.avatarLink}>
                             <UserAvatar user={userInfo} className={cls.avatar} />
                         </Link>

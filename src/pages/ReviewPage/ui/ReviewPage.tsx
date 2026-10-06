@@ -17,9 +17,9 @@ import { useUserInfo } from '@/entities/User';
 import { LearnSession } from '@/features/LearnSession';
 import { SessionResult } from '@/widgets/SessionResult';
 import { SectionPageHeader } from '@/widgets/SectionPage';
+import { PageLoader } from '@/widgets/PageLoader';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { VStack } from '@/shared/ui/Stack';
-import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { NavSectionKey } from '@/shared/const/menu';
 import { ReviewLocationState } from '@/shared/const/const';
@@ -164,11 +164,11 @@ const ReviewPage = () => {
     );
   }
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <PageLoader />;
 
   if (!dueCards?.length) {
     // Заголовок зависит от прогноза на завтра — не показываем его вполовину
-    if (isSummaryLoading) return <Loader />;
+    if (isSummaryLoading) return <PageLoader />;
 
     const tomorrowCount = dueSummary?.forecast[1]?.count ?? 0;
     const learnDeckUuid = selectLearnDeckUuid(dueSummary);

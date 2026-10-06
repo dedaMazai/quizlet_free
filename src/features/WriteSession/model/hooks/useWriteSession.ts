@@ -13,6 +13,7 @@ import {
 import { StudyEventDraft, useLogStudyEventsMutation } from '@/entities/Statistics';
 import { SessionAnswer } from '@/shared/lib/session';
 import { AnswerGrade, checkAnswer } from '@/shared/lib/text';
+import { randomUUID } from '@/shared/lib/utils';
 import {
   buildQueue,
   expectedFor,
@@ -146,7 +147,7 @@ export const useWriteSession = (
   // Состояние повторения до последнего ответа — для переоценки «Я ответил верно»
   const lastBeforeRef = useRef<CardReview | null>(null);
   // Сессия для статистики — сколько раз садились заниматься
-  const sessionIdRef = useRef(crypto.randomUUID());
+  const sessionIdRef = useRef(randomUUID());
 
   // Актуальное состояние повторения по карточкам сессии; обновляется на каждый ответ.
   const reviewsByUuid = useRef(new Map<string, CardReview | null>());
@@ -194,7 +195,7 @@ export const useWriteSession = (
     setAnswers([]);
     setLastReview(null);
     setStartedAt(Date.now());
-    sessionIdRef.current = crypto.randomUUID();
+    sessionIdRef.current = randomUUID();
   };
 
   const start = (settings: WriteSettings) => {

@@ -12,6 +12,7 @@ import {
 } from '@/entities/Card';
 import { StudyEventDraft, useLogStudyEventsMutation } from '@/entities/Statistics';
 import { SessionAnswer } from '@/shared/lib/session';
+import { randomUUID } from '@/shared/lib/utils';
 import { OrderItem, buildOrderItems, isOrderCorrect } from '../lib/orderEngine';
 
 type Phase = 'question' | 'feedback' | 'finished';
@@ -126,7 +127,7 @@ export const useOrderSession = (
   const reviewsRef = useRef<CardReview[]>([]);
   const questionStartRef = useRef(0);
   // Сессия для статистики — сколько раз садились заниматься
-  const sessionIdRef = useRef(crypto.randomUUID());
+  const sessionIdRef = useRef(randomUUID());
 
   // Актуальное состояние повторения по карточкам сессии; обновляется на каждый ответ.
   const reviewsByUuid = useRef(new Map<string, CardReview | null>());
@@ -172,7 +173,7 @@ export const useOrderSession = (
     setAnswers([]);
     setLastReview(null);
     setStartedAt(Date.now());
-    sessionIdRef.current = crypto.randomUUID();
+    sessionIdRef.current = randomUUID();
   };
 
   const check = () => {

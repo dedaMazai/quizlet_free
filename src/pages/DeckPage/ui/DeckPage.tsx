@@ -45,6 +45,7 @@ import {
   findDuplicateGroups,
 } from '@/entities/Card';
 import { CardList } from '@/widgets/CardList';
+import { PageLoader } from '@/widgets/PageLoader';
 import { CardEditor } from '@/features/CardEditor';
 import { ShareDeckModal } from '@/features/ShareDeck';
 import { DuplicateCardsModal } from '@/features/DuplicateCardsModal';
@@ -60,7 +61,6 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { Kicker, KickerSize, KickerTone } from '@/shared/ui/Kicker';
 import { MasteryBar, MasteryBarSize } from '@/shared/ui/MasteryBar';
 import { SectionHeader } from '@/shared/ui/SectionHeader';
-import { Loader } from '@/shared/ui/Loader';
 import { RoutePath } from '@/shared/config/router/routePath';
 import { Accesses } from '@/shared/types/accesses';
 import { classNames } from '@/shared/lib/classNames/classNames';
@@ -189,7 +189,7 @@ const DeckPage = () => {
   );
 
   if (!deckId) return null;
-  if (isLoading) return <Loader />;
+  if (isLoading) return <PageLoader />;
   if (!deck) return <Empty description={t('Колода не найдена')} />;
 
   const isOwner = deck.is_owner;

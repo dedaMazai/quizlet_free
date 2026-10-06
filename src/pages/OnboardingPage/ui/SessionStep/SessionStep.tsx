@@ -16,6 +16,7 @@ import { Kicker, KickerTone } from '@/shared/ui/Kicker';
 import { SessionButton } from '@/shared/ui/SessionButton';
 import { SessionStage } from '@/shared/ui/SessionStage';
 import { SessionTopBar } from '@/shared/ui/SessionTopBar';
+import { randomUUID } from '@/shared/lib/utils';
 import { estimateFlashcardsMinutes, FIRST_SESSION_SIZE } from '../../model/onboarding';
 import cls from '../OnboardingPage.module.scss';
 
@@ -88,7 +89,7 @@ export const SessionStep = memo((props: SessionStepProps) => {
         finishingRef.current = true;
         const startedAt = startedAtRef.current;
         const durationPerCard = Math.round((Date.now() - startedAt) / sessionCards.length);
-        const sessionId = crypto.randomUUID();
+        const sessionId = randomUUID();
         const events: StudyEventDraft[] = sessionCards.map((card) => ({
             card_id: card.uuid,
             is_correct: true,

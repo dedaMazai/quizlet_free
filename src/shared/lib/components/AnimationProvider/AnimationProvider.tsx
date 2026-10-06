@@ -19,6 +19,9 @@ interface AnimationContextPayload {
 
 const AnimationContext = createContext<AnimationContextPayload>({});
 
+/** Флаг в sessionStorage: перезагрузка из-за недогрузившегося чанка уже была — не зацикливаемся */
+const RELOAD_FLAG = 'animation-chunk-reload';
+
 // Обе либы зависят друг от друга
 const getAsyncAnimationModules = async () => {
     return Promise.all([
@@ -37,11 +40,22 @@ export const AnimationProvider = ({ children }: { children: ReactNode }) => {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        getAsyncAnimationModules().then(([Spring, Gesture]) => {
-            SpringRef.current = Spring;
-            GestureRef.current = Gesture;
-            setIsLoaded(true);
-        });
+        // Без либ шторка рендерит null и кнопка «ничего не делает». Чанк не грузится
+        // обычно из-за устаревшего кеша WebView (Telegram) после деплоя: повторяем,
+        // затем один раз перезагружаем страницу за свежим index.html
+        getAsyncAnimationModules()
+            .catch(getAsyncAnimationModules)
+            .then(([Spring, Gesture]) => {
+                SpringRef.current = Spring;
+                GestureRef.current = Gesture;
+                setIsLoaded(true);
+                sessionStorage.removeItem(RELOAD_FLAG);
+            })
+            .catch(() => {
+                if (sessionStorage.getItem(RELOAD_FLAG)) return;
+                sessionStorage.setItem(RELOAD_FLAG, '1');
+                window.location.reload();
+            });
     }, []);
 
     const value = useMemo(

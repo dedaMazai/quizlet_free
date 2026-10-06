@@ -18,6 +18,11 @@ i18n.use(Backend)
         supportedLngs: ['ru', 'en'],
         nonExplicitSupportedLngs: true,
         load: 'languageOnly',
+        // Системный en-US (в т.ч. в Telegram) → en: иначе i18n.language остаётся en-US
+        // и переключатели языка, сравнивающие с 'en', показывают «Русский»
+        detection: {
+            convertDetectedLanguage: (lng: string) => lng.split('-')[0],
+        },
         nsSeparator: '$',
         keySeparator: false,
         // debug: __IS_DEV__,

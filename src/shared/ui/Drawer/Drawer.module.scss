@@ -11,7 +11,7 @@
 
 .sheet {
     position: fixed;
-    top: 90px;
+    top: calc(90px + var(--tg-top-inset));
     right: 0;
 
     // Над клавиатурой iOS: переменную выставляет Drawer по visualViewport

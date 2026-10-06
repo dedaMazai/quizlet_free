@@ -7,6 +7,7 @@ import { useUserInfo } from '@/entities/User';
 import {
     selectLearnDeckUuid, StatsPeriod, useGetDueSummaryQuery, useGetStudyOverviewQuery,
 } from '@/entities/Statistics';
+import { QuickSettingsButton } from '@/features/QuickSettings';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { RoutePath } from '@/shared/config/router/routePath';
@@ -41,19 +42,24 @@ const ProgressPage = () => {
             <PageHeader
                 className={cls.header}
                 title={t('Прогресс')}
-                extra={showStats && (
-                    <Segmented<StatsPeriod>
-                        className={cls.period}
-                        classNames={{ item: cls.periodItem, label: cls.periodLabel }}
-                        value={period}
-                        onChange={setPeriod}
-                        options={[
-                            // Мобильная 6.55 — сокращения
-                            { label: isMobile ? t('Нед.') : t('Неделя'), value: StatsPeriod.WEEK },
-                            { label: isMobile ? t('Мес.') : t('Месяц'), value: StatsPeriod.MONTH },
-                            { label: t('Год'), value: StatsPeriod.YEAR },
-                        ]}
-                    />
+                extra={(
+                    <>
+                        {showStats && (
+                            <Segmented<StatsPeriod>
+                                className={cls.period}
+                                classNames={{ item: cls.periodItem, label: cls.periodLabel }}
+                                value={period}
+                                onChange={setPeriod}
+                                options={[
+                                    // Мобильная 6.55 — сокращения
+                                    { label: isMobile ? t('Нед.') : t('Неделя'), value: StatsPeriod.WEEK },
+                                    { label: isMobile ? t('Мес.') : t('Месяц'), value: StatsPeriod.MONTH },
+                                    { label: t('Год'), value: StatsPeriod.YEAR },
+                                ]}
+                            />
+                        )}
+                        {isMobile && <QuickSettingsButton />}
+                    </>
                 )}
             />
 

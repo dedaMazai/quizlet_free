@@ -8,6 +8,7 @@ import { useUserAccesses } from '@/entities/User';
 import { CardEditor } from '@/features/CardEditor';
 import { DeckForm } from '@/features/DeckForm';
 import { DuplicateCardsModal } from '@/features/DuplicateCardsModal';
+import { QuickSettingsButton } from '@/features/QuickSettings';
 import { BlueprintMarks } from '@/shared/ui/Blueprint';
 import { ModalFrame } from '@/shared/ui/ModalFrame';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -79,14 +80,19 @@ export const LibraryHeader = memo(({ showCreateDeck }: LibraryHeaderProps) => {
   };
 
   // Mobile 6.38: только «+» (создать колоду); импорт и дубли скрыты
-  const mobileExtra = showCreateDeck ? (
-    <Button
-      className={cls.mobileCreate}
-      aria-label={t('Создать колоду')}
-      icon={<Plus size={MOBILE_ICON_SIZE} strokeWidth={ICON_STROKE} />}
-      onClick={() => setDeckFormOpen(true)}
-    />
-  ) : undefined;
+  const mobileExtra = (
+    <>
+      {showCreateDeck && (
+        <Button
+          className={cls.mobileCreate}
+          aria-label={t('Создать колоду')}
+          icon={<Plus size={MOBILE_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+          onClick={() => setDeckFormOpen(true)}
+        />
+      )}
+      <QuickSettingsButton />
+    </>
+  );
 
   return (
     <>
