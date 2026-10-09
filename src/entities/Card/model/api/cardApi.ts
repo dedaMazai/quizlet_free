@@ -9,6 +9,7 @@ import {
 } from '../types/cardReview';
 import { AiCheckInput, AiCheckResult } from '../types/aiCheck';
 import { AiChunkInput, AiChunksResult } from '../types/aiChunks';
+import { AiParseWordsResult } from '../types/aiParse';
 
 // Строка таблицы cards в Supabase (RLS ограничивает выборку текущим пользователем).
 interface CardRow {
@@ -426,6 +427,31 @@ const cardApi = rtkApi.injectEndpoints({
       },
       invalidatesTags: [ApiTag.AiUsage],
     }),
+    // Разбор вставленного списка слов через Edge Function. Лимит запросов проверяется на сервере.
+    parseWordsAi: build.mutation<AiParseWordsResult, string>({
+      queryFn: async (text) => {
+        const { data, error } = await supabase.functions.invoke('parse-words', {
+          body: { text },
+        });
+        if (error) {
+          // Достаём код ошибки из тела ответа функции (например, AI_LIMIT_EXCEEDED).
+          let code = error.message;
+          const ctx = (error as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            try {
+              const body = await ctx.json();
+              if (body?.error) code = body.error;
+            } catch {
+              // Тело не JSON — оставляем исходное сообщение.
+            }
+          }
+          return supabaseError(code);
+        }
+        const result = data as Partial<AiParseWordsResult> | null;
+        return { data: { results: result?.results ?? [], truncated: Boolean(result?.truncated) } };
+      },
+      invalidatesTags: [ApiTag.AiUsage],
+    }),
     // Остаток доступных запросов к ИИ для текущего пользователя.
     getAiUsage: build.query<number, void>({
       queryFn: async () => {
@@ -483,6 +509,7 @@ export const {
   useGetFavoritesQuery,
   useToggleFavoriteMutation,
   useCheckTranslationsMutation,
+  useParseWordsAiMutation,
   useGenerateChunksMutation,
   useGetAiUsageQuery,
 } = cardApi;

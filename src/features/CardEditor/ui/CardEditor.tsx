@@ -7,13 +7,14 @@ import {
 } from 'antd';
 import type { InputRef, UploadProps } from 'antd';
 import {
-  Plus, Sparkles, Volume2, X,
+  ListPlus, Plus, Sparkles, Volume2, X,
 } from 'lucide-react';
 import {
   AiCheckInput,
   CardCreateDto,
   useCheckTranslationsMutation,
   useCreateCardsMutation,
+  useParseWordsAiMutation,
   AiQuotaNotice,
   useAiQuota,
 } from '@/entities/Card';
@@ -48,6 +49,9 @@ const TOOL_ICON_SIZE = 14;
 const ROW_ICON_SIZE = 16;
 const MOBILE_REMOVE_ICON_SIZE = 14;
 const ICON_STROKE = 1.5;
+
+const PASTE_MIN_ROWS = 4;
+const PASTE_MAX_ROWS = 10;
 
 const EXCEL_ACCEPT = '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -97,8 +101,12 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   // Строка, у которой сейчас открыт список вариантов перевода.
   const [openVariantsId, setOpenVariantsId] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  // Панель «Вставить списком» — текст разбирает ИИ.
+  const [isPasteOpen, setIsPasteOpen] = useState(false);
+  const [pasteText, setPasteText] = useState('');
   const [createCards, { isLoading }] = useCreateCardsMutation();
   const [checkTranslations, { isLoading: isChecking }] = useCheckTranslationsMutation();
+  const [parseWordsAi, { isLoading: isParsing }] = useParseWordsAiMutation();
   const { remaining, isExhausted: noCredits, isUnlimited } = useAiQuota({ skip: !open });
   const { data: deck } = useGetDeckQuery(deckUuid, { skip: !open });
 
@@ -110,6 +118,8 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
   useEffect(() => {
     if (open) {
       setRows(makeInitialRows());
+      setIsPasteOpen(false);
+      setPasteText('');
     }
   }, [open]);
 
@@ -252,6 +262,42 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
     }
   };
 
+  const handleParseText = async () => {
+    const text = pasteText.trim();
+    if (!text) return;
+
+    try {
+      const { results, truncated } = await parseWordsAi(text).unwrap();
+      if (!results.length) {
+        toast.warning(t('ИИ не нашёл слов в тексте'));
+        return;
+      }
+      const parsedRows: CardRow[] = results.map((word) => ({
+        ...makeEmptyRow(),
+        term: word.term,
+        translation: word.translation,
+        example: word.example,
+        translationEdited: true,
+        aiCorrected: true,
+      }));
+      // Пустые строки (в т.ч. стартовые) убираем, заполненные оставляем.
+      setRows((prev) => [...prev.filter((row) => row.term.trim()), ...parsedRows]);
+      setPasteText('');
+      setIsPasteOpen(false);
+      toast.success(t('Добавлено из списка: {{count}}', { count: parsedRows.length }));
+      if (truncated) {
+        toast.warning(t('Разобраны только первые 50 слов'));
+      }
+    } catch (err) {
+      const code = (err as { error?: string })?.error;
+      if (code === 'AI_LIMIT_EXCEEDED') {
+        toast.error(t('Лимит запросов к ИИ исчерпан'));
+      } else {
+        toast.error(t('Не удалось разобрать список'));
+      }
+    }
+  };
+
   const handleDownloadTemplate = useCallback(() => {
     downloadCardsTemplate();
   }, []);
@@ -345,6 +391,13 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
             {t('Импорт из Excel')}
           </Button>
         </Upload>
+        <Button
+          className={cls.toolButton}
+          icon={<ListPlus aria-hidden size={TOOL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+          onClick={() => setIsPasteOpen((prev) => !prev)}
+        >
+          {t('Вставить списком')}
+        </Button>
         {/* Шаблона нет в мобильном макете 6.37 */}
         {!isMobile && (
           <Button
@@ -373,7 +426,38 @@ export const CardEditor: FC<CardEditorProps> = (props) => {
           </Tooltip>
         )}
       </div>
-      {canAiCheck && <AiQuotaNotice className={cls.aiNotice} />}
+      {(canAiCheck || isPasteOpen) && <AiQuotaNotice className={cls.aiNotice} />}
+
+      {isPasteOpen && (
+        <div className={cls.pastePanel}>
+          <Input.TextArea
+            value={pasteText}
+            autoFocus
+            autoSize={{ minRows: PASTE_MIN_ROWS, maxRows: PASTE_MAX_ROWS }}
+            placeholder={t('Вставьте слова или фразы через запятую или с новой строки')}
+            onChange={(e) => setPasteText(e.target.value)}
+          />
+          <div className={cls.pasteActions}>
+            <span className={cls.pasteHint}>{t('До 50 слов за 1 запрос к ИИ')}</span>
+            <Button onClick={() => setIsPasteOpen(false)}>{t('Отмена')}</Button>
+            <Tooltip
+              title={noCredits
+                ? t('Лимит обновится завтра')
+                : !isUnlimited && t('Осталось запросов: {{count}}', { count: remaining ?? 0 })}
+            >
+              <Button
+                type="primary"
+                icon={<Sparkles aria-hidden size={TOOL_ICON_SIZE} strokeWidth={ICON_STROKE} />}
+                loading={isParsing}
+                disabled={noCredits || !pasteText.trim()}
+                onClick={handleParseText}
+              >
+                {t('Разобрать ИИ')}
+              </Button>
+            </Tooltip>
+          </div>
+        </div>
+      )}
 
       <div className={cls.table}>
         {!isMobile && (

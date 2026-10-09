@@ -188,3 +188,26 @@
     padding: 0 0 12px;
   }
 }
+
+// «Вставить списком»: textarea + разбор ИИ
+.pastePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.pasteActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pasteHint {
+  margin-right: auto;
+  font-size: 13px;
+  color: var(--color-neutral-700);
+}

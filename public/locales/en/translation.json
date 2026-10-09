@@ -2748,5 +2748,13 @@
   "{{name}} приглашает вас в контакты": "{{name}} invites you to be contacts",
   "Контакты делятся колодами друг с другом без ввода почты.": "Contacts can share decks with each other without typing an email.",
   "Добавить в контакты": "Add to contacts",
-  "Не сейчас": "Not now"
+  "Не сейчас": "Not now",
+  "Вставить списком": "Paste a list",
+  "Вставьте слова или фразы через запятую или с новой строки": "Paste words or phrases separated by commas or new lines",
+  "До 50 слов за 1 запрос к ИИ": "Up to 50 words per AI request",
+  "Разобрать ИИ": "Parse with AI",
+  "ИИ не нашёл слов в тексте": "AI found no words in the text",
+  "Добавлено из списка: {{count}}": "Added from list: {{count}}",
+  "Разобраны только первые 50 слов": "Only the first 50 words were parsed",
+  "Не удалось разобрать список": "Could not parse the list"
 }

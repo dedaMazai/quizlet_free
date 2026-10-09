@@ -6,6 +6,7 @@ export type {
 } from './model/types/cardReview';
 export type { AiCheckInput, AiCheckResult } from './model/types/aiCheck';
 export type { AiChunk, AiChunkInput, AiChunksResult } from './model/types/aiChunks';
+export type { AiParsedWord, AiParseWordsResult } from './model/types/aiParse';
 export {
   useGetCardsQuery,
   useLazyGetCardsQuery,
@@ -27,6 +28,7 @@ export {
   useGetFavoritesQuery,
   useToggleFavoriteMutation,
   useCheckTranslationsMutation,
+  useParseWordsAiMutation,
   useGenerateChunksMutation,
   useGetAiUsageQuery,
 } from './model/api/cardApi';
