@@ -1,5 +1,5 @@
 import {
-  FC, useCallback, useEffect, useMemo, useState,
+  FC, useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -45,6 +45,8 @@ interface ChunkRow extends AiChunk {
 
 type EditableField = 'term' | 'translation' | 'example';
 
+const normTerm = (term: string): string => term.trim().toLowerCase();
+
 export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
   const { open, deckUuid, onClose } = props;
   const { t } = useTranslation();
@@ -53,6 +55,7 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
   const [sourceUuids, setSourceUuids] = useState<string[]>([]);
   const [rows, setRows] = useState<ChunkRow[] | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Key[]>([]);
+  const savingRef = useRef(false);
 
   const { data: cards } = useGetCardsQuery(deckUuid, { skip: !open });
   const { remaining, isExhausted: noCredits, isUnlimited } = useAiQuota({ skip: !open });
@@ -77,6 +80,11 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
     [cards],
   );
 
+  // Термины, которые уже есть в колоде: такие фразы не добавляем повторно
+  const existingTerms = useMemo(
+    () => new Set((cards ?? []).map((card) => normTerm(card.term))),
+    [cards],
+  );
 
   const setRowField = useCallback((key: string, field: EditableField, value: string) => {
     setRows((prev) => (prev ?? []).map(
@@ -104,7 +112,9 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
       ));
 
       setRows(next);
-      setSelectedKeys(next.map((row) => row.key));
+      setSelectedKeys(next
+        .filter((row) => !existingTerms.has(normTerm(row.term)))
+        .map((row) => row.key));
       toast.success(t('Фразы подобраны'));
     } catch (err) {
       const code = (err as { error?: string })?.error;
@@ -117,9 +127,18 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
   };
 
   const handleSave = async () => {
+    // Повторный клик, пока идёт сохранение, вставил бы фразы второй раз.
+    // Ref, а не isSaving: двойной клик успевает до перерендера с loading.
+    if (savingRef.current) return;
     const selected = new Set(selectedKeys.map(String));
+    const seen = new Set(existingTerms);
     const payload = (rows ?? [])
-      .filter((row) => selected.has(row.key) && row.term.trim())
+      .filter((row) => {
+        const term = normTerm(row.term);
+        if (!selected.has(row.key) || !term || seen.has(term)) return false;
+        seen.add(term);
+        return true;
+      })
       .map((row) => ({
         deck_uuid: deckUuid,
         term: row.term.trim(),
@@ -129,12 +148,15 @@ export const GenerateChunksModal: FC<GenerateChunksModalProps> = (props) => {
         parent_card_uuid: row.sourceUuid,
       }));
     if (payload.length === 0) return;
+    savingRef.current = true;
     try {
       await createCards(payload).unwrap();
       toast.success(t('Фразы добавлены'));
       onClose();
     } catch {
       toast.error(t('Не удалось добавить фразы'));
+    } finally {
+      savingRef.current = false;
     }
   };
 
